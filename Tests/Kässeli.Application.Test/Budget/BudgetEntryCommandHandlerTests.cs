@@ -1,0 +1,65 @@
+﻿using FluentAssertions;
+using Kässeli.Application.Budget;
+using Kässeli.Domain.Entities;
+using Kässeli.Domain.Repositories;
+using Moq;
+using Xunit;
+
+namespace Kässeli.Application.Test.Budget;
+
+public class BudgetEntryCommandHandlerTests
+{
+    private readonly Mock<IBudgetRepository> _mockBudgetRepository;
+    private readonly BudgetEntryCommandHandler _handler;
+
+    public BudgetEntryCommandHandlerTests()
+    {
+        _mockBudgetRepository = new Mock<IBudgetRepository>();
+        _handler = new BudgetEntryCommandHandler(_mockBudgetRepository.Object);
+    }
+
+    [Fact]
+    public async Task Handle_ShouldReturnGuid_WhenBudgetEntryIsAddedSuccessfully()
+    {
+        // Arrange
+        var command = new AddBudgetEntryCommand
+        {
+            // Set properties of AddBudgetEntryCommand
+        };
+        var fakeBudgetEntry = new BudgetEntry
+        {
+            // Set properties of BudgetEntry, including Id
+        };
+
+        _mockBudgetRepository.Setup(repo => repo.AddBudgetEntry(It.IsAny<BudgetEntry>()))
+            .ReturnsAsync(fakeBudgetEntry);
+
+        // Act
+        var result = await _handler.Handle(command, CancellationToken.None);
+
+        // Assert
+        result.Should().Be(fakeBudgetEntry.Id);
+    }
+    [Fact]
+    public async Task Handle_ShouldCallAddBudgetEntryOnRepository()
+    {
+        // Arrange
+        var command = new AddBudgetEntryCommand
+        {
+            // Set properties of AddBudgetEntryCommand
+        };
+        var fakeBudgetEntry = new BudgetEntry
+        {
+            // Set properties of BudgetEntry, including Id
+        };
+
+        _mockBudgetRepository.Setup(repo => repo.AddBudgetEntry(It.IsAny<BudgetEntry>()))
+            .ReturnsAsync(fakeBudgetEntry);
+
+        // Act
+        var result = await _handler.Handle(command, CancellationToken.None);
+
+        // Assert
+        _mockBudgetRepository.Verify(repo => repo.AddBudgetEntry(It.IsAny<BudgetEntry>()), Times.Once());
+    }
+}
