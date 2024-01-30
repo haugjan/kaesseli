@@ -24,11 +24,11 @@ public class BudgetEntryCommandHandlerTests
         // Arrange
         var command = new AddBudgetEntryCommand
         {
-            // Set properties of AddBudgetEntryCommand
+            AccountId = Guid.NewGuid()
         };
         var fakeBudgetEntry = new BudgetEntry
         {
-            // Set properties of BudgetEntry, including Id
+            Id = Guid.NewGuid()
         };
 
         _mockBudgetRepository.Setup(repo => repo.AddBudgetEntry(It.IsAny<BudgetEntry>()))
@@ -46,18 +46,18 @@ public class BudgetEntryCommandHandlerTests
         // Arrange
         var command = new AddBudgetEntryCommand
         {
-            // Set properties of AddBudgetEntryCommand
+            AccountId = Guid.NewGuid()
         };
         var fakeBudgetEntry = new BudgetEntry
         {
-            // Set properties of BudgetEntry, including Id
+            Id = Guid.NewGuid()
         };
 
         _mockBudgetRepository.Setup(repo => repo.AddBudgetEntry(It.IsAny<BudgetEntry>()))
             .ReturnsAsync(fakeBudgetEntry);
 
         // Act
-        var result = await _handler.Handle(command, CancellationToken.None);
+        await _handler.Handle(command, CancellationToken.None);
 
         // Assert
         _mockBudgetRepository.Verify(repo => repo.AddBudgetEntry(It.IsAny<BudgetEntry>()), Times.Once());

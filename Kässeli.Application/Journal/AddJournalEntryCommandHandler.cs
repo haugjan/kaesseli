@@ -4,7 +4,7 @@ using MediatR;
 
 namespace Kässeli.Application.Journal;
 
-internal class AddJournalEntryCommandHandler(IJournalRepository journalRepository) 
+public class AddJournalEntryCommandHandler(IJournalRepository journalRepository) 
     : IRequestHandler<AddJournalEntryCommand, Guid>
 {
     public async Task<Guid> Handle(AddJournalEntryCommand request, CancellationToken cancellationToken)
