@@ -1,5 +1,4 @@
-﻿using Kaesseli.Domain.Entities;
-using Kaesseli.Domain.Repositories;
+﻿using Kaesseli.Domain.Journal;
 using MediatR;
 
 namespace Kaesseli.Application.Journal;

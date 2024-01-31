@@ -3,9 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using Kaesseli.Domain.Entities;
 
-namespace Kaesseli.Domain.Repositories
+namespace Kaesseli.Domain.Journal
 {
     public interface IJournalRepository
     {

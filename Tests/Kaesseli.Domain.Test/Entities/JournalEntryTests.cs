@@ -1,6 +1,6 @@
 ﻿using FluentAssertions;
-using Kaesseli.Domain.Entities;
-using Kaesseli.Domain.Exceptions;
+using Kaesseli.Domain.Common;
+using Kaesseli.Domain.Journal;
 
 namespace Kaesseli.Domain.Test.Entities;
 

@@ -1,7 +1,6 @@
 ﻿using FluentAssertions;
 using Kaesseli.Application.Budget;
-using Kaesseli.Domain.Entities;
-using Kaesseli.Domain.Repositories;
+using Kaesseli.Domain.Budget;
 using Moq;
 using Xunit;
 

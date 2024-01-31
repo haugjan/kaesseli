@@ -2,9 +2,9 @@
 
 namespace Kaesseli.Application.Journal;
 
-public class AddJournalEntryCommand : IRequest<Guid>, IRequest
+public class AddJournalEntryCommand : IRequest<Guid>
 {
-    public decimal Amount { get; set; }
-    public string Description { get; set; }
-    public DateTimeOffset ValueDate { get; set; }
+    public required decimal Amount { get; init; }
+    public required string Description { get; init; }
+    public required DateTimeOffset ValueDate { get; init; }
 }

@@ -1,15 +1,15 @@
-﻿using Kaesseli.Domain.Exceptions;
+﻿using Kaesseli.Domain.Common;
+namespace Kaesseli.Domain.Journal;
 
-namespace Kaesseli.Domain.Entities;
 
-public class BudgetEntry
+public class JournalEntry
 {
-    private Account? _account;
-    public Guid Id { get; set; } = Guid.NewGuid();
+    public Guid Id { get; set; }
     public DateTimeOffset ValueDate { get; set; }
+    private Account? _account;
+
     public string Description { get; set; } = string.Empty;
     public decimal Amount { get; set; }
-
     public Account? Account
     {
         get => _account;

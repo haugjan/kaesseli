@@ -3,9 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using Kaesseli.Domain.Entities;
+using Kaesseli.Domain.Common;
 
-namespace Kaesseli.Domain.Repositories;
+namespace Kaesseli.Domain.Budget;
 
 public interface IBudgetRepository
 {

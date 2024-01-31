@@ -1,4 +1,4 @@
-﻿namespace Kaesseli.Domain.Entities;
+﻿namespace Kaesseli.Domain.Common;
 
 public class Account
 {
