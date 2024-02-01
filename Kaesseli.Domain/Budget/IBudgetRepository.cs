@@ -9,7 +9,7 @@ namespace Kaesseli.Domain.Budget;
 
 public interface IBudgetRepository
 {
-    Task<BudgetEntry> AddBudgetEntry(BudgetEntry newBudgetEntryEntity);
-    Task AssignAccount(Guid budgetId, Guid accountId);
-    Task<Account> GetAccount(Guid accountId);
+    Task<BudgetEntry> AddBudgetEntry(BudgetEntry newBudgetEntryEntity, CancellationToken ct);
+    Task AssignAccount(Guid budgetId, Guid accountId, CancellationToken ct);
+    Task<Account> GetAccount(Guid accountId, CancellationToken ct);
 }

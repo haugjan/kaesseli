@@ -5,10 +5,12 @@ namespace Kaesseli.Server.Budget;
 
 public static class BudgetApiExtensions
 {
-    public static WebApplication MapBudgetEndpoints(this WebApplication app) => 
-        MapBudgetAddBudgetEntryEndpoint(app);
+    public static IEndpointRouteBuilder MapBudgetEndpoints(this IEndpointRouteBuilder app)
+    {
+        return MapBudgetAddBudgetEntryEndpoint(app);
+    }
 
-    private static WebApplication MapBudgetAddBudgetEntryEndpoint(WebApplication app)
+    private static IEndpointRouteBuilder MapBudgetAddBudgetEntryEndpoint(IEndpointRouteBuilder app)
     {
         app.MapPost("/budgetEntry",
             async (IMediator mediator, AddBudgetEntryCommand command) =>
@@ -16,6 +18,14 @@ public static class BudgetApiExtensions
                 var guid = await mediator.Send(command);
                 return Results.Created($"/budgetEntry/{guid}", guid);
             });
+        app.MapGet("/budgetEntry",
+            async (IMediator mediator, Guid? accountId, DateOnly? from, DateOnly? to) =>
+                await mediator.Send(new GetBudgetEntriesQuery
+                {
+                    AccountId = accountId,
+                    FromDate = from,
+                    ToDate = to
+                }));
         return app;
     }
 }

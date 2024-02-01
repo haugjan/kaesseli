@@ -1,4 +1,7 @@
-﻿namespace Kaesseli.Application.Budget;
+﻿using System.Collections;
+using MediatR;
+
+namespace Kaesseli.Application.Budget;
 
 public class GetBudgetEntriesQueryResult
 {

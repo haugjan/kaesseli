@@ -1,5 +1,6 @@
 using Kaesseli.Application.Budget;
 using Kaesseli.Server.Budget;
+using Kaesseli.Server.Journal;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -27,6 +28,7 @@ if (app.Environment.IsDevelopment())
 app.UseHttpsRedirection();
 
 app.MapBudgetEndpoints();
+app.MapJournalEndpoints();
 
 app.MapFallbackToFile("/index.html");
 
