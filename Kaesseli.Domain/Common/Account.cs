@@ -2,6 +2,6 @@
 
 public class Account
 {
-    public Guid Id { get; set; } = Guid.NewGuid();
-    public string Name { get; set; } = string.Empty;
+    public required Guid Id { get; init; }
+    public required string Name { get; init; }
 }

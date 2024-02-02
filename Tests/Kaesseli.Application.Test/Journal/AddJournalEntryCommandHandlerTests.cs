@@ -1,4 +1,5 @@
-﻿using FluentAssertions;
+﻿using Bogus;
+using FluentAssertions;
 using Kaesseli.Application.Journal;
 using Kaesseli.Domain.Journal;
 using Moq;
@@ -21,20 +22,15 @@ public class AddJournalEntryCommandHandlerTests
     public async Task Handle_ShouldReturnGuid_WhenJournalEntryIsAddedSuccessfully()
     {
         // Arrange
-        var command = new AddJournalEntryCommand
-        {
+        var command = new Faker<AddJournalEntryCommand>().UseSeed(seed: 0).Generate();
+        var fakeJournalEntry = new Faker<JournalEntry>().UseSeed(seed: 1).Generate();
+        var cancellationToken = new CancellationToken();
 
-        };
-        var fakeJournalEntry = new JournalEntry
-        {
-            Id = Guid.NewGuid()
-        };
-
-        _mockJournalRepository.Setup(repo => repo.AddJournalEntry(It.IsAny<JournalEntry>()))
-            .ReturnsAsync(fakeJournalEntry);
+        _mockJournalRepository.Setup(repo => repo.AddJournalEntry(It.IsAny<JournalEntry>(), cancellationToken))
+                              .ReturnsAsync(fakeJournalEntry);
 
         // Act
-        var result = await _handler.Handle(command, CancellationToken.None);
+        var result = await _handler.Handle(command, cancellationToken);
 
         // Assert
         result.Should().Be(fakeJournalEntry.Id);
@@ -44,24 +40,19 @@ public class AddJournalEntryCommandHandlerTests
     public async Task Handle_ShouldCallAddJournalEntryOnRepository()
     {
         // Arrange
-        var command = new AddJournalEntryCommand
-        {
-            // Set properties of AddJournalEntryCommand
-        };
-        var fakeJournalEntry = new JournalEntry
-        {
-            // Set properties of JournalEntry, including Id
-        };
+        var command = new Faker<AddJournalEntryCommand>().UseSeed(seed: 0).Generate();
+        var fakeJournalEntry = new Faker<JournalEntry>().UseSeed(seed: 1).Generate();
+        var cancellationToken = new CancellationToken();
 
-        _mockJournalRepository.Setup(repo => repo.AddJournalEntry(It.IsAny<JournalEntry>()))
-            .ReturnsAsync(fakeJournalEntry);
+        _mockJournalRepository.Setup(repo => repo.AddJournalEntry(It.IsAny<JournalEntry>(), cancellationToken))
+                              .ReturnsAsync(fakeJournalEntry);
 
         // Act
         var result = await _handler.Handle(command, CancellationToken.None);
 
         // Assert
-        _mockJournalRepository.Verify(repo => repo.AddJournalEntry(It.IsAny<JournalEntry>()), Times.Once());
+        _mockJournalRepository.Verify(repo => repo.AddJournalEntry(It.IsAny<JournalEntry>(), cancellationToken), 
+                                      times: Times.Once());
+        result.Should().Be(fakeJournalEntry.Id);
     }
-
-    // Weitere Tests können hier folgen
 }

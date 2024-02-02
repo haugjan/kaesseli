@@ -10,6 +10,11 @@ namespace Kaesseli.Domain.Budget;
 public interface IBudgetRepository
 {
     Task<BudgetEntry> AddBudgetEntry(BudgetEntry newBudgetEntryEntity, CancellationToken ct);
-    Task AssignAccount(Guid budgetId, Guid accountId, CancellationToken ct);
     Task<Account> GetAccount(Guid accountId, CancellationToken ct);
+
+    Task<IEnumerable<BudgetEntry>> GetBudgetEntries(
+        GetBudgetEntriesRequest request,
+        CancellationToken cancellationToken);
+
+    Task<Account> AddAccount(Account account, CancellationToken cancellationToken);
 }

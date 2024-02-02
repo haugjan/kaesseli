@@ -10,12 +10,13 @@ public class AddJournalEntryCommandHandler(IJournalRepository journalRepository)
     {
         var newJournalEntryEntity = new JournalEntry()
         {
+            Id = Guid.NewGuid(),
             ValueDate = request.ValueDate,
             Amount = request.Amount,
             Description = request.Description,
         };
 
-        var createdEntry = await journalRepository.AddJournalEntry(newJournalEntryEntity);
+        var createdEntry = await journalRepository.AddJournalEntry(newJournalEntryEntity, cancellationToken);
         return createdEntry.Id;
     }
 }

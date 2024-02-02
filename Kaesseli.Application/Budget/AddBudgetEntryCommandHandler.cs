@@ -3,7 +3,7 @@ using MediatR;
 
 namespace Kaesseli.Application.Budget;
 
-public class BudgetEntryCommandHandler(IBudgetRepository budgetRepository)
+public class AddBudgetEntryCommandHandler(IBudgetRepository budgetRepository)
     : IRequestHandler<AddBudgetEntryCommand, Guid>
 {
 
@@ -16,11 +16,14 @@ public class BudgetEntryCommandHandler(IBudgetRepository budgetRepository)
     private async Task<BudgetEntry> CreateEntityFromCommand(AddBudgetEntryCommand addBudgetEntryCommand, CancellationToken cancellationToken)
     {
         var account = await budgetRepository.GetAccount(addBudgetEntryCommand.AccountId, cancellationToken);
-        var newBudgetEntryEntity = new BudgetEntry()
+        var newBudgetEntryEntity = new BudgetEntry
         {
+            Id = Guid.NewGuid(),
+
             Amount = addBudgetEntryCommand.Amount,
             Description = addBudgetEntryCommand.Description,
-            Account = account
+            Account = account,
+            ValueDate = addBudgetEntryCommand.ValueDate
         };
         return newBudgetEntryEntity;
     }

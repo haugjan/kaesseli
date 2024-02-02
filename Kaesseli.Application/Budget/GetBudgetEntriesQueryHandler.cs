@@ -1,19 +1,30 @@
-﻿using MediatR;
+﻿using Kaesseli.Domain.Budget;
+using MediatR;
 
 namespace Kaesseli.Application.Budget;
 
-public class GetBudgetEntriesQueryHandler : 
+public class GetBudgetEntriesQueryHandler :
     IRequestHandler<GetBudgetEntriesQuery, IEnumerable<GetBudgetEntriesQueryResult>>
 {
-    public Task<IEnumerable<GetBudgetEntriesQueryResult>> Handle(GetBudgetEntriesQuery request,
+    private readonly IBudgetRepository _repository;
+
+    public GetBudgetEntriesQueryHandler(IBudgetRepository repository) =>
+        _repository = repository;
+
+    public async Task<IEnumerable<GetBudgetEntriesQueryResult>> Handle(
+        GetBudgetEntriesQuery request,
         CancellationToken cancellationToken)
     {
-        return Task.FromResult(
-            Enumerable.Range(1, 5).Select(i => new GetBudgetEntriesQueryResult
+        var entries = await _repository.GetBudgetEntries(
+                          request: new GetBudgetEntriesRequest
+                          {
+                              AccountId = request.AccountId, FromDate = request.FromDate, ToDate = request.ToDate
+                          },
+                          cancellationToken);
+        return entries.ToList().Select(
+            entry => new GetBudgetEntriesQueryResult
             {
-                Amount = i,
-                Description = i.ToString(),
-                AccountId = Guid.NewGuid()
-            }));
+                Amount = entry.Amount, Description = entry.Description, AccountId = entry.Account.Id
+            });
     }
 }

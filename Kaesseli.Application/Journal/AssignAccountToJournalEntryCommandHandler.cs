@@ -7,5 +7,5 @@ public class AssignAccountToJournalEntryCommandHandler(IJournalRepository journa
     : IRequestHandler<AssignAccountToJournalEntryCommand>
 {
     public async Task Handle(AssignAccountToJournalEntryCommand request, CancellationToken cancellationToken)
-        => await journalRepository.AssignAccount(request.JournalEntryId, request.AccountId);
+        => await journalRepository.AssignAccount(request.JournalEntryId, request.AccountId, cancellationToken);
 }

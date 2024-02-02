@@ -4,12 +4,12 @@ namespace Kaesseli.Domain.Journal;
 
 public class JournalEntry
 {
-    public Guid Id { get; set; }
-    public DateTimeOffset ValueDate { get; set; }
+    public required Guid Id { get; init; }
     private Account? _account;
+    public required DateOnly ValueDate { get; init; }
 
-    public string Description { get; set; } = string.Empty;
-    public decimal Amount { get; set; }
+    public required string Description { get; init; }
+    public required decimal Amount { get; init; }
     public Account? Account
     {
         get => _account;

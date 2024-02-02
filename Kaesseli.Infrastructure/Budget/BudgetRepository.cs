@@ -1,30 +1,45 @@
 ﻿using Kaesseli.Domain.Budget;
 using Kaesseli.Domain.Common;
+using Kaesseli.Infrastructure.Common;
+using Microsoft.EntityFrameworkCore;
 
 namespace Kaesseli.Infrastructure.Budget;
 
-public class BudgetRepository : IBudgetRepository
+public class BudgetRepository(KaesseliContext context) : IBudgetRepository
 {
-    private readonly BudgetContext _context;
-
-    public BudgetRepository(BudgetContext context) =>
-        _context = context;
 
     public async Task<Account> GetAccount(Guid accountId, CancellationToken ct) =>
-        await _context.Accounts.FindAsync(accountId, ct)
+        await context.Accounts.FindAsync(accountId, ct)
      ?? throw new AccountNotFoundException(accountId);
+
+    public async Task<IEnumerable<BudgetEntry>> GetBudgetEntries(
+        GetBudgetEntriesRequest request,
+        CancellationToken cancellationToken)
+    {
+        IQueryable<BudgetEntry> entries = context.BudgetEntries.Include(budget=> budget.Account);
+        if(request.AccountId  != null)
+            entries = entries.Where(entry=> entry.Account.Id==request.AccountId);
+        if (request.FromDate is not null) 
+            entries = entries.Where(entry => entry.ValueDate >= request.FromDate);
+        if (request.ToDate is not null)
+            entries = entries.Where(entry => entry.ValueDate < request.ToDate);
+
+        return await entries.ToListAsync(cancellationToken);
+    }
+
+    public async Task<Account> AddAccount(Account account, CancellationToken cancellationToken)
+    {
+        context.Accounts.Add(account);
+        await context.SaveChangesAsync(cancellationToken);
+        return account;
+    }
 
     public async Task<BudgetEntry> AddBudgetEntry(BudgetEntry newBudgetEntryEntity, CancellationToken ct)
     {
-        _context.BudgetEntries.Add(newBudgetEntryEntity);
-        await _context.SaveChangesAsync(ct);
+        context.BudgetEntries.Add(newBudgetEntryEntity);
+        await context.SaveChangesAsync(ct);
         return newBudgetEntryEntity;
     }
 
-    public async Task AssignAccount(Guid budgetId, Guid accountId, CancellationToken ct)
-    {
-        var budgetEntry = _context.BudgetEntries.Single(entry => entry.Id == budgetId);
-        budgetEntry.Account = _context.Accounts.Single(account => account.Id == accountId);
-        await _context.SaveChangesAsync(ct);
-    }
+
 }

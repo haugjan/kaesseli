@@ -1,6 +1,9 @@
-﻿using FluentAssertions;
+﻿using Bogus;
+using FluentAssertions;
 using Kaesseli.Domain.Common;
 using Kaesseli.Domain.Journal;
+using Kaesseli.TestUtilities.Faker;
+using Moq;
 
 namespace Kaesseli.Domain.Test.Entities;
 
@@ -10,8 +13,8 @@ public class JournalEntryTests
     public void SettingAccount_WhenAccountIsNull_ShouldNotThrowException()
     {
         // Arrange
-        var journalEntry = new JournalEntry();
-        var account = new Account();
+        var journalEntry = CreateJournalEntry();
+        var account = new Faker<Account>().UseSeed(seed: 0).Generate();
 
         // Act
         Action act = () => journalEntry.Account = account;
@@ -24,9 +27,10 @@ public class JournalEntryTests
     public void SettingAccount_WhenAccountIsAlreadySet_ShouldThrowJournalEntriesImmutableException()
     {
         // Arrange
-        var journalEntry = new JournalEntry();
-        var firstAccount = new Account();
-        var secondAccount = new Account();
+        var journalEntry = CreateJournalEntry();
+        var faker = new SmartFaker<Account>().UseSeed(seed: 1);
+        var firstAccount = faker.Generate();
+        var secondAccount = faker.Generate();
         journalEntry.Account = firstAccount;
 
         // Act
@@ -40,14 +44,23 @@ public class JournalEntryTests
     public void SettingAccount_WhenSettingSameAccountAgain_ShouldNotThrowException()
     {
         // Arrange
-        var journalEntry = new JournalEntry();
-        var account = new Account();
+        var journalEntry = CreateJournalEntry();
+        var account = new Faker<Account>().UseSeed(seed: 0).Generate();
         journalEntry.Account = account;
 
         // Act
         Action act = () => journalEntry.Account = account;
 
         // Assert
-        act.Should().NotThrow<JournalEntriesImmutableException>();
+        act.Should().NotThrow();
     }
+
+    private static JournalEntry CreateJournalEntry() =>
+        new()
+        {
+            Id = new Guid(g: "{177D8117-459F-4962-B1BD-1CFE107A98AF}"),
+            ValueDate = default,
+            Description = "Description",
+            Amount = 42.42m
+        };
 }

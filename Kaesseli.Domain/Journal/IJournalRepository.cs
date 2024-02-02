@@ -8,7 +8,7 @@ namespace Kaesseli.Domain.Journal
 {
     public interface IJournalRepository
     {
-        Task<JournalEntry> AddJournalEntry(JournalEntry newJournalEntryEntity);
-        Task AssignAccount(Guid journalEntryId, Guid accountId);
+        Task<JournalEntry> AddJournalEntry(JournalEntry newJournalEntryEntity, CancellationToken cancellationToken);
+        Task AssignAccount(Guid journalId, Guid accountId, CancellationToken cancellationToken);
     }
 }

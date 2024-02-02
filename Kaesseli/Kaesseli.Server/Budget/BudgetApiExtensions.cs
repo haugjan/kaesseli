@@ -20,12 +20,18 @@ public static class BudgetApiExtensions
             });
         app.MapGet("/budgetEntry",
             async (IMediator mediator, Guid? accountId, DateOnly? from, DateOnly? to) =>
-                await mediator.Send(new GetBudgetEntriesQuery
+                await mediator.Send(request: new GetBudgetEntriesQuery
                 {
                     AccountId = accountId,
                     FromDate = from,
                     ToDate = to
                 }));
+        app.MapPost("/account",
+                    async (IMediator mediator, AddAccountCommand command) =>
+                    {
+                        var guid = await mediator.Send(command);
+                        return Results.Created(uri: $"/account/{guid}", guid);
+                    });
         return app;
     }
 }
