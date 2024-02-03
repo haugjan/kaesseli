@@ -3,7 +3,7 @@ using FluentAssertions;
 using Kaesseli.Domain.Common;
 using Kaesseli.Domain.Journal;
 using Kaesseli.TestUtilities.Faker;
-using Moq;
+using Xunit;
 
 namespace Kaesseli.Domain.Test.Entities;
 

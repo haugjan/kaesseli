@@ -21,10 +21,15 @@ public class GetBudgetEntriesQueryHandler :
                               AccountId = request.AccountId, FromDate = request.FromDate, ToDate = request.ToDate
                           },
                           cancellationToken);
-        return entries.ToList().Select(
-            entry => new GetBudgetEntriesQueryResult
-            {
-                Amount = entry.Amount, Description = entry.Description, AccountId = entry.Account.Id
-            });
+        return entries.ToList()
+                      .Select(
+                          entry => new GetBudgetEntriesQueryResult
+                          {
+                              Id = entry.Id,
+                              Amount = entry.Amount,
+                              Description = entry.Description,
+                              AccountId = entry.Account.Id,
+                              ValueDate = entry.ValueDate
+                          });
     }
 }

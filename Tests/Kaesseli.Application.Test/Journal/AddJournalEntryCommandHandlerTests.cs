@@ -1,5 +1,6 @@
 ﻿using Bogus;
 using FluentAssertions;
+using Kaesseli.Application.Common;
 using Kaesseli.Application.Journal;
 using Kaesseli.Domain.Journal;
 using Moq;
@@ -15,7 +16,10 @@ public class AddJournalEntryCommandHandlerTests
     public AddJournalEntryCommandHandlerTests()
     {
         _mockJournalRepository = new Mock<IJournalRepository>();
-        _handler = new AddJournalEntryCommandHandler(_mockJournalRepository.Object);
+        var mockDateTimeService = new Mock<IDateTimeService>();
+        _handler = new AddJournalEntryCommandHandler(
+            _mockJournalRepository.Object,
+            mockDateTimeService.Object);
     }
 
     [Fact]
@@ -51,8 +55,9 @@ public class AddJournalEntryCommandHandlerTests
         var result = await _handler.Handle(command, CancellationToken.None);
 
         // Assert
-        _mockJournalRepository.Verify(repo => repo.AddJournalEntry(It.IsAny<JournalEntry>(), cancellationToken), 
-                                      times: Times.Once());
+        _mockJournalRepository.Verify(
+            repo => repo.AddJournalEntry(It.IsAny<JournalEntry>(), cancellationToken),
+            times: Times.Once());
         result.Should().Be(fakeJournalEntry.Id);
     }
 }

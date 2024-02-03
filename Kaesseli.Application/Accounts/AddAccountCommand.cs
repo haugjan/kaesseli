@@ -1,6 +1,6 @@
 ﻿using MediatR;
 
-namespace Kaesseli.Application.Budget;
+namespace Kaesseli.Application.Accounts;
 
 public class AddAccountCommand : IRequest<Guid>
 {

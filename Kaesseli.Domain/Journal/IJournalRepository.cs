@@ -1,14 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿namespace Kaesseli.Domain.Journal;
 
-namespace Kaesseli.Domain.Journal
+public interface IJournalRepository
 {
-    public interface IJournalRepository
-    {
-        Task<JournalEntry> AddJournalEntry(JournalEntry newJournalEntryEntity, CancellationToken cancellationToken);
-        Task AssignAccount(Guid journalId, Guid accountId, CancellationToken cancellationToken);
-    }
+    Task<JournalEntry> AddJournalEntry(JournalEntry newJournalEntryEntity, CancellationToken cancellationToken);
+    Task AssignAccount(Guid journalId, Guid accountId, CancellationToken cancellationToken);
+    Task<IEnumerable<JournalEntry>> GetJournalEntries(GetJournalEntriesRequest request, CancellationToken cancellationToken);
 }

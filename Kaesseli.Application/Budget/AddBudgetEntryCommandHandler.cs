@@ -1,9 +1,13 @@
-﻿using Kaesseli.Domain.Budget;
+﻿using Kaesseli.Application.Common;
+using Kaesseli.Domain.Accounts;
+using Kaesseli.Domain.Budget;
 using MediatR;
 
 namespace Kaesseli.Application.Budget;
 
-public class AddBudgetEntryCommandHandler(IBudgetRepository budgetRepository)
+public class AddBudgetEntryCommandHandler(IBudgetRepository budgetRepository, 
+                                          IAccountRepository accountRepository,
+                                          IDateTimeService dateTime)
     : IRequestHandler<AddBudgetEntryCommand, Guid>
 {
 
@@ -15,7 +19,9 @@ public class AddBudgetEntryCommandHandler(IBudgetRepository budgetRepository)
     }
     private async Task<BudgetEntry> CreateEntityFromCommand(AddBudgetEntryCommand addBudgetEntryCommand, CancellationToken cancellationToken)
     {
-        var account = await budgetRepository.GetAccount(addBudgetEntryCommand.AccountId, cancellationToken);
+        var account = await accountRepository.GetAccount(addBudgetEntryCommand.AccountId, cancellationToken);
+        var valueDate = addBudgetEntryCommand.ValueDate 
+                     ?? dateTime.ToDay;
         var newBudgetEntryEntity = new BudgetEntry
         {
             Id = Guid.NewGuid(),
@@ -23,7 +29,7 @@ public class AddBudgetEntryCommandHandler(IBudgetRepository budgetRepository)
             Amount = addBudgetEntryCommand.Amount,
             Description = addBudgetEntryCommand.Description,
             Account = account,
-            ValueDate = addBudgetEntryCommand.ValueDate
+            ValueDate = valueDate
         };
         return newBudgetEntryEntity;
     }

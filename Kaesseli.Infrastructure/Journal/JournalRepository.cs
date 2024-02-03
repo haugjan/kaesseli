@@ -24,6 +24,18 @@ public class JournalRepository(KaesseliContext context) : IJournalRepository
         await context.SaveChangesAsync(cancellationToken);
     }
 
+    public async Task<IEnumerable<JournalEntry>> GetJournalEntries(
+        GetJournalEntriesRequest request,
+        CancellationToken cancellationToken)
+    {
+        IQueryable<JournalEntry> entries = context.JournalEntries.Include(budget => budget.Account);
+        if (request.AccountId != null) entries = entries.Where(entry => entry.Account != null && entry.Account.Id == request.AccountId);
+        if (request.FromDate is not null) entries = entries.Where(entry => entry.ValueDate >= request.FromDate);
+        if (request.ToDate is not null) entries = entries.Where(entry => entry.ValueDate < request.ToDate);
+
+        return await entries.ToListAsync(cancellationToken);
+    }
+
     private async Task<JournalEntry> GetJournalEntry(Guid journalId, CancellationToken cancellationToken) =>
         await context.JournalEntries
                      .FirstOrDefaultAsync(j => j.Id == journalId, cancellationToken)

@@ -1,8 +1,8 @@
 ﻿using MediatR;
 
-namespace Kaesseli.Application.Budget;
+namespace Kaesseli.Application.Journal;
 
-public class GetBudgetEntriesQuery : IRequest<IEnumerable<GetBudgetEntriesQueryResult>>
+public class GetJournalEntriesQuery : IRequest<IEnumerable<GetJournalEntriesQueryResult>>
 {
     public required Guid? AccountId { get; init; }
     public required DateOnly? FromDate { get; init; }

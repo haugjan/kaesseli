@@ -1,4 +1,4 @@
-using Kaesseli.Application.Budget;
+using Kaesseli.Server.Accounts;
 using Kaesseli.Server.Budget;
 using Kaesseli.Server.Journal;
 
@@ -10,8 +10,7 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddBudgetRepositories(builder.Configuration);
 
-builder.Services.AddMediatR(config=> 
-    config.RegisterServicesFromAssembly(typeof(AddBudgetEntryCommand).Assembly));
+builder.Services.AddApplicationServices();
 
 var app = builder.Build();
 
@@ -30,8 +29,8 @@ app.UseHttpsRedirection();
 
 app.MapBudgetEndpoints();
 app.MapJournalEndpoints();
+app.MapAccountEndpoints();
 
 app.MapFallbackToFile(filePath: "/index.html");
 
 app.Run();
-

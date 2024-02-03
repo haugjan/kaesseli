@@ -27,12 +27,7 @@ public class BudgetRepository(KaesseliContext context) : IBudgetRepository
         return await entries.ToListAsync(cancellationToken);
     }
 
-    public async Task<Account> AddAccount(Account account, CancellationToken cancellationToken)
-    {
-        context.Accounts.Add(account);
-        await context.SaveChangesAsync(cancellationToken);
-        return account;
-    }
+
 
     public async Task<BudgetEntry> AddBudgetEntry(BudgetEntry newBudgetEntryEntity, CancellationToken ct)
     {

@@ -1,6 +1,8 @@
 ﻿using Bogus;
 using FluentAssertions;
 using Kaesseli.Application.Budget;
+using Kaesseli.Application.Common;
+using Kaesseli.Domain.Accounts;
 using Kaesseli.Domain.Budget;
 using Kaesseli.TestUtilities.Faker;
 using Moq;
@@ -12,11 +14,16 @@ public class AddBudgetEntryCommandHandlerTests
 {
     private readonly Mock<IBudgetRepository> _mockBudgetRepository;
     private readonly AddBudgetEntryCommandHandler _handler;
-    
+
     public AddBudgetEntryCommandHandlerTests()
     {
         _mockBudgetRepository = new Mock<IBudgetRepository>();
-        _handler = new AddBudgetEntryCommandHandler(_mockBudgetRepository.Object);
+        var mockAccountRepository = new Mock<IAccountRepository>();
+        var mockDateTimeService = new Mock<IDateTimeService>();
+        _handler = new AddBudgetEntryCommandHandler(
+            _mockBudgetRepository.Object,
+            mockAccountRepository.Object,
+            mockDateTimeService.Object);
     }
 
     [Fact]
@@ -28,7 +35,7 @@ public class AddBudgetEntryCommandHandlerTests
         var cancellationToken = new CancellationToken();
 
         _mockBudgetRepository.Setup(repo => repo.AddBudgetEntry(It.IsAny<BudgetEntry>(), cancellationToken))
-            .ReturnsAsync(fakeBudgetEntry);
+                             .ReturnsAsync(fakeBudgetEntry);
 
         // Act
         var result = await _handler.Handle(command, cancellationToken);
@@ -36,21 +43,22 @@ public class AddBudgetEntryCommandHandlerTests
         // Assert
         result.Should().Be(fakeBudgetEntry.Id);
     }
+
     [Fact]
     public async Task Handle_ShouldCallAddBudgetEntryOnRepository()
     {
         // Arrange
         var command = new Faker<AddBudgetEntryCommand>().UseSeed(seed: 0).Generate();
-        var fakeBudgetEntry = new Faker<BudgetEntry>().UseSeed(seed: 1).Generate(); 
+        var fakeBudgetEntry = new Faker<BudgetEntry>().UseSeed(seed: 1).Generate();
         var cancellationToken = new CancellationToken();
 
         _mockBudgetRepository.Setup(repo => repo.AddBudgetEntry(It.IsAny<BudgetEntry>(), cancellationToken))
-            .ReturnsAsync(fakeBudgetEntry);
+                             .ReturnsAsync(fakeBudgetEntry);
 
         // Act
         await _handler.Handle(command, cancellationToken);
 
         // Assert
-        _mockBudgetRepository.Verify(repo => repo.AddBudgetEntry(It.IsAny<BudgetEntry>(), cancellationToken), Times.Once());
+        _mockBudgetRepository.Verify(repo => repo.AddBudgetEntry(It.IsAny<BudgetEntry>(), cancellationToken), times: Times.Once());
     }
 }

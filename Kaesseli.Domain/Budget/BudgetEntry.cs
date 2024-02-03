@@ -1,5 +1,4 @@
 ﻿using Kaesseli.Domain.Common;
-using Kaesseli.Domain.Journal;
 
 namespace Kaesseli.Domain.Budget;
 
@@ -11,6 +10,4 @@ public class BudgetEntry
     public required decimal Amount { get; init; }
 
     public required Account Account { get; init; }
-    
-    
 }

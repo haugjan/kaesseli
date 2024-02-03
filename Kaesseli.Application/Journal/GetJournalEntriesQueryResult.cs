@@ -1,10 +1,10 @@
-﻿namespace Kaesseli.Application.Budget;
+﻿namespace Kaesseli.Application.Journal;
 
-public class GetBudgetEntriesQueryResult
+public class GetJournalEntriesQueryResult
 {
     public required Guid Id { get; init; }
+    public required Guid? AccountId { get; init; }
     public required decimal Amount { get; init; }
     public required string Description { get; init; }
-    public required Guid AccountId { get; init; }
     public required DateOnly ValueDate { get; init; }
 }
