@@ -13,6 +13,7 @@ namespace Microsoft.Extensions.DependencyInjection;
 
 public static class DomainServiceCollectionExtensions
 {
+    // ReSharper disable once UnusedMethodReturnValue.Global
     public static IServiceCollection AddBudgetRepositories(this IServiceCollection services, IConfiguration configuration) =>
         services.AddScoped<IBudgetRepository, BudgetRepository>()
             .AddScoped<IJournalRepository, JournalRepository>()

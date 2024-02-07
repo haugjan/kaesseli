@@ -1,5 +1,4 @@
 ﻿using Kaesseli.Domain.Budget;
-using Kaesseli.Domain.Common;
 using Kaesseli.Infrastructure.Common;
 using Microsoft.EntityFrameworkCore;
 
@@ -7,11 +6,6 @@ namespace Kaesseli.Infrastructure.Budget;
 
 public class BudgetRepository(KaesseliContext context) : IBudgetRepository
 {
-
-    public async Task<Account> GetAccount(Guid accountId, CancellationToken ct) =>
-        await context.Accounts.FindAsync(accountId, ct)
-     ?? throw new AccountNotFoundException(accountId);
-
     public async Task<IEnumerable<BudgetEntry>> GetBudgetEntries(
         GetBudgetEntriesRequest request,
         CancellationToken cancellationToken)

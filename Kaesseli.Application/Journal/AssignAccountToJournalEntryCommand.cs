@@ -2,8 +2,11 @@
 
 namespace Kaesseli.Application.Journal;
 
+// ReSharper disable once ClassNeverInstantiated.Global
 public class AssignAccountToJournalEntryCommand : IRequest
 {
-    public Guid JournalEntryId { get; set; }
-    public Guid AccountId { get; set; }
+    // ReSharper disable UnusedAutoPropertyAccessor.Global
+    public required Guid JournalEntryId { get; init; }
+    public required Guid AccountId { get; init; }
+    // ReSharper restore UnusedAutoPropertyAccessor.Global
 }

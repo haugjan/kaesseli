@@ -5,6 +5,7 @@ namespace Kaesseli.Server.Accounts;
 
 public static class AccountApiExtensions
 {
+    // ReSharper disable once UnusedMethodReturnValue.Global
     public static IEndpointRouteBuilder MapAccountEndpoints(this IEndpointRouteBuilder app) =>
         MapAddAccountEndpoint(app);
 
@@ -12,8 +13,7 @@ public static class AccountApiExtensions
     {
         app.MapGet(
             pattern: "/account",
-            async (
-                    IMediator mediator) =>
+            async (IMediator mediator) =>
                 await mediator.Send(request: new GetAccountsQuery()));
 
         app.MapPost(

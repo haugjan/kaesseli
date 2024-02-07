@@ -1,8 +1,8 @@
-﻿using Bogus;
-using FluentAssertions;
+﻿using Kaesseli.Application.Journal;
 using Kaesseli.Application.Common;
-using Kaesseli.Application.Journal;
+using Kaesseli.Domain.Accounts;
 using Kaesseli.Domain.Journal;
+using Kaesseli.TestUtilities.Faker;
 using Moq;
 using Xunit;
 
@@ -10,54 +10,65 @@ namespace Kaesseli.Application.Test.Journal;
 
 public class AddJournalEntryCommandHandlerTests
 {
-    private readonly AddJournalEntryCommandHandler _handler;
-    private readonly Mock<IJournalRepository> _mockJournalRepository;
-
-    public AddJournalEntryCommandHandlerTests()
+    [Fact]
+    public async Task Handle_ShouldAddAccountSuccessfully()
     {
-        _mockJournalRepository = new Mock<IJournalRepository>();
-        var mockDateTimeService = new Mock<IDateTimeService>();
-        _handler = new AddJournalEntryCommandHandler(
-            _mockJournalRepository.Object,
-            mockDateTimeService.Object);
+        // Arrange
+        var mockRepo = new Mock<IJournalRepository>();
+        var accountRepo = new Mock<IAccountRepository>();
+        var dateTimeService = new Mock<IDateTimeService>();
+        var command = new SmartFaker<AddJournalEntryCommand>().Generate();
+        var cancellationToken = new CancellationToken();
+
+        mockRepo.Setup(
+                    repo => repo.AddJournalEntry(
+                        It.Is<JournalEntry>(a => a.Amount == command.Amount && a.Description == command.Description),
+                        cancellationToken))
+                .ReturnsAsync((JournalEntry newJournalEntry, CancellationToken _) => newJournalEntry);
+
+        var handler = new AddJournalEntryCommandHandler(mockRepo.Object, dateTimeService.Object);
+
+        // Act
+        var result = await handler.Handle(command, CancellationToken.None);
+
+        // Assert
+        mockRepo.Verify(
+            repo => repo.AddJournalEntry(
+                It.Is<JournalEntry>(
+                    entry => entry.Amount == command.Amount
+                          && entry.Description == command.Description
+                          && entry.ValueDate == command.ValueDate),
+                cancellationToken));
     }
 
     [Fact]
-    public async Task Handle_ShouldReturnGuid_WhenJournalEntryIsAddedSuccessfully()
+    public async Task Handle_EmptyValueDate_ShouldAddAccountWithCurrentDate()
     {
         // Arrange
-        var command = new Faker<AddJournalEntryCommand>().UseSeed(seed: 0).Generate();
-        var fakeJournalEntry = new Faker<JournalEntry>().UseSeed(seed: 1).Generate();
+        var mockRepo = new Mock<IJournalRepository>();
+        var dateTimeService = new Mock<IDateTimeService>();
+        var command = new SmartFaker<AddJournalEntryCommand>().RuleFor(c => c.ValueDate, f => null).Generate();
         var cancellationToken = new CancellationToken();
+        var currentDay = new DateOnly(year: 1982, month: 11, day: 3);
 
-        _mockJournalRepository.Setup(repo => repo.AddJournalEntry(It.IsAny<JournalEntry>(), cancellationToken))
-                              .ReturnsAsync(fakeJournalEntry);
+        mockRepo.Setup(
+                    repo => repo.AddJournalEntry(
+                        It.Is<JournalEntry>(a => a.Amount == command.Amount && a.Description == command.Description),
+                        cancellationToken))
+                .ReturnsAsync((JournalEntry newJournalEntry, CancellationToken _) => newJournalEntry);
+        dateTimeService.Setup(dts => dts.ToDay).Returns(currentDay);
+        var handler = new AddJournalEntryCommandHandler(mockRepo.Object, dateTimeService.Object);
 
         // Act
-        var result = await _handler.Handle(command, cancellationToken);
+        var result = await handler.Handle(command, CancellationToken.None);
 
         // Assert
-        result.Should().Be(fakeJournalEntry.Id);
-    }
-
-    [Fact]
-    public async Task Handle_ShouldCallAddJournalEntryOnRepository()
-    {
-        // Arrange
-        var command = new Faker<AddJournalEntryCommand>().UseSeed(seed: 0).Generate();
-        var fakeJournalEntry = new Faker<JournalEntry>().UseSeed(seed: 1).Generate();
-        var cancellationToken = new CancellationToken();
-
-        _mockJournalRepository.Setup(repo => repo.AddJournalEntry(It.IsAny<JournalEntry>(), cancellationToken))
-                              .ReturnsAsync(fakeJournalEntry);
-
-        // Act
-        var result = await _handler.Handle(command, CancellationToken.None);
-
-        // Assert
-        _mockJournalRepository.Verify(
-            repo => repo.AddJournalEntry(It.IsAny<JournalEntry>(), cancellationToken),
-            times: Times.Once());
-        result.Should().Be(fakeJournalEntry.Id);
+        mockRepo.Verify(
+            repo => repo.AddJournalEntry(
+                It.Is<JournalEntry>(
+                    entry => entry.Amount == command.Amount
+                          && entry.Description == command.Description
+                          && entry.ValueDate == currentDay),
+                cancellationToken));
     }
 }

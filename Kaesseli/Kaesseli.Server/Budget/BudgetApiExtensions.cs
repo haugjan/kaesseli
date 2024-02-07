@@ -5,6 +5,7 @@ namespace Kaesseli.Server.Budget;
 
 public static class BudgetApiExtensions
 {
+    // ReSharper disable once UnusedMethodReturnValue.Global
     public static IEndpointRouteBuilder MapBudgetEndpoints(this IEndpointRouteBuilder app) =>
         MapBudgetAddBudgetEntryEndpoint(app);
 

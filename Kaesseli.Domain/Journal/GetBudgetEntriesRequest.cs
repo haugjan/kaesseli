@@ -2,7 +2,7 @@
 
 public class GetJournalEntriesRequest
 {
-    public Guid? AccountId { get; set; }
-    public DateOnly? FromDate { get; set; }
-    public DateOnly? ToDate { get; set; }
+    public required Guid? AccountId { get; init; }
+    public required DateOnly? FromDate { get; init; }
+    public DateOnly? ToDate { get; init; }
 }

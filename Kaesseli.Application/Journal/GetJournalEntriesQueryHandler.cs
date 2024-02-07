@@ -3,6 +3,7 @@ using MediatR;
 
 namespace Kaesseli.Application.Journal;
 
+// ReSharper disable once UnusedType.Global
 public class GetJournalEntriesQueryHandler(IJournalRepository repository) :
     IRequestHandler<GetJournalEntriesQuery, IEnumerable<GetJournalEntriesQueryResult>>
 {

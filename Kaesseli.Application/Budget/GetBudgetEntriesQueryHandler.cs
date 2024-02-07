@@ -3,6 +3,7 @@ using MediatR;
 
 namespace Kaesseli.Application.Budget;
 
+// ReSharper disable once UnusedType.Global
 public class GetBudgetEntriesQueryHandler :
     IRequestHandler<GetBudgetEntriesQuery, IEnumerable<GetBudgetEntriesQueryResult>>
 {

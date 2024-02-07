@@ -1,6 +1,4 @@
-﻿using Bogus;
-using FluentAssertions;
-using Kaesseli.Application.Budget;
+﻿using Kaesseli.Application.Budget;
 using Kaesseli.Application.Common;
 using Kaesseli.Domain.Accounts;
 using Kaesseli.Domain.Budget;
@@ -10,55 +8,68 @@ using Xunit;
 
 namespace Kaesseli.Application.Test.Budget;
 
-public class AddBudgetEntryCommandHandlerTests
+public class AddJournalEntryCommandHandlerTests
 {
-    private readonly Mock<IBudgetRepository> _mockBudgetRepository;
-    private readonly AddBudgetEntryCommandHandler _handler;
-
-    public AddBudgetEntryCommandHandlerTests()
+    [Fact]
+    public async Task Handle_ShouldAddAccountSuccessfully()
     {
-        _mockBudgetRepository = new Mock<IBudgetRepository>();
-        var mockAccountRepository = new Mock<IAccountRepository>();
-        var mockDateTimeService = new Mock<IDateTimeService>();
-        _handler = new AddBudgetEntryCommandHandler(
-            _mockBudgetRepository.Object,
-            mockAccountRepository.Object,
-            mockDateTimeService.Object);
+        // Arrange
+        var mockRepo = new Mock<IBudgetRepository>();
+        var accountRepo = new Mock<IAccountRepository>();
+        var dateTimeService = new Mock<IDateTimeService>();
+        var command = new SmartFaker<AddBudgetEntryCommand>().Generate();
+        var cancellationToken = new CancellationToken();
+
+        mockRepo.Setup(
+                    repo => repo.AddBudgetEntry(
+                        It.Is<BudgetEntry>(a => a.Amount == command.Amount && a.Description == command.Description),
+                        cancellationToken))
+                .ReturnsAsync((BudgetEntry newBudgetEntry, CancellationToken _) => newBudgetEntry);
+
+        var handler = new AddBudgetEntryCommandHandler(mockRepo.Object, accountRepo.Object, dateTimeService.Object);
+
+        // Act
+        var result = await handler.Handle(command, CancellationToken.None);
+
+        // Assert
+        mockRepo.Verify(
+            repo => repo.AddBudgetEntry(
+                It.Is<BudgetEntry>(
+                    entry => entry.Amount == command.Amount
+                          && entry.Description == command.Description
+                          && entry.ValueDate == command.ValueDate),
+                cancellationToken));
     }
 
     [Fact]
-    public async Task Handle_ShouldReturnGuid_WhenBudgetEntryIsAddedSuccessfully()
+    public async Task Handle_EmptyValueDate_ShouldAddAccountWithCurrentyDate()
     {
         // Arrange
-        var command = new Faker<AddBudgetEntryCommand>().UseSeed(seed: 0).Generate();
-        var fakeBudgetEntry = new SmartFaker<BudgetEntry>().Generate();
+        var mockRepo = new Mock<IBudgetRepository>();
+        var accountRepo = new Mock<IAccountRepository>();
+        var dateTimeService = new Mock<IDateTimeService>();
+        var command = new SmartFaker<AddBudgetEntryCommand>().RuleFor(c => c.ValueDate, f => null).Generate();
         var cancellationToken = new CancellationToken();
+        var currentDay = new DateOnly(year: 1982, month: 11, day: 3);
 
-        _mockBudgetRepository.Setup(repo => repo.AddBudgetEntry(It.IsAny<BudgetEntry>(), cancellationToken))
-                             .ReturnsAsync(fakeBudgetEntry);
+        mockRepo.Setup(
+                    repo => repo.AddBudgetEntry(
+                        It.Is<BudgetEntry>(a => a.Amount == command.Amount && a.Description == command.Description),
+                        cancellationToken))
+                .ReturnsAsync((BudgetEntry newBudgetEntry, CancellationToken _) => newBudgetEntry);
+        dateTimeService.Setup(dts => dts.ToDay).Returns(currentDay);
+        var handler = new AddBudgetEntryCommandHandler(mockRepo.Object, accountRepo.Object, dateTimeService.Object);
 
         // Act
-        var result = await _handler.Handle(command, cancellationToken);
+        var result = await handler.Handle(command, CancellationToken.None);
 
         // Assert
-        result.Should().Be(fakeBudgetEntry.Id);
-    }
-
-    [Fact]
-    public async Task Handle_ShouldCallAddBudgetEntryOnRepository()
-    {
-        // Arrange
-        var command = new Faker<AddBudgetEntryCommand>().UseSeed(seed: 0).Generate();
-        var fakeBudgetEntry = new Faker<BudgetEntry>().UseSeed(seed: 1).Generate();
-        var cancellationToken = new CancellationToken();
-
-        _mockBudgetRepository.Setup(repo => repo.AddBudgetEntry(It.IsAny<BudgetEntry>(), cancellationToken))
-                             .ReturnsAsync(fakeBudgetEntry);
-
-        // Act
-        await _handler.Handle(command, cancellationToken);
-
-        // Assert
-        _mockBudgetRepository.Verify(repo => repo.AddBudgetEntry(It.IsAny<BudgetEntry>(), cancellationToken), times: Times.Once());
+        mockRepo.Verify(
+            repo => repo.AddBudgetEntry(
+                It.Is<BudgetEntry>(
+                    entry => entry.Amount == command.Amount
+                          && entry.Description == command.Description
+                          && entry.ValueDate == currentDay),
+                cancellationToken));
     }
 }

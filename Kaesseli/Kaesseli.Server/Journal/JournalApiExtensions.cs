@@ -5,6 +5,7 @@ namespace Kaesseli.Server.Journal;
 
 public static class JournalApiExtensions
 {
+    // ReSharper disable once UnusedMethodReturnValue.Global
     public static IEndpointRouteBuilder MapJournalEndpoints(this IEndpointRouteBuilder app) =>
         MapJournalAddJournalEntryEndpoint(app);
 
