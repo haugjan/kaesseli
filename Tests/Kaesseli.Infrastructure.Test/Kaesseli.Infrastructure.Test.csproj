@@ -31,4 +31,8 @@
     <ProjectReference Include="..\..\Kaesseli.Infrastructure\Kaesseli.Infrastructure.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Journal\" />
+  </ItemGroup>
+
 </Project>

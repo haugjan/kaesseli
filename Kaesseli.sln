@@ -15,18 +15,17 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Kaesseli.Domain.Test", "Tes
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Kaesseli.Application.Test", "Tests\Kaesseli.Application.Test\Kaesseli.Application.Test.csproj", "{B569737A-D7AD-40FC-94DC-F62BD868F73F}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Kaesseli.Server", "Kaesseli\Kaesseli.Server\Kaesseli.Server.csproj", "{D1A81D2A-5FDD-4117-926A-08C9545F680F}"
-EndProject
-Project("{54A90642-561A-4BB1-A94E-469ADEE60C69}") = "kaesseli.client", "Kaesseli\kaesseli.client\kaesseli.client.esproj", "{0CCFEE33-D762-45E1-9BDF-6C3FED3250FD}"
-EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{B5E51834-AEC0-487A-9908-6F6E5E4151B4}"
 	ProjectSection(SolutionItems) = preProject
+		.gitignore = .gitignore
 		README.md = README.md
 	EndProjectSection
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Kaesseli.TestUtilities", "..\Tests\Kaesseli\Kaesseli.TestUtilities\Kaesseli.TestUtilities.csproj", "{BB56260A-851F-499D-B319-08555FED9428}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Kaesseli.Infrastructure.Test", "Tests\Kaesseli.Infrastructure.Test\Kaesseli.Infrastructure.Test.csproj", "{2E2001AA-A78A-427D-B642-5CECBE564299}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Kaesseli.Infrastructure.Test", "Tests\Kaesseli.Infrastructure.Test\Kaesseli.Infrastructure.Test.csproj", "{2E2001AA-A78A-427D-B642-5CECBE564299}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Kaesseli.Server", "Kaesseli.Server\Kaesseli.Server.csproj", "{A8D845FC-C5F7-4BDF-A677-200A1C06D518}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -54,16 +53,6 @@ Global
 		{B569737A-D7AD-40FC-94DC-F62BD868F73F}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{B569737A-D7AD-40FC-94DC-F62BD868F73F}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{B569737A-D7AD-40FC-94DC-F62BD868F73F}.Release|Any CPU.Build.0 = Release|Any CPU
-		{D1A81D2A-5FDD-4117-926A-08C9545F680F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{D1A81D2A-5FDD-4117-926A-08C9545F680F}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{D1A81D2A-5FDD-4117-926A-08C9545F680F}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{D1A81D2A-5FDD-4117-926A-08C9545F680F}.Release|Any CPU.Build.0 = Release|Any CPU
-		{0CCFEE33-D762-45E1-9BDF-6C3FED3250FD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{0CCFEE33-D762-45E1-9BDF-6C3FED3250FD}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{0CCFEE33-D762-45E1-9BDF-6C3FED3250FD}.Debug|Any CPU.Deploy.0 = Debug|Any CPU
-		{0CCFEE33-D762-45E1-9BDF-6C3FED3250FD}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{0CCFEE33-D762-45E1-9BDF-6C3FED3250FD}.Release|Any CPU.Build.0 = Release|Any CPU
-		{0CCFEE33-D762-45E1-9BDF-6C3FED3250FD}.Release|Any CPU.Deploy.0 = Release|Any CPU
 		{BB56260A-851F-499D-B319-08555FED9428}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{BB56260A-851F-499D-B319-08555FED9428}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{BB56260A-851F-499D-B319-08555FED9428}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -72,6 +61,10 @@ Global
 		{2E2001AA-A78A-427D-B642-5CECBE564299}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{2E2001AA-A78A-427D-B642-5CECBE564299}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{2E2001AA-A78A-427D-B642-5CECBE564299}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A8D845FC-C5F7-4BDF-A677-200A1C06D518}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A8D845FC-C5F7-4BDF-A677-200A1C06D518}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A8D845FC-C5F7-4BDF-A677-200A1C06D518}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A8D845FC-C5F7-4BDF-A677-200A1C06D518}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -17,10 +17,6 @@
     <ProjectReference Include="..\Kaesseli.Domain\Kaesseli.Domain.csproj" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="Repositories\" />
-  </ItemGroup>
-
 	<ItemGroup>
 		<AssemblyAttribute Include="System.Runtime.CompilerServices.InternalsVisibleTo">
 			<_Parameter1>Kaesseli.Infrastructure.Test</_Parameter1>
