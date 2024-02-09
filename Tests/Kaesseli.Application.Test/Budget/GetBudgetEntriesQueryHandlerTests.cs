@@ -47,7 +47,10 @@ public class GetBudgetEntriesQueryHandlerTests
 
         mockRepository.Verify(
             repo => repo.GetBudgetEntries(
-                It.Is<GetBudgetEntriesRequest>(r => r.AccountId == accountId && r.FromDate == fromDate && r.ToDate == toDate),
+                It.Is<GetBudgetEntriesRequest>(
+                    r => r.AccountId == accountId
+                      && r.FromDate == fromDate
+                      && r.ToDate == toDate),
                 It.IsAny<CancellationToken>()),
             Times.Once);
     }

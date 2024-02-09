@@ -24,7 +24,9 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		README.md = README.md
 	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Kaesseli.TestUtilities", "..\Tests\Kaesseli\Kaesseli.TestUtilities\Kaesseli.TestUtilities.csproj", "{BB56260A-851F-499D-B319-08555FED9428}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Kaesseli.TestUtilities", "..\Tests\Kaesseli\Kaesseli.TestUtilities\Kaesseli.TestUtilities.csproj", "{BB56260A-851F-499D-B319-08555FED9428}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Kaesseli.Infrastructure.Test", "Tests\Kaesseli.Infrastructure.Test\Kaesseli.Infrastructure.Test.csproj", "{2E2001AA-A78A-427D-B642-5CECBE564299}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -66,6 +68,10 @@ Global
 		{BB56260A-851F-499D-B319-08555FED9428}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{BB56260A-851F-499D-B319-08555FED9428}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{BB56260A-851F-499D-B319-08555FED9428}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2E2001AA-A78A-427D-B642-5CECBE564299}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2E2001AA-A78A-427D-B642-5CECBE564299}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2E2001AA-A78A-427D-B642-5CECBE564299}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2E2001AA-A78A-427D-B642-5CECBE564299}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -74,6 +80,7 @@ Global
 		{C95699F2-DC6A-4F80-BE28-398DF21898E0} = {FD24C30E-6C58-4562-873E-C7DC6DAA101E}
 		{B569737A-D7AD-40FC-94DC-F62BD868F73F} = {FD24C30E-6C58-4562-873E-C7DC6DAA101E}
 		{BB56260A-851F-499D-B319-08555FED9428} = {FD24C30E-6C58-4562-873E-C7DC6DAA101E}
+		{2E2001AA-A78A-427D-B642-5CECBE564299} = {FD24C30E-6C58-4562-873E-C7DC6DAA101E}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {2AD36FD5-53F3-4A0B-8240-3436ADCD3AA2}

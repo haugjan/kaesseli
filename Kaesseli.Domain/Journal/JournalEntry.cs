@@ -1,28 +1,47 @@
-﻿using Kaesseli.Domain.Common;
-namespace Kaesseli.Domain.Journal;
+﻿using System.Diagnostics.CodeAnalysis;
+using Kaesseli.Domain.Common;
 
+namespace Kaesseli.Domain.Journal;
 
 public class JournalEntry
 {
+    private readonly Account _debitAccount;
+    private readonly Account _creditAccount;
     public required Guid Id { get; init; }
-    private Account? _account;
+
     public required DateOnly ValueDate { get; init; }
 
     public required string Description { get; init; }
     public required decimal Amount { get; init; }
-    public Account? Account
+
+    public required Account DebitAccount
     {
-        get => _account;
-        set
+        get => _debitAccount;
+        [MemberNotNull(member: nameof(_debitAccount))]
+        init
         {
-            ThrowIfAccountAlreadySet(value);
-            _account = value;
+            ThrowIfAccountsAreSame(CreditAccount, value);
+            _debitAccount = value;
         }
     }
 
-    private void ThrowIfAccountAlreadySet(Account? value)
+    public required Account CreditAccount
     {
-        if (_account is not null && _account?.Id != value?.Id)
-            throw new JournalEntriesImmutableException();
+        get => _creditAccount;
+        [MemberNotNull(member: nameof(_creditAccount))]
+        init
+        {
+            ThrowIfAccountsAreSame(DebitAccount, value);
+            _creditAccount = value;
+        }
+    }
+
+    private static void ThrowIfAccountsAreSame(Account? firstAccount, Account? secondAccount)
+    {
+        if (firstAccount is null) return;
+        if (secondAccount is null) return;
+        if (firstAccount.Id != secondAccount.Id) return;
+
+        throw new AccountsMustNotBeSameException();
     }
 }

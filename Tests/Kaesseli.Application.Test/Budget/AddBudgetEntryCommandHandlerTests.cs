@@ -37,18 +37,19 @@ public class AddJournalEntryCommandHandlerTests
                 It.Is<BudgetEntry>(
                     entry => entry.Amount == command.Amount
                           && entry.Description == command.Description
-                          && entry.ValueDate == command.ValueDate),
+                          && entry.ValueDate == command.ValueDate
+                          && entry.Id == result),
                 cancellationToken));
     }
 
     [Fact]
-    public async Task Handle_EmptyValueDate_ShouldAddAccountWithCurrentyDate()
+    public async Task Handle_EmptyValueDate_ShouldAddAccountWithCurrentDate()
     {
         // Arrange
         var mockRepo = new Mock<IBudgetRepository>();
         var accountRepo = new Mock<IAccountRepository>();
         var dateTimeService = new Mock<IDateTimeService>();
-        var command = new SmartFaker<AddBudgetEntryCommand>().RuleFor(c => c.ValueDate, f => null).Generate();
+        var command = new SmartFaker<AddBudgetEntryCommand>().RuleFor(c => c.ValueDate, _ => null).Generate();
         var cancellationToken = new CancellationToken();
         var currentDay = new DateOnly(year: 1982, month: 11, day: 3);
 
@@ -69,7 +70,8 @@ public class AddJournalEntryCommandHandlerTests
                 It.Is<BudgetEntry>(
                     entry => entry.Amount == command.Amount
                           && entry.Description == command.Description
-                          && entry.ValueDate == currentDay),
+                          && entry.ValueDate == currentDay
+                          && entry.Id == result),
                 cancellationToken));
     }
 }

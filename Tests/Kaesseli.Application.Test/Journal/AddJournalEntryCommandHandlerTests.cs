@@ -1,6 +1,5 @@
 ﻿using Kaesseli.Application.Journal;
 using Kaesseli.Application.Common;
-using Kaesseli.Domain.Accounts;
 using Kaesseli.Domain.Journal;
 using Kaesseli.TestUtilities.Faker;
 using Moq;
@@ -15,7 +14,6 @@ public class AddJournalEntryCommandHandlerTests
     {
         // Arrange
         var mockRepo = new Mock<IJournalRepository>();
-        var accountRepo = new Mock<IAccountRepository>();
         var dateTimeService = new Mock<IDateTimeService>();
         var command = new SmartFaker<AddJournalEntryCommand>().Generate();
         var cancellationToken = new CancellationToken();
@@ -37,7 +35,8 @@ public class AddJournalEntryCommandHandlerTests
                 It.Is<JournalEntry>(
                     entry => entry.Amount == command.Amount
                           && entry.Description == command.Description
-                          && entry.ValueDate == command.ValueDate),
+                          && entry.ValueDate == command.ValueDate
+                             && entry.Id == result),
                 cancellationToken));
     }
 
@@ -47,7 +46,7 @@ public class AddJournalEntryCommandHandlerTests
         // Arrange
         var mockRepo = new Mock<IJournalRepository>();
         var dateTimeService = new Mock<IDateTimeService>();
-        var command = new SmartFaker<AddJournalEntryCommand>().RuleFor(c => c.ValueDate, f => null).Generate();
+        var command = new SmartFaker<AddJournalEntryCommand>().RuleFor(c => c.ValueDate, _ => null).Generate();
         var cancellationToken = new CancellationToken();
         var currentDay = new DateOnly(year: 1982, month: 11, day: 3);
 
@@ -68,7 +67,8 @@ public class AddJournalEntryCommandHandlerTests
                 It.Is<JournalEntry>(
                     entry => entry.Amount == command.Amount
                           && entry.Description == command.Description
-                          && entry.ValueDate == currentDay),
+                          && entry.ValueDate == currentDay
+                             && entry.Id== result),
                 cancellationToken));
     }
 }

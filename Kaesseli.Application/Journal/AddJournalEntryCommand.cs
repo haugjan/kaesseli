@@ -1,14 +1,17 @@
-﻿using MediatR;
+﻿using Kaesseli.Domain.Common;
+using MediatR;
 
 namespace Kaesseli.Application.Journal;
 
 // ReSharper disable once ClassNeverInstantiated.Global
 public class AddJournalEntryCommand : IRequest<Guid>
 {
-    // ReSharper disable once UnusedAutoPropertyAccessor.Global
+    // ReSharper disable UnusedAutoPropertyAccessor.Global
     public required decimal Amount { get; init; }
-    // ReSharper disable once UnusedAutoPropertyAccessor.Global
     public required string Description { get; init; }
-    // ReSharper disable once UnusedAutoPropertyAccessor.Global
     public required DateOnly? ValueDate { get; init; }
+    public required Account CreditAccountId { get; init; }
+    public required Account DebitAccountId { get; init; }
+    // ReSharper restore UnusedAutoPropertyAccessor.Global
+
 }

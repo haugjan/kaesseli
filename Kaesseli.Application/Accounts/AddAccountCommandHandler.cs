@@ -10,7 +10,7 @@ public class AddAccountCommandHandler(IAccountRepository repo) :
 {
     public async Task<Guid> Handle(AddAccountCommand request, CancellationToken cancellationToken)
     {
-        var account = await repo.AddAccount(account: new Account { Name = request.Name, Id = Guid.NewGuid() }, cancellationToken);
+        var account = await repo.AddAccount(account: new Account { Type=request.Type, Name = request.Name, Id = Guid.NewGuid() }, cancellationToken);
         return account.Id;
     }
 }

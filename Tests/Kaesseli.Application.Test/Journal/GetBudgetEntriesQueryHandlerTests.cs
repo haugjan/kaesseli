@@ -14,7 +14,8 @@ public class GetJournalEntriesQueryHandlerTests
     {
         // Arrange
         var mockRepository = new Mock<IJournalRepository>();
-        var accountId = Guid.NewGuid();
+        var debitAccountId = Guid.NewGuid();
+        var creditAccountId = Guid.NewGuid();
         var fromDate = new DateOnly(year: 2020, month: 01, day: 01);
         var toDate = fromDate.AddDays(value: 30);
 
@@ -23,12 +24,21 @@ public class GetJournalEntriesQueryHandlerTests
         mockRepository.Setup(
                           repo => repo.GetJournalEntries(
                               It.Is<GetJournalEntriesRequest>(
-                                  r => r.AccountId == accountId && r.FromDate == fromDate && r.ToDate == toDate),
+                                  r => r.DebitAccountId == debitAccountId
+                                    && r.CreditAccountId == creditAccountId
+                                    && r.FromDate == fromDate
+                                    && r.ToDate == toDate),
                               It.IsAny<CancellationToken>()))
                       .ReturnsAsync(entriesList);
 
         var handler = new GetJournalEntriesQueryHandler(mockRepository.Object);
-        var query = new GetJournalEntriesQuery { AccountId = accountId, FromDate = fromDate, ToDate = toDate };
+        var query = new GetJournalEntriesQuery
+        {
+            DebitAccountId = debitAccountId,
+            CreditAccountId = creditAccountId,
+            FromDate = fromDate,
+            ToDate = toDate
+        };
 
         // Act
         var result = (await handler.Handle(query, CancellationToken.None)).ToArray();
@@ -47,7 +57,11 @@ public class GetJournalEntriesQueryHandlerTests
 
         mockRepository.Verify(
             repo => repo.GetJournalEntries(
-                It.Is<GetJournalEntriesRequest>(r => r.AccountId == accountId && r.FromDate == fromDate && r.ToDate == toDate),
+                It.Is<GetJournalEntriesRequest>(
+                    r => r.DebitAccountId == debitAccountId
+                      && r.CreditAccountId == creditAccountId
+                      && r.FromDate == fromDate
+                      && r.ToDate == toDate),
                 It.IsAny<CancellationToken>()),
             Times.Once);
     }

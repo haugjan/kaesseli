@@ -7,14 +7,18 @@ namespace Kaesseli.Infrastructure.Common;
 
 public class KaesseliContext : DbContext
 {
+    [Obsolete(message: "Should only be used by Unit-Tests")]
+    public KaesseliContext() {
+    }
+
     public KaesseliContext(DbContextOptions<KaesseliContext> options)
         : base(options)
     {
     }
 
-    public required DbSet<JournalEntry> JournalEntries { get; init; }
-    public required DbSet<BudgetEntry> BudgetEntries { get; init; }
-    public required DbSet<Account> Accounts { get; init; }
+    public virtual DbSet<JournalEntry> JournalEntries { get; init; } = null!;
+    public virtual DbSet<BudgetEntry> BudgetEntries { get; init; } = null!;
+    public virtual DbSet<Account> Accounts { get; init; } = null!;
 
 
 }

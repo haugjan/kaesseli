@@ -22,17 +22,11 @@ public static class JournalApiExtensions
             pattern: "/journalEntry",
             async (
                     IMediator mediator,
-                    Guid? accountId,
-                    DateOnly? from,
+                    Guid? debitAccountId,
+                    Guid? creditAccountId,
+                    DateOnly ? from,
                     DateOnly? to) =>
-                await mediator.Send(request: new GetJournalEntriesQuery { AccountId = accountId, FromDate = from, ToDate = to }));
-        app.MapPatch(
-            pattern: "/journalEntry",
-            async (
-                    IMediator mediator,
-                    AssignAccountToJournalEntryCommand command) =>
-                await mediator.Send(command));
-
-        return app;
+                await mediator.Send(request: new GetJournalEntriesQuery { DebitAccountId = debitAccountId, CreditAccountId = creditAccountId, FromDate = from, ToDate = to }));
+       return app;
     }
 }
