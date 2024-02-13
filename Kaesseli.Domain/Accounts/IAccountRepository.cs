@@ -1,6 +1,4 @@
-﻿using Kaesseli.Domain.Common;
-
-namespace Kaesseli.Domain.Accounts;
+﻿namespace Kaesseli.Domain.Accounts;
 
 public interface IAccountRepository
 {

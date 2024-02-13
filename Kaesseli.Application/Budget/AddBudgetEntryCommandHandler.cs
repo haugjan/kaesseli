@@ -1,4 +1,4 @@
-﻿using Kaesseli.Application.Common;
+﻿using Kaesseli.Application.Utility;
 using Kaesseli.Domain.Accounts;
 using Kaesseli.Domain.Budget;
 using MediatR;

@@ -9,6 +9,16 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
+builder.Services.AddCors(
+    options =>
+    {
+        options.AddPolicy(
+            name: "AllowSpecificOrigin",
+            b => b.WithOrigins("https://localhost:5173")
+                              .AllowAnyHeader()
+                              .AllowAnyMethod());
+    });
+
 builder.Services.AddBudgetRepositories(builder.Configuration);
 builder.Services.AddApplicationServices();
 var app = builder.Build();
@@ -16,6 +26,7 @@ var app = builder.Build();
 app.UseDefaultFiles();
 app.UseStaticFiles();
 app.Services.InitializeDatabase();
+app.UseCors(policyName: "AllowSpecificOrigin");
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())

@@ -1,4 +1,4 @@
-﻿using Kaesseli.Application.Common;
+﻿using Kaesseli.Application.Utility;
 
 // ReSharper disable once CheckNamespace
 namespace Microsoft.Extensions.DependencyInjection;

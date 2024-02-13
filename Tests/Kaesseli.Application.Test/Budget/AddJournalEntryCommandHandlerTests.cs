@@ -1,5 +1,5 @@
 ﻿using Kaesseli.Application.Budget;
-using Kaesseli.Application.Common;
+using Kaesseli.Application.Utility;
 using Kaesseli.Domain.Accounts;
 using Kaesseli.Domain.Budget;
 using Kaesseli.TestUtilities.Faker;

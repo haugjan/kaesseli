@@ -1,6 +1,6 @@
 ﻿using System.Reflection;
 using FluentAssertions;
-using Kaesseli.Application.Common;
+using Kaesseli.Application.Utility;
 using MediatR;
 using Microsoft.Extensions.DependencyInjection;
 using Xunit;

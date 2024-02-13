@@ -1,4 +1,4 @@
-﻿namespace Kaesseli.Application.Common;
+﻿namespace Kaesseli.Application.Utility;
 
 public interface IDateTimeService
 {

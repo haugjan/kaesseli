@@ -1,6 +1,5 @@
 ﻿using Kaesseli.Application.Accounts;
 using Kaesseli.Domain.Accounts;
-using Kaesseli.Domain.Common;
 using Moq;
 using Xunit;
 

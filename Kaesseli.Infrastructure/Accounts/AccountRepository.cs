@@ -1,5 +1,4 @@
 ﻿using Kaesseli.Domain.Accounts;
-using Kaesseli.Domain.Common;
 using Kaesseli.Infrastructure.Common;
 using Microsoft.EntityFrameworkCore;
 

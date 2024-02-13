@@ -1,5 +1,5 @@
 ﻿using Kaesseli.Application.Journal;
-using Kaesseli.Application.Common;
+using Kaesseli.Application.Utility;
 using Kaesseli.Domain.Journal;
 using Kaesseli.TestUtilities.Faker;
 using Moq;

@@ -1,5 +1,4 @@
 ﻿using Kaesseli.Domain.Accounts;
-using Kaesseli.Domain.Common;
 using MediatR;
 
 namespace Kaesseli.Application.Accounts;

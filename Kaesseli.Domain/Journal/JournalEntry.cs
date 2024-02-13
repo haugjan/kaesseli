@@ -1,5 +1,5 @@
 ﻿using System.Diagnostics.CodeAnalysis;
-using Kaesseli.Domain.Common;
+using Kaesseli.Domain.Accounts;
 
 namespace Kaesseli.Domain.Journal;
 

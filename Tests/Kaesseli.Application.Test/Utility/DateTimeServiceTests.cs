@@ -1,8 +1,8 @@
 ﻿using FluentAssertions;
-using Kaesseli.Application.Common;
+using Kaesseli.Application.Utility;
 using Xunit;
 
-namespace Kaesseli.Application.Test.Common;
+namespace Kaesseli.Application.Test.Utility;
 
 public class DateTimeServiceTests
 {

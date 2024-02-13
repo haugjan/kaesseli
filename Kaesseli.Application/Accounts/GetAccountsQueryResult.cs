@@ -1,6 +1,4 @@
-﻿using Kaesseli.Domain.Common;
-
-namespace Kaesseli.Application.Accounts;
+﻿namespace Kaesseli.Application.Accounts;
 
 public class GetAccountsQueryResult
 {
@@ -8,6 +6,6 @@ public class GetAccountsQueryResult
     public required Guid Id { get; init; }
     public required string Name { get; init; }
 
-    public required AccountType Type { get; init; }
+    public required string Type { get; init; }
     // ReSharper restore UnusedAutoPropertyAccessor.Global
 }

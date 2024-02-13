@@ -1,4 +1,4 @@
-﻿using Kaesseli.Domain.Common;
+﻿using Kaesseli.Domain.Accounts;
 using Kaesseli.Domain.Journal;
 using Xunit;
 

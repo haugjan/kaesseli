@@ -1,5 +1,5 @@
-﻿using Kaesseli.Domain.Budget;
-using Kaesseli.Domain.Common;
+﻿using Kaesseli.Domain.Accounts;
+using Kaesseli.Domain.Budget;
 using Kaesseli.Domain.Journal;
 using Microsoft.EntityFrameworkCore;
 
@@ -19,6 +19,5 @@ public class KaesseliContext : DbContext
     public virtual DbSet<JournalEntry> JournalEntries { get; init; } = null!;
     public virtual DbSet<BudgetEntry> BudgetEntries { get; init; } = null!;
     public virtual DbSet<Account> Accounts { get; init; } = null!;
-
 
 }

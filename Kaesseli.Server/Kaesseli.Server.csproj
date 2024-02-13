@@ -5,7 +5,7 @@
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <InvariantGlobalization>true</InvariantGlobalization>
-    <SpaRoot>..\kaesseli.client</SpaRoot>
+    <SpaRoot>..\Kaesseli.Client</SpaRoot>
     <SpaProxyLaunchCommand>npm run dev</SpaProxyLaunchCommand>
     <SpaProxyServerUrl>https://localhost:5173</SpaProxyServerUrl>
   </PropertyGroup>
@@ -23,6 +23,9 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Kaesseli.Application\Kaesseli.Application.csproj" />
+	  <ProjectReference Include="..\Kaesseli.Client\Kaesseli.Client.esproj" >
+		  <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
+	  </ProjectReference>
     <ProjectReference Include="..\Kaesseli.Domain\Kaesseli.Domain.csproj" />
     <ProjectReference Include="..\Kaesseli.Infrastructure\Kaesseli.Infrastructure.csproj" />
   </ItemGroup>

@@ -1,8 +1,7 @@
-﻿using Bogus;
-using FluentAssertions;
+﻿using FluentAssertions;
 using Kaesseli.Application.Accounts;
 using Kaesseli.Domain.Accounts;
-using Kaesseli.Domain.Common;
+using Kaesseli.TestUtilities.Faker;
 using Moq;
 using Xunit;
 
@@ -15,9 +14,8 @@ public class GetAccountsQueryHandlerTests
     {
         // Arrange
         var mockRepository = new Mock<IAccountRepository>();
-        var faker = new Faker<Account>()
-                    .RuleFor(a => a.Id, f => f.Random.Guid())
-                    .RuleFor(a => a.Name, f => f.Person.FullName);
+        var faker = new SmartFaker<Account>()
+                    .RuleFor(a => a.Type, _ => AccountType.Asset);
 
         var accountsList = faker.Generate(count: 5);
         mockRepository.Setup(repo => repo.GetAccounts(It.IsAny<CancellationToken>()))
@@ -32,7 +30,9 @@ public class GetAccountsQueryHandlerTests
         // Assert
         result.Should().NotBeNull();
         result.Should().HaveCount(accountsList.Count);
+        result.Select(r => r.Id).Should().BeEquivalentTo(expectation: accountsList.Select(a => a.Id));
         result.Select(r => r.Name).Should().BeEquivalentTo(expectation: accountsList.Select(a => a.Name));
+        result.Select(r => r.Type).Should().BeEquivalentTo(expectation: accountsList.Select(a => a.Type.DisplayName()));
 
         mockRepository.Verify(repo => repo.GetAccounts(It.IsAny<CancellationToken>()), Times.Once);
     }

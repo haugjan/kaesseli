@@ -1,5 +1,5 @@
 using FluentAssertions;
-using Kaesseli.Domain.Common;
+using Kaesseli.Domain.Accounts;
 using Kaesseli.Infrastructure.Accounts;
 using Kaesseli.Infrastructure.Common;
 using Microsoft.EntityFrameworkCore;
