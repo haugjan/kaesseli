@@ -16,6 +16,17 @@ public static class AccountApiExtensions
             async (IMediator mediator) =>
                 await mediator.Send(request: new GetAccountsQuery()));
 
+        app.MapGet(
+            pattern: "/account/{accountId}",
+            async (IMediator mediator, Guid accountId) =>
+                await mediator.Send(request: new GetAccountQuery {AccountId = accountId}));
+
+
+        app.MapGet(
+            pattern: "/accountSummary",
+            async (IMediator mediator) =>
+                await mediator.Send(request: new GetAccountsSummaryQuery()));
+
         app.MapPost(
             pattern: "/account",
             async (IMediator mediator, AddAccountCommand command) =>

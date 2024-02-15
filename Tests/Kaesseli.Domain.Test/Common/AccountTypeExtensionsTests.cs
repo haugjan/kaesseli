@@ -8,8 +8,8 @@ public class AccountTypeExtensionsTests
 {
     [Theory]
     // ReSharper disable StringLiteralTypo
-    [InlineData(AccountType.Asset, "Aktive")]
-    [InlineData(AccountType.Liability, "Passive")]
+    [InlineData(AccountType.Asset, "Aktiv")]
+    [InlineData(AccountType.Liability, "Passiv")]
     [InlineData(AccountType.Revenue, "Aufwand")]
     [InlineData(AccountType.Expense, "Ertrag")]
     // ReSharper restore StringLiteralTypo

@@ -1,4 +1,5 @@
 ﻿using Kaesseli.Application.Journal;
+using Kaesseli.Domain.Accounts;
 using MediatR;
 
 namespace Kaesseli.Server.Journal;
@@ -24,9 +25,18 @@ public static class JournalApiExtensions
                     IMediator mediator,
                     Guid? debitAccountId,
                     Guid? creditAccountId,
-                    DateOnly ? from,
-                    DateOnly? to) =>
-                await mediator.Send(request: new GetJournalEntriesQuery { DebitAccountId = debitAccountId, CreditAccountId = creditAccountId, FromDate = from, ToDate = to }));
-       return app;
+                    DateOnly? from,
+                    DateOnly? to,
+                    AccountType? accountType) =>
+                await mediator.Send(
+                    request: new GetJournalEntriesQuery
+                    {
+                        DebitAccountId = debitAccountId,
+                        CreditAccountId = creditAccountId,
+                        FromDate = from,
+                        ToDate = to,
+                        AccountType = accountType
+                    }));
+        return app;
     }
 }

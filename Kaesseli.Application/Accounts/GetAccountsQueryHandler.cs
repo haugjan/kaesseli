@@ -10,6 +10,7 @@ public class GetAccountsQueryHandler(IAccountRepository repository)
     public async Task<IEnumerable<GetAccountsQueryResult>> Handle(GetAccountsQuery request, CancellationToken cancellationToken)
     {
         var accounts = await repository.GetAccounts(cancellationToken);
-        return accounts.Select(account => new GetAccountsQueryResult { Id = account.Id, Name = account.Name, Type = account.Type.DisplayName() });
+        return accounts.Select(
+            account => new GetAccountsQueryResult { Id = account.Id, Name = account.Name, TypeId=account.Type, Type = account.Type.DisplayName() });
     }
 }

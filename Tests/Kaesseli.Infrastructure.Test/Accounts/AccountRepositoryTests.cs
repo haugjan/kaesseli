@@ -43,16 +43,17 @@ public class AccountRepositoryTests
         var options = new DbContextOptionsBuilder<KaesseliContext>()
                       .UseInMemoryDatabase(databaseName: "GetAccountsDb")
                       .Options;
+        var cancellationToken = new CancellationToken();
 
         await using var setupContext = CreateContext(options);
         setupContext.Accounts.Add(entity: new Account { Id = Guid.NewGuid(), Name = "Account 1", Type = AccountType.Expense });
         setupContext.Accounts.Add(entity: new Account { Id = Guid.NewGuid(), Name = "Account 2", Type = AccountType.Expense });
-        await setupContext.SaveChangesAsync();
+        await setupContext.SaveChangesAsync(cancellationToken);
 
         var repository = new AccountRepository(setupContext);
 
         // Act
-        var accounts = await repository.GetAccounts(CancellationToken.None);
+        var accounts = await repository.GetAccounts(cancellationToken);
 
         // Assert
         accounts.Should().HaveCount(expected: 2);

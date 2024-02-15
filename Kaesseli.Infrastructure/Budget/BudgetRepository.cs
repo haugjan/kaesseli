@@ -10,18 +10,13 @@ public class BudgetRepository(KaesseliContext context) : IBudgetRepository
         GetBudgetEntriesRequest request,
         CancellationToken cancellationToken)
     {
-        IQueryable<BudgetEntry> entries = context.BudgetEntries.Include(budget=> budget.Account);
-        if(request.AccountId  != null)
-            entries = entries.Where(entry=> entry.Account.Id==request.AccountId);
-        if (request.FromDate is not null) 
-            entries = entries.Where(entry => entry.ValueDate >= request.FromDate);
-        if (request.ToDate is not null)
-            entries = entries.Where(entry => entry.ValueDate < request.ToDate);
-
+        IQueryable<BudgetEntry> entries = context.BudgetEntries.Include(budget => budget.Account);
+        if (request.AccountId != null) entries = entries.Where(entry => entry.Account.Id == request.AccountId);
+        if (request.FromDate is not null) entries = entries.Where(entry => entry.ValueDate >= request.FromDate);
+        if (request.ToDate is not null) entries = entries.Where(entry => entry.ValueDate < request.ToDate);
+        if (request.AccountType is not null) entries = entries.Where(entry => entry.Account.Type == request.AccountType);
         return await entries.ToListAsync(cancellationToken);
     }
-
-
 
     public async Task<BudgetEntry> AddBudgetEntry(BudgetEntry newBudgetEntryEntity, CancellationToken ct)
     {
@@ -29,6 +24,4 @@ public class BudgetRepository(KaesseliContext context) : IBudgetRepository
         await context.SaveChangesAsync(ct);
         return newBudgetEntryEntity;
     }
-
-
 }

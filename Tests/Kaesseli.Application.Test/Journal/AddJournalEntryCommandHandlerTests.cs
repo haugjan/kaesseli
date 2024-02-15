@@ -1,5 +1,6 @@
 ﻿using Kaesseli.Application.Journal;
 using Kaesseli.Application.Utility;
+using Kaesseli.Domain.Accounts;
 using Kaesseli.Domain.Journal;
 using Kaesseli.TestUtilities.Faker;
 using Moq;
@@ -13,24 +14,25 @@ public class AddJournalEntryCommandHandlerTests
     public async Task Handle_ShouldAddAccountSuccessfully()
     {
         // Arrange
-        var mockRepo = new Mock<IJournalRepository>();
+        var mockJournalRepo = new Mock<IJournalRepository>();
+        var mockAccountRepo = new Mock<IAccountRepository>();
         var dateTimeService = new Mock<IDateTimeService>();
         var command = new SmartFaker<AddJournalEntryCommand>().Generate();
         var cancellationToken = new CancellationToken();
 
-        mockRepo.Setup(
-                    repo => repo.AddJournalEntry(
-                        It.Is<JournalEntry>(a => a.Amount == command.Amount && a.Description == command.Description),
-                        cancellationToken))
-                .ReturnsAsync((JournalEntry newJournalEntry, CancellationToken _) => newJournalEntry);
+        mockJournalRepo.Setup(
+                           repo => repo.AddJournalEntry(
+                               It.Is<JournalEntry>(a => a.Amount == command.Amount && a.Description == command.Description),
+                               cancellationToken))
+                       .ReturnsAsync((JournalEntry newJournalEntry, CancellationToken _) => newJournalEntry);
 
-        var handler = new AddJournalEntryCommandHandler(mockRepo.Object, dateTimeService.Object);
+        var handler = new AddJournalEntryCommandHandler(mockJournalRepo.Object, mockAccountRepo.Object, dateTimeService.Object);
 
         // Act
         var result = await handler.Handle(command, CancellationToken.None);
 
         // Assert
-        mockRepo.Verify(
+        mockJournalRepo.Verify(
             repo => repo.AddJournalEntry(
                 It.Is<JournalEntry>(
                     entry => entry.Amount == command.Amount
@@ -44,25 +46,26 @@ public class AddJournalEntryCommandHandlerTests
     public async Task Handle_EmptyValueDate_ShouldAddAccountWithCurrentDate()
     {
         // Arrange
-        var mockRepo = new Mock<IJournalRepository>();
+        var mockJournalRepo = new Mock<IJournalRepository>();
+        var mockAccountRepo = new Mock<IAccountRepository>();
         var dateTimeService = new Mock<IDateTimeService>();
         var command = new SmartFaker<AddJournalEntryCommand>().RuleFor(c => c.ValueDate, _ => null).Generate();
         var cancellationToken = new CancellationToken();
         var currentDay = new DateOnly(year: 1982, month: 11, day: 3);
 
-        mockRepo.Setup(
+        mockJournalRepo.Setup(
                     repo => repo.AddJournalEntry(
                         It.Is<JournalEntry>(a => a.Amount == command.Amount && a.Description == command.Description),
                         cancellationToken))
                 .ReturnsAsync((JournalEntry newJournalEntry, CancellationToken _) => newJournalEntry);
         dateTimeService.Setup(dts => dts.ToDay).Returns(currentDay);
-        var handler = new AddJournalEntryCommandHandler(mockRepo.Object, dateTimeService.Object);
+        var handler = new AddJournalEntryCommandHandler(mockJournalRepo.Object, mockAccountRepo.Object, dateTimeService.Object);
 
         // Act
         var result = await handler.Handle(command, CancellationToken.None);
 
         // Assert
-        mockRepo.Verify(
+        mockJournalRepo.Verify(
             repo => repo.AddJournalEntry(
                 It.Is<JournalEntry>(
                     entry => entry.Amount == command.Amount

@@ -19,7 +19,7 @@ public class GetBudgetEntriesQueryHandler :
         var entries = await _repository.GetBudgetEntries(
                           request: new GetBudgetEntriesRequest
                           {
-                              AccountId = request.AccountId, FromDate = request.FromDate, ToDate = request.ToDate
+                              AccountId = request.AccountId, FromDate = request.FromDate, ToDate = request.ToDate, AccountType = request.AccountType
                           },
                           cancellationToken);
         return entries.ToList()

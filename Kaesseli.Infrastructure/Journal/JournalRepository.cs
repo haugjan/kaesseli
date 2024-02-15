@@ -20,10 +20,25 @@ public class JournalRepository(KaesseliContext context) : IJournalRepository
         IQueryable<JournalEntry> entries = context.JournalEntries
                                                   .Include(budget => budget.DebitAccount)
                                                   .Include(budget => budget.CreditAccount);
-        if (request.DebitAccountId != null) entries = entries.Where(entry => entry.DebitAccount.Id == request.DebitAccountId);
-        if (request.CreditAccountId != null) entries = entries.Where(entry => entry.CreditAccount.Id == request.DebitAccountId);
+        if (request.DebitAccountId is not null) entries = entries.Where(entry => entry.DebitAccount.Id == request.DebitAccountId);
+        if (request.CreditAccountId is not null) entries = entries.Where(entry => entry.CreditAccount.Id == request.DebitAccountId);
+
+        if (request.AccountId is not null)
+        {
+            entries = entries.Where(
+                journal => journal.CreditAccount.Id == request.AccountId
+                        || journal.DebitAccount.Id == request.AccountId);
+        }
+
         if (request.FromDate is not null) entries = entries.Where(entry => entry.ValueDate >= request.FromDate);
         if (request.ToDate is not null) entries = entries.Where(entry => entry.ValueDate < request.ToDate);
+
+        if (request.AccountType is not null)
+        {
+            entries = entries.Where(
+                entry => entry.DebitAccount.Type == request.AccountType
+                      || entry.CreditAccount.Type == request.AccountType);
+        }
 
         return await entries.ToListAsync(cancellationToken);
     }

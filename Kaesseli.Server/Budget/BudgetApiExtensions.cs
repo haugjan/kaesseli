@@ -1,4 +1,5 @@
 ﻿using Kaesseli.Application.Budget;
+using Kaesseli.Domain.Accounts;
 using MediatR;
 
 namespace Kaesseli.Server.Budget;
@@ -24,8 +25,9 @@ public static class BudgetApiExtensions
                     IMediator mediator,
                     Guid? accountId,
                     DateOnly? from,
-                    DateOnly? to) =>
-                await mediator.Send(request: new GetBudgetEntriesQuery { AccountId = accountId, FromDate = from, ToDate = to }));
+                    DateOnly? to,
+                    AccountType accountType) =>
+                await mediator.Send(request: new GetBudgetEntriesQuery { AccountId = accountId, FromDate = from, ToDate = to, AccountType = accountType}));
        
         return app;
     }

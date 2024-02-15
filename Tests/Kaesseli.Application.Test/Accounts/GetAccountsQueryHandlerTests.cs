@@ -16,16 +16,17 @@ public class GetAccountsQueryHandlerTests
         var mockRepository = new Mock<IAccountRepository>();
         var faker = new SmartFaker<Account>()
                     .RuleFor(a => a.Type, _ => AccountType.Asset);
+        var cancellationToken = new CancellationToken();
 
         var accountsList = faker.Generate(count: 5);
-        mockRepository.Setup(repo => repo.GetAccounts(It.IsAny<CancellationToken>()))
+        mockRepository.Setup(repo => repo.GetAccounts(cancellationToken))
                       .ReturnsAsync(accountsList);
 
         var handler = new GetAccountsQueryHandler(mockRepository.Object);
         var query = new GetAccountsQuery();
 
         // Act
-        var result = (await handler.Handle(query, CancellationToken.None)).ToArray();
+        var result = (await handler.Handle(query, cancellationToken)).ToArray();
 
         // Assert
         result.Should().NotBeNull();
@@ -34,6 +35,6 @@ public class GetAccountsQueryHandlerTests
         result.Select(r => r.Name).Should().BeEquivalentTo(expectation: accountsList.Select(a => a.Name));
         result.Select(r => r.Type).Should().BeEquivalentTo(expectation: accountsList.Select(a => a.Type.DisplayName()));
 
-        mockRepository.Verify(repo => repo.GetAccounts(It.IsAny<CancellationToken>()), Times.Once);
+        mockRepository.Verify(repo => repo.GetAccounts(cancellationToken), Times.Once);
     }
 }
