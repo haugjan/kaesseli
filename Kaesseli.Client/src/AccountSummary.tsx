@@ -1,8 +1,7 @@
 import { useState, useEffect } from 'react';
 import BalanceSheetAccount from './BalanceSheetAccount';
 import IncomeStatementAccount from './IncomeStatementAccount';
-import {IAccountSummary} from "./IAccountSummary";
-import fetch from 'node-fetch';
+import { IAccountSummary } from "./IAccountSummary";
 
 // ReSharper disable once InconsistentNaming
 function AccountSummary() {
@@ -19,7 +18,7 @@ function AccountSummary() {
                 }
                 return response.json();
             })
-// ReSharper disable once TS2345
+            // ReSharper disable once TS2345
             .then(data => setAccounts(data))
             .catch(error => setError(error.message));
     }, []);
@@ -34,7 +33,7 @@ function AccountSummary() {
             <div className="row">
                 <div className="col-lg-5 col-sm-12">
                     <h2>Aufwand</h2>
-                    <IncomeStatementAccount accounts={accounts.filter(account => account.typeId === 3)}/>
+                    <IncomeStatementAccount accounts={accounts.filter(account => account.typeId === 3)} />
                 </div>
                 <div className="col-lg-5 col-sm-12">
                     <h2>Ertrag</h2>

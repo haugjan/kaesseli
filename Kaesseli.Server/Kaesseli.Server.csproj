@@ -23,9 +23,6 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Kaesseli.Application\Kaesseli.Application.csproj" />
-	  <ProjectReference Include="..\Kaesseli.Client\Kaesseli.Client.esproj" >
-		  <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
-	  </ProjectReference>
     <ProjectReference Include="..\Kaesseli.Domain\Kaesseli.Domain.csproj" />
     <ProjectReference Include="..\Kaesseli.Infrastructure\Kaesseli.Infrastructure.csproj" />
   </ItemGroup>

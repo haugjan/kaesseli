@@ -1,5 +1,5 @@
 export interface IAccountSummary {
-    id: number;
+    id: string;
     name: string;
     typeId: number;
     accountBalance: number;

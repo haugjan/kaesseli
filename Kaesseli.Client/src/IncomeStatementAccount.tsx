@@ -1,4 +1,5 @@
 import { IAccountSummary } from "./IAccountSummary";
+import { Link } from 'react-router-dom';
 
 const getComparisonColor = (value: number) => {
     if (value > 0) {
@@ -26,7 +27,7 @@ function IncomeStatementAccount({ accounts }: { accounts: IAccountSummary[] }) {
             <tbody>
                 {accounts.map(account => (
                     <tr key={account.id}>
-                        <td>{account.name}</td>
+                        <td><Link to={`/account/${account.id}`}>{account.name}</Link></td>
                         <td className="text-end">{account.accountBalance.toFixed(2)}</td>
                         <td className="text-end">{account.budget.toFixed(2)}</td>
                         <td className={getComparisonColor(account.budgetBalance)}>{account.budgetBalance.toFixed(2)}</td>

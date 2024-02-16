@@ -1,6 +1,7 @@
 import 'bootstrap/dist/css/bootstrap.min.css';
 import 'bootstrap/dist/js/bootstrap.bundle.min.js';
 import { IAccountSummary } from "./IAccountSummary";
+import { Link } from 'react-router-dom';
 
 // ReSharper disable once InconsistentNaming
 function BalanceSheetAccount({ accounts }: { accounts: IAccountSummary[] }) {
@@ -15,7 +16,7 @@ function BalanceSheetAccount({ accounts }: { accounts: IAccountSummary[] }) {
             <tbody>
                 {accounts.map(account => (
                     <tr key={account.id}>
-                        <td>{account.name}</td>
+                        <td><Link to={`/account/${account.id}`}>{account.name}</Link></td>
                         <td className="fw-bold text-end">{account.accountBalance.toFixed(2)}</td>
                     </tr>
                 ))}

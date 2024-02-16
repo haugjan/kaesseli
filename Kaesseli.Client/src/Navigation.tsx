@@ -14,7 +14,7 @@ function Navigation() {
                            <Link className="nav-link" to="/">Startseite</Link>
                        </li>
                        <li className="nav-item">
-                           <Link className="nav-link" to="/accounts">Beispiel-Seite</Link>
+                           <Link className="nav-link" to="/accounts">Konten</Link>
                        </li>
                    </ul>
                </div>

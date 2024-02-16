@@ -26,7 +26,8 @@ public static class BudgetApiExtensions
                     Guid? accountId,
                     DateOnly? from,
                     DateOnly? to,
-                    AccountType accountType) =>
+                    AccountType accountType
+                    ) =>
                 await mediator.Send(request: new GetBudgetEntriesQuery { AccountId = accountId, FromDate = from, ToDate = to, AccountType = accountType}));
        
         return app;

@@ -1,6 +1,9 @@
-import { useState, useEffect} from 'react';
-import  fetch  from 'node-fetch';
+import { useState, useEffect } from 'react';
+import { useParams } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 interface IAccountDetail {
+    id: string;
     name: string;
     accountBalance: number;
     budget: number;
@@ -9,16 +12,18 @@ interface IAccountDetail {
 }
 
 interface IJournalEntry {
+    id: string;
     valueDate: string;
     amountType: number;
     otherAccount: string;
+    otherAccountId: string;
     amount: number;
     description: string;
 }
 
 // ReSharper disable once InconsistentNaming
-function Account({ accountId }: { accountId: number }) {
-    /*const { accountId } = useParams();*/
+function Account({accountId} : {accountId: string}) {
+    //const { accountId } = useParams();
     const [account, setAccounts] = useState<IAccountDetail>();
     const [error, setError] = useState(null);
 
@@ -39,18 +44,20 @@ function Account({ accountId }: { accountId: number }) {
     if (error) {
         return <div>Fehler beim Laden der Daten: {error}</div>;
     }
+    let navigate = useNavigate();
 
     return (
 
         <div className="container mt-5">
             {account && (
-                <div className="row">
+                <div className="row" key={account.id}>
+                    <div><button type="button" className="btn btn-primary" onClick={() => navigate(-1)}>Zurück</button></div>
                     <div className="col-lg-6 col-sm-12">
                         <h1>Konto {account.name}</h1>
                         <div className="lead">
-                            <em>Kontostand: </em>{account.accountBalance}&nbsp;
-                            <em>Budget: </em>{account.budget}&nbsp;
-                            <em>Vergleich: </em>{account.budgetBalance}&nbsp;
+                            <em>Kontostand: </em>{account.accountBalance.toFixed(2)}&nbsp;
+                            <em>Budget: </em>{account.budget.toFixed(2)}&nbsp;
+                            <em>Vergleich: </em>{account.budgetBalance.toFixed(2)}&nbsp;
                         </div>
                         <table>
                             <thead>
@@ -64,12 +71,12 @@ function Account({ accountId }: { accountId: number }) {
                             </thead>
                             <tbody>
                                 {account.entries.map(entry => (
-                                    <tr >
+                                    <tr key={entry.id}>
                                         <td>{entry.valueDate}</td>
                                         <td className={entry.amountType === 1 ? 'fw-bold' : ''}>{(entry.amountType === 1 ? 'Budget ' : '') + entry.description}</td>
-                                        <td>{entry.otherAccount}</td>
-                                        <td className="text-end">{entry.amountType !== 3 ? entry.amount : ''}</td>
-                                        <td className="text-end">{entry.amountType === 3 ? entry.amount : ''}</td>
+                                        <td><Link to={`/account/${entry.otherAccountId}`}> {entry.otherAccount}</Link></td>
+                                        <td className="text-end">{entry.amountType !== 3 ? entry.amount.toFixed(2) : ''}</td>
+                                        <td className="text-end">{entry.amountType === 3 ? entry.amount.toFixed(2) : ''}</td>
                                     </tr>
                                 ))}
 
@@ -81,5 +88,7 @@ function Account({ accountId }: { accountId: number }) {
         </div>
     );
 }
+
+
 
 export default Account;
