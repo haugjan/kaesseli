@@ -1,6 +1,4 @@
 //import React from 'react';
-import 'bootstrap/dist/css/bootstrap.min.css';
-import 'bootstrap/dist/js/bootstrap.bundle.min.js';
 import Navigation from './Navigation';
 import AccountSummary from './AccountSummary';
 import Account from './Account';

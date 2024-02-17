@@ -1,40 +1,39 @@
 import { IAccountSummary } from "./IAccountSummary";
 import { Link } from 'react-router-dom';
+import { Table } from 'react-bootstrap';
 
-const getComparisonColor = (value: number) => {
+const getComparisonStyle = (value: number) => {
     if (value > 0) {
-        return 'fw-bold text-end text-success';
+        return "fw-bold text-end text-success"; 
     } else if (value < 0) {
-        return 'fw-bold text-end text-danger';
+        return "fw-bold text-end text-danger";
     } else {
-        return 'fw-bold text-end';
+        return "fw-bold text-end";
     }
 };
 
-
-// ReSharper disable once InconsistentNaming
 function IncomeStatementAccount({ accounts }: { accounts: IAccountSummary[] }) {
     return (
-        <table className="table">
+        <Table>
             <thead>
                 <tr>
                     <th>Name</th>
-                    <th className="text-end">Kontostand</th>
-                    <th className="text-end">Budget</th>
-                    <th className="text-end">Vergleich</th>
+                    <th style={{ textAlign: 'right' }}>Kontostand</th>
+                    <th style={{ textAlign: 'right' }}>Budget</th>
+                    <th style={{ textAlign: 'right' }}>Vergleich</th>
                 </tr>
             </thead>
             <tbody>
                 {accounts.map(account => (
                     <tr key={account.id}>
                         <td><Link to={`/account/${account.id}`}>{account.name}</Link></td>
-                        <td className="text-end">{account.accountBalance.toFixed(2)}</td>
-                        <td className="text-end">{account.budget.toFixed(2)}</td>
-                        <td className={getComparisonColor(account.budgetBalance)}>{account.budgetBalance.toFixed(2)}</td>
+                        <td style={{ textAlign: 'right' }}>{account.accountBalance.toFixed(2)}</td>
+                        <td style={{ textAlign: 'right' }}>{account.budget.toFixed(2)}</td>
+                        <td className={getComparisonStyle(account.budgetBalance)}>{account.budgetBalance.toFixed(2)}</td>
                     </tr>
                 ))}
             </tbody>
-        </table>
+        </Table>
     );
 }
 

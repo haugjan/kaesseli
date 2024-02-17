@@ -2,8 +2,8 @@ import { useState, useEffect } from 'react';
 import BalanceSheetAccount from './BalanceSheetAccount';
 import IncomeStatementAccount from './IncomeStatementAccount';
 import { IAccountSummary } from "./IAccountSummary";
+import { Container, Row, Col } from 'react-bootstrap';
 
-// ReSharper disable once InconsistentNaming
 function AccountSummary() {
     const [accounts, setAccounts] = useState<IAccountSummary[]>([]);
     const [error, setError] = useState(null);
@@ -18,7 +18,6 @@ function AccountSummary() {
                 }
                 return response.json();
             })
-            // ReSharper disable once TS2345
             .then(data => setAccounts(data))
             .catch(error => setError(error.message));
     }, []);
@@ -28,27 +27,27 @@ function AccountSummary() {
     }
 
     return (
-        <div className="container mt-5">
+        <Container className="mt-5">
             <h1>Konten</h1>
-            <div className="row">
-                <div className="col-lg-5 col-sm-12">
+            <Row>
+                <Col lg={5} sm={12}>
                     <h2>Aufwand</h2>
                     <IncomeStatementAccount accounts={accounts.filter(account => account.typeId === 3)} />
-                </div>
-                <div className="col-lg-5 col-sm-12">
+                </Col>
+                <Col lg={5} sm={12}>
                     <h2>Ertrag</h2>
                     <IncomeStatementAccount accounts={accounts.filter(account => account.typeId === 4)} />
-                </div>
-                <div className="col-lg-3 col-sm-12">
+                </Col>
+                <Col lg={3} sm={12}>
                     <h2>Aktive</h2>
                     <BalanceSheetAccount accounts={accounts.filter(account => account.typeId === 1)} />
-                </div>
-                <div className="offset-lg-2 col-lg-3 col-sm-12">
+                </Col>
+                <Col lg={{ span: 3, offset: 2 }} sm={12}>
                     <h2>Passive</h2>
                     <BalanceSheetAccount accounts={accounts.filter(account => account.typeId === 2)} />
-                </div>
-            </div>
-        </div>
+                </Col>
+            </Row>
+        </Container>
     );
 }
 

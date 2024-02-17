@@ -1,7 +1,8 @@
 import { useState, useEffect, Fragment } from 'react';
-import { useParams } from 'react-router-dom';
-import { useNavigate } from 'react-router-dom';
-import { Link } from 'react-router-dom';
+import { useParams, useNavigate, Link } from 'react-router-dom';
+import { Container, Button, Row, Col, Table } from 'react-bootstrap';
+import 'bootstrap/dist/css/bootstrap.min.css';
+
 interface IAccountDetail {
     id: string;
     name: string;
@@ -31,7 +32,6 @@ function Account() {
 
     useEffect(() => {
         const apiUrl = `https://localhost:7123/account/${accountId}`;
-
         fetch(apiUrl)
             .then(response => {
                 if (!response.ok) {
@@ -46,56 +46,51 @@ function Account() {
     if (error) {
         return <div>Fehler beim Laden der Daten: {error}</div>;
     }
-    let navigate = useNavigate();
 
     return (
-
-        <div className="container mt-5">
+        <Container>
             {account && (
-                <div className="row" key={account.id}>
-                    <div><button type="button" className="btn btn-primary" onClick={() => navigate(-1)}>Zurück</button></div>
-                    <div className="col-lg-6 col-sm-12">
-                        <h1>Konto {account.name} ({account.type})</h1>
-                        <div className="lead">
-                            <em>Kontostand: </em>{account.accountBalance.toFixed(2)}&nbsp;
-                            {account.typeId === 3 || account.typeId === 4 ? (
-                                <Fragment>
-                                    <em>Budget: </em>{account.budget.toFixed(2)}&nbsp;
-                                    <em>Vergleich: </em>{account.budgetBalance.toFixed(2)}&nbsp;
-                                </Fragment>
-                            ) : null}
-                        </div>
-                        <table className="table">
-                            <thead>
-                                <tr>
-                                    <th>Datum</th>
-                                    <th>Text</th>
-                                    <th >Konto</th>
-                                    <th className="text-end">Soll</th>
-                                    <th className="text-end">Haben</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {account.entries.map(entry => (
-                                    <tr key={entry.id}>
-                                        <td>{new Date(entry.valueDate).toLocaleDateString('de-CH',
-                                            { day: '2-digit', month: '2-digit', year: 'numeric' })}</td>
-                                        <td className={entry.amountType === 1 ? 'fw-bold' : ''}>{(entry.amountType === 1 ? 'Budget ' : '') + entry.description}</td>
-                                        <td><Link to={`/account/${entry.otherAccountId}`}> {entry.otherAccount}</Link></td>
-                                        <td className="text-end">{entry.amountType !== 3 ? entry.amount.toFixed(2) : ''}</td>
-                                        <td className="text-end">{entry.amountType === 3 ? entry.amount.toFixed(2) : ''}</td>
+                <Fragment>
+                    <Row>
+                        <Col lg={6} sm={12}>
+                            <h1>Konto {account.name} ({account.type})</h1>
+                            <div className="lead">
+                                <em>Kontostand: </em>{account.accountBalance.toFixed(2)}&nbsp;
+                                {account.typeId === 3 || account.typeId === 4 ? (
+                                    <Fragment>
+                                        <em>Budget: </em>{account.budget.toFixed(2)}&nbsp;
+                                        <em>Vergleich: </em>{account.budgetBalance.toFixed(2)}&nbsp;
+                                    </Fragment>
+                                ) : null}
+                            </div>
+                            <Table variant="dark">
+                                <thead>
+                                    <tr>
+                                        <th>Datum</th>
+                                        <th>Text</th>
+                                        <th>Konto</th>
+                                        <th className="text-end">Soll</th>
+                                        <th className="text-end">Haben</th>
                                     </tr>
-                                ))}
-
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
+                                </thead>
+                                <tbody>
+                                    {account.entries.map(entry => (
+                                        <tr key={entry.id}>
+                                            <td>{new Date(entry.valueDate).toLocaleDateString('de-CH', { day: '2-digit', month: '2-digit', year: 'numeric' })}</td>
+                                            <td className={entry.amountType === 1 ? 'fw-bold' : ''}>{(entry.amountType === 1 ? 'Budget ' : '') + entry.description}</td>
+                                            <td><Link to={`/account/${entry.otherAccountId}`}>{entry.otherAccount}</Link></td>
+                                            <td className="text-end">{entry.amountType !== 3 ? entry.amount.toFixed(2) : ''}</td>
+                                            <td className="text-end">{entry.amountType === 3 ? entry.amount.toFixed(2) : ''}</td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </Table>
+                        </Col>
+                    </Row>
+                </Fragment>
             )}
-        </div>
+        </Container>
     );
 }
-
-
 
 export default Account;
