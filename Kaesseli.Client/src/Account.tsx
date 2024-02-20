@@ -63,7 +63,7 @@ function Account() {
                                     </Fragment>
                                 ) : null}
                             </div>
-                            <Table variant="dark">
+                            <Table >
                                 <thead>
                                     <tr>
                                         <th>Datum</th>

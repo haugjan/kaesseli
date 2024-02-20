@@ -1,25 +1,28 @@
-import { Link } from 'react-router-dom';
+import React from 'react';
+import { LinkContainer } from 'react-router-bootstrap';
+import { Nav, Navbar, Container } from 'react-bootstrap';
 
-// ReSharper disable once InconsistentNaming
 function Navigation() {
-
-    return <nav className="navbar navbar-expand-sm bg-light">
-               <Link className="navbar-brand" to="/">Kässeli</Link>
-               <button className="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
-                   <span className="navbar-toggler-icon"></span>
-               </button>
-               <div className="collapse navbar-collapse" id="navbarNav">
-                   <ul className="navbar-nav">
-                       <li className="nav-item">
-                           <Link className="nav-link" to="/">Startseite</Link>
-                       </li>
-                       <li className="nav-item">
-                           <Link className="nav-link" to="/accounts">Konten</Link>
-                       </li>
-                   </ul>
-               </div>
-           </nav>;
-
+    return (
+        <Navbar bg="light" expand="sm">
+            <Container>
+                <LinkContainer to="/">
+                    <Navbar.Brand>Kässeli</Navbar.Brand>
+                </LinkContainer>
+                <Navbar.Toggle aria-controls="basic-navbar-nav" />
+                <Navbar.Collapse id="basic-navbar-nav">
+                    <Nav className="me-auto">
+                        <LinkContainer to="/">
+                            <Nav.Link>Startseite</Nav.Link>
+                        </LinkContainer>
+                        <LinkContainer to="/accounts">
+                            <Nav.Link>Konten</Nav.Link>
+                        </LinkContainer>
+                    </Nav>
+                </Navbar.Collapse>
+            </Container>
+        </Navbar>
+    );
 }
 
 export default Navigation;

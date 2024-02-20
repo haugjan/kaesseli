@@ -4,12 +4,11 @@ import AccountSummary from './AccountSummary';
 import Account from './Account';
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 
-
 // ReSharper disable once InconsistentNaming
 function App() {
     return (
         <Router>
-            <Navigation />
+            <Navigation  />
             <Routes>
                 <Route path="/" element={<div>Startseite</div>} />
                 <Route path="/accounts" element={<AccountSummary />} />
