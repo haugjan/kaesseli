@@ -1,6 +1,6 @@
 import { useState, useEffect, Fragment } from 'react';
-import { useParams, useNavigate, Link } from 'react-router-dom';
-import { Container, Button, Row, Col, Table } from 'react-bootstrap';
+import { useParams, Link } from 'react-router-dom';
+import { Container, Row, Col, Table } from 'react-bootstrap';
 import 'bootstrap/dist/css/bootstrap.min.css';
 
 interface IAccountDetail {
@@ -12,16 +12,6 @@ interface IAccountDetail {
     budget: number;
     budgetBalance: number;
     entries: IJournalEntry[];
-}
-
-interface IJournalEntry {
-    id: string;
-    valueDate: string;
-    amountType: number;
-    otherAccount: string;
-    otherAccountId: string;
-    amount: number;
-    description: string;
 }
 
 // ReSharper disable once InconsistentNaming

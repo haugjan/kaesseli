@@ -25,6 +25,8 @@ public class AddJournalEntryCommandHandlerTests
                         It.Is<BudgetEntry>(a => a.Amount == command.Amount && a.Description == command.Description),
                         cancellationToken))
                 .ReturnsAsync((BudgetEntry newBudgetEntry, CancellationToken _) => newBudgetEntry);
+        accountRepo.Setup(repo => repo.GetAccount(It.IsAny<Guid>(), cancellationToken))
+                   .ReturnsAsync(() => new Account { Id = Guid.NewGuid(), Name = "Account", Type = AccountType.Expense });
 
         var handler = new AddBudgetEntryCommandHandler(mockRepo.Object, accountRepo.Object, dateTimeService.Object);
 
@@ -49,7 +51,8 @@ public class AddJournalEntryCommandHandlerTests
         var mockRepo = new Mock<IBudgetRepository>();
         var accountRepo = new Mock<IAccountRepository>();
         var dateTimeService = new Mock<IDateTimeService>();
-        var command = new SmartFaker<AddBudgetEntryCommand>().RuleFor(c => c.ValueDate, _ => null).Generate();
+        var command = new SmartFaker<AddBudgetEntryCommand>()
+                      .RuleFor(c => c.ValueDate, _ => null).Generate();
         var cancellationToken = new CancellationToken();
         var currentDay = new DateOnly(year: 1982, month: 11, day: 3);
 
@@ -59,6 +62,8 @@ public class AddJournalEntryCommandHandlerTests
                         cancellationToken))
                 .ReturnsAsync((BudgetEntry newBudgetEntry, CancellationToken _) => newBudgetEntry);
         dateTimeService.Setup(dts => dts.ToDay).Returns(currentDay);
+        accountRepo.Setup(repo => repo.GetAccount(It.IsAny<Guid>(), cancellationToken))
+                   .ReturnsAsync(() => new Account { Id = Guid.NewGuid(), Name = "Account", Type = AccountType.Expense });
         var handler = new AddBudgetEntryCommandHandler(mockRepo.Object, accountRepo.Object, dateTimeService.Object);
 
         // Act

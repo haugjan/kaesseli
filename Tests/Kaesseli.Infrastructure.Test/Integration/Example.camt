@@ -1,0 +1,236 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Document xmlns="urn:iso:std:iso:20022:tech:xsd:camt.053.001.04"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="urn:iso:std:iso:20022:tech:xsd:camt.053.001.04 camt.053.001.04.xsd">
+	<BkToCstmrStmt>
+		<GrpHdr>
+			<MsgId>MSG20240201014110</MsgId>
+			<CreDtTm>2024-02-01T01:41:10</CreDtTm>
+			<MsgPgntn>
+				<PgNb>1</PgNb>
+				<LastPgInd>true</LastPgInd>
+			</MsgPgntn>
+			<AddtlInf>System Info</AddtlInf>
+		</GrpHdr>
+		<Stmt>
+			<Id>STMT20240201014110</Id>
+			<ElctrncSeqNb>21</ElctrncSeqNb>
+			<CreDtTm>2024-02-01T01:41:10</CreDtTm>
+			<FrToDt>
+				<FrDtTm>2024-01-22T00:00:00</FrDtTm>
+				<ToDtTm>2024-01-31T23:59:59</ToDtTm>
+			</FrToDt>
+			<Acct>
+				<Id>
+					<IBAN>CH9300000000000000000</IBAN>
+				</Id>
+				<Ownr>
+					<Nm>John Doe Musterstadt</Nm>
+				</Ownr>
+			</Acct>
+			<Bal>
+				<Tp>
+					<CdOrPrtry>
+						<Cd>OPBD</Cd>
+					</CdOrPrtry>
+				</Tp>
+				<Amt Ccy="CHF">11708.31</Amt>
+				<CdtDbtInd>CRDT</CdtDbtInd>
+				<Dt>
+					<Dt>2024-01-22</Dt>
+				</Dt>
+			</Bal>
+			<Bal>
+				<Tp>
+					<CdOrPrtry>
+						<Cd>CLBD</Cd>
+					</CdOrPrtry>
+				</Tp>
+				<Amt Ccy="CHF">19513.79</Amt>
+				<CdtDbtInd>CRDT</CdtDbtInd>
+				<Dt>
+					<Dt>2024-01-31</Dt>
+				</Dt>
+			</Bal>
+			<Ntry>
+				<Amt Ccy="CHF">29.95</Amt>
+				<CdtDbtInd>DBIT</CdtDbtInd>
+				<RvslInd>false</RvslInd>
+				<Sts>BOOK</Sts>
+				<BookgDt>
+					<Dt>2024-01-24</Dt>
+				</BookgDt>
+				<ValDt>
+					<Dt>2024-01-25</Dt>
+				</ValDt>
+				<AcctSvcrRef>REF00000000000001</AcctSvcrRef>
+				<BkTxCd>
+					<Domn>
+						<Cd>PMNT</Cd>
+						<Fmly>
+							<Cd>ICDT</Cd>
+							<SubFmlyCd>BOOK</SubFmlyCd>
+						</Fmly>
+					</Domn>
+				</BkTxCd>
+				<NtryDtls>
+					<TxDtls>
+						<Refs>
+							<MsgId>MSG00000000000001</MsgId>
+							<AcctSvcrRef>ACCTREF0000000001</AcctSvcrRef>
+							<PmtInfId>PMTINF0000000001</PmtInfId>
+							<InstrId>INSTRID0000000001</InstrId>
+							<EndToEndId>NOTPROVIDED</EndToEndId>
+						</Refs>
+						<Amt Ccy="CHF">29.95</Amt>
+						<CdtDbtInd>DBIT</CdtDbtInd>
+						<BkTxCd>
+							<Domn>
+								<Cd>PMNT</Cd>
+								<Fmly>
+									<Cd>ICDT</Cd>
+									<SubFmlyCd>BOOK</SubFmlyCd>
+								</Fmly>
+							</Domn>
+						</BkTxCd>
+						<RltdPties>
+							<Cdtr>
+								<Nm>Fictional Company</Nm>
+								<PstlAdr>
+									<StrtNm>Main Street 123</StrtNm>
+									<PstCd>9999</PstCd>
+									<TwnNm>Sample Town</TwnNm>
+									<Ctry>CH</Ctry>
+								</PstlAdr>
+							</Cdtr>
+							<CdtrAcct>
+								<Id>
+									<IBAN>CH4400000000000000000</IBAN>
+								</Id>
+							</CdtrAcct>
+						</RltdPties>
+						<RltdAgts>
+							<CdtrAgt>
+								<FinInstnId>
+									<ClrSysMmbId>
+										<MmbId>00000</MmbId>
+									</ClrSysMmbId>
+									<Nm>Fictional Bank AG</Nm>
+									<PstlAdr>
+										<Ctry>CH</Ctry>
+										<AdrLine>Bank Street 1, 9999 Sample City</AdrLine>
+									</PstlAdr>
+								</FinInstnId>
+							</CdtrAgt>
+						</RltdAgts>
+						<RmtInf>
+							<Strd>
+								<CdtrRefInf>
+									<Tp>
+										<CdOrPrtry>
+											<Prtry>SCOR</Prtry>
+										</CdOrPrtry>
+									</Tp>
+									<Ref>REFERENCE00000001</Ref>
+								</CdtrRefInf>
+							</Strd>
+						</RmtInf>
+					</TxDtls>
+				</NtryDtls>
+				<AddtlNtryInf>Sample transaction details</AddtlNtryInf>
+			</Ntry>
+			<Ntry>
+				<NtryRef>REF00000000000002</NtryRef>
+				<Amt Ccy="CHF">13656.85</Amt>
+				<CdtDbtInd>CRDT</CdtDbtInd>
+				<RvslInd>false</RvslInd>
+				<Sts>BOOK</Sts>
+				<BookgDt>
+					<Dt>2024-01-26</Dt>
+				</BookgDt>
+				<ValDt>
+					<Dt>2024-01-27</Dt>
+				</ValDt>
+				<AcctSvcrRef>REF00000000000002</AcctSvcrRef>
+				<BkTxCd>
+					<Domn>
+						<Cd>PMNT</Cd>
+						<Fmly>
+							<Cd>RCDT</Cd>
+							<SubFmlyCd>AUTT</SubFmlyCd>
+						</Fmly>
+					</Domn>
+				</BkTxCd>
+				<NtryDtls>
+					<Btch>
+						<NbOfTxs>1</NbOfTxs>
+					</Btch>
+					<TxDtls>
+						<Refs>
+							<MsgId>MSG00000000000002</MsgId>
+							<AcctSvcrRef>ACCTREF0000000002</AcctSvcrRef>
+							<PmtInfId>PMTINF0000000002</PmtInfId>
+							<InstrId>INSTRID0000000002</InstrId>
+							<EndToEndId>ENDTOENDID00000002</EndToEndId>
+						</Refs>
+						<Amt Ccy="CHF">13656.85</Amt>
+						<CdtDbtInd>CRDT</CdtDbtInd>
+						<BkTxCd>
+							<Domn>
+								<Cd>PMNT</Cd>
+								<Fmly>
+									<Cd>RCDT</Cd>
+									<SubFmlyCd>AUTT</SubFmlyCd>
+								</Fmly>
+							</Domn>
+						</BkTxCd>
+						<RltdPties>
+							<Dbtr>
+								<Nm>Another Fictional Company</Nm>
+								<PstlAdr>
+									<StrtNm>Another Street 456</StrtNm>
+									<BldgNb>8</BldgNb>
+									<PstCd>8888</PstCd>
+									<TwnNm>Another Town</TwnNm>
+									<Ctry>CH</Ctry>
+								</PstlAdr>
+							</Dbtr>
+							<DbtrAcct>
+								<Id>
+									<IBAN>CH3300000000000000000</IBAN>
+								</Id>
+							</DbtrAcct>
+							<CdtrAcct>
+								<Id>
+									<IBAN>CH9300000000000000000</IBAN>
+								</Id>
+							</CdtrAcct>
+						</RltdPties>
+						<RltdAgts>
+							<DbtrAgt>
+								<FinInstnId>
+									<BICFI>FICTCHZZXXX</BICFI>
+									<Nm>Another Fictional Bank AG</Nm>
+									<PstlAdr>
+										<AdrLine>Another Bank Street 2, 8888 Another City</AdrLine>
+									</PstlAdr>
+								</FinInstnId>
+							</DbtrAgt>
+						</RltdAgts>
+						<Purp>
+							<Cd>SALA</Cd>
+						</Purp>
+						<RmtInf>
+							<Strd>
+								<AddtlRmtInf>Salary for January</AddtlRmtInf>
+							</Strd>
+						</RmtInf>
+						<RltdDts>
+							<AccptncDtTm>2024-01-25T20:00:00</AccptncDtTm>
+						</RltdDts>
+					</TxDtls>
+				</NtryDtls>
+				<AddtlNtryInf>Credit transaction details</AddtlNtryInf>
+			</Ntry>
+		</Stmt>
+	</BkToCstmrStmt>
+</Document>

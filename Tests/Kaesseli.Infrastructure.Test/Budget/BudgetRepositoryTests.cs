@@ -1,4 +1,6 @@
-﻿using FluentAssertions;
+﻿using Bogus;
+using Bogus.DataSets;
+using FluentAssertions;
 using Kaesseli.Domain.Accounts;
 using Kaesseli.Domain.Budget;
 using Kaesseli.Infrastructure.Budget;
@@ -22,15 +24,11 @@ public class BudgetRepositoryTests
                       .UseInMemoryDatabase(databaseName: "GetBudgetEntriesDb")
                       .Options;
 
-        var budgetEntry = new SmartFaker<BudgetEntry>()
-                          .RuleFor(
-                              be => be.ValueDate,
-                              faker => new DateOnly(year: 2000 + faker.IndexFaker, month: 01, day: 01))
-                          .Generate(count: 2);
+        var budgetEntries = CreateBudgetEntries();
 
         await using var setupContext = CreateContext(options);
-        setupContext.BudgetEntries.Add(entity: budgetEntry.First());
-        setupContext.BudgetEntries.Add(entity: budgetEntry.Last());
+        setupContext.BudgetEntries.Add(entity: budgetEntries.First());
+        setupContext.BudgetEntries.Add(entity: budgetEntries.Last());
         await setupContext.SaveChangesAsync();
 
         var repository = new BudgetRepository(setupContext);
@@ -51,6 +49,37 @@ public class BudgetRepositoryTests
                .BeTrue();
     }
 
+    private static List<BudgetEntry> CreateBudgetEntries() =>
+        new()
+        {
+            new ()
+            {
+                Id = Guid.NewGuid(),
+                ValueDate = new DateOnly(year: 2000, month: 01, day: 01),
+                Description = "Description 1",
+                Amount = 42.42m,
+                Account = new Account
+                {
+                    Id = Guid.NewGuid(),
+                    Name = "Account 1",
+                    Type = AccountType.Revenue
+                }
+            },
+            new()
+            {
+                Id = Guid.NewGuid(),
+                ValueDate = new DateOnly(year: 2001, month: 01, day: 01),
+                Description = "Description 2",
+                Amount = 24.24m,
+                Account = new Account
+                {
+                    Id = Guid.NewGuid(),
+                    Name = "Account 2",
+                    Type = AccountType.Expense
+                }
+            }
+        };
+
     [Fact]
     public async Task AddBudgetEntry_ShouldAddEntry()
     {
@@ -62,7 +91,7 @@ public class BudgetRepositoryTests
         var newEntry = new BudgetEntry
         {
             Id = Guid.NewGuid(),
-            Account = new Account { Id = Guid.NewGuid(), Name = "Account", Type = AccountType.Asset },
+            Account = new Account { Id = Guid.NewGuid(), Name = "Account", Type = AccountType.Expense },
             ValueDate = DateOnly.FromDateTime(DateTime.Now),
             Description = "Description",
             Amount = 11.11m

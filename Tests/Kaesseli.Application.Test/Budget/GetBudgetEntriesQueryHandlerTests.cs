@@ -1,7 +1,7 @@
 ﻿using FluentAssertions;
 using Kaesseli.Application.Budget;
+using Kaesseli.Domain.Accounts;
 using Kaesseli.Domain.Budget;
-using Kaesseli.TestUtilities.Faker;
 using Moq;
 using Xunit;
 
@@ -18,8 +18,8 @@ public class GetBudgetEntriesQueryHandlerTests
         var fromDate = new DateOnly(year: 2020, month: 01, day: 01);
         var toDate = fromDate.AddDays(value: 30);
 
-        var faker = new SmartFaker<BudgetEntry>();
-        var entriesList = faker.Generate(count: 5);
+        var entriesList = CreateBudgetEntries();
+
         mockRepository.Setup(
                           repo => repo.GetBudgetEntries(
                               It.Is<GetBudgetEntriesRequest>(
@@ -54,4 +54,25 @@ public class GetBudgetEntriesQueryHandlerTests
                 It.IsAny<CancellationToken>()),
             Times.Once);
     }
+
+    private static List<BudgetEntry> CreateBudgetEntries() =>
+        new()
+        {
+            new()
+            {
+                Id = Guid.NewGuid(),
+                ValueDate = new DateOnly(year: 2000, month: 12, day: 13),
+                Description = "Description 1",
+                Amount = 42.42m,
+                Account = new Account { Id = Guid.NewGuid(), Name = "Account 1", Type = AccountType.Expense }
+            },
+            new()
+            {
+                Id = Guid.NewGuid(),
+                ValueDate = new DateOnly(year: 1982, month: 11, day: 3),
+                Description = "Description 2",
+                Amount = 24.24m,
+                Account = new Account { Id = Guid.NewGuid(), Name = "Account 2", Type = AccountType.Revenue }
+            }
+        };
 }

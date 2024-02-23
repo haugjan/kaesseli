@@ -10,25 +10,9 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <None Remove="Integration\Example.camt" />
-    <None Remove="Integration\RawText1.yaml" />
-    <None Remove="Integration\RawText2.yaml" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <EmbeddedResource Include="Integration\Example.camt">
-      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Integration\RawText1.yaml" />
-    <EmbeddedResource Include="Integration\RawText2.yaml" />
-  </ItemGroup>
-
-  <ItemGroup>
+    <PackageReference Include="Bogus" Version="35.4.0" />
     <PackageReference Include="FluentAssertions" Version="6.12.0" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="8.0.1" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.InMemory" Version="8.0.1" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.6.0" />
-    <PackageReference Include="Moq" Version="4.20.70" />
     <PackageReference Include="xunit" Version="2.4.2" />
     <PackageReference Include="xunit.runner.visualstudio" Version="2.4.5">
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
@@ -41,8 +25,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\..\Tests\Kaesseli\Kaesseli.TestUtilities\Kaesseli.TestUtilities.csproj" />
-    <ProjectReference Include="..\..\Kaesseli.Infrastructure\Kaesseli.Infrastructure.csproj" />
+    <ProjectReference Include="..\Kaesseli.Utility\Kaesseli.Utility.csproj" />
   </ItemGroup>
 
 </Project>

@@ -25,9 +25,9 @@ public class Account
         var balance = Type switch
         {
             AccountType.Asset => debits - credits,
-            AccountType.Expense => debits - credits,
             AccountType.Liability => credits - debits,
-            AccountType.Revenue => credits - debits,
+            AccountType.Revenue => debits - credits,
+            AccountType.Expense => credits - debits,
             // ReSharper disable StringLiteralTypo
             _ => throw new InvalidOperationException(message: "Unbekannter Kontotyp")
             // ReSharper restore StringLiteralTypo
@@ -41,4 +41,7 @@ public class Account
 
     private decimal GetDebits(IEnumerable<JournalEntry> entries) =>
         entries.Where(entry => entry.DebitAccount.Id == Id).Sum(entry => entry.Amount);
+
+    public override string ToString() =>
+        $"{Name} ({Type.DisplayName()})";
 }

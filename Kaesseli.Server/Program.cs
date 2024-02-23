@@ -20,7 +20,7 @@ builder.Services.AddCors(
                   .AllowAnyMethod());
     });
 
-builder.Services.AddBudgetRepositories(builder.Configuration);
+builder.Services.AddInfrastructureServices(builder.Configuration);
 builder.Services.AddApplicationServices();
 var app = builder.Build();
 

@@ -1,9 +1,11 @@
-﻿using Kaesseli.Domain.Accounts;
+﻿using Kaesseli.Application.Integration;
+using Kaesseli.Domain.Accounts;
 using Kaesseli.Domain.Budget;
 using Kaesseli.Domain.Journal;
 using Kaesseli.Infrastructure.Accounts;
 using Kaesseli.Infrastructure.Budget;
 using Kaesseli.Infrastructure.Common;
+using Kaesseli.Infrastructure.Integration;
 using Kaesseli.Infrastructure.Journal;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -11,13 +13,14 @@ using Microsoft.Extensions.Configuration;
 // ReSharper disable once CheckNamespace
 namespace Microsoft.Extensions.DependencyInjection;
 
-public static class DomainServiceCollectionExtensions
+public static class InfrastructureServiceCollectionExtensions
 {
     // ReSharper disable once UnusedMethodReturnValue.Global
-    public static IServiceCollection AddBudgetRepositories(this IServiceCollection services, IConfiguration configuration) =>
+    public static IServiceCollection AddInfrastructureServices(this IServiceCollection services, IConfiguration configuration) =>
         services.AddScoped<IBudgetRepository, BudgetRepository>()
             .AddScoped<IJournalRepository, JournalRepository>()
             .AddScoped<IAccountRepository, AccountRepository>()
+            .AddScoped<ICamtProcessor, CamtProcessor>()
             .AddDbContext<KaesseliContext>(options =>
                                              options.UseSqlite(connectionString: configuration.GetConnectionString(name: "BudgetDatabase")));
 

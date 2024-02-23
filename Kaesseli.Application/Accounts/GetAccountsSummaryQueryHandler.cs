@@ -35,7 +35,7 @@ public class GetAccountsSummaryQueryHandler(
     {
         var accountBalance = account.GetAccountBalance(journalEntries);
         var budget = account.GetBudget(budgetEntries);
-        var budgetBalance = budget - accountBalance;
+        var budgetBalance = budget + accountBalance;
 
         return new GetAccountsSummaryQueryResult
         {

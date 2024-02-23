@@ -8,12 +8,9 @@ public class JournalEntry
     private readonly Account _debitAccount;
     private readonly Account _creditAccount;
     public required Guid Id { get; init; }
-
     public required DateOnly ValueDate { get; init; }
-
     public required string Description { get; init; }
     public required decimal Amount { get; init; }
-
     public required Account DebitAccount
     {
         get => _debitAccount;
@@ -44,4 +41,7 @@ public class JournalEntry
 
         throw new AccountsMustNotBeSameException();
     }
+
+    public override string ToString() =>
+        $"{DebitAccount.Name} - {CreditAccount.Name}: {Amount:C}";
 }

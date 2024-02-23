@@ -1,7 +1,7 @@
 //import React from 'react';
 import Navigation from './Navigation';
 import AccountSummary from './AccountSummary';
-import Account from './Account';
+import Account from "./IAccountDetail";
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 
 // ReSharper disable once InconsistentNaming

@@ -69,6 +69,7 @@ public class JournalApiExtensionsTests
         _mediatorMock.Verify(m => m.Send(It.IsAny<AddJournalEntryCommand>(), default), Times.Once);
     }
 
+   
     [Fact]
     public async Task GetJournalEntriesEndpoint_ShouldReturnJournalEntries()
     {

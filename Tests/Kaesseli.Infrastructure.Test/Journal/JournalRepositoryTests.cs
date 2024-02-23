@@ -87,4 +87,31 @@ public class JournalRepositoryTests
                                             .SingleAsync();
         addedEntry.Should().BeEquivalentTo(newEntry);
     }
+
+    [Fact]
+    public async Task AddPreJournalEntry_ShouldAddEntry()
+    {
+        // Arrange
+        var options = new DbContextOptionsBuilder<KaesseliContext>()
+                      .UseInMemoryDatabase(databaseName: "AddPreJournalEntryDb")
+                      .Options;
+
+        var newEntry = new SmartFaker<PreJournalEntry>().Generate();
+
+        await using var context = CreateContext(options);
+        var repository = new JournalRepository(context);
+
+        // Act
+        var result = await repository.AddPreJournalEntry(newEntry, CancellationToken.None);
+
+        // Assert
+        result.Should().BeEquivalentTo(newEntry);
+
+        await using var assertContext = CreateContext(options);
+        var addedEntry = await assertContext.PreJournalEntries
+                                            .Include(be => be.Account)
+                                            .Where(be => be.Id == newEntry.Id)
+                                            .SingleAsync();
+        addedEntry.Should().BeEquivalentTo(newEntry);
+    }
 }

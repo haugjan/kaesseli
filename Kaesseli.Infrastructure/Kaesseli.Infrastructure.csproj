@@ -14,7 +14,9 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\Kaesseli.Application\Kaesseli.Application.csproj" />
     <ProjectReference Include="..\Kaesseli.Domain\Kaesseli.Domain.csproj" />
+    <ProjectReference Include="..\Kaesseli.Utility\Kaesseli.Utility.csproj" />
   </ItemGroup>
 
 	<ItemGroup>

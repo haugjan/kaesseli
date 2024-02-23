@@ -18,6 +18,7 @@ public class KaesseliContext : DbContext
     }
 
     public virtual DbSet<JournalEntry> JournalEntries { get; init; } = null!;
+    public virtual DbSet<PreJournalEntry> PreJournalEntries { get; init; } = null!;
     public virtual DbSet<BudgetEntry> BudgetEntries { get; init; } = null!;
     public virtual DbSet<Account> Accounts { get; init; } = null!;
 
@@ -41,6 +42,15 @@ public class KaesseliContext : DbContext
                       .IsRequired()
                       .OnDelete(DeleteBehavior.Restrict);
 
+            });
+        modelBuilder.Entity<PreJournalEntry>(
+            entity =>
+            {
+                entity.HasOne(je => je.Account)
+                      .WithMany()
+                      .HasForeignKey("AccountId")
+                      .IsRequired()
+                      .OnDelete(DeleteBehavior.Restrict);
             });
     }
 }

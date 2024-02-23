@@ -4,7 +4,7 @@ using MediatR;
 
 namespace Kaesseli.Server.Journal;
 
-public static class JournalApiExtensions
+public static class IntegrationApiExtensions
 {
     // ReSharper disable once UnusedMethodReturnValue.Global
     public static IEndpointRouteBuilder MapJournalEndpoints(this IEndpointRouteBuilder app) =>
