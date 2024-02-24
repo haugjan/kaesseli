@@ -92,13 +92,12 @@ public class GetAccountsSummaryQueryHandlerTests
         var summaryToTest = result[1];
         summaryToTest.Id.Should().Be(accountToTest.Id);
         summaryToTest.AccountBalance.Should().Be(accountBalance);
-        summaryToTest.Budget.Should().Be(0);
-        summaryToTest.BudgetBalance.Should().Be(expected: accountBalance);
+        summaryToTest.Budget.Should().Be(expected: 0);
+        summaryToTest.BudgetBalance.Should().Be(accountBalance);
         summaryToTest.Name.Should().Be(accountToTest.Name);
         summaryToTest.Type.Should().Be(expected: accountToTest.Type.DisplayName());
         summaryToTest.TypeId.Should().Be(accountToTest.Type);
     }
-
 
     private static IEnumerable<BudgetEntry> CreateTestBudgetEntries(Account accountToTest) =>
     [

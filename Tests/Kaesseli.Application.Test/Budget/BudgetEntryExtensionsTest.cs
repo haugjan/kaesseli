@@ -7,7 +7,6 @@ namespace Kaesseli.Application.Test.Budget;
 
 public class BudgetEntryExtensionsTest
 {
-
     [Fact]
     public void ToGetBudgetEntriesQueryResult_ReturnsCorrectQueryResult()
     {
@@ -15,7 +14,7 @@ public class BudgetEntryExtensionsTest
         var budgetEntry = new BudgetEntry
         {
             Id = Guid.NewGuid(),
-            ValueDate = new DateOnly(1982, 11, 3),
+            ValueDate = new DateOnly(year: 1982, month: 11, day: 3),
             Description = "Description",
             Amount = 42,
             Account = new Account { Id = Guid.NewGuid(), Name = "Name", Type = AccountType.Expense }
@@ -25,9 +24,7 @@ public class BudgetEntryExtensionsTest
         var queryResult = budgetEntry.ToGetBudgetEntriesQueryResult();
 
         //Assert
-        queryResult.Should().BeEquivalentTo(budgetEntry, options => options.Excluding(be=> be.Account));
+        queryResult.Should().BeEquivalentTo(budgetEntry, options => options.Excluding(be => be.Account));
         queryResult.AccountId.Should().Be(budgetEntry.Account.Id);
-
-
     }
 }

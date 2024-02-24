@@ -1,11 +1,8 @@
-﻿using Bogus;
-using Bogus.DataSets;
-using FluentAssertions;
+﻿using FluentAssertions;
 using Kaesseli.Domain.Accounts;
 using Kaesseli.Domain.Budget;
 using Kaesseli.Infrastructure.Budget;
 using Kaesseli.Infrastructure.Common;
-using Kaesseli.TestUtilities.Faker;
 using Microsoft.EntityFrameworkCore;
 using Xunit;
 
@@ -50,35 +47,25 @@ public class BudgetRepositoryTests
     }
 
     private static List<BudgetEntry> CreateBudgetEntries() =>
+    [
         new()
         {
-            new ()
-            {
-                Id = Guid.NewGuid(),
-                ValueDate = new DateOnly(year: 2000, month: 01, day: 01),
-                Description = "Description 1",
-                Amount = 42.42m,
-                Account = new Account
-                {
-                    Id = Guid.NewGuid(),
-                    Name = "Account 1",
-                    Type = AccountType.Revenue
-                }
-            },
-            new()
-            {
-                Id = Guid.NewGuid(),
-                ValueDate = new DateOnly(year: 2001, month: 01, day: 01),
-                Description = "Description 2",
-                Amount = 24.24m,
-                Account = new Account
-                {
-                    Id = Guid.NewGuid(),
-                    Name = "Account 2",
-                    Type = AccountType.Expense
-                }
-            }
-        };
+            Id = Guid.NewGuid(),
+            ValueDate = new DateOnly(year: 2000, month: 01, day: 01),
+            Description = "Description 1",
+            Amount = 42.42m,
+            Account = new Account { Id = Guid.NewGuid(), Name = "Account 1", Type = AccountType.Revenue }
+        },
+
+        new()
+        {
+            Id = Guid.NewGuid(),
+            ValueDate = new DateOnly(year: 2001, month: 01, day: 01),
+            Description = "Description 2",
+            Amount = 24.24m,
+            Account = new Account { Id = Guid.NewGuid(), Name = "Account 2", Type = AccountType.Expense }
+        }
+    ];
 
     [Fact]
     public async Task AddBudgetEntry_ShouldAddEntry()

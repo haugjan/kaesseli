@@ -1,6 +1,4 @@
 ﻿using Kaesseli.Application.Integration;
-using Kaesseli.Application.Journal;
-using Kaesseli.Domain.Accounts;
 using MediatR;
 
 namespace Kaesseli.Server.Integration;
@@ -18,7 +16,7 @@ public static class IntegrationApiExtensions
             async (IMediator mediator, ProcessCamtFileCommand command) =>
             {
                 var guid = await mediator.Send(command);
-                return Results.Created($"/camt/{guid}", guid);
+                return Results.Created(uri: $"/camt/{guid}", guid);
             });
         return app;
     }

@@ -1,5 +1,4 @@
 ﻿using Kaesseli.Application.Accounts;
-using Kaesseli.Domain.Accounts;
 
 // ReSharper disable once CheckNamespace
 namespace Kaesseli.Domain.Accounts;

@@ -56,23 +56,23 @@ public class GetBudgetEntriesQueryHandlerTests
     }
 
     private static List<BudgetEntry> CreateBudgetEntries() =>
+    [
         new()
         {
-            new()
-            {
-                Id = Guid.NewGuid(),
-                ValueDate = new DateOnly(year: 2000, month: 12, day: 13),
-                Description = "Description 1",
-                Amount = 42.42m,
-                Account = new Account { Id = Guid.NewGuid(), Name = "Account 1", Type = AccountType.Expense }
-            },
-            new()
-            {
-                Id = Guid.NewGuid(),
-                ValueDate = new DateOnly(year: 1982, month: 11, day: 3),
-                Description = "Description 2",
-                Amount = 24.24m,
-                Account = new Account { Id = Guid.NewGuid(), Name = "Account 2", Type = AccountType.Revenue }
-            }
-        };
+            Id = Guid.NewGuid(),
+            ValueDate = new DateOnly(year: 2000, month: 12, day: 13),
+            Description = "Description 1",
+            Amount = 42.42m,
+            Account = new Account { Id = Guid.NewGuid(), Name = "Account 1", Type = AccountType.Expense }
+        },
+
+        new()
+        {
+            Id = Guid.NewGuid(),
+            ValueDate = new DateOnly(year: 1982, month: 11, day: 3),
+            Description = "Description 2",
+            Amount = 24.24m,
+            Account = new Account { Id = Guid.NewGuid(), Name = "Account 2", Type = AccountType.Revenue }
+        }
+    ];
 }

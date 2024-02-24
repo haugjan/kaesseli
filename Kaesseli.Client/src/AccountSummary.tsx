@@ -4,13 +4,14 @@ import IncomeStatementAccount from './IncomeStatementAccount';
 import { IAccountSummary } from "./IAccountSummary";
 import { Container, Row, Col } from 'react-bootstrap';
 
-function AccountSummary() {
+function accountSummary() {
     const [accounts, setAccounts] = useState<IAccountSummary[]>([]);
     const [error, setError] = useState(null);
 
     useEffect(() => {
         const apiUrl = 'https://localhost:7123/accountSummary';
 
+// ReSharper disable once TsResolvedFromInaccessibleModule
         fetch(apiUrl)
             .then(response => {
                 if (!response.ok) {
@@ -51,4 +52,4 @@ function AccountSummary() {
     );
 }
 
-export default AccountSummary;
+export default accountSummary;

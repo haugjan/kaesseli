@@ -1,7 +1,8 @@
 import { LinkContainer } from 'react-router-bootstrap';
+
 import { Nav, Navbar, Container } from 'react-bootstrap';
 
-function Navigation() {
+function navigation() {
     return (
         <Navbar bg="light" expand="sm">
             <Container>
@@ -24,4 +25,4 @@ function Navigation() {
     );
 }
 
-export default Navigation;
+export default navigation;

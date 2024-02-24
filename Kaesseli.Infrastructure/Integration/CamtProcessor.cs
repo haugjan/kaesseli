@@ -6,11 +6,11 @@ namespace Kaesseli.Infrastructure.Integration;
 internal class CamtProcessor : ICamtProcessor
 {
 
-    public Task<CamtDocument> ReadCamtFile(string content, Guid accountId, CancellationToken cancellationToken)
+    public async Task<CamtDocument> ReadCamtFile(string content, CancellationToken cancellationToken)
     {
         var serializer = new XmlSerializer(type: typeof(Document));
         using var reader = new StringReader(content);
-        var document = (Document)serializer.Deserialize(reader)!;
+        var document = await Task.Run(()=> (Document)serializer.Deserialize(reader)!, cancellationToken);
         if (document is null) throw new FormatException(message: "Could not deserialize CAMT053");
 
         ThrowExceptionIfFailures(document);
@@ -27,7 +27,7 @@ internal class CamtProcessor : ICamtProcessor
             Reference = document.BkToCstmrStmt.GrpHdr.MsgId
         };
 
-        return Task.FromResult(camtDocument);
+        return camtDocument;
     }
 
     private static IEnumerable<CamtEntry> CreateCamtEntries( AccountStatement4 accountStatement) =>

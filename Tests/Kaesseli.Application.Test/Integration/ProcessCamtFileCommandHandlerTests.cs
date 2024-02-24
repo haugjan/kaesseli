@@ -1,4 +1,5 @@
-﻿using Kaesseli.Application.Integration;
+﻿using FluentAssertions;
+using Kaesseli.Application.Integration;
 using Kaesseli.Domain.Accounts;
 using Kaesseli.Domain.Journal;
 using Kaesseli.TestUtilities.Faker;
@@ -30,19 +31,20 @@ public class ProcessCamtFileCommandHandlerTests
                         .ReturnsAsync(
                             (Guid accountId, CancellationToken _) =>
                                 new Account { Id = accountId, Name = "Account", Type = AccountType.Expense });
-        _camtProcessorMock.Setup(x => x.ReadCamtFile(fakeCommand.Content, fakeCommand.AccountId, It.IsAny<CancellationToken>()))
+        _camtProcessorMock.Setup(x => x.ReadCamtFile(fakeCommand.Content, It.IsAny<CancellationToken>()))
                           .ReturnsAsync(fakeCamtDocument);
 
         _journalRepoMock.Setup(x => x.AddAccountStatement(It.IsAny<AccountStatement>(), cancellationToken))
-                        .ReturnsAsync((AccountStatement accountStatement, CancellationToken ct) => accountStatement);
+                        .ReturnsAsync((AccountStatement accountStatement, CancellationToken _) => accountStatement);
 
         // Act
         var result = await _handler.Handle(fakeCommand, cancellationToken);
 
         // Assert
         _camtProcessorMock.Verify(
-            x => x.ReadCamtFile(fakeCommand.Content, fakeCommand.AccountId, It.IsAny<CancellationToken>()),
+            x => x.ReadCamtFile(fakeCommand.Content, It.IsAny<CancellationToken>()),
             Times.Once);
         _journalRepoMock.Verify(x => x.AddAccountStatement(It.IsAny<AccountStatement>(), cancellationToken), Times.Once);
+        result.Should().NotBe(Guid.Empty);
     }
 }

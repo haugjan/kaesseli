@@ -1,5 +1,4 @@
 ﻿using Kaesseli.Application.Budget;
-using Kaesseli.Domain.Budget;
 
 // ReSharper disable once CheckNamespace
 namespace Kaesseli.Domain.Budget;

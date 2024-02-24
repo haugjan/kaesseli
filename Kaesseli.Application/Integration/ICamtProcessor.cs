@@ -1,8 +1,6 @@
-﻿using Kaesseli.Domain.Journal;
-
-namespace Kaesseli.Application.Integration;
+﻿namespace Kaesseli.Application.Integration;
 
 public interface ICamtProcessor
 {
-    Task<CamtDocument> ReadCamtFile(string content, Guid accountId, CancellationToken cancellationToken);
+    Task<CamtDocument> ReadCamtFile(string content, CancellationToken cancellationToken);
 }

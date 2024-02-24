@@ -57,7 +57,8 @@ public class AccountTests
         accountBalance.Should().Be(expectedBalance);
     }
 
-    public void Test()
+    [Fact]
+    public void GetBudget_ReturnCorrectBudget()
     {
         //Arrange
         var account = new Account { Id = Guid.NewGuid(), Name = "Account", Type = AccountType.Revenue };

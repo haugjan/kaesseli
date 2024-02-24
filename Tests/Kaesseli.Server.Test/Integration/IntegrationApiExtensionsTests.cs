@@ -3,9 +3,7 @@ using System.Text;
 using System.Text.Json;
 using FluentAssertions;
 using Kaesseli.Application.Integration;
-using Kaesseli.Application.Journal;
 using Kaesseli.Server.Integration;
-using Kaesseli.Server.Journal;
 using Kaesseli.TestUtilities.Faker;
 using MediatR;
 using Microsoft.AspNetCore.Builder;
@@ -53,7 +51,7 @@ public class IntegrationApiExtensionsTests
     {
         // Arrange
         var guid = Guid.NewGuid();
-        _mediatorMock.Setup(m => m.Send(It.IsAny<ProcessCamtFileCommand>(), default)).ReturnsAsync(value: guid);
+        _mediatorMock.Setup(m => m.Send(It.IsAny<ProcessCamtFileCommand>(), default)).ReturnsAsync(guid);
 
         var addJournalEntryCommand = new SmartFaker<ProcessCamtFileCommand>().Generate();
         var content = new StringContent(
@@ -65,11 +63,12 @@ public class IntegrationApiExtensionsTests
         var response = await _client.PostAsync(requestUri: "/camt", content);
 
         // Assert
-        response.StatusCode.Should().Be(HttpStatusCode.Created, because: $"there should be no failure, but server responded '{await response.Content.ReadAsStringAsync()}'");
+        response.StatusCode.Should()
+                .Be(
+                    HttpStatusCode.Created,
+                    because: $"there should be no failure, but server responded '{await response.Content.ReadAsStringAsync()}'");
         response.Headers.Location.Should()
                 .BeEquivalentTo(expectation: new Uri(uriString: $"/camt/{guid}", UriKind.Relative));
         _mediatorMock.Verify(m => m.Send(It.IsAny<ProcessCamtFileCommand>(), default), Times.Once);
     }
-
-   
 }

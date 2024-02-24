@@ -13,19 +13,18 @@ public class CamtProcessorTests
         //Arrange
         var processor = new CamtProcessor();
         var content = await GetType().ReadResource(fileName: "Example.camt");
-        var accountId = Guid.NewGuid();
         var cancellationToken = new CancellationToken();
 
         //Act
-        var current = await processor.ReadCamtFile(content, accountId, cancellationToken);
+        var current = await processor.ReadCamtFile(content, cancellationToken);
         // ReSharper disable StringLiteralTypo
-        var expected = await CreateExpected2(accountId);
+        var expected = await CreateExpected2();
 
         //Assert
         current.Should().BeEquivalentTo(expected);
     }
 
-    private async Task<CamtDocument> CreateExpected2(Guid accountId) =>
+    private async Task<CamtDocument> CreateExpected2() =>
         new()
         {
             CamtEntries = await CreateCamtEntries(),

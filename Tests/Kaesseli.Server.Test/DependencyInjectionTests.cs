@@ -19,7 +19,7 @@ public class DependencyInjectionTests
         var configMock = new Mock<IConfiguration>();
         var configSectionMock = new Mock<IConfigurationSection>();
         configMock.Setup(cfg => cfg.GetSection(It.IsAny<string>()))
-                  .Returns((string cfg) => configSectionMock.Object);
+                  .Returns((string _) => configSectionMock.Object);
         var serviceCollection = new ServiceCollection();
         serviceCollection
             .AddApplicationServices()

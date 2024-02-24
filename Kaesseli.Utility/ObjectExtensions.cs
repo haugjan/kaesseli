@@ -24,8 +24,9 @@ public static class ObjectExtensions
         public object ReadYaml(IParser parser, Type type) =>
             throw new NotImplementedException();
 
-        public void WriteYaml(IEmitter emitter, object value, Type type)
+        public void WriteYaml(IEmitter emitter, object? value, Type type)
         {
+            if (value is null) return;
             var dateOnly = (DateOnly)value;
             emitter.Emit(@event: new Scalar(value: dateOnly.ToString(format: "yyyy-MM-dd", CultureInfo.InvariantCulture)));
         }

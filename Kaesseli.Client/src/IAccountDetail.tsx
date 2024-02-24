@@ -22,6 +22,7 @@ function Account() {
 
     useEffect(() => {
         const apiUrl = `https://localhost:7123/account/${accountId}`;
+// ReSharper disable once TsResolvedFromInaccessibleModule
         fetch(apiUrl)
             .then(response => {
                 if (!response.ok) {

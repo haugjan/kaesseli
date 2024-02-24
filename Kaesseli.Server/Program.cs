@@ -1,8 +1,3 @@
-using Kaesseli.Server.Accounts;
-using Kaesseli.Server.Budget;
-using Kaesseli.Server.Integration;
-using Kaesseli.Server.Journal;
-
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.

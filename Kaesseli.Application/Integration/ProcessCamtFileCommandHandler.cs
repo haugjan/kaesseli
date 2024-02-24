@@ -1,5 +1,4 @@
-﻿using System.Diagnostics.CodeAnalysis;
-using Kaesseli.Domain.Accounts;
+﻿using Kaesseli.Domain.Accounts;
 using Kaesseli.Domain.Journal;
 using MediatR;
 
@@ -20,7 +19,7 @@ public class ProcessCamtFileCommandHandler : IRequestHandler<ProcessCamtFileComm
 
     public async Task<Guid> Handle(ProcessCamtFileCommand request, CancellationToken cancellationToken)
     {
-        var camtDocument = await _camtProcessor.ReadCamtFile(request.Content, request.AccountId, cancellationToken);
+        var camtDocument = await _camtProcessor.ReadCamtFile(request.Content, cancellationToken);
         var account = await _accountRepo.GetAccount(request.AccountId, cancellationToken);
 
         var accountStatement = camtDocument.ToAccountStatement(account);
