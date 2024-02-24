@@ -1,4 +1,5 @@
-﻿using System.Reflection;
+﻿using System.Collections.Immutable;
+using System.Reflection;
 using FluentAssertions;
 using MediatR;
 using Microsoft.Extensions.Configuration;
@@ -32,7 +33,7 @@ public class DependencyInjectionTests
                                                   i => i.IsGenericType
                                                     && (i.GetGenericTypeDefinition() == typeof(IRequestHandler<,>)
                                                      || i.GetGenericTypeDefinition() == typeof(INotificationHandler<>))))
-                                    .ToList();
+                                    .ToImmutableList();
 
         foreach (var handlerType in handlerTypes) serviceCollection.AddTransient(handlerType);
 

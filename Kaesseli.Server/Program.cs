@@ -1,5 +1,6 @@
 using Kaesseli.Server.Accounts;
 using Kaesseli.Server.Budget;
+using Kaesseli.Server.Integration;
 using Kaesseli.Server.Journal;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -38,9 +39,7 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
-app.MapBudgetEndpoints();
-app.MapJournalEndpoints();
-app.MapAccountEndpoints();
+app.MapKaesseliEndpoints();
 
 app.MapFallbackToFile(filePath: "/index.html");
 

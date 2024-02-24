@@ -18,9 +18,10 @@ public class KaesseliContext : DbContext
     }
 
     public virtual DbSet<JournalEntry> JournalEntries { get; init; } = null!;
-    public virtual DbSet<PreJournalEntry> PreJournalEntries { get; init; } = null!;
+    public virtual DbSet<PaymentEntry> PaymentEntries { get; init; } = null!;
     public virtual DbSet<BudgetEntry> BudgetEntries { get; init; } = null!;
     public virtual DbSet<Account> Accounts { get; init; } = null!;
+    public virtual DbSet<AccountStatement> AccountStatements { get; init; } = null!;
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -43,7 +44,7 @@ public class KaesseliContext : DbContext
                       .OnDelete(DeleteBehavior.Restrict);
 
             });
-        modelBuilder.Entity<PreJournalEntry>(
+        modelBuilder.Entity<AccountStatement>(
             entity =>
             {
                 entity.HasOne(je => je.Account)
@@ -51,6 +52,8 @@ public class KaesseliContext : DbContext
                       .HasForeignKey("AccountId")
                       .IsRequired()
                       .OnDelete(DeleteBehavior.Restrict);
+                entity.HasMany(statement => statement.PaymentEntries);
+
             });
     }
 }

@@ -37,15 +37,8 @@ public class GetAccountsSummaryQueryHandler(
         var budget = account.GetBudget(budgetEntries);
         var budgetBalance = budget + accountBalance;
 
-        return new GetAccountsSummaryQueryResult
-        {
-            Id = account.Id,
-            Name = account.Name,
-            Type = account.Type.DisplayName(),
-            TypeId = account.Type,
-            AccountBalance = accountBalance,
-            Budget = budget,
-            BudgetBalance = budgetBalance
-        };
+        return account.ToAccountSummary(accountBalance, budget, budgetBalance);
     }
+
+    
 }

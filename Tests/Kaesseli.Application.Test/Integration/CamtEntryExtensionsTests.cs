@@ -10,19 +10,32 @@ namespace Kaesseli.Application.Test.Integration;
 public class CamtEntryExtensionsTests
 {
     [Fact]
-    public void ToPreJournalEntry_TransformsCorrectly()
+    public void ToPaymentEntry_TransformsCorrectly()
     {
         //Arange
         var camtEntry = new SmartFaker<CamtEntry>().Generate();
+
+        //Act
+        var paymentEntry = camtEntry.ToPaymentEntry();
+
+        //Assert
+        paymentEntry.Should()
+                       .BeEquivalentTo(camtEntry);
+    }
+
+    [Fact]
+    public void ToAccountStatement_TransformsCorrectly()
+    {
+        //Arange
+        var camtDocument = new SmartFaker<CamtDocument>().RuleFor(ce=> ce.CamtEntries,  value: new SmartFaker<CamtEntry>().Generate(count: 2) ).Generate();
         var account = new SmartFaker<Account>().Generate();
 
         //Act
-        var preJournalEntry = camtEntry.ToPreJournalEntry(account);
+        var accountStatement = camtDocument.ToAccountStatement(account);
 
         //Assert
-        preJournalEntry.Should()
-                       .BeEquivalentTo(camtEntry, options 
-                                           => options.Excluding(entry => entry.AccountId));
-        preJournalEntry.Account.Should().Be(account);
+        accountStatement.Should()
+                    .BeEquivalentTo(camtDocument, options => options.Excluding(cd=> cd.CamtEntries));
+        accountStatement.PaymentEntries.Should().BeEquivalentTo(camtDocument.CamtEntries);
     }
 }

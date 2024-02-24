@@ -1,4 +1,5 @@
-﻿using Kaesseli.Domain.Accounts;
+﻿using System.Collections.Immutable;
+using Kaesseli.Domain.Accounts;
 using Kaesseli.Domain.Budget;
 using Kaesseli.Domain.Journal;
 using MediatR;
@@ -48,7 +49,7 @@ public class GetAccountQueryHandler(IAccountRepository accountRepo, IJournalRepo
                              .OrderBy(entry => entry.ValueDate)
                              .ThenBy(entry => entry.AmountType)
                              .ThenBy(entry => entry.Amount)
-                             .ToList();
+                             .ToImmutableList();
 
     }
 

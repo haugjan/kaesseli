@@ -1,4 +1,5 @@
 ﻿
+using System.Collections.Immutable;
 using Kaesseli.Application.Integration;
 using Kaesseli.Domain.Accounts;
 
@@ -7,7 +8,21 @@ namespace Kaesseli.Domain.Journal;
 
 internal static class CamtEntryExtensions
 {
-    public static PreJournalEntry ToPreJournalEntry(this CamtEntry camtEntry, Account account) =>
+
+    public static AccountStatement ToAccountStatement(this CamtDocument camtDocument, Account account) =>
+        new()
+        {
+            Id = Guid.NewGuid(),
+            Account = account,
+            BalanceBefore = camtDocument.BalanceBefore,
+            BalanceAfter = camtDocument.BalanceAfter,
+            ValueDateFrom = camtDocument.ValueDateFrom,
+            ValueDateTo = camtDocument.ValueDateTo,
+            Reference = camtDocument.Reference,
+            PaymentEntries = camtDocument.CamtEntries.Select(ToPaymentEntry).ToImmutableList()
+        };
+
+    public static PaymentEntry ToPaymentEntry(this CamtEntry camtEntry) =>
         new()
         {
             RawText = camtEntry.RawText,
@@ -15,7 +30,6 @@ internal static class CamtEntryExtensions
             Reference = camtEntry.Reference,
             TransactionCode = camtEntry.TransactionCode,
             TransactionCodeDetail = camtEntry.TransactionCodeDetail,
-            Account = account,
             Amount = camtEntry.Amount,
             ValueDate = camtEntry.ValueDate,
             BookDate = camtEntry.BookDate,

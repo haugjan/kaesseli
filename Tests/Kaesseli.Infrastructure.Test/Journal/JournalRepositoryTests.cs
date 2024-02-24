@@ -1,8 +1,8 @@
 ﻿using FluentAssertions;
 using Kaesseli.Domain.Accounts;
 using Kaesseli.Domain.Journal;
-using Kaesseli.Infrastructure.Journal;
 using Kaesseli.Infrastructure.Common;
+using Kaesseli.Infrastructure.Journal;
 using Kaesseli.TestUtilities.Faker;
 using Microsoft.EntityFrameworkCore;
 using Xunit;
@@ -23,10 +23,10 @@ public class JournalRepositoryTests
                       .Options;
 
         var journalEntry = new SmartFaker<JournalEntry>()
-                          .RuleFor(
-                              be => be.ValueDate,
-                              faker => new DateOnly(year: 2000 + faker.IndexFaker, month: 01, day: 01))
-                          .Generate(count: 2);
+                           .RuleFor(
+                               be => be.ValueDate,
+                               faker => new DateOnly(year: 2000 + faker.IndexFaker, month: 01, day: 01))
+                           .Generate(count: 2);
 
         await using var setupContext = CreateContext(options);
         setupContext.JournalEntries.Add(entity: journalEntry.First());
@@ -89,29 +89,33 @@ public class JournalRepositoryTests
     }
 
     [Fact]
-    public async Task AddPreJournalEntry_ShouldAddEntry()
+    public async Task AddPaymentEntry_ShouldAddEntry()
     {
         // Arrange
         var options = new DbContextOptionsBuilder<KaesseliContext>()
-                      .UseInMemoryDatabase(databaseName: "AddPreJournalEntryDb")
+                      .UseInMemoryDatabase(databaseName: "AddPaymentEntryDb")
                       .Options;
 
-        var newEntry = new SmartFaker<PreJournalEntry>().Generate();
+        var accountStatement = new SmartFaker<AccountStatement>().RuleFor(
+                                                                     statement => statement.PaymentEntries,
+                                                                     value: new SmartFaker<PaymentEntry>().Generate(count: 5))
+                                                                 .Generate();
 
         await using var context = CreateContext(options);
         var repository = new JournalRepository(context);
 
         // Act
-        var result = await repository.AddPreJournalEntry(newEntry, CancellationToken.None);
+        var result = await repository.AddAccountStatement(accountStatement, CancellationToken.None);
 
         // Assert
-        result.Should().BeEquivalentTo(newEntry);
+        result.Should().BeEquivalentTo(accountStatement);
 
         await using var assertContext = CreateContext(options);
-        var addedEntry = await assertContext.PreJournalEntries
-                                            .Include(be => be.Account)
-                                            .Where(be => be.Id == newEntry.Id)
+        var addedEntry = await assertContext.AccountStatements
+                                            .Where(be => be.Id == accountStatement.Id)
+                                            .Include(statement=> statement.PaymentEntries)
+                                            .Include(statement => statement.Account)
                                             .SingleAsync();
-        addedEntry.Should().BeEquivalentTo(newEntry);
+        addedEntry.Should().BeEquivalentTo(accountStatement);
     }
 }

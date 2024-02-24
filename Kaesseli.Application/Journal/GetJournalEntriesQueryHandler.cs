@@ -1,4 +1,5 @@
-﻿using Kaesseli.Domain.Journal;
+﻿using System.Collections.Immutable;
+using Kaesseli.Domain.Journal;
 using MediatR;
 
 namespace Kaesseli.Application.Journal;
@@ -21,8 +22,7 @@ public class GetJournalEntriesQueryHandler(IJournalRepository repository) :
                               ToDate = request.ToDate
                           },
                           cancellationToken);
-        return entries.ToList()
-                      .Select(
+        return entries.Select(
                           entry => new GetJournalEntriesQueryResult
                           {
                               Id = entry.Id,
@@ -31,6 +31,6 @@ public class GetJournalEntriesQueryHandler(IJournalRepository repository) :
                               DebitAccountId = entry.DebitAccount.Id,
                               CreditAccountId = entry.CreditAccount.Id,
                               ValueDate = entry.ValueDate
-                          });
+                          }).ToImmutableList();
     }
 }

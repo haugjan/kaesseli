@@ -1,11 +1,8 @@
-﻿using Kaesseli.Domain.Accounts;
+﻿namespace Kaesseli.Domain.Journal;
 
-namespace Kaesseli.Domain.Journal;
-
-public class PreJournalEntry()
+public class PaymentEntry()
 {
     public required string RawText { get; init; }
-    public required Account Account { get; init; }
     public required decimal Amount { get; init; }
     public required DateOnly ValueDate { get; init; }
     public required Guid Id { get; init; }

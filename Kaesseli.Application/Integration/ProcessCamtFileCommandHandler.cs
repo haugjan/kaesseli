@@ -5,10 +5,10 @@ using MediatR;
 
 namespace Kaesseli.Application.Integration;
 
-public class ProcessCamtFileCommandHandler : IRequestHandler<ProcessCamtFileCommand, IEnumerable<Guid>>
+public class ProcessCamtFileCommandHandler : IRequestHandler<ProcessCamtFileCommand, Guid>
 {
-    private ICamtProcessor _camtProcessor;
-    private IJournalRepository _journalRepo;
+    private readonly ICamtProcessor _camtProcessor;
+    private readonly IJournalRepository _journalRepo;
     private readonly IAccountRepository _accountRepo;
 
     public ProcessCamtFileCommandHandler(ICamtProcessor camtProcessor, IJournalRepository journalRepo, IAccountRepository accountRepo)
@@ -18,18 +18,14 @@ public class ProcessCamtFileCommandHandler : IRequestHandler<ProcessCamtFileComm
         _accountRepo = accountRepo;
     }
 
-    public async Task<IEnumerable<Guid>> Handle(ProcessCamtFileCommand request, CancellationToken cancellationToken)
+    public async Task<Guid> Handle(ProcessCamtFileCommand request, CancellationToken cancellationToken)
     {
-        var entries = await _camtProcessor.ReadCamtFile(request.Content, request.AccountId, cancellationToken);
-        var result = new List<Guid>();
+        var camtDocument = await _camtProcessor.ReadCamtFile(request.Content, request.AccountId, cancellationToken);
         var account = await _accountRepo.GetAccount(request.AccountId, cancellationToken);
-        foreach (var camtEntry in entries)
-        {
-            var preJournalEntry = camtEntry.ToPreJournalEntry( account);
-            var newEntry = await _journalRepo.AddPreJournalEntry(preJournalEntry, cancellationToken);
-            result.Add(newEntry.Id);
-        }
-        return result;
+
+        var accountStatement = camtDocument.ToAccountStatement(account);
+        await _journalRepo.AddAccountStatement(accountStatement, cancellationToken);
+        return accountStatement.Id;
     }
 
 }

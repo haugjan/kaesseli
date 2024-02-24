@@ -22,15 +22,7 @@ public class AddBudgetEntryCommandHandler(IBudgetRepository budgetRepository,
         var account = await accountRepository.GetAccount(addBudgetEntryCommand.AccountId, cancellationToken);
         var valueDate = addBudgetEntryCommand.ValueDate 
                      ?? dateTime.ToDay;
-        var newBudgetEntryEntity = new BudgetEntry
-        {
-            Id = Guid.NewGuid(),
-
-            Amount = addBudgetEntryCommand.Amount,
-            Description = addBudgetEntryCommand.Description,
-            Account = account,
-            ValueDate = valueDate
-        };
+        var newBudgetEntryEntity = addBudgetEntryCommand.ToBudgetEntry(account, valueDate);
         return newBudgetEntryEntity;
     }
 

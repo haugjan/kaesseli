@@ -43,10 +43,10 @@ public class JournalRepository(KaesseliContext context) : IJournalRepository
         return await entries.ToListAsync(cancellationToken);
     }
 
-    public async Task<PreJournalEntry> AddPreJournalEntry(PreJournalEntry entry, CancellationToken cancellationToken)
+    public async Task<AccountStatement> AddAccountStatement(AccountStatement accountStatement, CancellationToken cancellationToken)
     {
-        context.PreJournalEntries.Add(entry);
+        context.AccountStatements.Add(accountStatement);
         await context.SaveChangesAsync(cancellationToken);
-        return entry;
+        return accountStatement;
     }
 }

@@ -1,4 +1,5 @@
-﻿using Kaesseli.Domain.Budget;
+﻿using System.Collections.Immutable;
+using Kaesseli.Domain.Budget;
 using MediatR;
 
 namespace Kaesseli.Application.Budget;
@@ -13,24 +14,14 @@ public class GetBudgetEntriesQueryHandler :
         _repository = repository;
 
     public async Task<IEnumerable<GetBudgetEntriesQueryResult>> Handle(
-        GetBudgetEntriesQuery request,
+        GetBudgetEntriesQuery query,
         CancellationToken cancellationToken)
     {
         var entries = await _repository.GetBudgetEntries(
-                          request: new GetBudgetEntriesRequest
-                          {
-                              AccountId = request.AccountId, FromDate = request.FromDate, ToDate = request.ToDate, AccountType = request.AccountType
-                          },
+                          request: query.ToGetBudgetEntriesRequest(),
                           cancellationToken);
-        return entries.ToList()
-                      .Select(
-                          entry => new GetBudgetEntriesQueryResult
-                          {
-                              Id = entry.Id,
-                              Amount = entry.Amount,
-                              Description = entry.Description,
-                              AccountId = entry.Account.Id,
-                              ValueDate = entry.ValueDate
-                          });
+        return entries.Select(
+                          entry => entry.ToGetBudgetEntriesQueryResult())
+                      .ToImmutableList();
     }
 }

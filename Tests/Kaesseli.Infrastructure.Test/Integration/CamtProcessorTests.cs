@@ -18,19 +18,29 @@ public class CamtProcessorTests
 
         //Act
         var current = await processor.ReadCamtFile(content, accountId, cancellationToken);
-                // ReSharper disable StringLiteralTypo
-        var expected = await CreateExpected(accountId);
+        // ReSharper disable StringLiteralTypo
+        var expected = await CreateExpected2(accountId);
 
         //Assert
         current.Should().BeEquivalentTo(expected);
     }
 
-    private async Task<List<CamtEntry>> CreateExpected(Guid accountId) =>
+    private async Task<CamtDocument> CreateExpected2(Guid accountId) =>
+        new()
+        {
+            CamtEntries = await CreateCamtEntries(),
+            BalanceBefore = 11708.31m,
+            BalanceAfter = 19513.79m,
+            ValueDateFrom = new DateOnly(year: 2024, month: 1, day: 22),
+            ValueDateTo = new DateOnly(year: 2024, month: 1, day: 31),
+            Reference = "MSG20240201014110"
+        };
+
+    private async Task<List<CamtEntry>> CreateCamtEntries() =>
     [
         new()
         {
             Description = "Sample transaction details",
-            AccountId = accountId,
             Amount = -29.95m,
             ValueDate = new DateOnly(
                 year: 2024,
@@ -50,14 +60,13 @@ public class CamtProcessorTests
                                         Cd: ICDT
                                         SubFmlyCd: BOOK
                                     Prtry: 
-                                    
+
                                     """
         },
 
         new()
         {
             Description = "Credit transaction details",
-            AccountId = accountId,
             Amount = 13656.85m,
             ValueDate = new DateOnly(
                 year: 2024,
@@ -77,7 +86,7 @@ public class CamtProcessorTests
                                         Cd: RCDT
                                         SubFmlyCd: AUTT
                                     Prtry: 
-                                    
+
                                     """
         }
     ];
