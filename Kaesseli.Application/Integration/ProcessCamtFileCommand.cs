@@ -6,7 +6,7 @@ namespace Kaesseli.Application.Integration;
 public class ProcessCamtFileCommand : IRequest<Guid>
 {
     // ReSharper disable UnusedAutoPropertyAccessor.Global
-    public required string Content { get; init; }
+    public required Stream Content { get; init; }
     public required Guid AccountId { get; init; }
     // ReSharper restore UnusedAutoPropertyAccessor.Global
 }

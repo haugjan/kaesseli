@@ -88,34 +88,5 @@ public class JournalRepositoryTests
         addedEntry.Should().BeEquivalentTo(newEntry);
     }
 
-    [Fact]
-    public async Task AddPaymentEntry_ShouldAddEntry()
-    {
-        // Arrange
-        var options = new DbContextOptionsBuilder<KaesseliContext>()
-                      .UseInMemoryDatabase(databaseName: "AddPaymentEntryDb")
-                      .Options;
-
-        var accountStatement = new SmartFaker<AccountStatement>().RuleFor(
-                                                                     statement => statement.PaymentEntries,
-                                                                     value: new SmartFaker<PaymentEntry>().Generate(count: 5))
-                                                                 .Generate();
-
-        await using var context = CreateContext(options);
-        var repository = new JournalRepository(context);
-
-        // Act
-        var result = await repository.AddAccountStatement(accountStatement, CancellationToken.None);
-
-        // Assert
-        result.Should().BeEquivalentTo(accountStatement);
-
-        await using var assertContext = CreateContext(options);
-        var addedEntry = await assertContext.AccountStatements
-                                            .Where(be => be.Id == accountStatement.Id)
-                                            .Include(statement=> statement.PaymentEntries)
-                                            .Include(statement => statement.Account)
-                                            .SingleAsync();
-        addedEntry.Should().BeEquivalentTo(accountStatement);
-    }
+   
 }

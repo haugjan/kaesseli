@@ -2,6 +2,7 @@
 using System.Collections.Immutable;
 using Kaesseli.Application.Integration;
 using Kaesseli.Domain.Accounts;
+using Kaesseli.Domain.Integration;
 
 // ReSharper disable once CheckNamespace
 namespace Kaesseli.Domain.Journal;
@@ -9,7 +10,7 @@ namespace Kaesseli.Domain.Journal;
 internal static class CamtEntryExtensions
 {
 
-    public static AccountStatement ToAccountStatement(this CamtDocument camtDocument, Account account) =>
+    public static TransactionSummary ToTransactionSummary(this CamtDocument camtDocument, Account account) =>
         new()
         {
             Id = Guid.NewGuid(),
@@ -19,10 +20,10 @@ internal static class CamtEntryExtensions
             ValueDateFrom = camtDocument.ValueDateFrom,
             ValueDateTo = camtDocument.ValueDateTo,
             Reference = camtDocument.Reference,
-            PaymentEntries = camtDocument.CamtEntries.Select(ToPaymentEntry).ToImmutableList()
+            Transactions = camtDocument.CamtEntries.Select(ToTransaction).ToImmutableList()
         };
 
-    public static PaymentEntry ToPaymentEntry(this CamtEntry camtEntry) =>
+    public static Transaction ToTransaction(this CamtEntry camtEntry) =>
         new()
         {
             RawText = camtEntry.RawText,

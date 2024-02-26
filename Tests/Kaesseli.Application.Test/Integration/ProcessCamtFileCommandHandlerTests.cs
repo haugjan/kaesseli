@@ -1,6 +1,7 @@
 ﻿using FluentAssertions;
 using Kaesseli.Application.Integration;
 using Kaesseli.Domain.Accounts;
+using Kaesseli.Domain.Integration;
 using Kaesseli.Domain.Journal;
 using Kaesseli.TestUtilities.Faker;
 using Moq;
@@ -11,12 +12,12 @@ namespace Kaesseli.Application.Test.Integration;
 public class ProcessCamtFileCommandHandlerTests
 {
     private readonly Mock<ICamtProcessor> _camtProcessorMock = new();
-    private readonly Mock<IJournalRepository> _journalRepoMock = new();
+    private readonly Mock<ITransactionRepository> _transactionRepoMock = new();
     private readonly Mock<IAccountRepository> _accountRepoMock = new();
     private readonly ProcessCamtFileCommandHandler _handler;
 
     public ProcessCamtFileCommandHandlerTests() =>
-        _handler = new ProcessCamtFileCommandHandler(_camtProcessorMock.Object, _journalRepoMock.Object, _accountRepoMock.Object);
+        _handler = new ProcessCamtFileCommandHandler(_camtProcessorMock.Object, _transactionRepoMock.Object, _accountRepoMock.Object);
 
     [Fact]
     public async Task Handle_ShouldProcessCamtFileAndReturnEntryIds()
@@ -34,8 +35,8 @@ public class ProcessCamtFileCommandHandlerTests
         _camtProcessorMock.Setup(x => x.ReadCamtFile(fakeCommand.Content, It.IsAny<CancellationToken>()))
                           .ReturnsAsync(fakeCamtDocument);
 
-        _journalRepoMock.Setup(x => x.AddAccountStatement(It.IsAny<AccountStatement>(), cancellationToken))
-                        .ReturnsAsync((AccountStatement accountStatement, CancellationToken _) => accountStatement);
+        _transactionRepoMock.Setup(x => x.AddTransactionSummary(It.IsAny<TransactionSummary>(), cancellationToken))
+                        .ReturnsAsync((TransactionSummary transactionSummary, CancellationToken _) => transactionSummary);
 
         // Act
         var result = await _handler.Handle(fakeCommand, cancellationToken);
@@ -44,7 +45,7 @@ public class ProcessCamtFileCommandHandlerTests
         _camtProcessorMock.Verify(
             x => x.ReadCamtFile(fakeCommand.Content, It.IsAny<CancellationToken>()),
             Times.Once);
-        _journalRepoMock.Verify(x => x.AddAccountStatement(It.IsAny<AccountStatement>(), cancellationToken), Times.Once);
+        _transactionRepoMock.Verify(x => x.AddTransactionSummary(It.IsAny<TransactionSummary>(), cancellationToken), Times.Once);
         result.Should().NotBe(Guid.Empty);
     }
 }

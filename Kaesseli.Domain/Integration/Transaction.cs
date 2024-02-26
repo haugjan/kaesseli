@@ -1,6 +1,6 @@
-﻿namespace Kaesseli.Domain.Journal;
+﻿namespace Kaesseli.Domain.Integration;
 
-public class PaymentEntry
+public class Transaction
 {
     public required string RawText { get; init; }
     public required decimal Amount { get; init; }

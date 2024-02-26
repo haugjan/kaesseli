@@ -5,13 +5,12 @@ namespace Kaesseli.Infrastructure.Integration;
 
 internal class CamtProcessor : ICamtProcessor
 {
-
-    public async Task<CamtDocument> ReadCamtFile(string content, CancellationToken cancellationToken)
+    public async Task<CamtDocument> ReadCamtFile(Stream content, CancellationToken cancellationToken)
     {
         var serializer = new XmlSerializer(type: typeof(Document));
-        using var reader = new StringReader(content);
-        var document = await Task.Run(()=> (Document)serializer.Deserialize(reader)!, cancellationToken);
-        if (document is null) throw new FormatException(message: "Could not deserialize CAMT053");
+        using var reader = new StreamReader(content);
+        var document = await Task.Run(() => (Document)serializer.Deserialize(reader)!, cancellationToken)
+                    ?? throw new FormatException(message: "Could not deserialize CAMT053");
 
         ThrowExceptionIfFailures(document);
 
@@ -20,7 +19,7 @@ internal class CamtProcessor : ICamtProcessor
         var camtDocument = new CamtDocument
         {
             CamtEntries = CreateCamtEntries(firstStatement),
-            BalanceBefore = firstStatement.Bal.Single(balance=> balance.Tp.CdOrPrtry.Item is BalanceType12Code.OPBD).Amt.Value,
+            BalanceBefore = firstStatement.Bal.Single(balance => balance.Tp.CdOrPrtry.Item is BalanceType12Code.OPBD).Amt.Value,
             BalanceAfter = firstStatement.Bal.Single(balance => balance.Tp.CdOrPrtry.Item is BalanceType12Code.CLBD).Amt.Value,
             ValueDateFrom = DateOnly.FromDateTime(firstStatement.FrToDt.FrDtTm),
             ValueDateTo = DateOnly.FromDateTime(firstStatement.FrToDt.ToDtTm),
@@ -30,7 +29,7 @@ internal class CamtProcessor : ICamtProcessor
         return camtDocument;
     }
 
-    private static IEnumerable<CamtEntry> CreateCamtEntries( AccountStatement4 accountStatement) =>
+    private static IEnumerable<CamtEntry> CreateCamtEntries(AccountStatement4 accountStatement) =>
         accountStatement.Ntry
                         .Select(
                             entry => new CamtEntry
@@ -38,8 +37,8 @@ internal class CamtProcessor : ICamtProcessor
                                 RawText = entry.NtryDtls.ToYaml(),
                                 Description = entry.AddtlNtryInf,
                                 Reference = entry.AcctSvcrRef,
-                                TransactionCodeDetail=entry.BkTxCd.ToYaml(),
-                                TransactionCode=entry.BkTxCd.Domn.Cd,
+                                TransactionCodeDetail = entry.BkTxCd.ToYaml(),
+                                TransactionCode = entry.BkTxCd.Domn.Cd,
                                 Amount = entry.CdtDbtInd == CreditDebitCode.CRDT ? entry.Amt.Value : -entry.Amt.Value,
                                 ValueDate = DateOnly.FromDateTime(entry.ValDt.Item),
                                 BookDate = DateOnly.FromDateTime(entry.BookgDt.Item)
@@ -47,16 +46,13 @@ internal class CamtProcessor : ICamtProcessor
 
     private static void ThrowExceptionIfFailures(Document document)
     {
-    
         if (document.BkToCstmrStmt.Stmt
                     .SelectMany(stmt => stmt.Ntry)
                     .Any(entry => entry.Sts != EntryStatus2Code.BOOK))
-        {
             throw new FormatException(message: "Found journal entry with status code not equals to 'book'");
-        }
 
-        if (document.BkToCstmrStmt.Stmt.Length != 1)        {
-            throw new FormatException(message: $"Only one account statement per document allowed, but found {document.BkToCstmrStmt.Stmt.Length}");
-        }
+        if (document.BkToCstmrStmt.Stmt.Length != 1)
+            throw new FormatException(
+                message: $"Only one account statement per document allowed, but found {document.BkToCstmrStmt.Stmt.Length}");
     }
 }

@@ -1,0 +1,31 @@
+﻿using FluentAssertions;
+using Kaesseli.Domain.Integration;
+using Kaesseli.TestUtilities.Faker;
+using Xunit;
+
+namespace Kaesseli.Application.Test.Integration;
+
+public class GetTransactionSummariesQueryResultExtensionsTests
+{
+    [Fact]
+    public void ToGetTransactionSummary_TransferCorrectly()
+    {
+        //Arrange
+        var transactionSummary = new SmartFaker<TransactionSummary>()
+                                 .RuleFor(ts => ts.Transactions, value: new SmartFaker<Transaction>().Generate(count: 5))
+                                 .Generate();
+
+        //Act
+        var getTransactionSummary = transactionSummary.ToGetTransactionSummary();
+
+        //Assert
+        getTransactionSummary.Should()
+                             .BeEquivalentTo(
+                                 transactionSummary,
+                                 options => options
+                                            .Excluding(ts => ts.Account)
+                                            .Excluding(ts => ts.Transactions));
+        getTransactionSummary.AccountName.Should().Be(transactionSummary.Account.Name);
+        getTransactionSummary.NrOfTransactions.Should().Be(expected: transactionSummary.Transactions.Count());
+    }
+}

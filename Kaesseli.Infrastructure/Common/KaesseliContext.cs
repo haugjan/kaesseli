@@ -1,5 +1,6 @@
 ﻿using Kaesseli.Domain.Accounts;
 using Kaesseli.Domain.Budget;
+using Kaesseli.Domain.Integration;
 using Kaesseli.Domain.Journal;
 using Microsoft.EntityFrameworkCore;
 
@@ -18,10 +19,10 @@ public class KaesseliContext : DbContext
     }
 
     public virtual DbSet<JournalEntry> JournalEntries { get; init; } = null!;
-    public virtual DbSet<PaymentEntry> PaymentEntries { get; init; } = null!;
+    public virtual DbSet<Transaction> PaymentEntries { get; init; } = null!;
     public virtual DbSet<BudgetEntry> BudgetEntries { get; init; } = null!;
     public virtual DbSet<Account> Accounts { get; init; } = null!;
-    public virtual DbSet<AccountStatement> AccountStatements { get; init; } = null!;
+    public virtual DbSet<TransactionSummary> TransactionSummarys { get; init; } = null!;
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -44,7 +45,7 @@ public class KaesseliContext : DbContext
                       .OnDelete(DeleteBehavior.Restrict);
 
             });
-        modelBuilder.Entity<AccountStatement>(
+        modelBuilder.Entity<TransactionSummary>(
             entity =>
             {
                 entity.HasOne(je => je.Account)
@@ -52,7 +53,8 @@ public class KaesseliContext : DbContext
                       .HasForeignKey("AccountId")
                       .IsRequired()
                       .OnDelete(DeleteBehavior.Restrict);
-                entity.HasMany(statement => statement.PaymentEntries);
+                entity.HasMany(statement => statement.Transactions)
+                      .WithOne();
 
             });
     }

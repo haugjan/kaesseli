@@ -12,7 +12,7 @@ public class CamtProcessorTests
     {
         //Arrange
         var processor = new CamtProcessor();
-        var content = await GetType().ReadResource(fileName: "Example.camt");
+        await using var content = GetType().ReadResourceAsStream(fileName: "ExampleData.Example.camt");
         var cancellationToken = new CancellationToken();
 
         //Act
@@ -49,7 +49,7 @@ public class CamtProcessorTests
                 year: 2024,
                 month: 01,
                 day: 24),
-            RawText = await GetType().ReadResource(fileName: "RawText1.yaml"),
+            RawText = await GetType().ReadResource(fileName: "ExampleData.RawText1.yaml"),
             Reference = "REF00000000000001",
             TransactionCode = "PMNT",
             TransactionCodeDetail = """
@@ -75,7 +75,7 @@ public class CamtProcessorTests
                 year: 2024,
                 month: 01,
                 day: 26),
-            RawText = await GetType().ReadResource(fileName: "RawText2.yaml"),
+            RawText = await GetType().ReadResource(fileName: "ExampleData.RawText2.yaml"),
             Reference = "REF00000000000002",
             TransactionCode = "PMNT",
             TransactionCodeDetail = """

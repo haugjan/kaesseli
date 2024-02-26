@@ -2,5 +2,5 @@
 
 public interface ICamtProcessor
 {
-    Task<CamtDocument> ReadCamtFile(string content, CancellationToken cancellationToken);
+    Task<CamtDocument> ReadCamtFile(Stream content, CancellationToken cancellationToken);
 }

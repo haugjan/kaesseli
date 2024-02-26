@@ -1,4 +1,4 @@
-import { LinkContainer } from 'react-router-bootstrap';
+import { Link } from 'react-router-dom';
 
 import { Nav, Navbar, Container } from 'react-bootstrap';
 
@@ -6,18 +6,18 @@ function navigation() {
     return (
         <Navbar bg="light" expand="sm">
             <Container>
-                <LinkContainer to="/">
+                <Link to="/">
                     <Navbar.Brand>Kässeli</Navbar.Brand>
-                </LinkContainer>
+                </Link>
                 <Navbar.Toggle aria-controls="basic-navbar-nav" />
                 <Navbar.Collapse id="basic-navbar-nav">
                     <Nav className="me-auto">
-                        <LinkContainer to="/">
+                        <Link to="/">
                             <Nav.Link>Startseite</Nav.Link>
-                        </LinkContainer>
-                        <LinkContainer to="/accounts">
+                        </Link>
+                        <Link to="/accounts">
                             <Nav.Link>Konten</Nav.Link>
-                        </LinkContainer>
+                        </Link>
                     </Nav>
                 </Navbar.Collapse>
             </Container>

@@ -1,4 +1,5 @@
 ﻿using Kaesseli.Domain.Accounts;
+using Kaesseli.Domain.Integration;
 using Kaesseli.Domain.Journal;
 using MediatR;
 
@@ -7,13 +8,13 @@ namespace Kaesseli.Application.Integration;
 public class ProcessCamtFileCommandHandler : IRequestHandler<ProcessCamtFileCommand, Guid>
 {
     private readonly ICamtProcessor _camtProcessor;
-    private readonly IJournalRepository _journalRepo;
+    private readonly ITransactionRepository _transactionRepository;
     private readonly IAccountRepository _accountRepo;
 
-    public ProcessCamtFileCommandHandler(ICamtProcessor camtProcessor, IJournalRepository journalRepo, IAccountRepository accountRepo)
+    public ProcessCamtFileCommandHandler(ICamtProcessor camtProcessor, ITransactionRepository transactionRepository, IAccountRepository accountRepo)
     {
         _camtProcessor = camtProcessor;
-        _journalRepo = journalRepo;
+        _transactionRepository = transactionRepository;
         _accountRepo = accountRepo;
     }
 
@@ -22,9 +23,9 @@ public class ProcessCamtFileCommandHandler : IRequestHandler<ProcessCamtFileComm
         var camtDocument = await _camtProcessor.ReadCamtFile(request.Content, cancellationToken);
         var account = await _accountRepo.GetAccount(request.AccountId, cancellationToken);
 
-        var accountStatement = camtDocument.ToAccountStatement(account);
-        await _journalRepo.AddAccountStatement(accountStatement, cancellationToken);
-        return accountStatement.Id;
+        var  transactionSummary = camtDocument.ToTransactionSummary(account);
+        await _transactionRepository.AddTransactionSummary(transactionSummary, cancellationToken);
+        return transactionSummary.Id;
     }
 
 }

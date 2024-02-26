@@ -1,8 +1,8 @@
 ﻿using Kaesseli.Domain.Accounts;
 
-namespace Kaesseli.Domain.Journal;
+namespace Kaesseli.Domain.Integration;
 
-public class AccountStatement
+public class TransactionSummary
 {
     public required Guid Id { get; init; }
     public required Account Account { get; init; }
@@ -11,6 +11,6 @@ public class AccountStatement
     public required DateOnly ValueDateFrom { get; init; }
     public required DateOnly ValueDateTo { get; init; }
     public required string Reference { get; init; }
-    public required IEnumerable<PaymentEntry> PaymentEntries { get; init; }
+    public required IEnumerable<Transaction> Transactions { get; init; }
 
 }

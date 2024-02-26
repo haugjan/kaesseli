@@ -1,4 +1,5 @@
-﻿using Kaesseli.Domain.Journal;
+﻿using Kaesseli.Domain.Integration;
+using Kaesseli.Domain.Journal;
 using Kaesseli.Infrastructure.Common;
 using Microsoft.EntityFrameworkCore;
 
@@ -43,10 +44,4 @@ public class JournalRepository(KaesseliContext context) : IJournalRepository
         return await entries.ToListAsync(cancellationToken);
     }
 
-    public async Task<AccountStatement> AddAccountStatement(AccountStatement accountStatement, CancellationToken cancellationToken)
-    {
-        context.AccountStatements.Add(accountStatement);
-        await context.SaveChangesAsync(cancellationToken);
-        return accountStatement;
-    }
 }

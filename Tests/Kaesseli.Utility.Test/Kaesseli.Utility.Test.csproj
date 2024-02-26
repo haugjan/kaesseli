@@ -25,7 +25,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Kaesseli.Utility\Kaesseli.Utility.csproj" />
+    <ProjectReference Include="..\..\Kaesseli.Utility\Kaesseli.Utility.csproj" />
   </ItemGroup>
 
 </Project>

@@ -2,8 +2,7 @@ import { IAccountSummary } from "./IAccountSummary";
 import { Link } from 'react-router-dom';
 import { Table } from 'react-bootstrap';
 
-// ReSharper disable once InconsistentNaming
-function BalanceSheetAccount({ accounts }: { accounts: IAccountSummary[] }) {
+function balanceSheetAccount({ accounts }: { accounts: IAccountSummary[] }) {
     return (
         <Table >
             <thead>
@@ -26,4 +25,4 @@ function BalanceSheetAccount({ accounts }: { accounts: IAccountSummary[] }) {
     );
 }
 
-export default BalanceSheetAccount;
+export default balanceSheetAccount;
