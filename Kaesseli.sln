@@ -33,6 +33,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Kaesseli.Utility", "Kaessel
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Kaesseli.Utility.Test", "Tests\Kaesseli.Utility.Test\Kaesseli.Utility.Test.csproj", "{3A39676B-81E3-4B39-9645-5C5FAEB4B9BD}"
 EndProject
+Project("{54A90642-561A-4BB1-A94E-469ADEE60C69}") = "Kaesseli.Client", "Kaesseli.Client\Kaesseli.Client.esproj", "{B6D473F4-379A-4285-A3BA-4A9572B53ECB}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -83,6 +85,12 @@ Global
 		{3A39676B-81E3-4B39-9645-5C5FAEB4B9BD}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{3A39676B-81E3-4B39-9645-5C5FAEB4B9BD}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{3A39676B-81E3-4B39-9645-5C5FAEB4B9BD}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B6D473F4-379A-4285-A3BA-4A9572B53ECB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B6D473F4-379A-4285-A3BA-4A9572B53ECB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B6D473F4-379A-4285-A3BA-4A9572B53ECB}.Debug|Any CPU.Deploy.0 = Debug|Any CPU
+		{B6D473F4-379A-4285-A3BA-4A9572B53ECB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B6D473F4-379A-4285-A3BA-4A9572B53ECB}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B6D473F4-379A-4285-A3BA-4A9572B53ECB}.Release|Any CPU.Deploy.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
