@@ -4,7 +4,7 @@ import IncomeStatementAccount from './IncomeStatementAccount';
 import { IAccountSummary } from "./IAccountSummary";
 import { Container, Row, Col } from 'react-bootstrap';
 
-function accountSummary() {
+function AccountSummary() {
     const [accounts, setAccounts] = useState<IAccountSummary[]>([]);
     const [error, setError] = useState(null);
 
@@ -52,4 +52,4 @@ function accountSummary() {
     );
 }
 
-export default accountSummary;
+export default AccountSummary;

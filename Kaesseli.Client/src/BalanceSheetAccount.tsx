@@ -2,7 +2,7 @@ import { IAccountSummary } from "./IAccountSummary";
 import { Link } from 'react-router-dom';
 import { Table } from 'react-bootstrap';
 
-function balanceSheetAccount({ accounts }: { accounts: IAccountSummary[] }) {
+function BalanceSheetAccount({ accounts }: { accounts: IAccountSummary[] }) {
     return (
         <Table >
             <thead>
@@ -25,4 +25,4 @@ function balanceSheetAccount({ accounts }: { accounts: IAccountSummary[] }) {
     );
 }
 
-export default balanceSheetAccount;
+export default BalanceSheetAccount;

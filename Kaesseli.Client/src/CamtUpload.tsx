@@ -6,7 +6,7 @@ interface IAccount {
     name: string;
 }
 
-const camtUpload: React.FC = () => {
+const CamtUpload: React.FC = () => {
     const [accounts, setAccounts] = useState<IAccount[]>([]);
     const [selectedAccount, setSelectedAccount] = useState<string>('');
     const [file, setFile] = useState<File | null>(null);
@@ -68,4 +68,4 @@ const camtUpload: React.FC = () => {
     );
 };
 
-export default camtUpload;
+export default CamtUpload;

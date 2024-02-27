@@ -5,9 +5,10 @@ import ListGroup from "react-bootstrap/ListGroup";
 interface ITransactionSummary {
     valueDateFrom: string;
     valueDateTo: string;
+    id: string;
 }
 
-function transaction() {
+function Transaction() {
     const [summaries, setSummaries] = useState<ITransactionSummary[]>([]);
     const [error, setError] = useState(null);
 
@@ -33,11 +34,11 @@ function transaction() {
 
     return <Container className="mt-5">
                <ListGroup>
-                   {summaries.map(summary => <ListGroup.Item>
-                                                 {summary.valueDateFrom}
+                   {summaries.map(summary => <ListGroup.Item key={summary.id}>
+                       {summary.valueDateFrom} - {summary.valueDateTo}
                                              </ListGroup.Item>)}
                </ListGroup>
            </Container>;
 }
 
-export default transaction();
+export default Transaction;

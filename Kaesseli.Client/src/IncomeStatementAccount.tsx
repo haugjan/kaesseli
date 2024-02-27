@@ -12,7 +12,7 @@ const getComparisonStyle = (value: number) => {
     }
 };
 
-function incomeStatementAccount({ accounts }: { accounts: IAccountSummary[] }) {
+function IncomeStatementAccount({ accounts }: { accounts: IAccountSummary[] }) {
     return (
         <Table>
             <thead>
@@ -37,4 +37,4 @@ function incomeStatementAccount({ accounts }: { accounts: IAccountSummary[] }) {
     );
 }
 
-export default incomeStatementAccount;
+export default IncomeStatementAccount;
