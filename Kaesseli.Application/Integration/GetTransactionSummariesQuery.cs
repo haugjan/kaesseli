@@ -1,9 +1,5 @@
-﻿using Kaesseli.Domain.Accounts;
-using MediatR;
+﻿using MediatR;
 
 namespace Kaesseli.Application.Integration;
 
-public class GetTransactionSummariesQuery : IRequest<IEnumerable<GetTransactionSummariesQueryResult>>
-{
-  
-}
+public class GetTransactionSummariesQuery : IRequest<IEnumerable<GetTransactionSummariesQueryResult>>;

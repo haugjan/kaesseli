@@ -1,6 +1,4 @@
-﻿using Kaesseli.Domain.Budget;
-
-namespace Kaesseli.Domain.Integration;
+﻿namespace Kaesseli.Domain.Integration;
 
 public interface ITransactionRepository
 {

@@ -80,7 +80,7 @@ public class IntegrationApiExtensionsTests
         _mediatorMock.Setup(m => m.Send(It.IsAny<GetTransactionSummariesQuery>(), default)).ReturnsAsync(transactionSummaries);
 
         // Act
-        var response = await _client.GetAsync(requestUri: $"/transactionSummary");
+        var response = await _client.GetAsync(requestUri: "/transactionSummary");
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);

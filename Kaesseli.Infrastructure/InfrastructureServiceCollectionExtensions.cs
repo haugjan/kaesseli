@@ -1,5 +1,4 @@
-﻿using System.Runtime.CompilerServices;
-using Kaesseli.Application.Integration;
+﻿using Kaesseli.Application.Integration;
 using Kaesseli.Domain.Accounts;
 using Kaesseli.Domain.Budget;
 using Kaesseli.Domain.Integration;
@@ -20,9 +19,10 @@ public static class InfrastructureServiceCollectionExtensions
     // ReSharper disable once UnusedMethodReturnValue.Global
     public static IServiceCollection AddInfrastructureServices(this IServiceCollection services, IConfiguration configuration) =>
         services.AddRepositories()
-            .AddScoped<ICamtProcessor, CamtProcessor>()
-            .AddDbContext<KaesseliContext>(options =>
-                                             options.UseSqlite(connectionString: configuration.GetConnectionString(name: "BudgetDatabase")));
+                .AddScoped<ICamtProcessor, CamtProcessor>()
+                .AddDbContext<KaesseliContext>(
+                    options =>
+                        options.UseSqlite(connectionString: configuration.GetConnectionString(name: "BudgetDatabase")));
 
     private static IServiceCollection AddRepositories(this IServiceCollection services) =>
         services.AddScoped<IBudgetRepository, BudgetRepository>()

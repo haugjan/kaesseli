@@ -8,8 +8,8 @@ public static class AccountTypeExtensions
         {
             AccountType.Asset => "Aktiv",
             AccountType.Liability => "Passiv",
-            AccountType.Revenue => "Aufwand",
-            AccountType.Expense => "Ertrag",
+            AccountType.Revenue => "Einkommen",
+            AccountType.Expense => "Ausgaben",
             _ => throw new ArgumentOutOfRangeException(paramName: nameof(accountType), accountType, message: null)
         };
     // ReSharper restore StringLiteralTypo

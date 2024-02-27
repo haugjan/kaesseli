@@ -1,10 +1,7 @@
-﻿using Kaesseli.Domain.Integration;
-
-namespace Kaesseli.Application.Integration;
+﻿namespace Kaesseli.Application.Integration;
 
 public class GetTransactionSummariesQueryResult
 {
-    
     // ReSharper disable UnusedAutoPropertyAccessor.Global
     public required Guid Id { get; init; }
     public required string AccountName { get; init; }
@@ -13,7 +10,7 @@ public class GetTransactionSummariesQueryResult
     public required decimal BalanceBefore { get; init; }
     public required decimal BalanceAfter { get; init; }
     public required string Reference { get; init; }
-    public int NrOfTransactions { get; set; }
+    public required int NrOfTransactions { get; init; }
 
     // ReSharper restore UnusedAutoPropertyAccessor.Global
- }
+}

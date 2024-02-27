@@ -2,7 +2,6 @@
 using Kaesseli.Application.Integration;
 using Kaesseli.Domain.Accounts;
 using Kaesseli.Domain.Integration;
-using Kaesseli.Domain.Journal;
 using Kaesseli.TestUtilities.Faker;
 using Moq;
 using Xunit;
@@ -36,7 +35,7 @@ public class ProcessCamtFileCommandHandlerTests
                           .ReturnsAsync(fakeCamtDocument);
 
         _transactionRepoMock.Setup(x => x.AddTransactionSummary(It.IsAny<TransactionSummary>(), cancellationToken))
-                        .ReturnsAsync((TransactionSummary transactionSummary, CancellationToken _) => transactionSummary);
+                            .ReturnsAsync((TransactionSummary transactionSummary, CancellationToken _) => transactionSummary);
 
         // Act
         var result = await _handler.Handle(fakeCommand, cancellationToken);

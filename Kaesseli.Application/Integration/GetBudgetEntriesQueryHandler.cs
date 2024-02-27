@@ -1,8 +1,5 @@
 ﻿using System.Collections.Immutable;
-using Kaesseli.Application.Budget;
-using Kaesseli.Domain.Budget;
 using Kaesseli.Domain.Integration;
-using Kaesseli.Domain.Journal;
 using MediatR;
 
 namespace Kaesseli.Application.Integration;
@@ -16,11 +13,12 @@ public class GetTransactionSummariesQueryHandler :
     public GetTransactionSummariesQueryHandler(ITransactionRepository repository) =>
         _repository = repository;
 
-    public async Task<IEnumerable<GetTransactionSummariesQueryResult>> Handle(GetTransactionSummariesQuery request, CancellationToken cancellationToken)
+    public async Task<IEnumerable<GetTransactionSummariesQueryResult>> Handle(
+        GetTransactionSummariesQuery request,
+        CancellationToken cancellationToken)
     {
         var entries = await _repository.GetTransactionSummaries(cancellationToken);
-        return entries.Select(
-                          entry => entry.ToGetTransactionSummary())
+        return entries.Select(entry => entry.ToGetTransactionSummary())
                       .ToImmutableList();
     }
 }

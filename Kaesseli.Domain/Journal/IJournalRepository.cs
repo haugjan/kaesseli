@@ -1,6 +1,4 @@
-﻿using Kaesseli.Domain.Integration;
-
-namespace Kaesseli.Domain.Journal;
+﻿namespace Kaesseli.Domain.Journal;
 
 public interface IJournalRepository
 {
