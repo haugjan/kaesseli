@@ -3,7 +3,7 @@
 // ReSharper disable once CheckNamespace
 namespace Kaesseli.Domain.Integration;
 
-public static class GetTransactionSummariesQueryResultExtensions
+public static class TransactionSummaryExtensions
 {
     public static GetTransactionSummariesQueryResult ToGetTransactionSummary(this TransactionSummary transactionSummary) =>
         new()

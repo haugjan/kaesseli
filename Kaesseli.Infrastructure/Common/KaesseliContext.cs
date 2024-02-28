@@ -22,7 +22,8 @@ public class KaesseliContext : DbContext
     public virtual DbSet<Transaction> PaymentEntries { get; init; } = null!;
     public virtual DbSet<BudgetEntry> BudgetEntries { get; init; } = null!;
     public virtual DbSet<Account> Accounts { get; init; } = null!;
-    public virtual DbSet<TransactionSummary> TransactionSummarys { get; init; } = null!;
+    public virtual DbSet<TransactionSummary> TransactionSummaries { get; init; } = null!;
+    public virtual DbSet<Transaction> Transactions { get; init; } = null!;
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -54,7 +55,7 @@ public class KaesseliContext : DbContext
                       .IsRequired()
                       .OnDelete(DeleteBehavior.Restrict);
                 entity.HasMany(statement => statement.Transactions)
-                      .WithOne();
+                      .WithOne(x=> x.TransactionSummary);
 
             });
     }

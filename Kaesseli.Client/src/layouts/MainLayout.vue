@@ -1,46 +1,69 @@
 <template>
   <q-layout view="hHh lpR fFf">
-    <q-header elevated class="bg-primary text-white">
+
+    <q-header elevated height-hint="98">
       <q-toolbar>
+        <q-btn dense flat round icon="menu" @click="toggleLeftDrawer" />
+
         <q-toolbar-title>
-          Kaesseli
+          <q-avatar>
+            <img src="https://cdn.quasar.dev/logo-v2/svg/logo-mono-white.svg">
+          </q-avatar>
+          Kässeli
         </q-toolbar-title>
       </q-toolbar>
+
     </q-header>
 
-    <q-page-container>
-      <q-tabs v-model="tab" inline-label
-        outside-arrows
-        mobile-arrows align="justify" class="bg-grey-8 text-white">
-        <q-tab name="konten" icon="account_balance" label="Konten" />
-        <q-tab name="transaktionen" icon="receipt_long" label="Transaktionen" />
-      </q-tabs>
+    <q-drawer show-if-above v-model="leftDrawerOpen" side="left" elevated>
+      <q-list>
+        <q-item clickable v-ripple to="/accounts">
+          <q-item-section avatar>
+            <q-icon name="account_balance" />
+          </q-item-section>
+          <q-item-section>
+            <q-item-label>Kontoübersicht</q-item-label>
+          </q-item-section>
+        </q-item>
+        <q-item clickable v-ripple to="/transactions">
+          <q-item-section avatar>
+            <q-icon name="receipt_long" />
+          </q-item-section>
+          <q-item-section>
+            <q-item-label>Kontobewegungen</q-item-label>
+          </q-item-section>
+        </q-item>
+        <q-item clickable v-ripple to="/assign">
+          <q-item-section avatar>
+            <q-icon name="assignment_turned_in" />
+          </q-item-section>
+          <q-item-section>
+            <q-item-label>Zuordnen</q-item-label>
+          </q-item-section>
+        </q-item>
+      </q-list>
+    </q-drawer>
 
-      <q-tab-panels v-model="tab" animated>
-        <q-tab-panel name="konten">
-          <KaesseliAccounts />
-        </q-tab-panel>
-        <q-tab-panel name="transaktionen">
-          <KaesseliTransactions />
-        </q-tab-panel>
-      </q-tab-panels>
+    <q-page-container>
+      <router-view />
     </q-page-container>
+
   </q-layout>
 </template>
 
 <script>
-  import KaesseliAccounts from '../components/KaesseliAccounts.vue';
-  import KaesseliTransactions from '../components/KaesseliTransactions.vue';
+  import { ref } from 'vue'
 
   export default {
-    components: {
-      KaesseliAccounts,
-      KaesseliTransactions
-    },
-    data() {
+    setup() {
+      const leftDrawerOpen = ref(false)
+
       return {
-        tab: 'konten', // Standardmäßig ausgewählter Tab
-      };
-    },
-  };
+        leftDrawerOpen,
+        toggleLeftDrawer() {
+          leftDrawerOpen.value = !leftDrawerOpen.value
+        }
+      }
+    }
+  }
 </script>

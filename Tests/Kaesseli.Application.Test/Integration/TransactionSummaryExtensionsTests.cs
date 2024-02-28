@@ -5,7 +5,7 @@ using Xunit;
 
 namespace Kaesseli.Application.Test.Integration;
 
-public class GetTransactionSummariesQueryResultExtensionsTests
+public class TransactionSummaryExtensionsTests
 {
     [Fact]
     public void ToGetTransactionSummary_TransferCorrectly()

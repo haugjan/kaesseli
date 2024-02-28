@@ -12,7 +12,7 @@ internal class TransactionRepository : ITransactionRepository
         _context = context;
 
     public async Task<IEnumerable<TransactionSummary>> GetTransactionSummaries(CancellationToken cancellationToken) =>
-        await _context.TransactionSummarys
+        await _context.TransactionSummaries
                       .Include(ts => ts.Account)
                       .Include(ts => ts.Transactions)
                       .ToListAsync(cancellationToken);
@@ -21,8 +21,13 @@ internal class TransactionRepository : ITransactionRepository
         TransactionSummary transactionSummary,
         CancellationToken cancellationToken)
     {
-        _context.TransactionSummarys.Add(transactionSummary);
+        _context.TransactionSummaries.Add(transactionSummary);
         await _context.SaveChangesAsync(cancellationToken);
         return transactionSummary;
     }
+
+    public async Task<IEnumerable<Transaction>> GetTransactions(Guid transactionSummaryId, CancellationToken cancellationToken) =>
+        await _context.Transactions
+                      .Where(tran => tran.TransactionSummary!.Id == transactionSummaryId)
+                      .ToListAsync(cancellationToken);
 }

@@ -14,11 +14,11 @@ public class TransactionRepositoryTests
         new(options);
 
     [Fact]
-    public async Task GetTransaction_ShouldReturnFilteredEntries()
+    public async Task GetTransactionSummaries_ReturnsTransactionSummaries()
     {
         // Arrange
         var options = new DbContextOptionsBuilder<KaesseliContext>()
-                      .UseInMemoryDatabase(databaseName: "GetTransactionDb")
+                      .UseInMemoryDatabase(databaseName: "GetTransactionSummariesDb")
                       .Options;
 
         var transactions = new SmartFaker<TransactionSummary>()
@@ -26,7 +26,7 @@ public class TransactionRepositoryTests
                            .Generate(count: 2);
 
         await using var setupContext = CreateContext(options);
-        setupContext.TransactionSummarys.AddRange(transactions);
+        setupContext.TransactionSummaries.AddRange(transactions);
         await setupContext.SaveChangesAsync();
 
         var repository = new TransactionRepository(setupContext);
@@ -37,6 +37,31 @@ public class TransactionRepositoryTests
         // Assert
         entries.Should().HaveCount(expected: 2);
         entries.Should().BeEquivalentTo(transactions);
+    }
+
+    [Fact]
+    public async Task GetTransaction_ShouldReturnFilteredEntries()
+    {
+        // Arrange
+        var options = new DbContextOptionsBuilder<KaesseliContext>()
+                      .UseInMemoryDatabase(databaseName: "GetTransactionsDb")
+                      .Options;
+
+        var transactions = new SmartFaker<Transaction>()
+            .Generate(count: 2);
+
+        await using var setupContext = CreateContext(options);
+        setupContext.Transactions.AddRange(transactions);
+        await setupContext.SaveChangesAsync();
+
+        var repository = new TransactionRepository(setupContext);
+
+        // Act
+        var entries = (await repository.GetTransactions(transactions.Last().TransactionSummary!.Id, CancellationToken.None)).ToArray();
+
+        // Assert
+        entries.Should().HaveCount(expected: 1);
+        entries.Should().BeEquivalentTo(expectation: [transactions.Last()]);
     }
 
     [Fact]
@@ -62,11 +87,11 @@ public class TransactionRepositoryTests
         result.Should().BeEquivalentTo(transactionSummary);
 
         await using var assertContext = CreateContext(options);
-        var addedEntry = await assertContext.TransactionSummarys
+        var addedEntry = await assertContext.TransactionSummaries
                                             .Where(be => be.Id == transactionSummary.Id)
                                             .Include(statement => statement.Transactions)
                                             .Include(statement => statement.Account)
                                             .SingleAsync();
-        addedEntry.Should().BeEquivalentTo(transactionSummary);
+        addedEntry.Should().BeEquivalentTo(transactionSummary, opt => opt.IgnoringCyclicReferences());
     }
 }

@@ -34,6 +34,7 @@ internal static class CamtEntryExtensions
             Amount = camtEntry.Amount,
             ValueDate = camtEntry.ValueDate,
             BookDate = camtEntry.BookDate,
-            Id = Guid.NewGuid()
+            Id = Guid.NewGuid(),
+            TransactionSummary = null
         };
 }

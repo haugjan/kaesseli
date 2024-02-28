@@ -6,21 +6,39 @@
         <q-card-section>
           <q-table :rows="filteredAccounts(type)"
                    :columns="columns"
-                  :hide-pagination="true"
+                   :hide-pagination="true"
                    :rows-per-page-options="[0]"
-                   row-key="id" />
+                   row-key="id">
+            <template v-slot:body="props">
+              <q-tr :props="props" @click="onRowClick(props.row)">
+                <q-td v-for="col in props.cols" :key="col.name" :props="props">
+                  {{ col.value }}
+                </q-td>
+              </q-tr>
+            </template>
+          </q-table>
         </q-card-section>
 
       </q-card>
     </div>
   </div>
+  <div class="row">
+    <div v-if="current">
+      <KaesseliAccountTable :accountId="current.id" />
+    </div>
+    <div v-else>
+      nix
+    </div>
+
+  </div>
 </template>
 
 <script lang="ts">
-  import { defineComponent, ref, onMounted } from 'vue';
+  import { defineComponent, ref, Ref, onMounted } from 'vue';
+  import KaesseliAccountTable from './KaesseliAccountTable.vue';
   import axios from 'axios';
 
-  interface Account {
+  interface IAccount {
     id: string;
     name: string;
     type: string;
@@ -32,14 +50,24 @@
 
   export default defineComponent({
     name: 'KaesseliAccounts',
+    components: {
+      KaesseliAccountTable
+    },
+    methods: {
+      onRowClick(row: IAccount) {
+        this.current = row;
+      }
+    },
     setup() {
-      const accounts = ref<Account[]>([]);
+      const accounts = ref<IAccount[]>([]);
       const accountTypes = ref<string[]>(['Einkommen', 'Ausgaben', 'Aktiv', 'Passiv']);
+      const current: Ref<IAccount | null> = ref(null);;
+
       const columns = ref([
-        { name: 'name', required: true, label: 'Name', align: 'left', field: (row: Account) => row.name, sortable: true },
-        { name: 'accountBalance', label: 'Kontostand', align: 'right', field: (row: Account) => row.accountBalance, sortable: true, format: (val: number) => `${val.toFixed(2)}` },
-        { name: 'budget', label: 'Budget', align: 'right', field: (row: Account) => row.budget, sortable: true, format: (val: number) => `${val.toFixed(2)}` },
-        { name: 'budgetBalance', label: 'Budgetsaldo', align: 'right', field: (row: Account) => row.budgetBalance, sortable: true, format: (val: number) => `${val.toFixed(2)}`, classes: 'budgetBalance' },
+        { name: 'name', required: true, label: 'Name', align: 'left', field: (row: IAccount) => row.name, sortable: true },
+        { name: 'accountBalance', label: 'Kontostand', align: 'right', field: (row: IAccount) => row.accountBalance, sortable: true, format: (val: number) => `${val.toFixed(2)}` },
+        { name: 'budget', label: 'Budget', align: 'right', field: (row: IAccount) => row.budget, sortable: true, format: (val: number) => `${val.toFixed(2)}` },
+        { name: 'budgetBalance', label: 'Budgetsaldo', align: 'right', field: (row: IAccount) => row.budgetBalance, sortable: true, format: (val: number) => `${val.toFixed(2)}`, classes: 'budgetBalance' },
       ]);
 
       const fetchAccounts = async () => {
@@ -51,7 +79,7 @@
         }
       };
 
-    
+
 
       const filteredAccounts = (type: string) => {
         return accounts.value.filter(account => account.type === type);
@@ -66,8 +94,9 @@
         accountTypes,
         columns,
         filteredAccounts,
+        current
       };
-    },
+    }
   });
 </script>
 

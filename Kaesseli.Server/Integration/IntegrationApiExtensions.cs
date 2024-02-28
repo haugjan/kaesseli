@@ -19,6 +19,17 @@ public static class IntegrationApiExtensions
                 var query = new GetTransactionSummariesQuery();
                 return await mediator.Send(query);
             });
+        app.MapGet(
+            pattern: "/transaction",
+            async (IMediator mediator, [FromQuery] Guid transactionSummeryId) =>
+            {
+                var query = new GetTransactionsQuery
+                {
+                    TransactionSummaryId = transactionSummeryId
+                };
+                return await mediator.Send(query);
+            });
+
         app.MapPost(
                pattern: "/camt/upload",
                async (IMediator mediator, IFormFile file, [FromForm] Guid accountId) =>
