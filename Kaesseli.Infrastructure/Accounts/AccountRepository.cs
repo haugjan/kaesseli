@@ -16,6 +16,9 @@ internal class AccountRepository(KaesseliContext context) : IAccountRepository
     public async Task<IEnumerable<Account>> GetAccounts(CancellationToken cancellationToken) =>
         await context.Accounts.ToListAsync(cancellationToken);
 
+    public async Task<IEnumerable<Account>> GetAccounts(AccountType accountType, CancellationToken cancellationToken) =>
+        await context.Accounts.Where(account=> account.Type == accountType).ToListAsync(cancellationToken);
+
     public async Task<Account> GetAccount(Guid accountId, CancellationToken cancellationToken) =>
         await context.Accounts.SingleOrDefaultAsync(account => account.Id == accountId, cancellationToken)
      ?? throw new AccountNotFoundException(accountId);

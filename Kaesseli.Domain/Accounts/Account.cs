@@ -7,6 +7,7 @@ public class Account
 {
     public required Guid Id { get; init; }
     public required string Name { get; init; }
+
     public required AccountType Type { get; init; }
 
     public decimal GetAccountBalance(IEnumerable<JournalEntry> entries)
@@ -20,14 +21,19 @@ public class Account
     public decimal GetBudget(IEnumerable<BudgetEntry> entries) =>
         entries.Where(entry => entry.Account.Id == Id).Sum(entry => entry.Amount);
 
+    public decimal GetBudgetBalance(decimal budget, decimal accountBalance) =>
+        Type is AccountType.Revenue or AccountType.Asset 
+            ? accountBalance - budget 
+            : budget - accountBalance;
+
     private decimal GetBalanceDependingOnAccountType(decimal debits, decimal credits)
     {
         var balance = Type switch
         {
             AccountType.Asset => debits - credits,
             AccountType.Liability => credits - debits,
-            AccountType.Revenue => debits - credits,
-            AccountType.Expense => credits - debits,
+            AccountType.Revenue => credits - debits,
+            AccountType.Expense => debits - credits,
             // ReSharper disable StringLiteralTypo
             _ => throw new InvalidOperationException(message: "Unbekannter Kontotyp")
             // ReSharper restore StringLiteralTypo

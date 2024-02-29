@@ -1,20 +1,16 @@
 <template>
   <div class="q-pa-md">
-    <q-btn-dropdown :label="`${currentLabel}`" v-model="show">
-      <q-list style="min-width: 100px">
-        <q-item v-for="(item, index) in summaries" :key="index" clickable v-ripple @click="select(item)">
-          <q-item-section avatar>
-            <q-avatar icon="receipt_long" />
-          </q-item-section>
-          <q-item-section>
-            <q-item-label>{{ item.accountName }}</q-item-label>
-            <q-item-label caption>{{ formatDate(item.valueDateFrom) }} - {{ formatDate(item.valueDateTo) }}, {{ item.nrOfTransactions }} Transaktionen</q-item-label>
-          </q-item-section>
-        </q-item>
-      </q-list>
-    </q-btn-dropdown>
+    <q-select v-model="selected"
+              :options="summaries"
+              emit-value
+              map-options
+              option-value="id"
+              option-label="accountName"
+              @update:model-value="select"
+              :label="currentLabel"
+              style="min-width: 300px"></q-select>
   </div>
-  <div>
+  <div class="q-pa-md">
     <div v-if="current">
       <KaesseliTransactionTable :summaryId="current.id"></KaesseliTransactionTable>
     </div>
@@ -23,69 +19,69 @@
     </div>
   </div>
 </template>
+
 <script lang="ts">
-  import { defineComponent, Ref, ref, onMounted } from 'vue';
-  import KaesseliTransactionTable from './KaesseliTransactionTable.vue'; 
+  import { defineComponent, ref, onMounted } from 'vue';
+  import KaesseliTransactionTable from './KaesseliTransactionTable.vue';
+  import axios from 'axios';
+
   interface ITransactionSummary {
-    id: string,
-    accountName: string,
-    valueDateFrom: Date,
-    valueDateTo: Date,
-    balanceBefore: number,
-    balanceAfter: number,
-    reference: string,
-    nrOfTransactions: number
+    id: string;
+    accountName: string;
+    valueDateFrom: Date;
+    valueDateTo: Date;
+    balanceBefore: number;
+    balanceAfter: number;
+    reference: string;
+    nrOfTransactions: number;
   }
+
   export default defineComponent({
     name: 'KaesseliAccounts',
     components: {
-      // Registrieren Sie die Komponente
       KaesseliTransactionTable,
     },
     setup() {
       const summaries = ref<ITransactionSummary[]>([]);
-      const show = ref(false);
-      const currentLabel: Ref<string> = ref("Kontoauszug wählen");
-      const current: Ref<ITransactionSummary | null> = ref(null);;
-      const FetchSummaries = async () => {
+      const selected = ref<ITransactionSummary | null>(null);
+      const current = ref<ITransactionSummary | null>(null);
+      const currentLabel = ref("Kontoauszug wählen");
+
+      const fetchSummaries = async () => {
         try {
           const response = await axios.get('https://localhost:7123/transactionSummary');
           summaries.value = response.data;
         } catch (error) {
-          console.error('There was an error fetching the accounts:', error);
+          console.error('There was an error fetching the summaries:', error);
         }
       };
-      function select(option: ITransactionSummary) {
-        currentLabel.value = `${option.accountName} ${formatDate(option.valueDateFrom)} - ${formatDate(option.valueDateTo)}`; // Speichert die aktuelle Auswahl
-        current.value = option;
-        show.value = false; // Schließt das Menü
-      }
-      const formatDate = (dateStr: Date) => {
-        const date = new Date(dateStr);
-        return new Intl.DateTimeFormat(navigator.language).format(date);
+
+      const select = (id: string) => {
+        const option = summaries.value.find(summary => summary.id === id);
+        if (option) {
+          currentLabel.value = `${option.accountName} ${formatDate(option.valueDateFrom)} - ${formatDate(option.valueDateTo)}`;
+          current.value = option;
+        }
       };
-      onMounted(() => {
-        FetchSummaries();
-      });
+
+      const formatDate = (date: Date): string => {
+        return new Intl.DateTimeFormat(navigator.language, {
+          year: 'numeric',
+          month: '2-digit',
+          day: '2-digit'
+        }).format(new Date(date));
+      };
+
+      onMounted(fetchSummaries);
+
       return {
         summaries,
         formatDate,
         currentLabel,
         current,
         select,
-        show
+        selected
       };
     },
   });
 </script>
-<style>
-  .budgetBalance[data-fldval^='-'] {
-    color: red;
-    font-weight: bold;
-  }
-
-  .budgetBalance:not([data-fldval^='-']) {
-    color: green;
-    font-weight: bold;
-  }
-</style>

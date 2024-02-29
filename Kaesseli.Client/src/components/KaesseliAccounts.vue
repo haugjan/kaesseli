@@ -1,10 +1,15 @@
 <template>
-  <div class="row ">
-    <div v-for="type in accountTypes" :key="type" class="col-md-6 col-sm-12 account-type q-pa-md">
+  <div class="row">
+    <q-breadcrumbs class="q-pa-md">
+      <q-breadcrumbs-el label="Kontoübersicht" to="/accounts" />
+    </q-breadcrumbs>
+  </div>
+  <div class="row">
+    <div v-for="type in accountTypes" :key="type" class="account-type q-pa-md col-md-6 col-sm-12">
       <q-card>
-        <q-card-section class="text-h6">{{ type }}</q-card-section>
+        <q-card-section> <q-avatar size="md" text-color="white" :color="type.color" :icon="type.icon" class="q-mr-sm" />{{ type.name }}</q-card-section>
         <q-card-section>
-          <q-table :rows="filteredAccounts(type)"
+          <q-table :rows="filteredAccounts(type.name)"
                    :columns="columns"
                    :hide-pagination="true"
                    :rows-per-page-options="[0]"
@@ -14,6 +19,7 @@
                 <q-td v-for="col in props.cols" :key="col.name" :props="props">
                   {{ col.value }}
                 </q-td>
+
               </q-tr>
             </template>
           </q-table>
@@ -22,21 +28,13 @@
       </q-card>
     </div>
   </div>
-  <div class="row">
-    <div v-if="current">
-      <KaesseliAccountTable :accountId="current.id" />
-    </div>
-    <div v-else>
-      nix
-    </div>
-
-  </div>
 </template>
 
 <script lang="ts">
   import { defineComponent, ref, Ref, onMounted } from 'vue';
-  import KaesseliAccountTable from './KaesseliAccountTable.vue';
   import axios from 'axios';
+  import { useRouter } from 'vue-router'; // Importieren von useRouter
+
 
   interface IAccount {
     id: string;
@@ -50,24 +48,24 @@
 
   export default defineComponent({
     name: 'KaesseliAccounts',
-    components: {
-      KaesseliAccountTable
-    },
-    methods: {
-      onRowClick(row: IAccount) {
-        this.current = row;
-      }
-    },
     setup() {
       const accounts = ref<IAccount[]>([]);
-      const accountTypes = ref<string[]>(['Einkommen', 'Ausgaben', 'Aktiv', 'Passiv']);
-      const current: Ref<IAccount | null> = ref(null);;
+      const accountTypes = ref([
+        { name: 'Einkommen', icon: 'attach_money', color: 'green' },
+        { name: 'Ausgaben', icon: 'money_off', color: 'red' },
+        { name: 'Aktiv', icon: 'account_balance', color: 'blue' },
+        { name: 'Passiv', icon: 'account_balance_wallet', color: 'brown' }
+      ]);
+
+      const current: Ref<IAccount | null> = ref(null);
+      const router = useRouter();
+
 
       const columns = ref([
         { name: 'name', required: true, label: 'Name', align: 'left', field: (row: IAccount) => row.name, sortable: true },
-        { name: 'accountBalance', label: 'Kontostand', align: 'right', field: (row: IAccount) => row.accountBalance, sortable: true, format: (val: number) => `${val.toFixed(2)}` },
-        { name: 'budget', label: 'Budget', align: 'right', field: (row: IAccount) => row.budget, sortable: true, format: (val: number) => `${val.toFixed(2)}` },
-        { name: 'budgetBalance', label: 'Budgetsaldo', align: 'right', field: (row: IAccount) => row.budgetBalance, sortable: true, format: (val: number) => `${val.toFixed(2)}`, classes: 'budgetBalance' },
+        { name: 'accountBalance', label: 'Kontostand', align: 'right', field: (row: IAccount) => formatNumber(row.accountBalance), sortable: true },
+        { name: 'budget', label: 'Budget', align: 'right', field: (row: IAccount) => formatNumber(row.budget), sortable: true },
+        { name: 'budgetBalance', label: 'Budgetsaldo', align: 'right', field: (row: IAccount) => formatNumber(row.budgetBalance), sortable: true, classes: 'budgetBalance' },
       ]);
 
       const fetchAccounts = async () => {
@@ -79,11 +77,21 @@
         }
       };
 
-
+      function formatNumber(value: number, locale: string = navigator.language): string {
+        return new Intl.NumberFormat(locale, {
+          style: 'decimal',
+          minimumFractionDigits: 2,
+          maximumFractionDigits: 2,
+        }).format(value);
+      }
 
       const filteredAccounts = (type: string) => {
         return accounts.value.filter(account => account.type === type);
       };
+
+      function onRowClick(row: IAccount) {
+        router.push(`/accountTable/${row.id}`);
+      }
 
       onMounted(() => {
         fetchAccounts();
@@ -94,7 +102,9 @@
         accountTypes,
         columns,
         filteredAccounts,
-        current
+        current,
+        formatNumber,
+        onRowClick
       };
     }
   });

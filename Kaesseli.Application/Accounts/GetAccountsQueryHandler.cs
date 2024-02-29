@@ -9,8 +9,16 @@ public class GetAccountsQueryHandler(IAccountRepository repository)
 {
     public async Task<IEnumerable<GetAccountsQueryResult>> Handle(GetAccountsQuery request, CancellationToken cancellationToken)
     {
-        var accounts = await repository.GetAccounts(cancellationToken);
+        var accounts = request.AccountType is null
+                           ? await repository.GetAccounts(cancellationToken)
+                           : await repository.GetAccounts(request.AccountType.Value, cancellationToken);
         return accounts.Select(
-            account => new GetAccountsQueryResult { Id = account.Id, Name = account.Name, TypeId=account.Type, Type = account.Type.DisplayName() });
+            account => new GetAccountsQueryResult
+            {
+                Id = account.Id,
+                Name = account.Name,
+                TypeId = account.Type,
+                Type = account.Type.DisplayName()
+            });
     }
 }

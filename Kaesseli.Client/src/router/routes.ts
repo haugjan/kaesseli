@@ -5,20 +5,31 @@ const routes: RouteRecordRaw[] = [
     path: '/',
     component: () => import('layouts/MainLayout.vue'),
     children: [
-      // Define 'accounts' as a child route
       {
-        path: 'accounts', // Kein führender Schrägstrich, um 'accounts' als Kind von '/' zu definieren
+        path: 'accounts', 
         component: () => import('components/KaesseliAccounts.vue')
       },
       {
-        path: 'transactions', // Kein führender Schrägstrich, um 'accounts' als Kind von '/' zu definieren
+        path: 'accountTable/:id',
+        component: () => import('components/KaesseliAccountTable.vue')
+      },
+      {
+        path: 'transactions', 
         component: () => import('components/KaesseliTransactions.vue')
       }
-      // Hier können weitere Kinderrouten hinzugefügt werden
+      ,
+      {
+        path: 'import',
+        component: () => import('components/KaesseliImport.vue')
+      },
+      {
+        path: 'assign',
+        component: () => import('components/KaesseliAssign.vue')
+      }
+      
     ]
   },
-  // Always leave this as last one,
-  // but you can also remove it
+  
   {
     path: '/:catchAll(.*)*',
     component: () => import('pages/ErrorNotFound.vue'),

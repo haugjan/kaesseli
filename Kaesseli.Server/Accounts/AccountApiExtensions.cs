@@ -1,5 +1,7 @@
 ﻿using Kaesseli.Application.Accounts;
+using Kaesseli.Domain.Accounts;
 using MediatR;
+using Microsoft.AspNetCore.Mvc;
 
 namespace Kaesseli.Server.Accounts;
 
@@ -13,8 +15,8 @@ public static class AccountApiExtensions
     {
         app.MapGet(
             pattern: "/account",
-            async (IMediator mediator) =>
-                await mediator.Send(request: new GetAccountsQuery()));
+            async (IMediator mediator, [FromQuery] AccountType? accountType) =>
+                await mediator.Send(request: new GetAccountsQuery(){AccountType = accountType}));
 
         app.MapGet(
             pattern: "/account/{accountId}",

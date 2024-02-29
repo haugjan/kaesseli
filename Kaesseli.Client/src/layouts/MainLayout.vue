@@ -11,6 +11,7 @@
           </q-avatar>
           Kässeli
         </q-toolbar-title>
+        <q-toggle v-model="darkMode" icon="contrast" color="black" />
       </q-toolbar>
 
     </q-header>
@@ -33,6 +34,14 @@
             <q-item-label>Kontobewegungen</q-item-label>
           </q-item-section>
         </q-item>
+        <q-item clickable v-ripple to="/import">
+          <q-item-section avatar>
+            <q-icon name="folder_open" />
+          </q-item-section>
+          <q-item-section>
+            <q-item-label>Import</q-item-label>
+          </q-item-section>
+        </q-item>
         <q-item clickable v-ripple to="/assign">
           <q-item-section avatar>
             <q-icon name="assignment_turned_in" />
@@ -52,17 +61,25 @@
 </template>
 
 <script>
-  import { ref } from 'vue'
+  import { ref, watch } from 'vue'
+  import { useQuasar } from 'quasar'
 
   export default {
     setup() {
       const leftDrawerOpen = ref(false)
+      const darkMode = ref(false);
+      const $q = useQuasar()
+
+      watch(darkMode, (newValue) => {
+        $q.dark.set(newValue)
+      });
 
       return {
         leftDrawerOpen,
         toggleLeftDrawer() {
           leftDrawerOpen.value = !leftDrawerOpen.value
-        }
+        },
+        darkMode
       }
     }
   }
