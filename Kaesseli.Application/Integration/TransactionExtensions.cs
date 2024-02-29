@@ -16,6 +16,6 @@ public static class TransactionExtensions
             Description = transactionSummary.Description,
             Reference = transactionSummary.Reference,
             TransactionCode = transactionSummary.TransactionCode,
-            TransactionCodeDetail = transactionSummary.TransactionCodeDetail,
+            TransactionCodeDetail = transactionSummary.TransactionCodeDetail
         };
 }

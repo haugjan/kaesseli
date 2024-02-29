@@ -16,7 +16,7 @@ public static class AccountApiExtensions
         app.MapGet(
             pattern: "/account",
             async (IMediator mediator, [FromQuery] AccountType? accountType) =>
-                await mediator.Send(request: new GetAccountsQuery(){AccountType = accountType}));
+                await mediator.Send(request: new GetAccountsQuery{AccountType = accountType}));
 
         app.MapGet(
             pattern: "/account/{accountId}",

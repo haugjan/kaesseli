@@ -1,5 +1,6 @@
 import { RouteRecordRaw } from 'vue-router';
 
+// ReSharper disable TsResolvedFromInaccessibleModule
 const routes: RouteRecordRaw[] = [
   {
     path: '/',
@@ -37,3 +38,4 @@ const routes: RouteRecordRaw[] = [
 ];
 
 export default routes;
+// ReSharper restore TsResolvedFromInaccessibleModule

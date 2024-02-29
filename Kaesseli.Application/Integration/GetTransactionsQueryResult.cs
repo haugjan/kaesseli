@@ -1,6 +1,4 @@
-﻿using Kaesseli.Domain.Integration;
-
-namespace Kaesseli.Application.Integration;
+﻿namespace Kaesseli.Application.Integration;
 
 public class GetTransactionsQueryResult
 {
