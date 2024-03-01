@@ -19,7 +19,14 @@ public class BudgetEntryTests
             ValueDate = new DateOnly(year: 2000, month: 12, day: 13),
             Description = "Budget entry",
             Amount = 42.42m,
-            Account = new Account { Id = Guid.NewGuid(), Name = "Account", Type = accountType }
+            Account = new Account
+            {
+                Id = Guid.NewGuid(),
+                Name = "Account",
+                Type = accountType,
+                Icon = "favorite",
+                IconColor = "blue"
+            }
         };
 
         //Assert
@@ -38,7 +45,14 @@ public class BudgetEntryTests
             ValueDate = new DateOnly(year: 2000, month: 12, day: 13),
             Description = "Budget entry",
             Amount = 42.42m,
-            Account = new Account { Id = Guid.NewGuid(), Name = "Account", Type = accountType }
+            Account = new Account
+            {
+                Id = Guid.NewGuid(),
+                Name = "Account",
+                Type = accountType,
+                Icon = "favorite",
+                IconColor = "blue"
+            }
         };
 
         //Assert

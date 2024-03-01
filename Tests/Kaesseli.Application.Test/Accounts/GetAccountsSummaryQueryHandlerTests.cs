@@ -15,9 +15,9 @@ public class GetAccountsSummaryQueryHandlerTests
     private const decimal BudgetAmount = 7;
 
     [Theory]
-    [InlineData(AccountType.Revenue, -2)] //DebitAmount - CreditAmount
-    [InlineData(AccountType.Expense, 2)] //CreditAmount - DebitAmount 
-    public async Task Handle_WithBudget_ReturnsAccountSummary(AccountType accountType, decimal accountBalance)
+    [InlineData(AccountType.Revenue, 2, 5)] //CreditAmount - DebitAmount 
+    [InlineData(AccountType.Expense, -2, 9)] //DebitAmount - CreditAmount   
+    public async Task Handle_WithBudget_ReturnsAccountSummary(AccountType accountType, decimal accountBalance, decimal budgetBalance)
     {
         // Arrange
         var accountRepo = new Mock<IAccountRepository>();
@@ -26,8 +26,22 @@ public class GetAccountsSummaryQueryHandlerTests
 
         var handler = new GetAccountsSummaryQueryHandler(accountRepo.Object, journalRepo.Object, budgetRepo.Object);
 
-        var otherAccount = new Account { Id = Guid.NewGuid(), Name = "Other Account", Type = AccountType.Expense };
-        var accountToTest = new Account { Id = Guid.NewGuid(), Name = "Current Account", Type = accountType };
+        var accountToTest = new Account
+        {
+            Id = Guid.NewGuid(),
+            Name = "Current Account",
+            Type = accountType,
+            Icon = "favorite",
+            IconColor = "blue"
+        };
+        var otherAccount = new Account
+        {
+            Id = Guid.NewGuid(),
+            Name = "Other Account",
+            Type = AccountType.Expense,
+            Icon = "favorite",
+            IconColor = "blue"
+        };
 
         var journalEntries = CreateTestJournalEntries(accountToTest, otherAccount);
         var budgetEntries = CreateTestBudgetEntries(accountToTest);
@@ -51,7 +65,7 @@ public class GetAccountsSummaryQueryHandlerTests
         summaryToTest.Id.Should().Be(accountToTest.Id);
         summaryToTest.AccountBalance.Should().Be(accountBalance);
         summaryToTest.Budget.Should().Be(BudgetAmount);
-        summaryToTest.BudgetBalance.Should().Be(expected: BudgetAmount + accountBalance);
+        summaryToTest.BudgetBalance.Should().Be(expected: budgetBalance);
         summaryToTest.Name.Should().Be(accountToTest.Name);
         summaryToTest.Type.Should().Be(expected: accountToTest.Type.DisplayName());
         summaryToTest.TypeId.Should().Be(accountToTest.Type);
@@ -69,8 +83,22 @@ public class GetAccountsSummaryQueryHandlerTests
 
         var handler = new GetAccountsSummaryQueryHandler(accountRepo.Object, journalRepo.Object, budgetRepo.Object);
 
-        var otherAccount = new Account { Id = Guid.NewGuid(), Name = "Other Account", Type = AccountType.Expense };
-        var accountToTest = new Account { Id = Guid.NewGuid(), Name = "Current Account", Type = accountType };
+        var otherAccount = new Account
+        {
+            Id = Guid.NewGuid(),
+            Name = "Other Account",
+            Type = AccountType.Expense,
+            Icon = "favorite",
+            IconColor = "blue"
+        };
+        var accountToTest = new Account
+        {
+            Id = Guid.NewGuid(),
+            Name = "Current Account",
+            Type = accountType,
+            Icon = "favorite",
+            IconColor = "blue"
+        };
 
         var journalEntries = CreateTestJournalEntries(accountToTest, otherAccount);
 
@@ -92,8 +120,8 @@ public class GetAccountsSummaryQueryHandlerTests
         var summaryToTest = result[1];
         summaryToTest.Id.Should().Be(accountToTest.Id);
         summaryToTest.AccountBalance.Should().Be(accountBalance);
-        summaryToTest.Budget.Should().Be(expected: 0);
-        summaryToTest.BudgetBalance.Should().Be(accountBalance);
+        summaryToTest.Budget.Should().BeNull();
+        summaryToTest.BudgetBalance.Should().BeNull();
         summaryToTest.Name.Should().Be(accountToTest.Name);
         summaryToTest.Type.Should().Be(expected: accountToTest.Type.DisplayName());
         summaryToTest.TypeId.Should().Be(accountToTest.Type);
@@ -120,7 +148,8 @@ public class GetAccountsSummaryQueryHandlerTests
             Description = "Test 1",
             Amount = DebitAmount,
             DebitAccount = accountToTest,
-            CreditAccount = otherAccount
+            CreditAccount = otherAccount,
+            Transaction = null
         },
 
         new()
@@ -130,7 +159,8 @@ public class GetAccountsSummaryQueryHandlerTests
             Description = "Test 2",
             Amount = CreditAmount,
             DebitAccount = otherAccount,
-            CreditAccount = accountToTest
+            CreditAccount = accountToTest,
+            Transaction = null
         }
     ];
 }

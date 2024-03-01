@@ -10,22 +10,23 @@
       <q-card>
 
         <q-card-section>
-          {{account.name}} ({{account.type}})
+          <span class="header">
+            <q-avatar :icon="account.icon" size="md" text-color="white" :color="account.iconColor" />
+            {{account.name}} ({{account.type}})
+          </span>
         </q-card-section>
         <q-card-section>
           <q-chip color="blue-10" text-color="white" icon="account_balance_wallet">
             {{formatNumber(account.accountBalance)}}
           </q-chip>
-          <q-chip color="brown-7" text-color="white" icon="savings">
-            {{formatNumber(account.budget)}}
-          </q-chip>
-          <span v-if="account.budgetBalance >= 0">
-            <q-chip color="green-9" text-color="white" icon="balance">
+          <span v-if="account.parentTypeId === 2">
+            <q-chip color="brown-7" text-color="white" icon="savings">
+              {{formatNumber(account.budget)}}
+            </q-chip>
+            <q-chip v-if="account.budgetBalance >= 0" color="green-9" text-color="white" icon="balance">
               {{formatNumber(account.budgetBalance)}}
             </q-chip>
-          </span>
-          <span v-if="account.budgetBalance < 0">
-            <q-chip color="red-14" text-color="white" icon="balance">
+            <q-chip v-if="account.budgetBalance < 0" color="red-14" text-color="white" icon="balance">
               {{ formatNumber(account.budgetBalance)}}
             </q-chip>
           </span>
@@ -36,7 +37,16 @@
                      :columns="columns"
                      :hide-pagination="true"
                      :rows-per-page-options="[0]"
-                     row-key="id"></q-table>
+                     row-key="id"
+                     dense>
+              <template v-slot:body="props">
+                <q-tr :class="{'italic-row': props.row.amountType === 1}" :props="props" @click="onRowClick(props.row)">
+                  <q-td v-for="col in props.cols" :key="col.name" :props="props" :data-fldval="col.value">
+                    {{ col.value }}
+                  </q-td>
+                </q-tr>
+              </template>
+            </q-table>
           </div>
         </q-card-section>
       </q-card>
@@ -55,9 +65,11 @@
     name: string,
     type: string,
     typeId: number,
+    parentType: string,
+    parentTypeId: number,
     accountBalance: number,
-    budget: number,
-    budgetBalance: number
+    budget: number | null,
+    budgetBalance: number | null
     entries: IAccountEntry[]
   }
 
@@ -79,13 +91,13 @@
   export default defineComponent({
     setup(props) {
       const account = ref<IAccount | null>(null);
-      const route = useRoute(); 
+      const route = useRoute();
 
       const columns = ref([
         { name: 'valueDate', required: true, label: 'Datum', align: 'left', field: (row: IAccountEntry) => formatDate(row.valueDate), sortable: true },
         { name: 'description', required: true, label: 'Beschreibung', align: 'left', field: (row: IAccountEntry) => row.description, sortable: true },
         { name: 'otherAccount', required: true, label: 'Gegenkonto', align: 'left', field: (row: IAccountEntry) => row.otherAccount, sortable: true },
-        { name: 'Betrag', required: true, label: 'Betrag', align: 'right', field: (row: IAccountEntry) => formatNumber(row.amount), sortable: true },
+        { name: 'Betrag', required: true, label: 'Betrag', align: 'right', field: (row: IAccountEntry) => formatNumber(row.amount), sortable: true, classes: 'budgetBalance' },
       ]);
 
       const FetchEntries = async () => {
@@ -132,4 +144,18 @@
   });
 </script>
 <style>
-</style>
+  .italic-row {
+    font-style: italic;
+  }
+
+  .budgetBalance[data-fldval^='-'] {
+    color: red;
+    font-weight: bold;
+  }
+
+  .budgetBalance:not([data-fldval^='-']) {
+    color: green;
+    font-weight: bold;
+  }
+</style>  
+

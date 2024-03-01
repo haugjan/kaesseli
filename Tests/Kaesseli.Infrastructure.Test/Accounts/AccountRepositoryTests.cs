@@ -20,7 +20,14 @@ public class AccountRepositoryTests
                       .UseInMemoryDatabase(databaseName: "AddAccountDb")
                       .Options;
 
-        var account = new Account { Id = Guid.NewGuid(), Name = "Test Account", Type = AccountType.Asset };
+        var account = new Account
+        {
+            Id = Guid.NewGuid(),
+            Name = "Test Account",
+            Type = AccountType.Asset,
+            Icon = "favorite",
+            IconColor = "blue"
+        };
 
         await using var context = CreateContext(options);
         var repository = new AccountRepository(context);
@@ -46,8 +53,22 @@ public class AccountRepositoryTests
         var cancellationToken = new CancellationToken();
 
         await using var setupContext = CreateContext(options);
-        setupContext.Accounts.Add(entity: new Account { Id = Guid.NewGuid(), Name = "Account 1", Type = AccountType.Expense });
-        setupContext.Accounts.Add(entity: new Account { Id = Guid.NewGuid(), Name = "Account 2", Type = AccountType.Expense });
+        setupContext.Accounts.Add(entity: new Account
+        {
+            Id = Guid.NewGuid(),
+            Name = "Account 1",
+            Type = AccountType.Expense,
+            Icon = "favorite",
+            IconColor = "blue"
+        });
+        setupContext.Accounts.Add(entity: new Account
+        {
+            Id = Guid.NewGuid(),
+            Name = "Account 2",
+            Type = AccountType.Expense,
+            Icon = "favorite",
+            IconColor = "blue"
+        });
         await setupContext.SaveChangesAsync(cancellationToken);
 
         var repository = new AccountRepository(setupContext);
@@ -60,6 +81,56 @@ public class AccountRepositoryTests
     }
 
     [Fact]
+    public async Task GetAccountsOfType_ShouldReturnAccountsOfType()
+    {
+        // Arrange
+        var options = new DbContextOptionsBuilder<KaesseliContext>()
+                      .UseInMemoryDatabase(databaseName: "GetAccountsDb")
+                      .Options;
+        var cancellationToken = new CancellationToken();
+
+        await using var setupContext = CreateContext(options);
+        var accounts = new List<Account>
+        {
+            new()
+            {
+                Id = Guid.NewGuid(),
+                Name = "Account 1",
+                Type = AccountType.Asset,
+                Icon = "favorite",
+                IconColor = "blue"
+            },
+            new()
+            {
+                Id = Guid.NewGuid(),
+                Name = "Account 2",
+                Type = AccountType.Expense,
+                Icon = "favorite",
+                IconColor = "blue"
+            },
+            new()
+            {
+                Id = Guid.NewGuid(),
+                Name = "Account 3",
+                Type = AccountType.Asset,
+                Icon = "favorite",
+                IconColor = "blue"
+            }
+        };
+        setupContext.Accounts.AddRange(accounts);
+        await setupContext.SaveChangesAsync(cancellationToken);
+
+        var repository = new AccountRepository(setupContext);
+
+        // Act
+        var currentAccounts = (await repository.GetAccounts(AccountType.Asset, cancellationToken)).ToArray();
+
+        // Assert
+        currentAccounts.Should().HaveCount(expected: 2);
+        currentAccounts.Should().BeEquivalentTo(expectation: accounts.Where(account => account.Type == AccountType.Asset));
+    }
+
+    [Fact]
     public async Task GetAccount_ShouldReturnAccountWhenExists()
     {
         // Arrange
@@ -67,7 +138,14 @@ public class AccountRepositoryTests
                       .UseInMemoryDatabase(databaseName: "GetAccountDb")
                       .Options;
 
-        var account = new Account { Id = Guid.NewGuid(), Name = "Existing Account", Type = AccountType.Liability };
+        var account = new Account
+        {
+            Id = Guid.NewGuid(),
+            Name = "Existing Account",
+            Type = AccountType.Liability,
+            Icon = "favorite",
+            IconColor = "blue"
+        };
 
         await using var setupContext = CreateContext(options);
         setupContext.Accounts.Add(account);

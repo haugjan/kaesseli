@@ -1,6 +1,6 @@
 ﻿using MediatR;
 
-namespace Kaesseli.Application.Integration;
+namespace Kaesseli.Application.Integration.Camt;
 
 // ReSharper disable once ClassNeverInstantiated.Global
 public class ProcessCamtFileCommand : IRequest<Guid>

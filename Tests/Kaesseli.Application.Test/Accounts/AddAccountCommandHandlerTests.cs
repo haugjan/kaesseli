@@ -13,7 +13,13 @@ public class AddAccountCommandHandlerTests
         // Arrange
         var mockRepo = new Mock<IAccountRepository>();
         const string name = "MyAccount";
-        var command = new AddAccountCommand { Name = name, Type = AccountType.Expense};
+        var command = new AddAccountCommand
+        {
+            Name = name,
+            Type = AccountType.Expense,
+            Icon = "favorite",
+            IconColor = "blue"
+        };
         var cancellationToken = new CancellationToken();
 
         mockRepo.Setup(

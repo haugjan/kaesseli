@@ -10,7 +10,14 @@ public class AccountExtensionsTest
     public void Test()
     {
         //Arrange
-        var account = new Account { Id = Guid.NewGuid(), Name = "Account", Type = AccountType.Expense };
+        var account = new Account
+        {
+            Id = Guid.NewGuid(),
+            Name = "Account",
+            Type = AccountType.Expense,
+            Icon = "favorite",
+            IconColor = "blue"
+        };
 
         //Act
         var summary = account.ToAccountSummary(accountBalance: 3m, budget: 5m, budgetBalance: 7m);

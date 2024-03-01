@@ -1,5 +1,5 @@
 ﻿using FluentAssertions;
-using Kaesseli.Application.Integration;
+using Kaesseli.Application.Integration.Camt;
 using Kaesseli.Infrastructure.Integration;
 using Xunit;
 
@@ -59,7 +59,7 @@ public class CamtProcessorTests
                                         Cd: ICDT
                                         SubFmlyCd: BOOK
                                     Prtry: 
-
+                                    
                                     """
         },
 
@@ -85,7 +85,7 @@ public class CamtProcessorTests
                                         Cd: RCDT
                                         SubFmlyCd: AUTT
                                     Prtry: 
-
+                                    
                                     """
         }
     ];

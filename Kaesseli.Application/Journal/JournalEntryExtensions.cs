@@ -17,6 +17,7 @@ internal static class JournalEntryExtensions
             Amount = request.Amount,
             Description = request.Description,
             CreditAccount = creditAccount,
-            DebitAccount = debitAccount
+            DebitAccount = debitAccount,
+            Transaction = null
         };
 }

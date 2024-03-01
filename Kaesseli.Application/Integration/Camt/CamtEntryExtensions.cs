@@ -1,6 +1,5 @@
-﻿
-using System.Collections.Immutable;
-using Kaesseli.Application.Integration;
+﻿using System.Collections.Immutable;
+using Kaesseli.Application.Integration.Camt;
 using Kaesseli.Domain.Accounts;
 using Kaesseli.Domain.Integration;
 
@@ -9,7 +8,6 @@ namespace Kaesseli.Domain.Journal;
 
 internal static class CamtEntryExtensions
 {
-
     public static TransactionSummary ToTransactionSummary(this CamtDocument camtDocument, Account account) =>
         new()
         {

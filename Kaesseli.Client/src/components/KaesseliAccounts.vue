@@ -7,21 +7,36 @@
   <div class="row">
     <div v-for="type in accountTypes" :key="type" class="account-type q-pa-md col-md-6 col-sm-12">
       <q-card>
-        <q-card-section> <q-avatar size="md" text-color="white" :color="type.color" :icon="type.icon" class="q-mr-sm" />{{ type.name }}</q-card-section>
+        <span class="header">
+          <q-card-section> <q-avatar size="md" text-color="white" :color="type.color" :icon="type.icon" class="q-mr-sm shadow-3" />{{ type.name }}</q-card-section>
+        </span>
         <q-card-section>
           <q-table :rows="filteredAccounts(type.name)"
                    :columns="columns"
                    :hide-pagination="true"
                    :rows-per-page-options="[0]"
-                   row-key="id">
+                   row-key="id"
+                   dense>
             <template v-slot:body="props">
               <q-tr :props="props" @click="onRowClick(props.row)">
-                <q-td v-for="col in props.cols" :key="col.name" :props="props">
-                  {{ col.value }}
+                <q-td v-for="col in props.cols" :key="col.name" :props="props" :data-fldval="col.value">
+                  <span v-if="col.name!=='icon'">{{ col.value }}</span>
+                  <span v-if="col.name==='icon'">
+                    <q-avatar :icon="props.row.icon" size="sm" text-color="white" :color="props.row.iconColor" :label="props.value" />
+                  </span>
                 </q-td>
 
               </q-tr>
             </template>
+            <template v-slot:body-cell-icon="props">
+              <q-td :props="props" @click="onRowClick(props.row)">
+                <div>
+                  <q-avatar :icon="props.row.icon" size="sm" text-color="white" :color="props.row.iconColor" :label="props.value" />
+                </div>
+
+              </q-td>
+            </template>
+
           </q-table>
         </q-card-section>
 
@@ -36,20 +51,24 @@
   import { useRouter } from 'vue-router'; // Importieren von useRouter
 
 
-  interface IAccount {
+  interface IAccountSummary {
     id: string;
     name: string;
+    icon: string;
+    iconColor: string;
     type: string;
     typeId: number;
+    parentType: string;
+    parentTypeId: number;
     accountBalance: number;
-    budget: number;
-    budgetBalance: number;
+    budget: number | null;
+    budgetBalance: number | null;
   }
 
   export default defineComponent({
     name: 'KaesseliAccounts',
     setup() {
-      const accounts = ref<IAccount[]>([]);
+      const accounts = ref<IAccountSummary[]>([]);
       const accountTypes = ref([
         { name: 'Einkommen', icon: 'attach_money', color: 'green' },
         { name: 'Ausgaben', icon: 'money_off', color: 'red' },
@@ -57,15 +76,15 @@
         { name: 'Passiv', icon: 'account_balance_wallet', color: 'brown' }
       ]);
 
-      const current: Ref<IAccount | null> = ref(null);
+      const current: Ref<IAccountSummary | null> = ref(null);
       const router = useRouter();
 
-
       const columns = ref([
-        { name: 'name', required: true, label: 'Name', align: 'left', field: (row: IAccount) => row.name, sortable: true },
-        { name: 'accountBalance', label: 'Kontostand', align: 'right', field: (row: IAccount) => formatNumber(row.accountBalance), sortable: true },
-        { name: 'budget', label: 'Budget', align: 'right', field: (row: IAccount) => formatNumber(row.budget), sortable: true },
-        { name: 'budgetBalance', label: 'Budgetsaldo', align: 'right', field: (row: IAccount) => formatNumber(row.budgetBalance), sortable: true, classes: 'budgetBalance' },
+        { name: 'icon', required: true, label: '', align: 'left', field: (row: IAccountSummary) => row.icon, sortable: true },
+        { name: 'name', required: true, label: 'Name', align: 'left', field: (row: IAccountSummary) => row.name, sortable: true },
+        { name: 'accountBalance', label: 'Kontostand', align: 'right', field: (row: IAccountSummary) => formatNumber(row.accountBalance), sortable: true },
+        { name: 'budget', label: 'Budget', align: 'right', field: (row: IAccountSummary) => formatNumber(row.budget), sortable: true },
+        { name: 'budgetBalance', label: 'Budgetsaldo', align: 'right', field: (row: IAccountSummary) => formatNumber(row.budgetBalance), sortable: true, classes: 'budgetBalance' },
       ]);
 
       const fetchAccounts = async () => {
@@ -77,7 +96,9 @@
         }
       };
 
-      function formatNumber(value: number, locale: string = navigator.language): string {
+      function formatNumber(value: number | null, locale: string = navigator.language): string {
+        if (!value)
+          return "";
         return new Intl.NumberFormat(locale, {
           style: 'decimal',
           minimumFractionDigits: 2,
@@ -89,7 +110,15 @@
         return accounts.value.filter(account => account.type === type);
       };
 
-      function onRowClick(row: IAccount) {
+      function getColumns(type: string) {
+        if (type === 'Aktiv' || type === 'Passiv') {
+          return columns.value.filter(column => column.name !== 'budget'
+            && column.name !== 'budgetBalance');
+        }
+        return columns;
+      }
+
+      function onRowClick(row: IAccountSummary) {
         router.push(`/accountTable/${row.id}`);
       }
 
@@ -102,6 +131,7 @@
         accountTypes,
         columns,
         filteredAccounts,
+        getColumns,
         current,
         formatNumber,
         onRowClick

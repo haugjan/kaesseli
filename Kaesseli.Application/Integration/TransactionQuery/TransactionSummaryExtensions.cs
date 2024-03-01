@@ -1,7 +1,7 @@
-﻿using Kaesseli.Application.Integration;
+﻿using Kaesseli.Domain.Integration;
 
 // ReSharper disable once CheckNamespace
-namespace Kaesseli.Domain.Integration;
+namespace Kaesseli.Application.Integration.TransactionQuery;
 
 public static class TransactionSummaryExtensions
 {

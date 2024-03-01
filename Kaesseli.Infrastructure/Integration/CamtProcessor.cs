@@ -1,5 +1,5 @@
 ﻿using System.Xml.Serialization;
-using Kaesseli.Application.Integration;
+using Kaesseli.Application.Integration.Camt;
 
 namespace Kaesseli.Infrastructure.Integration;
 
@@ -52,7 +52,9 @@ internal class CamtProcessor : ICamtProcessor
             throw new FormatException(message: "Found journal entry with status code not equals to 'book'");
 
         if (document.BkToCstmrStmt.Stmt.Length != 1)
+        {
             throw new FormatException(
                 message: $"Only one account statement per document allowed, but found {document.BkToCstmrStmt.Stmt.Length}");
+        }
     }
 }

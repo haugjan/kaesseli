@@ -1,4 +1,6 @@
-﻿namespace Kaesseli.Domain.Integration;
+﻿using Kaesseli.Domain.Journal;
+
+namespace Kaesseli.Domain.Integration;
 
 public class Transaction
 {
@@ -12,4 +14,5 @@ public class Transaction
     public required string TransactionCode { get; init; }
     public required string TransactionCodeDetail { get; init; }
     public required TransactionSummary? TransactionSummary { get; init; }
+    public IEnumerable<JournalEntry>? JournalEntries { get; init; }
 }

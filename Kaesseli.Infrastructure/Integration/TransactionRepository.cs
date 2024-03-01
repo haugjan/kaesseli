@@ -30,4 +30,15 @@ internal class TransactionRepository : ITransactionRepository
         await _context.Transactions
                       .Where(tran => tran.TransactionSummary!.Id == transactionSummaryId)
                       .ToListAsync(cancellationToken);
+
+    public async Task<Transaction?> GetNextOpenTransaction(int skip, CancellationToken cancellationToken)
+    {
+        return await _context.Transactions
+                             .Include(tran=> tran.TransactionSummary)
+                             .Where(
+                   tran => tran.JournalEntries!.Any() == false)
+                             .OrderBy(tran=> tran.ValueDate)
+                             .Skip(skip)
+                             .FirstOrDefaultAsync(cancellationToken: cancellationToken);
+    }
 }

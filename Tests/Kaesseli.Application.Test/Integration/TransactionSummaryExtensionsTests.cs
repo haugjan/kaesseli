@@ -1,4 +1,5 @@
 ﻿using FluentAssertions;
+using Kaesseli.Application.Integration.TransactionQuery;
 using Kaesseli.Domain.Integration;
 using Kaesseli.TestUtilities.Faker;
 using Xunit;

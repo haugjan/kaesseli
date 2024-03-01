@@ -17,8 +17,7 @@ public class GetAccountsQueryHandler(IAccountRepository repository)
             {
                 Id = account.Id,
                 Name = account.Name,
-                TypeId = account.Type,
-                Type = account.Type.DisplayName()
+                TypeId = account.Type
             });
     }
 }

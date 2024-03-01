@@ -1,5 +1,6 @@
 ﻿using FluentAssertions;
 using Kaesseli.Domain.Integration;
+using Kaesseli.Domain.Journal;
 using Kaesseli.Infrastructure.Common;
 using Kaesseli.Infrastructure.Integration;
 using Kaesseli.TestUtilities.Faker;
@@ -93,5 +94,27 @@ public class TransactionRepositoryTests
                                             .Include(statement => statement.Account)
                                             .SingleAsync();
         addedEntry.Should().BeEquivalentTo(transactionSummary, opt => opt.IgnoringCyclicReferences());
+    }
+
+    [Fact]
+    public async Task GetNextOpenTransaction_ReturnsTransaction()
+    {
+        // Arrange
+        var options = new DbContextOptionsBuilder<KaesseliContext>()
+                      .UseInMemoryDatabase(databaseName: "GetNextOpenTransactionDb")
+                      .Options;
+        var context = CreateContext(options);
+        var repository = new TransactionRepository(context);
+        var transaction = new SmartFaker<Transaction>()
+                          .RuleFor(t => t.JournalEntries, _ => new SmartFaker<JournalEntry>()
+                                       .Generate(count: 5)).Generate();
+        context.Transactions.Add(transaction);
+        await context.SaveChangesAsync();
+
+        // Act
+        var result = await repository.GetNextOpenTransaction(skip: 0, cancellationToken: default);
+
+        // Assert
+        Assert.NotNull(result);
     }
 }

@@ -54,7 +54,14 @@ public class BudgetRepositoryTests
             ValueDate = new DateOnly(year: 2000, month: 01, day: 01),
             Description = "Description 1",
             Amount = 42.42m,
-            Account = new Account { Id = Guid.NewGuid(), Name = "Account 1", Type = AccountType.Revenue }
+            Account = new Account
+            {
+                Id = Guid.NewGuid(),
+                Name = "Account 1",
+                Type = AccountType.Revenue,
+                Icon = "favorite",
+                IconColor = "blue"
+            }
         },
 
         new()
@@ -63,7 +70,14 @@ public class BudgetRepositoryTests
             ValueDate = new DateOnly(year: 2001, month: 01, day: 01),
             Description = "Description 2",
             Amount = 24.24m,
-            Account = new Account { Id = Guid.NewGuid(), Name = "Account 2", Type = AccountType.Expense }
+            Account = new Account
+            {
+                Id = Guid.NewGuid(),
+                Name = "Account 2",
+                Type = AccountType.Expense,
+                Icon = "favorite",
+                IconColor = "blue"
+            }
         }
     ];
 
@@ -78,7 +92,14 @@ public class BudgetRepositoryTests
         var newEntry = new BudgetEntry
         {
             Id = Guid.NewGuid(),
-            Account = new Account { Id = Guid.NewGuid(), Name = "Account", Type = AccountType.Expense },
+            Account = new Account
+            {
+                Id = Guid.NewGuid(),
+                Name = "Account",
+                Type = AccountType.Expense,
+                Icon = "favorite",
+                IconColor = "blue"
+            },
             ValueDate = DateOnly.FromDateTime(DateTime.Now),
             Description = "Description",
             Amount = 11.11m

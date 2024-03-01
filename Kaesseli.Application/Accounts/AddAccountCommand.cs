@@ -8,4 +8,6 @@ public class AddAccountCommand : IRequest<Guid>
 {
     public required string Name { get; init; }
     public required AccountType Type { get; init; }
+    public required string Icon { get; init; }
+    public required string IconColor { get; init; }
 }

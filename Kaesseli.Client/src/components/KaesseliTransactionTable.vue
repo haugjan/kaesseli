@@ -43,7 +43,7 @@
 
       const FetchSummaries = async (summaryId: string) => {
         try {
-          const response = await axios.get(`https://localhost:7123/transaction?transactionSummeryId=${summaryId}`);
+          const response = await axios.get(`https://localhost:7123/transaction?transactionSummaryId=${summaryId}`);
           transactions.value = response.data;
         } catch (error) {
           console.error('There was an error fetching the transactions:', error);

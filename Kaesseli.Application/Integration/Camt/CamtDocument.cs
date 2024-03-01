@@ -1,4 +1,4 @@
-﻿namespace Kaesseli.Application.Integration;
+﻿namespace Kaesseli.Application.Integration.Camt;
 
 public class CamtDocument
 {

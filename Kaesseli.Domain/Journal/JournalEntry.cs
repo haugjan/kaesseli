@@ -1,5 +1,6 @@
 ﻿using System.Diagnostics.CodeAnalysis;
 using Kaesseli.Domain.Accounts;
+using Kaesseli.Domain.Integration;
 
 namespace Kaesseli.Domain.Journal;
 
@@ -32,6 +33,8 @@ public class JournalEntry
             _creditAccount = value;
         }
     }
+
+    public required Transaction? Transaction { get; init; }
 
     private static void ThrowIfAccountsAreSame(Account? firstAccount, Account? secondAccount)
     {

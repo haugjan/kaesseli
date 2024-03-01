@@ -1,5 +1,5 @@
 ﻿using FluentAssertions;
-using Kaesseli.Application.Integration;
+using Kaesseli.Application.Integration.Camt;
 using Kaesseli.Domain.Accounts;
 using Kaesseli.Domain.Integration;
 using Kaesseli.TestUtilities.Faker;
@@ -30,7 +30,14 @@ public class ProcessCamtFileCommandHandlerTests
         _accountRepoMock.Setup(repo => repo.GetAccount(fakeCommand.AccountId, cancellationToken))
                         .ReturnsAsync(
                             (Guid accountId, CancellationToken _) =>
-                                new Account { Id = accountId, Name = "Account", Type = AccountType.Expense });
+                                new Account
+                                {
+                                    Id = accountId,
+                                    Name = "Account",
+                                    Type = AccountType.Expense,
+                                    Icon = "favorite",
+                                    IconColor = "blue"
+                                });
         _camtProcessorMock.Setup(x => x.ReadCamtFile(fakeCommand.Content, It.IsAny<CancellationToken>()))
                           .ReturnsAsync(fakeCamtDocument);
 

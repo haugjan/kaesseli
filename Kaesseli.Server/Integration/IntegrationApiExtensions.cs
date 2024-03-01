@@ -1,4 +1,6 @@
-﻿using Kaesseli.Application.Integration;
+﻿using Kaesseli.Application.Integration.Camt;
+using Kaesseli.Application.Integration.NextOpenTransaction;
+using Kaesseli.Application.Integration.TransactionQuery;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 
@@ -21,12 +23,17 @@ public static class IntegrationApiExtensions
             });
         app.MapGet(
             pattern: "/transaction",
-            async (IMediator mediator, [FromQuery] Guid transactionSummeryId) =>
+            async (IMediator mediator, [FromQuery] Guid transactionSummaryId) =>
             {
-                var query = new GetTransactionsQuery
-                {
-                    TransactionSummaryId = transactionSummeryId
-                };
+                var query = new GetTransactionsQuery { TransactionSummaryId = transactionSummaryId };
+                return await mediator.Send(query);
+            });
+
+        app.MapGet(
+            pattern: "/transaction/nextOpen",
+            async (IMediator mediator, [FromQuery] int? skip) =>
+            {
+                var query = new GetNextOpenTransactionQuery { Skip = skip.GetValueOrDefault() };
                 return await mediator.Send(query);
             });
 

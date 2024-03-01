@@ -44,6 +44,18 @@ public class KaesseliContext : DbContext
                       .HasForeignKey("CreditAccountId") 
                       .IsRequired()
                       .OnDelete(DeleteBehavior.Restrict);
+                entity.HasOne(je => je.Transaction)
+                      .WithMany(tran => tran.JournalEntries)
+                      .HasForeignKey("TransactionId");
+            });
+        modelBuilder.Entity<Transaction>(
+            entity =>
+            {
+                entity.HasMany(je => je.JournalEntries)
+                      .WithOne()
+                      .HasForeignKey("TransactionId")
+                      .OnDelete(DeleteBehavior.Restrict);
+               
 
             });
         modelBuilder.Entity<TransactionSummary>(

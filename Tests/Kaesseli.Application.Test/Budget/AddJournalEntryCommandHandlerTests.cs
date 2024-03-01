@@ -26,7 +26,14 @@ public class AddJournalEntryCommandHandlerTests
                         cancellationToken))
                 .ReturnsAsync((BudgetEntry newBudgetEntry, CancellationToken _) => newBudgetEntry);
         accountRepo.Setup(repo => repo.GetAccount(It.IsAny<Guid>(), cancellationToken))
-                   .ReturnsAsync(() => new Account { Id = Guid.NewGuid(), Name = "Account", Type = AccountType.Expense });
+                   .ReturnsAsync(() => new Account
+                   {
+                       Id = Guid.NewGuid(),
+                       Name = "Account",
+                       Type = AccountType.Expense,
+                       Icon = "favorite",
+                       IconColor = "blue"
+                   });
 
         var handler = new AddBudgetEntryCommandHandler(mockRepo.Object, accountRepo.Object, dateTimeService.Object);
 
@@ -63,7 +70,14 @@ public class AddJournalEntryCommandHandlerTests
                 .ReturnsAsync((BudgetEntry newBudgetEntry, CancellationToken _) => newBudgetEntry);
         dateTimeService.Setup(dts => dts.ToDay).Returns(currentDay);
         accountRepo.Setup(repo => repo.GetAccount(It.IsAny<Guid>(), cancellationToken))
-                   .ReturnsAsync(() => new Account { Id = Guid.NewGuid(), Name = "Account", Type = AccountType.Expense });
+                   .ReturnsAsync(() => new Account
+                   {
+                       Id = Guid.NewGuid(),
+                       Name = "Account",
+                       Type = AccountType.Expense,
+                       Icon = "favorite",
+                       IconColor = "blue"
+                   });
         var handler = new AddBudgetEntryCommandHandler(mockRepo.Object, accountRepo.Object, dateTimeService.Object);
 
         // Act

@@ -1,5 +1,6 @@
 ﻿using Kaesseli.Domain.Budget;
 using Kaesseli.Domain.Journal;
+using Serilog;
 
 namespace Kaesseli.Domain.Accounts;
 
@@ -7,46 +8,36 @@ public class Account
 {
     public required Guid Id { get; init; }
     public required string Name { get; init; }
-
     public required AccountType Type { get; init; }
+    public required string Icon { get; init; }
+    public required string IconColor { get; init; }
 
-    public decimal GetAccountBalance(IEnumerable<JournalEntry> entries)
+    public decimal GetAccountBalance(IEnumerable<JournalEntry> entries) =>
+        entries.Select(GetSignedAmount).Sum();
+
+    public decimal GetSignedAmount(JournalEntry entry)
     {
-        entries = entries.ToArray();
-        var debits = GetDebits(entries);
-        var credits = GetCredits(entries);
-        return GetBalanceDependingOnAccountType(debits, credits);
+        var amount = entry.Amount;
+        if (Type is AccountType.Liability or AccountType.Revenue) amount = -amount;
+
+        if (entry.DebitAccount.Id == Id) return amount;
+        if (entry.CreditAccount.Id == Id) return -amount;
+
+        return 0;
     }
 
-    public decimal GetBudget(IEnumerable<BudgetEntry> entries) =>
-        entries.Where(entry => entry.Account.Id == Id).Sum(entry => entry.Amount);
-
-    public decimal GetBudgetBalance(decimal budget, decimal accountBalance) =>
-        Type is AccountType.Revenue or AccountType.Asset 
-            ? accountBalance - budget 
-            : budget - accountBalance;
-
-    private decimal GetBalanceDependingOnAccountType(decimal debits, decimal credits)
+    public decimal? GetBudget(IEnumerable<BudgetEntry> entries)
     {
-        var balance = Type switch
-        {
-            AccountType.Asset => debits - credits,
-            AccountType.Liability => credits - debits,
-            AccountType.Revenue => credits - debits,
-            AccountType.Expense => debits - credits,
-            // ReSharper disable StringLiteralTypo
-            _ => throw new InvalidOperationException(message: "Unbekannter Kontotyp")
-            // ReSharper restore StringLiteralTypo
-        };
+        var budgetEntries = entries.Where(entry => entry.Account.Id == Id)
+                                   .Select(entry => entry.Amount);
+        if (Type is not (AccountType.Asset or AccountType.Liability)) return budgetEntries.Sum();
 
-        return balance;
+        if (budgetEntries.Any()) Log.Logger.Warning(messageTemplate: "Found budget entries on account type {AccountType}", Type);
+        return null;
     }
 
-    private decimal GetCredits(IEnumerable<JournalEntry> entries) =>
-        entries.Where(entry => entry.CreditAccount.Id == Id).Sum(entry => entry.Amount);
-
-    private decimal GetDebits(IEnumerable<JournalEntry> entries) =>
-        entries.Where(entry => entry.DebitAccount.Id == Id).Sum(entry => entry.Amount);
+    public static decimal? GetBudgetBalance(decimal? budget, decimal accountBalance) =>
+        budget - accountBalance;
 
     public override string ToString() =>
         $"{Name} ({Type.DisplayName()})";

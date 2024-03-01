@@ -1,5 +1,5 @@
 ﻿using FluentAssertions;
-using Kaesseli.Application.Integration;
+using Kaesseli.Application.Integration.Camt;
 using Kaesseli.Domain.Accounts;
 using Kaesseli.Domain.Journal;
 using Kaesseli.TestUtilities.Faker;
@@ -20,14 +20,16 @@ public class CamtEntryExtensionsTests
 
         //Assert
         transaction.Should()
-                       .BeEquivalentTo(camtEntry);
+                   .BeEquivalentTo(camtEntry);
     }
 
     [Fact]
     public void ToTransactionSummary_TransformsCorrectly()
     {
         //Arange
-        var camtDocument = new SmartFaker<CamtDocument>().RuleFor(ce=> ce.CamtEntries,  value: new SmartFaker<CamtEntry>().Generate(count: 2) ).Generate();
+        var camtDocument = new SmartFaker<CamtDocument>()
+                           .RuleFor(ce => ce.CamtEntries, value: new SmartFaker<CamtEntry>().Generate(count: 2))
+                           .Generate();
         var account = new SmartFaker<Account>().Generate();
 
         //Act
@@ -35,7 +37,7 @@ public class CamtEntryExtensionsTests
 
         //Assert
         transactionSummary.Should()
-                    .BeEquivalentTo(camtDocument, options => options.Excluding(cd=> cd.CamtEntries));
+                          .BeEquivalentTo(camtDocument, options => options.Excluding(cd => cd.CamtEntries));
         transactionSummary.Transactions.Should().BeEquivalentTo(camtDocument.CamtEntries);
     }
 }

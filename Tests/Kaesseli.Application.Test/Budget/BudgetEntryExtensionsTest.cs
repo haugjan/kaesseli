@@ -17,7 +17,14 @@ public class BudgetEntryExtensionsTest
             ValueDate = new DateOnly(year: 1982, month: 11, day: 3),
             Description = "Description",
             Amount = 42,
-            Account = new Account { Id = Guid.NewGuid(), Name = "Name", Type = AccountType.Expense }
+            Account = new Account
+            {
+                Id = Guid.NewGuid(),
+                Name = "Name",
+                Type = AccountType.Expense,
+                Icon = "favorite",
+                IconColor = "blue"
+            }
         };
 
         //Act

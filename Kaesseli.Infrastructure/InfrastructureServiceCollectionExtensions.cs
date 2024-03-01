@@ -1,4 +1,4 @@
-﻿using Kaesseli.Application.Integration;
+﻿using Kaesseli.Application.Integration.Camt;
 using Kaesseli.Domain.Accounts;
 using Kaesseli.Domain.Budget;
 using Kaesseli.Domain.Integration;
@@ -22,7 +22,7 @@ public static class InfrastructureServiceCollectionExtensions
                 .AddScoped<ICamtProcessor, CamtProcessor>()
                 .AddDbContext<KaesseliContext>(
                     options =>
-                        options.UseSqlite(connectionString: configuration.GetConnectionString(name: "BudgetDatabase")));
+                        options.UseSqlite(connectionString: configuration.GetConnectionString(name: "BudgetDatabase")  ));
 
     private static IServiceCollection AddRepositories(this IServiceCollection services) =>
         services.AddScoped<IBudgetRepository, BudgetRepository>()

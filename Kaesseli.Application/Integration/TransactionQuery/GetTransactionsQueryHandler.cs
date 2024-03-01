@@ -2,7 +2,7 @@
 using Kaesseli.Domain.Integration;
 using MediatR;
 
-namespace Kaesseli.Application.Integration;
+namespace Kaesseli.Application.Integration.TransactionQuery;
 
 // ReSharper disable once UnusedType.Global
 public class GetTransactionsQueryHandler :

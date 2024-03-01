@@ -1,7 +1,8 @@
 ﻿using System.Net;
 using System.Net.Http.Headers;
 using FluentAssertions;
-using Kaesseli.Application.Integration;
+using Kaesseli.Application.Integration.Camt;
+using Kaesseli.Application.Integration.TransactionQuery;
 using Kaesseli.Server.Integration;
 using Kaesseli.TestUtilities.Faker;
 using MediatR;
@@ -32,11 +33,12 @@ public class IntegrationApiExtensionsTests
                              services.AddRouting();
                              services.AddSingleton(_mediatorMock.Object);
                              services.AddAntiforgery();
-                             services.AddLogging(loggingBuilder =>
-                             {
-                                 loggingBuilder.AddConsole(); 
-                                 loggingBuilder.AddDebug();
-                             });
+                             services.AddLogging(
+                                 loggingBuilder =>
+                                 {
+                                     loggingBuilder.AddConsole();
+                                     loggingBuilder.AddDebug();
+                                 });
                          })
                      .Configure(
                          app =>
@@ -58,15 +60,15 @@ public class IntegrationApiExtensionsTests
 
         var formContent = new MultipartFormDataContent();
         var accountId = Guid.NewGuid();
-       var fileContent = new ByteArrayContent(content: "Dummy File Content"u8.ToArray());
+        var fileContent = new ByteArrayContent(content: "Dummy File Content"u8.ToArray());
         fileContent.Headers.ContentType = MediaTypeHeaderValue.Parse(input: "multipart/form-data");
-        formContent.Add(content: fileContent, name: "file", fileName: "dummy_file.txt");
+        formContent.Add(fileContent, name: "file", fileName: "dummy_file.txt");
 
         var accountIdContent = new StringContent(content: accountId.ToString());
-        formContent.Add(content: accountIdContent, name: "accountId");
+        formContent.Add(accountIdContent, name: "accountId");
         // Act
         var response = await _client.PostAsync(requestUri: "/camt/upload", formContent);
-        
+
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);
         _mediatorMock.Verify(m => m.Send(It.IsAny<ProcessCamtFileCommand>(), default), Times.Once);

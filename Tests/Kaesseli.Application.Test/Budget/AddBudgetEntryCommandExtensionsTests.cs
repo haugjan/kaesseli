@@ -11,7 +11,14 @@ public class AddBudgetEntryCommandExtensionsTests
     public void ToBudgetEntry_ReturnBudgetEntry()
     {
         //Arrange
-        var account = new Account { Id = Guid.NewGuid(), Name = "Account", Type = AccountType.Expense };
+        var account = new Account
+        {
+            Id = Guid.NewGuid(),
+            Name = "Account",
+            Type = AccountType.Expense,
+            Icon = "favorite",
+            IconColor = "blue"
+        };
         var budgetEntryCommand = new AddBudgetEntryCommand
         {
             Amount = 42,

@@ -63,11 +63,26 @@ public class JournalRepositoryTests
         var newEntry = new JournalEntry
         {
             Id = Guid.NewGuid(),
-            CreditAccount = new Account { Id = Guid.NewGuid(), Name = "CreditAccount", Type = AccountType.Asset },
-            DebitAccount = new Account { Id = Guid.NewGuid(), Name = "DebitAccount", Type = AccountType.Asset },
+            CreditAccount = new Account
+            {
+                Id = Guid.NewGuid(),
+                Name = "CreditAccount",
+                Type = AccountType.Asset,
+                Icon = "favorite",
+                IconColor = "blue"
+            },
+            DebitAccount = new Account
+            {
+                Id = Guid.NewGuid(),
+                Name = "DebitAccount",
+                Type = AccountType.Asset,
+                Icon = "favorite",
+                IconColor = "blue"
+            },
             ValueDate = DateOnly.FromDateTime(DateTime.Now),
             Description = "Description",
-            Amount = 11.11m
+            Amount = 11.11m,
+            Transaction = null
         };
 
         await using var context = CreateContext(options);

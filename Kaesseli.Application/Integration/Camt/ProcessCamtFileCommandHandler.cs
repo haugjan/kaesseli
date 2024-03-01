@@ -3,7 +3,7 @@ using Kaesseli.Domain.Integration;
 using Kaesseli.Domain.Journal;
 using MediatR;
 
-namespace Kaesseli.Application.Integration;
+namespace Kaesseli.Application.Integration.Camt;
 
 public class ProcessCamtFileCommandHandler : IRequestHandler<ProcessCamtFileCommand, Guid>
 {
