@@ -28,7 +28,7 @@
   </div>
   <div v-if="transaction" class="row q-pa-md">
     <div v-for="account in transaction.suggestedAccounts" :key="account.id">
-      <q-chip @click="onClick(account)" size="md" :color="account.accountIconColor" :icon="account.accountIcon" text-color="white" square> {{account.accountName}}</q-chip>
+      <q-chip clickable  @click="onClick(account)" size="md" :color="account.accountIconColor" :icon="account.accountIcon" text-color="white" square> {{account.accountName}}</q-chip>
       
     </div>
   </div>
@@ -37,15 +37,17 @@
 <script lang="ts">
 
   interface ISuggestedAccount {
+    accountId: number;
     accountName: string;
     accountType: string;
     accountTypeId: number;
     accountIcon: string;
     accountIconColor: string;
+    relevance: number;
   }
 
   interface ITransaction {
-    transactionId: string;
+    id: string;
     amount: number;
     description: string;
     valueDate: Date;
@@ -57,6 +59,7 @@
 
   import { defineComponent, ref, onMounted } from 'vue';
   import axios from 'axios';
+import { is } from 'quasar';
 
   export default defineComponent({
     setup() {
@@ -65,7 +68,7 @@
 
       const FetchTransaction = async () => {
         try {
-          const response = await axios.get(`https://localhost:7123/transaction/nextOpen`);
+          const response = await axios.get('https://localhost:7123/transaction/nextOpen');
           transaction.value = response.data;
         } catch (error) {
           console.error('There was an error fetching the transactions:', error);
@@ -91,9 +94,17 @@
         }).format(value);
       }
 
-      function onClick(transaction: ITransaction) {
-
-      }
+      const onClick = async (account: ISuggestedAccount) => {
+        try {
+          await axios.patch('https://localhost:7123/transaction/journalEntry', {
+            transactionId: transaction.value?.id,
+            otherAccountId: account.accountId
+          });
+          window.location.reload(); // Seite neu laden
+        } catch (error) {
+          console.error('Error updating the transaction:', error);
+        }
+      };
 
       onMounted(() => {
         FetchTransaction();

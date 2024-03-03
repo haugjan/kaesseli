@@ -5,7 +5,7 @@ namespace Kaesseli.Application.Integration.NextOpenTransaction;
 public class GetNextOpenTransactionQueryResult
 {
     // ReSharper disable UnusedAutoPropertyAccessor.Global
-    public required Guid TransactionId { get; init; }
+    public required Guid Id { get; init; }
     public required decimal Amount { get; init; }
     public required string Description { get; init; }
     public required DateOnly ValueDate { get; init; }

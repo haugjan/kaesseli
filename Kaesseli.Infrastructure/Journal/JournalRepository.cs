@@ -42,4 +42,29 @@ public class JournalRepository(KaesseliContext context) : IJournalRepository
 
         return await entries.ToListAsync(cancellationToken);
     }
+
+
+    public async Task AssignOpenTransaction(Guid transactionId, Guid otherAccountId, CancellationToken cancellationToken)
+    {
+        var transaction = await context.Transactions
+                                       .Include(trans=> trans.TransactionSummary)
+                                       .ThenInclude(summary=> summary!.Account)
+                                       .SingleAsync(trans=> trans.Id == transactionId, cancellationToken: cancellationToken);
+        var otherAccount = await context.Accounts.SingleAsync(account => account.Id == otherAccountId, cancellationToken);
+
+        var newJournalEntry = new JournalEntry
+        {
+            Id = Guid.NewGuid(),
+            ValueDate = transaction.ValueDate,
+            Description = transaction.Description,
+            Amount = transaction.Amount,
+            DebitAccount = transaction.TransactionSummary!.Account,
+            CreditAccount = otherAccount,
+            Transaction = transaction
+        };
+
+        context.JournalEntries.Add(newJournalEntry);
+        await context.SaveChangesAsync(cancellationToken);
+    }
+
 }

@@ -35,10 +35,18 @@ internal class TransactionRepository : ITransactionRepository
     {
         return await _context.Transactions
                              .Include(tran=> tran.TransactionSummary)
+                             .Include(tran=> tran.JournalEntries)
                              .Where(
                    tran => tran.JournalEntries!.Any() == false)
                              .OrderBy(tran=> tran.ValueDate)
                              .Skip(skip)
                              .FirstOrDefaultAsync(cancellationToken: cancellationToken);
     }
+
+    public async Task<int> GetTotalOpenTransaction(CancellationToken cancellationToken)
+    {
+        return await _context.Transactions
+                             .CountAsync(tran => tran.JournalEntries!.Any() 
+                                              == false, 
+                                         cancellationToken: cancellationToken);}
 }

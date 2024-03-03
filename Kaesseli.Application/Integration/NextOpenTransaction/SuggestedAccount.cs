@@ -6,6 +6,7 @@ public class SuggestedAccount
 {
     // ReSharper disable UnusedAutoPropertyAccessor.Global
     public required double Relevance { get; init; }
+    public required Guid AccountId { get; init; }
     public required string AccountName { get; init; }
     public required string AccountType { get; init; }
     public required AccountType AccountTypeId { get; init; }

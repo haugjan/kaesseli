@@ -46,18 +46,9 @@ public class KaesseliContext : DbContext
                       .OnDelete(DeleteBehavior.Restrict);
                 entity.HasOne(je => je.Transaction)
                       .WithMany(tran => tran.JournalEntries)
-                      .HasForeignKey("TransactionId");
+                      .HasForeignKey("TransactionId");  
             });
-        modelBuilder.Entity<Transaction>(
-            entity =>
-            {
-                entity.HasMany(je => je.JournalEntries)
-                      .WithOne()
-                      .HasForeignKey("TransactionId")
-                      .OnDelete(DeleteBehavior.Restrict);
-               
 
-            });
         modelBuilder.Entity<TransactionSummary>(
             entity =>
             {

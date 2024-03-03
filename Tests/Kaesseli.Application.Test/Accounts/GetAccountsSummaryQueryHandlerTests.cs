@@ -15,7 +15,7 @@ public class GetAccountsSummaryQueryHandlerTests
     private const decimal BudgetAmount = 7;
 
     [Theory]
-    [InlineData(AccountType.Revenue, 2, 5)] //CreditAmount - DebitAmount 
+    [InlineData(AccountType.Revenue, 2, -5)] //CreditAmount - DebitAmount 
     [InlineData(AccountType.Expense, -2, 9)] //DebitAmount - CreditAmount   
     public async Task Handle_WithBudget_ReturnsAccountSummary(AccountType accountType, decimal accountBalance, decimal budgetBalance)
     {

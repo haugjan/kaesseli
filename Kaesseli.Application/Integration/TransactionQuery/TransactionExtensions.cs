@@ -1,7 +1,9 @@
-﻿using Kaesseli.Domain.Integration;
+﻿using Kaesseli.Application.Integration.NextOpenTransaction;
+using Kaesseli.Application.Integration.TransactionQuery;
+using Kaesseli.Domain.Accounts;
 
 // ReSharper disable once CheckNamespace
-namespace Kaesseli.Application.Integration.TransactionQuery;
+namespace Kaesseli.Domain.Integration;
 
 public static class TransactionExtensions
 {
@@ -17,5 +19,30 @@ public static class TransactionExtensions
             Reference = transactionSummary.Reference,
             TransactionCode = transactionSummary.TransactionCode,
             TransactionCodeDetail = transactionSummary.TransactionCodeDetail
+        };
+
+    public static GetNextOpenTransactionQueryResult ToGetNextOpenTransactionResult(
+        this Transaction transaction,
+        IEnumerable<Account> accounts) =>
+        new()
+        {
+            Id = transaction.Id,
+            Amount = transaction.Amount,
+            ValueDate = transaction.ValueDate,
+            Description = transaction.Description,
+            SuggestedAccounts = accounts.Select(
+                account => new SuggestedAccount
+                {
+                    Relevance = 1,
+                    AccountId = account.Id,
+                    AccountName = account.Name,
+                    AccountType = account.Type.DisplayName(),
+                    AccountTypeId = account.Type,
+                    AccountIcon = account.Icon,
+                    AccountIconColor = account.IconColor
+                }),
+            AccountName = transaction.TransactionSummary!.Account.Name,
+            AccountType = transaction.TransactionSummary!.Account.Type.DisplayName(),
+            AccountTypeId = transaction.TransactionSummary!.Account.Type
         };
 }

@@ -1,5 +1,6 @@
 ﻿using FluentAssertions;
 using Kaesseli.Application.Integration.TransactionQuery;
+using Kaesseli.Domain.Accounts;
 using Kaesseli.Domain.Integration;
 using Kaesseli.TestUtilities.Faker;
 using Xunit;
@@ -29,4 +30,20 @@ public class TransactionSummaryExtensionsTests
         getTransactionSummary.AccountName.Should().Be(transactionSummary.Account.Name);
         getTransactionSummary.NrOfTransactions.Should().Be(expected: transactionSummary.Transactions.Count());
     }
+
+    [Fact]
+    public void ToGetNextOpenTransactionResult_ReturnsToGetNextOpenTransactionResult()
+    {
+        //Arrange
+        var transaction = new SmartFaker<Transaction>().Generate();
+        var accounts = new SmartFaker<Account>().Generate(count: 5);
+
+        //Act
+        var current = transaction.ToGetNextOpenTransactionResult(accounts);
+
+        //Assert
+        current.Should().BeEquivalentTo(transaction, options => options.ExcludingMissingMembers());
+
+    }
+
 }

@@ -36,8 +36,13 @@ public class Account
         return null;
     }
 
-    public static decimal? GetBudgetBalance(decimal? budget, decimal accountBalance) =>
-        budget - accountBalance;
+    public decimal? GetBudgetBalance(decimal? budget, decimal accountBalance) =>
+        Type switch
+        {
+            AccountType.Revenue => accountBalance - budget, 
+            AccountType.Expense => budget - accountBalance, 
+            _ => null
+        };
 
     public override string ToString() =>
         $"{Name} ({Type.DisplayName()})";

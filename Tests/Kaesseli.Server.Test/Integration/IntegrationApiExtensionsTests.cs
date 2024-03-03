@@ -2,6 +2,7 @@
 using System.Net.Http.Headers;
 using FluentAssertions;
 using Kaesseli.Application.Integration.Camt;
+using Kaesseli.Application.Integration.NextOpenTransaction;
 using Kaesseli.Application.Integration.TransactionQuery;
 using Kaesseli.Server.Integration;
 using Kaesseli.TestUtilities.Faker;
@@ -87,5 +88,21 @@ public class IntegrationApiExtensionsTests
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);
         _mediatorMock.Verify(m => m.Send(It.IsAny<GetTransactionSummariesQuery>(), default), Times.Once);
+    }
+
+
+    [Fact]
+    public async Task G2etTransactionSummariesEndpoint_ShouldReturnTransactionSummaries()
+    {
+        // Arrange
+        var nextOpenTransaction = new SmartFaker<GetNextOpenTransactionQueryResult>().Generate();
+        _mediatorMock.Setup(m => m.Send(It.IsAny<GetNextOpenTransactionQuery>(), default)).ReturnsAsync(nextOpenTransaction);
+
+        // Act
+        var response = await _client.GetAsync(requestUri: "/transaction/nextOpen");
+
+        // Assert
+        response.StatusCode.Should().Be(HttpStatusCode.OK);
+        _mediatorMock.Verify(m => m.Send(It.IsAny<GetNextOpenTransactionQuery>(), default), Times.Once);
     }
 }

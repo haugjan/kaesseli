@@ -22,28 +22,9 @@ public class GetNextOpenTransactionQueryHandler : IRequestHandler<GetNextOpenTra
     {
         var transaction = await _transactionRepository.GetNextOpenTransaction(request.Skip, cancellationToken);
         if (transaction is null) return null;
-        
+
         var accounts = await _accountRepository.GetAccounts(cancellationToken);
 
-        return new()
-        {
-            TransactionId = transaction.Id,
-            Amount = transaction.Amount,
-            ValueDate = transaction.ValueDate,
-            Description = transaction.Description,
-            SuggestedAccounts = accounts.Select(
-                account => new SuggestedAccount
-                {
-                    Relevance = 1,
-                    AccountName = account.Name,
-                    AccountType = account.Type.DisplayName(),
-                    AccountTypeId = account.Type,
-                    AccountIcon = account.Icon,
-                    AccountIconColor = account.IconColor
-                }),
-            AccountName = transaction.TransactionSummary!.Account.Name,
-            AccountType = transaction.TransactionSummary!.Account.Type.DisplayName(),
-            AccountTypeId = transaction.TransactionSummary!.Account.Type
-        };
+        return transaction.ToGetNextOpenTransactionResult(accounts);
     }
 }

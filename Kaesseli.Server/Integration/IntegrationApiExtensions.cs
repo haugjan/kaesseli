@@ -36,6 +36,20 @@ public static class IntegrationApiExtensions
                 var query = new GetNextOpenTransactionQuery { Skip = skip.GetValueOrDefault() };
                 return await mediator.Send(query);
             });
+        app.MapGet(
+            pattern: "/transaction/totalOpen",
+            async (IMediator mediator, [FromQuery] int? skip) =>
+            {
+                var query = new GetTotalOpenTransactionQuery();
+                return await mediator.Send(query);
+            });
+
+        app.MapPatch(
+            pattern: "/transaction/journalEntry",
+            async (IMediator mediator, [FromBody] AssignOpenTransactionCommand cmd) =>
+            {
+                await mediator.Send(cmd);
+            });
 
         app.MapPost(
                pattern: "/camt/upload",

@@ -47,7 +47,12 @@
             <q-icon name="assignment_turned_in" />
           </q-item-section>
           <q-item-section>
-            <q-item-label>Zuordnen</q-item-label>
+            <!--<q-item-label>Zuordnen</q-item-label>
+            <q-badge color="red" floating>4</q-badge>-->
+            <div>
+              Zuordnen
+              <q-badge color="red" rounded align="top">{{totalOpenTransaction}}</q-badge>
+            </div>
           </q-item-section>
         </q-item>
       </q-list>
@@ -61,14 +66,29 @@
 </template>
 
 <script>
-  import { ref, watch } from 'vue'
-  import { useQuasar } from 'quasar'
+  import { ref, watch, onMounted } from 'vue';
+  import { useQuasar } from 'quasar';
+  import axios from 'axios';
 
   export default {
     setup() {
       const leftDrawerOpen = ref(false)
       const darkMode = ref(false);
       const $q = useQuasar()
+      const totalOpenTransaction = ref(0);
+
+      const fetchTotalOpen = async () => {
+        try {
+          const response = await axios.get('https://localhost:7123/transaction/totalOpen');
+          totalOpenTransaction.value = response.data;
+        } catch (error) {
+          console.error('There was an error fetching the accounts:', error);
+        }
+      };
+
+      onMounted(() => {
+        fetchTotalOpen();
+      });
 
       watch(darkMode, (newValue) => {
         $q.dark.set(newValue)
@@ -79,7 +99,9 @@
         toggleLeftDrawer() {
           leftDrawerOpen.value = !leftDrawerOpen.value
         },
-        darkMode
+        darkMode,
+        fetchTotalOpen,
+        totalOpenTransaction
       }
     }
   }

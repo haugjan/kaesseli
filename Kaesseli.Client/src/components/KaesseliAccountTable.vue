@@ -38,6 +38,7 @@
                      :hide-pagination="true"
                      :rows-per-page-options="[0]"
                      row-key="id"
+                     wrap-cells="false"
                      dense>
               <template v-slot:body="props">
                 <q-tr :class="{'italic-row': props.row.amountType === 1}" :props="props" @click="onRowClick(props.row)">

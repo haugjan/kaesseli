@@ -22,7 +22,7 @@ public class GetAccountQueryHandler(IAccountRepository accountRepo, IJournalRepo
 
         var accountBalance = account.GetAccountBalance(journalEntries);
         var budget = account.GetBudget(budgetEntries);
-        var budgetBalance = Account.GetBudgetBalance(budget, accountBalance);
+        var budgetBalance = account.GetBudgetBalance(budget, accountBalance);
 
         return new GetAccountQueryResult
         {

@@ -6,4 +6,5 @@ public interface ITransactionRepository
     Task<TransactionSummary> AddTransactionSummary(TransactionSummary transactionSummary, CancellationToken cancellationToken);
     Task<IEnumerable<Transaction>> GetTransactions(Guid transactionSummaryId, CancellationToken cancellationToken);
     Task<Transaction?> GetNextOpenTransaction(int skip, CancellationToken cancellationToken);
+    Task<int> GetTotalOpenTransaction(CancellationToken cancellationToken);
 }
