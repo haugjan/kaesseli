@@ -14,9 +14,8 @@ public class GetBudgetEntriesQueryExtensionsTest
         var budgetEntriesQuery = new GetBudgetEntriesQuery
         {
             AccountId = Guid.NewGuid(),
-            FromDate = new DateOnly(year: 1982, month: 11, day: 3),
-            ToDate = new DateOnly(year: 2000, month: 12, day: 13),
-            AccountType = AccountType.Asset
+            AccountType = AccountType.Asset,
+            AccountingPeriodId = Guid.NewGuid()
         };
 
         //Act

@@ -9,7 +9,8 @@ internal static class JournalEntryExtensions
         this AddJournalEntryCommand request,
         DateOnly valueDate,
         Account debitAccount,
-        Account creditAccount) =>
+        Account creditAccount,
+        AccountingPeriod accountingPeriod) =>
         new()
         {
             Id = Guid.NewGuid(),
@@ -18,6 +19,7 @@ internal static class JournalEntryExtensions
             Description = request.Description,
             CreditAccount = creditAccount,
             DebitAccount = debitAccount,
-            Transaction = null
+            Transaction = null,
+            AccountingPeriod = accountingPeriod
         };
 }

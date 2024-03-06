@@ -13,6 +13,6 @@ public class GetBudgetEntriesQueryResult
     
     public required Guid AccountId { get; init; }
     
-    public required DateOnly ValueDate { get; init; }
+    public required Guid AccountingPeriodId { get; init; }
  // ReSharper restore UnusedAutoPropertyAccessor.Global
  }

@@ -106,7 +106,8 @@ public class TransactionRepositoryTests
         var context = CreateContext(options);
         var repository = new TransactionRepository(context);
         var transaction = new SmartFaker<Transaction>()
-                          .RuleFor(t => t.JournalEntries, value: Array.Empty<JournalEntry>()).Generate();
+                          .RuleFor(t => t.JournalEntries, value: Array.Empty<JournalEntry>())
+                          .Generate();
         context.Transactions.Add(transaction);
         await context.SaveChangesAsync();
 

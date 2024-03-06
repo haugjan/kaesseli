@@ -11,6 +11,7 @@ public class AddJournalEntryCommand : IRequest<Guid>
     public required DateOnly? ValueDate { get; init; }
     public required Guid DebitAccountId { get; init; }
     public required Guid CreditAccountId { get; init; }
+    public required Guid AccountingPeriodId { get; init; }
 
     // ReSharper restore UnusedAutoPropertyAccessor.Global
 }

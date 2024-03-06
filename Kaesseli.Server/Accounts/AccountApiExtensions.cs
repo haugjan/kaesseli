@@ -19,6 +19,12 @@ public static class AccountApiExtensions
                 await mediator.Send(request: new GetAccountsQuery{AccountType = accountType}));
 
         app.MapGet(
+            pattern: "/accountingPeriod",
+            async (IMediator mediator) =>
+                await mediator.Send(request: new GetAccountingPeriodsQuery()));
+
+
+        app.MapGet(
             pattern: "/account/{accountId}",
             async (IMediator mediator, Guid accountId) =>
                 await mediator.Send(request: new GetAccountQuery {AccountId = accountId}));
@@ -36,6 +42,15 @@ public static class AccountApiExtensions
                 var guid = await mediator.Send(command);
                 return Results.Created(uri: $"/account/{guid}", guid);
             });
+
+        app.MapPost(
+            pattern: "/accountingPeriod",
+            async (IMediator mediator, AddAccountingPeriodCommand command) =>
+            {
+                var guid = await mediator.Send(command);
+                return Results.Created(uri: $"/accountingPeriod/{guid}", guid);
+            });
+
         return app;
     }
 }

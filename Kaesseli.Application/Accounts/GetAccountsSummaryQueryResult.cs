@@ -11,10 +11,6 @@ public class GetAccountsSummaryQueryResult
     public required string IconColor { get; set; }
     public required string Type { get; init; }
     public required AccountType TypeId { get; init; }
-    // ReSharper disable once MemberCanBePrivate.Global
-    public ParentAccountType ParentTypeId => TypeId.ToParentAccountType();
-    // ReSharper disable once UnusedMember.Global
-    public string ParentType => ParentTypeId.DisplayName();
     public required decimal AccountBalance{ get; init; }
     public required decimal? Budget{ get; init; }
     public required decimal? BudgetBalance{ get; init; }

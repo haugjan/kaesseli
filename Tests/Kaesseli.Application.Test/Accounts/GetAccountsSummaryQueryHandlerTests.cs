@@ -132,10 +132,16 @@ public class GetAccountsSummaryQueryHandlerTests
         new()
         {
             Id = default,
-            ValueDate = default,
             Description = "Budget 1",
             Amount = BudgetAmount,
-            Account = accountToTest
+            Account = accountToTest,
+            AccountingPeriod = new AccountingPeriod
+            {
+                Id = Guid.NewGuid(),
+                FromInclusive = default,
+                ToInclusive = default,
+                Description = string.Empty
+            }
         }
     ];
 
@@ -149,7 +155,14 @@ public class GetAccountsSummaryQueryHandlerTests
             Amount = DebitAmount,
             DebitAccount = accountToTest,
             CreditAccount = otherAccount,
-            Transaction = null
+            Transaction = null,
+            AccountingPeriod = new AccountingPeriod
+            {
+                Id = Guid.NewGuid(),
+                FromInclusive = default,
+                ToInclusive = default,
+                Description = string.Empty
+            }
         },
 
         new()
@@ -160,7 +173,14 @@ public class GetAccountsSummaryQueryHandlerTests
             Amount = CreditAmount,
             DebitAccount = otherAccount,
             CreditAccount = accountToTest,
-            Transaction = null
+            Transaction = null,
+            AccountingPeriod = new AccountingPeriod
+            {
+                Id = Guid.NewGuid(),
+                FromInclusive = default,
+                ToInclusive = default,
+                Description = string.Empty
+            }
         }
     ];
 }

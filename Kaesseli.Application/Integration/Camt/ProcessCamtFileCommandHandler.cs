@@ -25,6 +25,7 @@ public class ProcessCamtFileCommandHandler : IRequestHandler<ProcessCamtFileComm
 
         var  transactionSummary = camtDocument.ToTransactionSummary(account);
         await _transactionRepository.AddTransactionSummary(transactionSummary, cancellationToken);
+
         return transactionSummary.Id;
     }
 

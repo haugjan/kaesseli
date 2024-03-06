@@ -33,6 +33,8 @@ internal static class CamtEntryExtensions
             ValueDate = camtEntry.ValueDate,
             BookDate = camtEntry.BookDate,
             Id = Guid.NewGuid(),
-            TransactionSummary = null
+            TransactionSummary = null,
+            Debtor = camtEntry.Debtor,
+            Creditor = camtEntry.Creditor
         };
 }

@@ -17,9 +17,23 @@ internal class AccountRepository(KaesseliContext context) : IAccountRepository
         await context.Accounts.ToListAsync(cancellationToken);
 
     public async Task<IEnumerable<Account>> GetAccounts(AccountType accountType, CancellationToken cancellationToken) =>
-        await context.Accounts.Where(account=> account.Type == accountType).ToListAsync(cancellationToken);
+        await context.Accounts.Where(account => account.Type == accountType).ToListAsync(cancellationToken);
 
     public async Task<Account> GetAccount(Guid accountId, CancellationToken cancellationToken) =>
         await context.Accounts.SingleOrDefaultAsync(account => account.Id == accountId, cancellationToken)
-     ?? throw new AccountNotFoundException(accountId);
+     ?? throw new EntityNotFoundException(entityType: typeof(Account), accountId);
+
+    public async Task<AccountingPeriod> GetAccountingPeriod(Guid accountingPeriodId, CancellationToken cancellationToken) =>
+        await context.AccountingPeriods.FindAsync(accountingPeriodId, cancellationToken)
+     ?? throw new EntityNotFoundException(entityType: typeof(AccountingPeriod), accountingPeriodId);
+
+    public async Task<AccountingPeriod> AddAccountingPeriod(AccountingPeriod accountingPeriod, CancellationToken cancellationToken)
+    {
+        context.AccountingPeriods.Add(accountingPeriod);
+        await context.SaveChangesAsync(cancellationToken);
+        return accountingPeriod;
+    }
+
+    public async Task<IEnumerable<AccountingPeriod>> GetAccountingPeriods(CancellationToken cancellationToken) =>
+        await context.AccountingPeriods.ToListAsync(cancellationToken);
 }

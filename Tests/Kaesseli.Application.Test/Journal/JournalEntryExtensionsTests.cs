@@ -20,12 +20,21 @@ public class JournalEntryExtensionsTests
             Description = "Description",
             ValueDate = null,
             CreditAccountId = creditAccount.Id,
-            DebitAccountId = debitAccount.Id
+            DebitAccountId = debitAccount.Id,
+            AccountingPeriodId = Guid.NewGuid()
         };
         var valueDate = new DateOnly(year: 1982, month: 12, day: 13);
+        var accountIngPeriod = new AccountingPeriod
+        {
+            Id = Guid.NewGuid(),
+            Description = string.Empty,
+            FromInclusive = default,
+            ToInclusive = default
+        };
 
         //Act
-        var journalEntry = command.ToJournalEntry(valueDate: valueDate, debitAccount, creditAccount);
+        var journalEntry = command.ToJournalEntry(valueDate: valueDate, debitAccount: debitAccount, creditAccount: creditAccount,
+                                                  accountingPeriod: accountIngPeriod);
 
         //Assert
         journalEntry.Amount.Should().Be(command.Amount);
@@ -34,5 +43,6 @@ public class JournalEntryExtensionsTests
         journalEntry.DebitAccount.Should().Be(debitAccount);
         journalEntry.ValueDate.Should().Be(valueDate);
         journalEntry.Description.Should().Be(command.Description);
+        journalEntry.AccountingPeriod.Should().Be(accountIngPeriod);
     }
 }

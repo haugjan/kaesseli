@@ -2,6 +2,7 @@
 using Kaesseli.Domain.Budget;
 using Kaesseli.Domain.Integration;
 using Kaesseli.Domain.Journal;
+using Kaesseli.Domain.Prediction;
 using Microsoft.EntityFrameworkCore;
 
 namespace Kaesseli.Infrastructure.Common;
@@ -24,6 +25,8 @@ public class KaesseliContext : DbContext
     public virtual DbSet<Account> Accounts { get; init; } = null!;
     public virtual DbSet<TransactionSummary> TransactionSummaries { get; init; } = null!;
     public virtual DbSet<Transaction> Transactions { get; init; } = null!;
+    public virtual DbSet<LearnedPrediction> LearnedPredictions { get; init; } = null!;
+    public virtual DbSet<AccountingPeriod> AccountingPeriods { get; init; } = null!;
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

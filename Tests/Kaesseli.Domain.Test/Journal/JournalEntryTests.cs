@@ -36,7 +36,14 @@ public class JournalEntryTests
             Amount = 100m,
             DebitAccount = debitAccount,
             CreditAccount = creditAccount,
-            Transaction = null
+            Transaction = null,
+            AccountingPeriod = new AccountingPeriod
+            {
+                Id = Guid.NewGuid(),
+                FromInclusive = default,
+                ToInclusive = default,
+                Description = string.Empty
+            }
         };
     }
 
@@ -63,7 +70,14 @@ public class JournalEntryTests
                 Amount = 100m,
                 DebitAccount = account,
                 CreditAccount = account,
-                Transaction = null
+                Transaction = null,
+                AccountingPeriod = new AccountingPeriod
+                {
+                    Id = Guid.NewGuid(),
+                    FromInclusive = default,
+                    ToInclusive = default,
+                    Description = string.Empty
+                }
             });
     }
 }

@@ -1,4 +1,5 @@
-﻿using Kaesseli.Domain.Journal;
+﻿using Kaesseli.Domain.Accounts;
+using Kaesseli.Domain.Journal;
 using Kaesseli.Infrastructure.Common;
 using Microsoft.EntityFrameworkCore;
 
@@ -18,8 +19,9 @@ public class JournalRepository(KaesseliContext context) : IJournalRepository
         CancellationToken cancellationToken)
     {
         IQueryable<JournalEntry> entries = context.JournalEntries
-                                                  .Include(budget => budget.DebitAccount)
-                                                  .Include(budget => budget.CreditAccount);
+                                                  .Include(journalEntry => journalEntry.DebitAccount)
+                                                  .Include(journalEntry => journalEntry.CreditAccount)
+                                                  .Include(journalEntry => journalEntry.AccountingPeriod);
         if (request.DebitAccountId is not null) entries = entries.Where(entry => entry.DebitAccount.Id == request.DebitAccountId);
         if (request.CreditAccountId is not null) entries = entries.Where(entry => entry.CreditAccount.Id == request.DebitAccountId);
 
@@ -43,14 +45,21 @@ public class JournalRepository(KaesseliContext context) : IJournalRepository
         return await entries.ToListAsync(cancellationToken);
     }
 
-
-    public async Task AssignOpenTransaction(Guid transactionId, Guid otherAccountId, CancellationToken cancellationToken)
+    public async Task AssignOpenTransaction(
+        Guid transactionId,
+        Guid otherAccountId,
+        Guid accountingPeriodId,
+        CancellationToken cancellationToken)
     {
         var transaction = await context.Transactions
-                                       .Include(trans=> trans.TransactionSummary)
-                                       .ThenInclude(summary=> summary!.Account)
-                                       .SingleAsync(trans=> trans.Id == transactionId, cancellationToken: cancellationToken);
-        var otherAccount = await context.Accounts.SingleAsync(account => account.Id == otherAccountId, cancellationToken);
+                                       .Include(trans => trans.TransactionSummary)
+                                       .ThenInclude(summary => summary!.Account)
+                                       .SingleAsync(trans => trans.Id == transactionId, cancellationToken);
+        var otherAccount = await context.Accounts.FindAsync(otherAccountId, cancellationToken)
+                        ?? throw new EntityNotFoundException(entityType: typeof(Account), otherAccountId);
+
+        var accountingPeriod = await context.AccountingPeriods.FindAsync(accountingPeriodId, cancellationToken)
+                            ?? throw new EntityNotFoundException(entityType: typeof(AccountingPeriod), accountingPeriodId);
 
         var newJournalEntry = new JournalEntry
         {
@@ -60,11 +69,11 @@ public class JournalRepository(KaesseliContext context) : IJournalRepository
             Amount = transaction.Amount,
             DebitAccount = transaction.TransactionSummary!.Account,
             CreditAccount = otherAccount,
-            Transaction = transaction
+            Transaction = transaction,
+            AccountingPeriod = accountingPeriod
         };
 
         context.JournalEntries.Add(newJournalEntry);
         await context.SaveChangesAsync(cancellationToken);
     }
-
 }

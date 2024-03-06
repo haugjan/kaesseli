@@ -1,5 +1,4 @@
 ﻿using Kaesseli.Application.Budget;
-using Kaesseli.Application.Utility;
 using Kaesseli.Domain.Accounts;
 using Kaesseli.Domain.Budget;
 using Kaesseli.TestUtilities.Faker;
@@ -16,7 +15,6 @@ public class AddJournalEntryCommandHandlerTests
         // Arrange
         var mockRepo = new Mock<IBudgetRepository>();
         var accountRepo = new Mock<IAccountRepository>();
-        var dateTimeService = new Mock<IDateTimeService>();
         var command = new SmartFaker<AddBudgetEntryCommand>().Generate();
         var cancellationToken = new CancellationToken();
 
@@ -34,8 +32,18 @@ public class AddJournalEntryCommandHandlerTests
                        Icon = "favorite",
                        IconColor = "blue"
                    });
+        accountRepo.Setup(repo => repo.GetAccountingPeriod(It.IsAny<Guid>(), cancellationToken))
+                   .ReturnsAsync(
+                       (Guid accountingPeriodId, CancellationToken _) =>
+                           new AccountingPeriod
+                           {
+                               Id = accountingPeriodId,
+                               FromInclusive = default,
+                               ToInclusive = default,
+                               Description = string.Empty
+                           });
 
-        var handler = new AddBudgetEntryCommandHandler(mockRepo.Object, accountRepo.Object, dateTimeService.Object);
+        var handler = new AddBudgetEntryCommandHandler(mockRepo.Object, accountRepo.Object);
 
         // Act
         var result = await handler.Handle(command, CancellationToken.None);
@@ -46,7 +54,7 @@ public class AddJournalEntryCommandHandlerTests
                 It.Is<BudgetEntry>(
                     entry => entry.Amount == command.Amount
                           && entry.Description == command.Description
-                          && entry.ValueDate == command.ValueDate
+                          && entry.AccountingPeriod.Id == command.AccountingPeriodId
                           && entry.Id == result),
                 cancellationToken));
     }
@@ -57,18 +65,14 @@ public class AddJournalEntryCommandHandlerTests
         // Arrange
         var mockRepo = new Mock<IBudgetRepository>();
         var accountRepo = new Mock<IAccountRepository>();
-        var dateTimeService = new Mock<IDateTimeService>();
-        var command = new SmartFaker<AddBudgetEntryCommand>()
-                      .RuleFor(c => c.ValueDate, _ => null).Generate();
+        var command = new SmartFaker<AddBudgetEntryCommand>().Generate();
         var cancellationToken = new CancellationToken();
-        var currentDay = new DateOnly(year: 1982, month: 11, day: 3);
 
         mockRepo.Setup(
                     repo => repo.AddBudgetEntry(
                         It.Is<BudgetEntry>(a => a.Amount == command.Amount && a.Description == command.Description),
                         cancellationToken))
                 .ReturnsAsync((BudgetEntry newBudgetEntry, CancellationToken _) => newBudgetEntry);
-        dateTimeService.Setup(dts => dts.ToDay).Returns(currentDay);
         accountRepo.Setup(repo => repo.GetAccount(It.IsAny<Guid>(), cancellationToken))
                    .ReturnsAsync(() => new Account
                    {
@@ -78,7 +82,19 @@ public class AddJournalEntryCommandHandlerTests
                        Icon = "favorite",
                        IconColor = "blue"
                    });
-        var handler = new AddBudgetEntryCommandHandler(mockRepo.Object, accountRepo.Object, dateTimeService.Object);
+        accountRepo.Setup(repo => repo.GetAccountingPeriod(It.IsAny<Guid>(), cancellationToken))
+                   .ReturnsAsync(
+                       (Guid accountingPeriodId, CancellationToken _) =>
+                           new AccountingPeriod
+                           {
+                               Id = accountingPeriodId,
+                               FromInclusive = default,
+                               ToInclusive = default,
+                               Description = string.Empty
+                           });
+
+
+        var handler = new AddBudgetEntryCommandHandler(mockRepo.Object, accountRepo.Object);
 
         // Act
         var result = await handler.Handle(command, CancellationToken.None);
@@ -89,8 +105,8 @@ public class AddJournalEntryCommandHandlerTests
                 It.Is<BudgetEntry>(
                     entry => entry.Amount == command.Amount
                           && entry.Description == command.Description
-                          && entry.ValueDate == currentDay
-                          && entry.Id == result),
+                          && entry.Id == result
+                             && entry.AccountingPeriod.Id == command.AccountingPeriodId),
                 cancellationToken));
     }
 }

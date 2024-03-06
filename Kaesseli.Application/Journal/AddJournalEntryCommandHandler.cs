@@ -15,8 +15,9 @@ public class AddJournalEntryCommandHandler(IJournalRepository journalRepository,
         var valueDate = request.ValueDate ?? dateTime.ToDay;
         var creditAccount = await accountRepo.GetAccount(request.CreditAccountId, cancellationToken);
         var debitAccount = await accountRepo.GetAccount(request.DebitAccountId, cancellationToken);
+        var accountingPeriod = await accountRepo.GetAccountingPeriod(request.AccountingPeriodId, cancellationToken);
 
-        var newJournalEntryEntity = request.ToJournalEntry(valueDate, debitAccount, creditAccount);
+        var newJournalEntryEntity = request.ToJournalEntry(valueDate, debitAccount, creditAccount, accountingPeriod);
 
         var createdEntry = await journalRepository.AddJournalEntry(newJournalEntryEntity, cancellationToken);
         return createdEntry.Id;

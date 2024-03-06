@@ -2,6 +2,7 @@ using FluentAssertions;
 using Kaesseli.Domain.Accounts;
 using Kaesseli.Infrastructure.Accounts;
 using Kaesseli.Infrastructure.Common;
+using Kaesseli.TestUtilities.Faker;
 using Microsoft.EntityFrameworkCore;
 using Xunit;
 
@@ -53,22 +54,24 @@ public class AccountRepositoryTests
         var cancellationToken = new CancellationToken();
 
         await using var setupContext = CreateContext(options);
-        setupContext.Accounts.Add(entity: new Account
-        {
-            Id = Guid.NewGuid(),
-            Name = "Account 1",
-            Type = AccountType.Expense,
-            Icon = "favorite",
-            IconColor = "blue"
-        });
-        setupContext.Accounts.Add(entity: new Account
-        {
-            Id = Guid.NewGuid(),
-            Name = "Account 2",
-            Type = AccountType.Expense,
-            Icon = "favorite",
-            IconColor = "blue"
-        });
+        setupContext.Accounts.Add(
+            entity: new Account
+            {
+                Id = Guid.NewGuid(),
+                Name = "Account 1",
+                Type = AccountType.Expense,
+                Icon = "favorite",
+                IconColor = "blue"
+            });
+        setupContext.Accounts.Add(
+            entity: new Account
+            {
+                Id = Guid.NewGuid(),
+                Name = "Account 2",
+                Type = AccountType.Expense,
+                Icon = "favorite",
+                IconColor = "blue"
+            });
         await setupContext.SaveChangesAsync(cancellationToken);
 
         var repository = new AccountRepository(setupContext);
@@ -161,7 +164,7 @@ public class AccountRepositoryTests
     }
 
     [Fact]
-    public async Task GetAccount_ShouldThrowWhenAccountDoesNotExist()
+    public async Task GetNotExistingAccount_ShouldThrowException()
     {
         // Arrange
         var options = new DbContextOptionsBuilder<KaesseliContext>()
@@ -171,7 +174,75 @@ public class AccountRepositoryTests
         var repository = new AccountRepository(context: CreateContext(options));
 
         // Act & Assert
-        await Assert.ThrowsAsync<AccountNotFoundException>(
+        await Assert.ThrowsAsync<EntityNotFoundException>(
             () => repository.GetAccount(accountId: Guid.NewGuid(), CancellationToken.None));
+    }
+
+    [Fact]
+    public async Task GetAccountingPeriods_ShouldReturnAllAccountingPeriods()
+    {
+        // Arrange
+        var options = new DbContextOptionsBuilder<KaesseliContext>()
+                      .UseInMemoryDatabase(databaseName: "GetAccountingPeriodsDb")
+                      .Options;
+        var cancellationToken = new CancellationToken();
+
+        await using var setupContext = CreateContext(options);
+        var expectedPeriods = new SmartFaker<AccountingPeriod>().Generate(count: 5);
+
+        setupContext.AccountingPeriods.AddRange(expectedPeriods);
+        await setupContext.SaveChangesAsync(cancellationToken);
+
+        var repository = new AccountRepository(setupContext);
+
+        // Act
+        var currentPeriods = await repository.GetAccountingPeriods(cancellationToken);
+
+        // Assert
+        currentPeriods.Should().BeEquivalentTo(expectedPeriods);
+    }
+
+    [Fact]
+    public async Task GetAccountingPeriod_ShouldReturnAllAccountingPeriods()
+    {
+        // Arrange
+        var options = new DbContextOptionsBuilder<KaesseliContext>()
+                      .UseInMemoryDatabase(databaseName: "GetAccountingPeriodDb")
+                      .Options;
+        var cancellationToken = new CancellationToken();
+
+        await using var setupContext = CreateContext(options);
+        var periods = new SmartFaker<AccountingPeriod>().Generate(count: 5);
+        var expectedPeriod = periods[index: 1];
+
+        setupContext.AccountingPeriods.AddRange(periods);
+        await setupContext.SaveChangesAsync(cancellationToken);
+
+        var repository = new AccountRepository(setupContext);
+
+        // Act
+        var currentPeriod = await repository.GetAccountingPeriod(expectedPeriod.Id, cancellationToken);
+
+        // Assert
+        currentPeriod.Should().BeEquivalentTo(expectedPeriod);
+    }
+
+    [Fact]
+    public async Task GetNotExistingAccountingPeriod_ShouldThrowException()
+    {
+        // Arrange
+        var options = new DbContextOptionsBuilder<KaesseliContext>()
+                      .UseInMemoryDatabase(databaseName: "GetNotExistingAccountingPeriod")
+                      .Options;
+        var cancellationToken = new CancellationToken();
+
+        await using var setupContext = CreateContext(options);
+        var repository = new AccountRepository(setupContext);
+
+        // Act
+        var getPeriod = async () => await repository.GetAccountingPeriod(accountingPeriodId: Guid.NewGuid(), cancellationToken);
+
+        // Assert
+        await getPeriod.Should().ThrowAsync<EntityNotFoundException>();
     }
 }

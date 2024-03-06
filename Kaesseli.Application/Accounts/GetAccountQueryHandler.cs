@@ -17,7 +17,7 @@ public class GetAccountQueryHandler(IAccountRepository accountRepo, IJournalRepo
                                   request: new GetJournalEntriesRequest { AccountId = request.AccountId },
                                   cancellationToken)).ToArray();
         var budgetEntries = (await budgetRepo.GetBudgetEntries(
-                                 request: new GetBudgetEntriesRequest { AccountId = request.AccountId },
+                                 request: new GetBudgetEntriesRequest { AccountingPeriodId = null , AccountId = request.AccountId },
                                  cancellationToken)).ToArray();
 
         var accountBalance = account.GetAccountBalance(journalEntries);
@@ -62,7 +62,7 @@ public class GetAccountQueryHandler(IAccountRepository accountRepo, IJournalRepo
         new()
         {
             Id = entry.Id,
-            ValueDate = entry.ValueDate,
+            ValueDate = entry.AccountingPeriod.FromInclusive,
             Description = entry.Description,
             Amount = entry.Amount,
             AmountType = AmountType.Budget,

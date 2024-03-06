@@ -24,11 +24,15 @@ public static class BudgetApiExtensions
             async (
                     IMediator mediator,
                     Guid? accountId,
-                    DateOnly? from,
-                    DateOnly? to,
+                    Guid? accountingPeriodId,
                     AccountType? accountType
                     ) =>
-                await mediator.Send(request: new GetBudgetEntriesQuery { AccountId = accountId, FromDate = from, ToDate = to, AccountType = accountType}));
+                await mediator.Send(request: new GetBudgetEntriesQuery
+                {
+                    AccountId = accountId,
+                    AccountType = accountType,
+                    AccountingPeriodId = accountingPeriodId
+                }));
        
         return app;
     }

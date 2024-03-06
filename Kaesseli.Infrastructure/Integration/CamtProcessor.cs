@@ -39,10 +39,25 @@ internal class CamtProcessor : ICamtProcessor
                                 Reference = entry.AcctSvcrRef,
                                 TransactionCodeDetail = entry.BkTxCd.ToYaml(),
                                 TransactionCode = entry.BkTxCd.Domn.Cd,
-                                Amount = entry.CdtDbtInd == CreditDebitCode.CRDT ? entry.Amt.Value : -entry.Amt.Value,
+                                Amount = entry.CdtDbtInd == CreditDebitCode.CRDT
+                                             ? entry.Amt.Value
+                                             : -entry.Amt.Value,
                                 ValueDate = DateOnly.FromDateTime(entry.ValDt.Item),
-                                BookDate = DateOnly.FromDateTime(entry.BookgDt.Item)
+                                BookDate = DateOnly.FromDateTime(entry.BookgDt.Item),
+                                Debtor = GetDebtor(entry),
+                                Creditor = GetCreditor(entry)
                             });
+
+    private static string? GetDebtor(ReportEntry4 entry) =>
+        entry.NtryDtls
+             .FirstOrDefault()?.TxDtls
+             .FirstOrDefault()?
+             .RltdPties?.Dbtr?.Nm;
+    private static string? GetCreditor(ReportEntry4 entry) =>
+        entry.NtryDtls
+             .FirstOrDefault()?.TxDtls
+             .FirstOrDefault()?
+             .RltdPties?.Cdtr?.Nm;
 
     private static void ThrowExceptionIfFailures(Document document)
     {

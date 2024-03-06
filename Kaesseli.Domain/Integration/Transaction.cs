@@ -13,6 +13,8 @@ public class Transaction
     public required DateOnly BookDate { get; init; }
     public required string TransactionCode { get; init; }
     public required string TransactionCodeDetail { get; init; }
+    public required string? Debtor { get; init; }
+    public required string? Creditor { get; init; }
     public required TransactionSummary? TransactionSummary { get; init; }
     public IEnumerable<JournalEntry>? JournalEntries { get; init; }
 }

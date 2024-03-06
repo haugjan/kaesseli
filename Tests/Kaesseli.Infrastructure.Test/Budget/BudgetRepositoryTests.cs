@@ -10,6 +10,8 @@ namespace Kaesseli.Infrastructure.Test.Budget;
 
 public class BudgetRepositoryTests
 {
+    private static readonly Guid ExpectedAccountPeriodId = Guid.NewGuid();
+
     private static KaesseliContext CreateContext(DbContextOptions<KaesseliContext> options) =>
         new(options);
 
@@ -29,19 +31,14 @@ public class BudgetRepositoryTests
         await setupContext.SaveChangesAsync();
 
         var repository = new BudgetRepository(setupContext);
-        var request = new GetBudgetEntriesRequest
-        {
-            AccountId = null,
-            FromDate = new DateOnly(year: 2000, month: 01, day: 01),
-            ToDate = new DateOnly(year: 2000, month: 05, day: 01)
-        };
+        var request = new GetBudgetEntriesRequest { AccountId = null, AccountingPeriodId = ExpectedAccountPeriodId };
 
         // Act
         var entries = (await repository.GetBudgetEntries(request, CancellationToken.None)).ToArray();
 
         // Assert
         entries.Should().HaveCount(expected: 1);
-        entries.All(e => e.ValueDate >= request.FromDate && e.ValueDate < request.ToDate)
+        entries.All(e => e.AccountingPeriod.Id == ExpectedAccountPeriodId)
                .Should()
                .BeTrue();
     }
@@ -51,7 +48,6 @@ public class BudgetRepositoryTests
         new()
         {
             Id = Guid.NewGuid(),
-            ValueDate = new DateOnly(year: 2000, month: 01, day: 01),
             Description = "Description 1",
             Amount = 42.42m,
             Account = new Account
@@ -61,13 +57,25 @@ public class BudgetRepositoryTests
                 Type = AccountType.Revenue,
                 Icon = "favorite",
                 IconColor = "blue"
+            },
+            AccountingPeriod = new AccountingPeriod
+            {
+                Id = ExpectedAccountPeriodId,
+                FromInclusive = new DateOnly(
+                    year: 2000,
+                    month: 1,
+                    day: 1),
+                ToInclusive = new DateOnly(
+                    year: 2000,
+                    month: 12,
+                    day: 31),
+                Description = string.Empty
             }
         },
 
         new()
         {
             Id = Guid.NewGuid(),
-            ValueDate = new DateOnly(year: 2001, month: 01, day: 01),
             Description = "Description 2",
             Amount = 24.24m,
             Account = new Account
@@ -77,6 +85,19 @@ public class BudgetRepositoryTests
                 Type = AccountType.Expense,
                 Icon = "favorite",
                 IconColor = "blue"
+            },
+            AccountingPeriod = new AccountingPeriod
+            {
+                Id = Guid.NewGuid(),
+                FromInclusive = new DateOnly(
+                    year: 2001,
+                    month: 1,
+                    day: 1),
+                ToInclusive = new DateOnly(
+                    year: 2001,
+                    month: 12,
+                    day: 31),
+                Description = string.Empty
             }
         }
     ];
@@ -100,9 +121,15 @@ public class BudgetRepositoryTests
                 Icon = "favorite",
                 IconColor = "blue"
             },
-            ValueDate = DateOnly.FromDateTime(DateTime.Now),
             Description = "Description",
-            Amount = 11.11m
+            Amount = 11.11m,
+            AccountingPeriod = new AccountingPeriod
+            {
+                Id = Guid.NewGuid(),
+                FromInclusive = default,
+                ToInclusive = default,
+                Description = string.Empty
+            }
         };
 
         await using var context = CreateContext(options);
@@ -117,6 +144,7 @@ public class BudgetRepositoryTests
         await using var assertContext = CreateContext(options);
         var addedEntry = await assertContext.BudgetEntries
                                             .Include(be => be.Account)
+                                            .Include(be => be.AccountingPeriod)
                                             .Where(be => be.Id == newEntry.Id)
                                             .SingleAsync();
         addedEntry.Should().BeEquivalentTo(newEntry);

@@ -24,17 +24,24 @@ public class AddBudgetEntryCommandExtensionsTests
             Amount = 42,
             Description = "Description",
             AccountId = Guid.NewGuid(),
-            ValueDate = new DateOnly(year: 1982, month: 11, day: 3)
+            AccountingPeriodId = Guid.NewGuid()
+        };
+        var accountingPeriod = new AccountingPeriod
+        {
+            Id = Guid.NewGuid(),
+            Description = string.Empty,
+            FromInclusive = default,
+            ToInclusive = default
         };
 
         //Act
-        var budgetEntry = budgetEntryCommand.ToBudgetEntry(account, budgetEntryCommand.ValueDate.Value);
+        var budgetEntry = budgetEntryCommand.ToBudgetEntry(account, accountingPeriod);
 
         //Assert
         budgetEntry.Account.Should().Be(account);
         budgetEntry.Amount.Should().Be(budgetEntryCommand.Amount);
         budgetEntry.Description.Should().Be(budgetEntryCommand.Description);
         budgetEntry.Id.Should().NotBe(Guid.Empty);
-        budgetEntry.ValueDate.Should().Be(budgetEntryCommand.ValueDate);
+        budgetEntry.AccountingPeriod.Should().Be(accountingPeriod);
     }
 }

@@ -24,6 +24,8 @@ if ((await mediator.Send(request: new GetAccountsQuery())).Any())
     throw new Exception();
 }
 
+var accountingPeriodId = Guid.NewGuid();
+
 // ReSharper disable StringLiteralTypo
 var pfGiroId = await AddAccount(
                    accountName: "PostFinance Giro",
@@ -35,184 +37,275 @@ var pfSavingId = await AddAccount(
                      AccountType.Asset,
                      icon: "savings",
                      iconColor: "yellow");
-var zkbGiroId = await AddAccount(
-                    accountName: "ZKB Giro",
-                    AccountType.Asset,
-                    icon: "account_balance",
-                    iconColor: "blue");
-var zkbSavingId = await AddAccount(
-                      accountName: "ZKB Spar",
-                      AccountType.Asset,
-                      icon: "savings",
-                      iconColor: "blue");
+_ = await AddAccount(
+                     accountName: "Debitoren",
+                     AccountType.Asset,
+                     icon: "payments",
+                     iconColor: "red");
+
 var equityId = await AddAccount(
                    accountName: "Eigenkapital",
                    AccountType.Liability,
                    icon: "person",
                    iconColor: "black");
+
+_ =  await AddAccount(
+                   accountName: "Kreditoren",
+                   AccountType.Liability,
+                   icon: "person",
+                   iconColor: "black");
+
 var wages1Id = await AddAccount(
                    accountName: "Lohn Jan",
                    AccountType.Revenue,
                    icon: "man",
                    iconColor: "blue");
+
 var wages2Id = await AddAccount(
                    accountName: "Lohn Jasmine",
                    AccountType.Revenue,
                    icon: "woman",
                    iconColor: "pink");
 _ = await AddAccount(
-        accountName: "Lohn Vereine",
+        accountName: "Vergütung Vereine",
         AccountType.Revenue,
         icon: "sports_soccer",
         iconColor: "green");
 
+_ = await AddAccount(
+        accountName: "Auswärts Essen",
+        AccountType.Revenue,
+        icon: "restaurant",
+        iconColor: "red");
+
 _ = new List<Guid>
 {
     await AddAccount(
-        accountName: "Abo",
+        accountName: "ÖV",
         AccountType.Expense,
         icon: "train",
         iconColor: "red"),
+   
     await AddAccount(
-        accountName: "Aktivitäten",
+        accountName: "Streaming",
         AccountType.Expense,
-        icon: "pool",
+        icon: "live_tv",
         iconColor: "blue"),
+
+    //await AddAccount(
+    //    accountName: "Aktivitäten",
+    //    AccountType.Expense,
+    //    icon: "pool",
+    //    iconColor: "blue"),
+
+
     await AddAccount(
         accountName: "Billag",
         AccountType.Expense,
         icon: "tv",
         iconColor: "grey-9"),
+
     await AddAccount(
         accountName: "Coiffeur",
         AccountType.Expense,
         icon: "content_cut",
         iconColor: "brown"),
+    
     await AddAccount(
         accountName: "Ferien",
         AccountType.Expense,
         icon: "flight",
         iconColor: "blue"),
+    
     await AddAccount(
         accountName: "Geschenke",
         AccountType.Expense,
         icon: "redeem",
         iconColor: "red"),
+    
     await AddAccount(
         accountName: "Krankenkasse",
         AccountType.Expense,
         icon: "sick",
         iconColor: "yellow"),
+    
     await AddAccount(
         accountName: "Arzt",
         AccountType.Expense,
         icon: "vaccines",
         iconColor: "blue"),
+    
     await AddAccount(
         accountName: "Gesundheit",
         AccountType.Expense,
         icon: "medication",
         iconColor: "red"),
+    
     await AddAccount(
         accountName: "Haushalt Basic",
         AccountType.Expense,
         icon: "home",
         iconColor: "green"),
+    
     await AddAccount(
         accountName: "Haushalt Plus",
         AccountType.Expense,
         icon: "apartment",
         iconColor: "green"),
+    
     await AddAccount(
         accountName: "Hausrat",
         AccountType.Expense,
         icon: "bathtub",
         iconColor: "brown"),
+    
     await AddAccount(
         accountName: "Hobby",
         AccountType.Expense,
         icon: "fitness_center",
         iconColor: "red"),
+    
     await AddAccount(
         accountName: "Möbel",
         AccountType.Expense,
         icon: "chair",
         iconColor: "brown"),
+    
     await AddAccount(
-        accountName: "Veloservice",
+        accountName: "Velo",
         AccountType.Expense,
         icon: "pedal_bike",
         iconColor: "blue"),
+    
     await AddAccount(
         accountName: "Kleider Jan",
         AccountType.Expense,
         icon: "checkroom",
         iconColor: "blue"),
+    
     await AddAccount(
         accountName: "Kleider Jasmine",
         AccountType.Expense,
         icon: "checkroom",
         iconColor: "pink"),
+
     await AddAccount(
-        accountName: "Wohnkosten",
+        accountName: "Kleider Leonie",
+        AccountType.Expense,
+        icon: "checkroom",
+        iconColor: "green"),
+
+    await AddAccount(
+        accountName: "Kleider Enea",
+        AccountType.Expense,
+        icon: "checkroom",
+        iconColor: "green"),
+
+    await AddAccount(
+        accountName: "Hypothek",
         AccountType.Expense,
         icon: "living",
         iconColor: "green"),
+
+    await AddAccount(
+        accountName: "Nebenkosten",
+        AccountType.Expense,
+        icon: "grass",
+        iconColor: "green"),
+
+
     await AddAccount(
         accountName: "Werterneuerung",
         AccountType.Expense,
         icon: "build",
         iconColor: "grey-9"),
+
     await AddAccount(
         accountName: "Sackgeld Jan",
         AccountType.Expense,
         icon: "wallet",
         iconColor: "blue"),
+
     await AddAccount(
         accountName: "Sackgeld Jasmine",
         AccountType.Expense,
         icon: "wallet",
         iconColor: "pink"),
+
+    await AddAccount(
+        accountName: "Sackgeld Leonie",
+        AccountType.Expense,
+        icon: "wallet",
+        iconColor: "pink"),
+
+
+    await AddAccount(
+        accountName: "Sackgeld Enea",
+        AccountType.Expense,
+        icon: "wallet",
+        iconColor: "blue"),
+
     await AddAccount(
         accountName: "Sparen",
         AccountType.Expense,
         icon: "savings",
         iconColor: "green"),
+
     await AddAccount(
         accountName: "Steuern",
         AccountType.Expense,
         icon: "flag",
         iconColor: "red"),
+
     await AddAccount(
         accountName: "Strom",
         AccountType.Expense,
         icon: "bolt",
         iconColor: "blue"),
+
     await AddAccount(
-        accountName: "Telefon ",
+        accountName: "Telefon/Internet",
         AccountType.Expense,
         icon: "call",
         iconColor: "blue"),
+
     await AddAccount(
         accountName: "Zahnarzt",
         AccountType.Expense,
         icon: "health_and_safety",
         iconColor: "red"),
+
     await AddAccount(
         accountName: "Zeitung",
         AccountType.Expense,
         icon: "newspaper",
         iconColor: "grey"),
+
     await AddAccount(
         accountName: "Temporär",
         AccountType.Expense,
         icon: "question_mark",
         iconColor: "blue"),
+
     await AddAccount(
-        accountName: "Kinder",
+        accountName: "Optiker",
         AccountType.Expense,
-        icon: "child_care",
+        icon: "eyeglasses",
+        iconColor: "blue"),
+
+    await AddAccount(
+        accountName: "Auto Börni",
+        AccountType.Expense,
+        icon: "eyeglasses",
+        iconColor: "blue"),
+
+    await AddAccount(
+        accountName: "Auto Minime",
+        AccountType.Expense,
+        icon: "eyeglasses",
         iconColor: "blue")
+
+
 };
 
 var allAccounts = (await mediator.Send(request: new GetAccountsQuery())).ToList();
@@ -227,8 +320,7 @@ foreach (var expenseAccount in expenseAccounts)
     await AddBudgetEntry(
         amount,
         description: "Budget",
-        expenseAccount.Id,
-        valueDate: new DateOnly(year: 2024, month: 1, day: 1));
+        expenseAccount.Id);
 }
 
 foreach (var revenueAccount in revenueAccounts)
@@ -237,8 +329,7 @@ foreach (var revenueAccount in revenueAccounts)
     await AddBudgetEntry(
         amount,
         description: "Budget",
-        revenueAccount.Id,
-        valueDate: new DateOnly(year: 2024, month: 1, day: 1));
+        revenueAccount.Id);
 }
 
 await AddJournalEntry(
@@ -255,19 +346,6 @@ await AddJournalEntry(
     pfSavingId,
     equityId);
 
-await AddJournalEntry(
-    amount: 1_000m,
-    description: "Anfangsbestand",
-    valueDate: new DateOnly(year: 2024, month: 01, day: 01),
-    zkbGiroId,
-    equityId);
-
-await AddJournalEntry(
-    amount: 2000m,
-    description: "Anfangsbestand",
-    valueDate: new DateOnly(year: 2024, month: 01, day: 01),
-    zkbSavingId,
-    equityId);
 for (var month = 1; month < 13; month++)
 {
     var valueDate = new DateOnly(year: 2024, month, day: 25);
@@ -317,15 +395,14 @@ async Task<Guid> AddAccount(
 async Task AddBudgetEntry(
     decimal amount,
     string description,
-    Guid accountId,
-    DateOnly? valueDate) =>
+    Guid accountId) =>
     await mediator.Send(
         request: new AddBudgetEntryCommand
         {
             Amount = amount,
             Description = description,
             AccountId = accountId,
-            ValueDate = valueDate
+            AccountingPeriodId = accountingPeriodId
         });
 
 async Task AddJournalEntry(
@@ -341,5 +418,6 @@ async Task AddJournalEntry(
             Description = description,
             ValueDate = valueDate,
             CreditAccountId = creditAccountId,
-            DebitAccountId = debitAccountId
+            DebitAccountId = debitAccountId,
+            AccountingPeriodId = accountingPeriodId
         });

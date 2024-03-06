@@ -12,6 +12,6 @@ internal static class BudgetEntryExtensions
             Amount = budgetEntry.Amount,
             Description = budgetEntry.Description,
             AccountId = budgetEntry.Account.Id,
-            ValueDate = budgetEntry.ValueDate
+            AccountingPeriodId = budgetEntry.AccountingPeriod.Id
         };
 }

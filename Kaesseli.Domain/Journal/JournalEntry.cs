@@ -9,6 +9,7 @@ public class JournalEntry
     private readonly Account _debitAccount;
     private readonly Account _creditAccount;
     public required Guid Id { get; init; }
+    public required AccountingPeriod AccountingPeriod { get; init; }
     public required DateOnly ValueDate { get; init; }
     public required string Description { get; init; }
     public required decimal Amount { get; init; }

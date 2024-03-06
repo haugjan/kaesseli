@@ -5,9 +5,9 @@ namespace Kaesseli.Domain.Budget;
 
 public class BudgetEntry
 {
+    public required AccountingPeriod AccountingPeriod { get; init; }
     private readonly Account _account;
     public required Guid Id { get; init; }
-    public required DateOnly ValueDate { get; init; }
     public required string Description { get; init; }
     public required decimal Amount { get; init; }
 

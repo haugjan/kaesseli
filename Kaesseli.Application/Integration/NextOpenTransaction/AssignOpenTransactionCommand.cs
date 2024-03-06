@@ -9,5 +9,7 @@ public class AssignOpenTransactionCommand : IRequest
     public required Guid TransactionId { get; init; }
 
     public required Guid OtherAccountId { get; init; }
+
+    public required Guid AccountingPeriodId { get; init; }
     // ReSharper restore UnusedAutoPropertyAccessor.Global
 }

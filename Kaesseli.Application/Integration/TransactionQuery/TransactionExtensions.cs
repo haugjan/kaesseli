@@ -18,7 +18,9 @@ public static class TransactionExtensions
             Description = transactionSummary.Description,
             Reference = transactionSummary.Reference,
             TransactionCode = transactionSummary.TransactionCode,
-            TransactionCodeDetail = transactionSummary.TransactionCodeDetail
+            TransactionCodeDetail = transactionSummary.TransactionCodeDetail,
+            Debtor = transactionSummary.Debtor,
+            Creditor = transactionSummary.Creditor
         };
 
     public static GetNextOpenTransactionQueryResult ToGetNextOpenTransactionResult(
@@ -30,17 +32,16 @@ public static class TransactionExtensions
             Amount = transaction.Amount,
             ValueDate = transaction.ValueDate,
             Description = transaction.Description,
-            SuggestedAccounts = accounts.Select(
-                account => new SuggestedAccount
-                {
-                    Relevance = 1,
-                    AccountId = account.Id,
-                    AccountName = account.Name,
-                    AccountType = account.Type.DisplayName(),
-                    AccountTypeId = account.Type,
-                    AccountIcon = account.Icon,
-                    AccountIconColor = account.IconColor
-                }),
+            SuggestedAccounts = accounts.Select(account=> new SuggestedAccount
+            {
+                Relevance = 0,
+                AccountId = account.Id,
+                AccountName = account.Name,
+                AccountType = account.Type.DisplayName(),
+                AccountTypeId = account.Type,
+                AccountIcon = account.Icon,
+                AccountIconColor = account.IconColor
+            }),
             AccountName = transaction.TransactionSummary!.Account.Name,
             AccountType = transaction.TransactionSummary!.Account.Type.DisplayName(),
             AccountTypeId = transaction.TransactionSummary!.Account.Type

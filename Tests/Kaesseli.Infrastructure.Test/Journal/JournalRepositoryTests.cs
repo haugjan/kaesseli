@@ -82,7 +82,14 @@ public class JournalRepositoryTests
             ValueDate = DateOnly.FromDateTime(DateTime.Now),
             Description = "Description",
             Amount = 11.11m,
-            Transaction = null
+            Transaction = null,
+            AccountingPeriod = new AccountingPeriod
+            {
+                Id = Guid.NewGuid(),
+                FromInclusive = default,
+                ToInclusive = default,
+                Description = string.Empty
+            }
         };
 
         await using var context = CreateContext(options);
@@ -98,10 +105,9 @@ public class JournalRepositoryTests
         var addedEntry = await assertContext.JournalEntries
                                             .Include(be => be.DebitAccount)
                                             .Include(be => be.CreditAccount)
+                                            .Include(be => be.AccountingPeriod)
                                             .Where(be => be.Id == newEntry.Id)
                                             .SingleAsync();
         addedEntry.Should().BeEquivalentTo(newEntry);
     }
-
-   
 }

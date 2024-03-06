@@ -49,7 +49,8 @@ public class CamtProcessorTests
                 year: 2024,
                 month: 01,
                 day: 24),
-            RawText = await GetType().ReadResource(fileName: "ExampleData.RawText1.yaml"),
+            RawText = await GetType()
+                          .ReadResource(fileName: "ExampleData.RawText1.yaml"),
             Reference = "REF00000000000001",
             TransactionCode = "PMNT",
             TransactionCodeDetail = """
@@ -60,7 +61,9 @@ public class CamtProcessorTests
                                         SubFmlyCd: BOOK
                                     Prtry: 
                                     
-                                    """
+                                    """,
+            Debtor = null,
+            Creditor = "Fictional Company"
         },
 
         new()
@@ -75,7 +78,8 @@ public class CamtProcessorTests
                 year: 2024,
                 month: 01,
                 day: 26),
-            RawText = await GetType().ReadResource(fileName: "ExampleData.RawText2.yaml"),
+            RawText = await GetType()
+                          .ReadResource(fileName: "ExampleData.RawText2.yaml"),
             Reference = "REF00000000000002",
             TransactionCode = "PMNT",
             TransactionCodeDetail = """
@@ -86,7 +90,9 @@ public class CamtProcessorTests
                                         SubFmlyCd: AUTT
                                     Prtry: 
                                     
-                                    """
+                                    """,
+            Debtor = "Another Fictional Company",
+            Creditor = null
         }
     ];
 }

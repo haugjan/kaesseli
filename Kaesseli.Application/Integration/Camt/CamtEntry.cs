@@ -10,4 +10,6 @@ public class CamtEntry
     public required string Reference { get; init; }
     public required string TransactionCode { get; init; }
     public required string TransactionCodeDetail { get; init; }
+    public required string? Debtor { get; init; }
+    public required string? Creditor { get; init; }
 }

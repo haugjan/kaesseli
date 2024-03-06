@@ -7,9 +7,3 @@ public enum AccountType
     Revenue = 3,
     Expense = 4
 }
-
-public enum ParentAccountType
-{
-    BalanceSheet = 1,
-    IncomeStatement
-}

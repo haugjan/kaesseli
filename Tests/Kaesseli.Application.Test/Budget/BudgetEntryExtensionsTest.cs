@@ -14,7 +14,6 @@ public class BudgetEntryExtensionsTest
         var budgetEntry = new BudgetEntry
         {
             Id = Guid.NewGuid(),
-            ValueDate = new DateOnly(year: 1982, month: 11, day: 3),
             Description = "Description",
             Amount = 42,
             Account = new Account
@@ -24,6 +23,13 @@ public class BudgetEntryExtensionsTest
                 Type = AccountType.Expense,
                 Icon = "favorite",
                 IconColor = "blue"
+            },
+            AccountingPeriod = new AccountingPeriod
+            {
+                Id = Guid.NewGuid(),
+                FromInclusive = default,
+                ToInclusive = default,
+                Description = string.Empty
             }
         };
 
@@ -31,7 +37,8 @@ public class BudgetEntryExtensionsTest
         var queryResult = budgetEntry.ToGetBudgetEntriesQueryResult();
 
         //Assert
-        queryResult.Should().BeEquivalentTo(budgetEntry, options => options.Excluding(be => be.Account));
+        queryResult.Should().BeEquivalentTo(budgetEntry, options => options.Excluding(be => be.Account).Excluding(be=> be.AccountingPeriod));
         queryResult.AccountId.Should().Be(budgetEntry.Account.Id);
+        queryResult.AccountingPeriodId.Should().Be(budgetEntry.AccountingPeriod.Id);
     }
 }

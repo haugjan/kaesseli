@@ -8,8 +8,7 @@ internal static class GetBudgetEntriesQueryExtensions
         new()
         {
             AccountId = query.AccountId,
-            FromDate = query.FromDate,
-            ToDate = query.ToDate,
+            AccountingPeriodId = query.AccountingPeriodId,
             AccountType = query.AccountType
         };
 }

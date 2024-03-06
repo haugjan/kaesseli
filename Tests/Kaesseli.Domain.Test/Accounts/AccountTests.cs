@@ -53,7 +53,14 @@ public class AccountTests
                 Amount = 3m,
                 DebitAccount = account,
                 CreditAccount = otherAccount,
-                Transaction = null
+                Transaction = null,
+                AccountingPeriod = new AccountingPeriod
+                {
+                    Id = Guid.NewGuid(),
+                    FromInclusive = default,
+                    ToInclusive = default,
+                    Description = string.Empty
+                }
             },
             new()
             {
@@ -66,7 +73,14 @@ public class AccountTests
                 Amount = 5m,
                 DebitAccount = yetAnotherAccount,
                 CreditAccount = account,
-                Transaction = null
+                Transaction = null,
+                AccountingPeriod = new AccountingPeriod
+                {
+                    Id = Guid.NewGuid(),
+                    FromInclusive = default,
+                    ToInclusive = default,
+                    Description = string.Empty
+                }
             },
             new()
             {
@@ -79,7 +93,14 @@ public class AccountTests
                 Amount = 42.42m,
                 DebitAccount = otherAccount,
                 CreditAccount = yetAnotherAccount,
-                Transaction = null
+                Transaction = null,
+                AccountingPeriod = new AccountingPeriod
+                {
+                    Id = Guid.NewGuid(),
+                    FromInclusive = default,
+                    ToInclusive = default,
+                    Description = string.Empty
+                }
             }
         };
 
@@ -115,26 +136,44 @@ public class AccountTests
             new()
             {
                 Id = Guid.NewGuid(),
-                ValueDate = new DateOnly(year: 2000, month: 12, day: 13),
                 Description = "Description",
                 Amount = 3,
-                Account = account
+                Account = account,
+                AccountingPeriod = new AccountingPeriod
+                {
+                    Id = Guid.NewGuid(),
+                    FromInclusive = default,
+                    ToInclusive = default,
+                    Description = string.Empty
+                }
             },
             new()
             {
                 Id = Guid.NewGuid(),
-                ValueDate = new DateOnly(year: 2000, month: 12, day: 13),
                 Description = "Description",
                 Amount = 5,
-                Account = otherAccount
+                Account = otherAccount,
+                AccountingPeriod = new AccountingPeriod
+                {
+                    Id = Guid.NewGuid(),
+                    FromInclusive = default,
+                    ToInclusive = default,
+                    Description = string.Empty
+                }
             },
             new()
             {
                 Id = Guid.NewGuid(),
-                ValueDate = new DateOnly(year: 2000, month: 12, day: 13),
                 Description = "Description",
                 Amount = 7,
-                Account = account
+                Account = account,
+                AccountingPeriod = new AccountingPeriod
+                {
+                    Id = default,
+                    Description = string.Empty,
+                    FromInclusive = default,
+                    ToInclusive = default
+                }
             }
         };
         //Act

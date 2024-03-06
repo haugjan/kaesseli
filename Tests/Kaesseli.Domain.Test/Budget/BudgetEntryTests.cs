@@ -16,7 +16,6 @@ public class BudgetEntryTests
         var makeNewBudgetEntry = () => new BudgetEntry
         {
             Id = Guid.NewGuid(),
-            ValueDate = new DateOnly(year: 2000, month: 12, day: 13),
             Description = "Budget entry",
             Amount = 42.42m,
             Account = new Account
@@ -26,6 +25,13 @@ public class BudgetEntryTests
                 Type = accountType,
                 Icon = "favorite",
                 IconColor = "blue"
+            },
+            AccountingPeriod = new AccountingPeriod
+            {
+                Id = Guid.NewGuid(),
+                FromInclusive = default,
+                ToInclusive = default,
+                Description = string.Empty
             }
         };
 
@@ -42,7 +48,6 @@ public class BudgetEntryTests
         var makeNewBudgetEntry = () => new BudgetEntry
         {
             Id = Guid.NewGuid(),
-            ValueDate = new DateOnly(year: 2000, month: 12, day: 13),
             Description = "Budget entry",
             Amount = 42.42m,
             Account = new Account
@@ -52,6 +57,13 @@ public class BudgetEntryTests
                 Type = accountType,
                 Icon = "favorite",
                 IconColor = "blue"
+            },
+            AccountingPeriod = new AccountingPeriod
+            {
+                Id = Guid.NewGuid(),
+                FromInclusive = default,
+                ToInclusive = default,
+                Description = string.Empty
             }
         };
 

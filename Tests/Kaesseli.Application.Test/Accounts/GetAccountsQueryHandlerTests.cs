@@ -29,12 +29,8 @@ public class GetAccountsQueryHandlerTests
         var result = (await handler.Handle(query, cancellationToken)).ToArray();
 
         // Assert
-        result.Should().NotBeNull();
-        result.Should().HaveCount(accountsList.Count);
-        result.Select(r => r.Id).Should().BeEquivalentTo(expectation: accountsList.Select(a => a.Id));
-        result.Select(r => r.Name).Should().BeEquivalentTo(expectation: accountsList.Select(a => a.Name));
+        result.Should().BeEquivalentTo(accountsList, options=> options.Excluding(al=> al.Type));
         result.Select(r => r.Type).Should().BeEquivalentTo(expectation: accountsList.Select(a => a.Type.DisplayName()));
-
         mockRepository.Verify(repo => repo.GetAccounts(cancellationToken), Times.Once);
     }
 }

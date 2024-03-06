@@ -9,26 +9,31 @@ namespace Kaesseli.Application.Test.Budget;
 
 public class GetBudgetEntriesQueryHandlerTests
 {
+    private static readonly Guid ExpectedAccountingPeriodId = Guid.NewGuid();
+
     [Fact]
     public async Task Handle_ReturnsCorrectBudgetEntries()
     {
         // Arrange
         var mockRepository = new Mock<IBudgetRepository>();
         var accountId = Guid.NewGuid();
-        var fromDate = new DateOnly(year: 2020, month: 01, day: 01);
-        var toDate = fromDate.AddDays(value: 30);
 
         var entriesList = CreateBudgetEntries();
 
         mockRepository.Setup(
                           repo => repo.GetBudgetEntries(
                               It.Is<GetBudgetEntriesRequest>(
-                                  r => r.AccountId == accountId && r.FromDate == fromDate && r.ToDate == toDate),
+                                  r => r.AccountId == accountId && r.AccountingPeriodId == ExpectedAccountingPeriodId),
                               It.IsAny<CancellationToken>()))
                       .ReturnsAsync(entriesList);
 
         var handler = new GetBudgetEntriesQueryHandler(mockRepository.Object);
-        var query = new GetBudgetEntriesQuery { AccountId = accountId, FromDate = fromDate, ToDate = toDate };
+        var query = new GetBudgetEntriesQuery
+        {
+            AccountId = accountId,
+            AccountType = null,
+            AccountingPeriodId = ExpectedAccountingPeriodId
+        };
 
         // Act
         var result = (await handler.Handle(query, CancellationToken.None)).ToArray();
@@ -49,8 +54,7 @@ public class GetBudgetEntriesQueryHandlerTests
             repo => repo.GetBudgetEntries(
                 It.Is<GetBudgetEntriesRequest>(
                     r => r.AccountId == accountId
-                      && r.FromDate == fromDate
-                      && r.ToDate == toDate),
+                      && r.AccountingPeriodId == ExpectedAccountingPeriodId),
                 It.IsAny<CancellationToken>()),
             Times.Once);
     }
@@ -60,7 +64,6 @@ public class GetBudgetEntriesQueryHandlerTests
         new()
         {
             Id = Guid.NewGuid(),
-            ValueDate = new DateOnly(year: 2000, month: 12, day: 13),
             Description = "Description 1",
             Amount = 42.42m,
             Account = new Account
@@ -70,13 +73,19 @@ public class GetBudgetEntriesQueryHandlerTests
                 Type = AccountType.Expense,
                 Icon = "favorite",
                 IconColor = "blue"
+            },
+            AccountingPeriod = new AccountingPeriod
+            {
+                Id = ExpectedAccountingPeriodId,
+                FromInclusive = default,
+                ToInclusive = default,
+                Description = string.Empty
             }
         },
 
         new()
         {
             Id = Guid.NewGuid(),
-            ValueDate = new DateOnly(year: 1982, month: 11, day: 3),
             Description = "Description 2",
             Amount = 24.24m,
             Account = new Account
@@ -86,6 +95,13 @@ public class GetBudgetEntriesQueryHandlerTests
                 Type = AccountType.Revenue,
                 Icon = "favorite",
                 IconColor = "blue"
+            },
+            AccountingPeriod = new AccountingPeriod
+            {
+                Id = Guid.NewGuid(),
+                FromInclusive = default,
+                ToInclusive = default,
+                Description = string.Empty
             }
         }
     ];
