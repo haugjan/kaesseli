@@ -32,7 +32,23 @@ public class KaesseliContext : DbContext
     {
         base.OnModelCreating(modelBuilder);
 
-        // Konfigurieren der JournalEntry-Entität
+        modelBuilder.Entity<BudgetEntry>(
+            entity =>
+            {
+                //entity.HasIndex(b => new { b.Account, b.AccountingPeriod })
+                //      .IsUnique();
+
+                entity.HasOne(be => be.Account)
+                                .WithMany()
+                                .IsRequired()
+                                .OnDelete(DeleteBehavior.NoAction);
+
+                entity.HasOne(be => be.AccountingPeriod)
+                      .WithMany()
+                      .IsRequired()
+                      .OnDelete(DeleteBehavior.NoAction);
+            });
+        ;
         modelBuilder.Entity<JournalEntry>(
             entity =>
             {
@@ -40,16 +56,15 @@ public class KaesseliContext : DbContext
                       .WithMany() 
                       .HasForeignKey("DebitAccountId") 
                       .IsRequired()
-                      .OnDelete(DeleteBehavior.Restrict); 
+                      .OnDelete(DeleteBehavior.NoAction); 
 
                 entity.HasOne(je => je.CreditAccount)
                       .WithMany() 
                       .HasForeignKey("CreditAccountId") 
                       .IsRequired()
-                      .OnDelete(DeleteBehavior.Restrict);
+                      .OnDelete(DeleteBehavior.NoAction);
                 entity.HasOne(je => je.Transaction)
-                      .WithMany(tran => tran.JournalEntries)
-                      .HasForeignKey("TransactionId");  
+                      .WithMany(tran => tran.JournalEntries);  
             });
 
         modelBuilder.Entity<TransactionSummary>(

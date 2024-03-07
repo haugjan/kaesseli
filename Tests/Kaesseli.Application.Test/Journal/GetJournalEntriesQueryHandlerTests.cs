@@ -14,31 +14,25 @@ public class GetJournalEntriesQueryHandlerTests
     {
         // Arrange
         var mockRepository = new Mock<IJournalRepository>();
-        var debitAccountId = Guid.NewGuid();
-        var creditAccountId = Guid.NewGuid();
         var fromDate = new DateOnly(year: 2020, month: 01, day: 01);
-        var toDate = fromDate.AddDays(value: 30);
+        var expectedPeriodId = Guid.NewGuid();
 
         var faker = new SmartFaker<JournalEntry>();
         var entriesList = faker.Generate(count: 5);
         mockRepository.Setup(
                           repo => repo.GetJournalEntries(
                               It.Is<GetJournalEntriesRequest>(
-                                  r => r.DebitAccountId == debitAccountId
-                                    && r.CreditAccountId == creditAccountId
-                                    && r.FromDate == fromDate
-                                    && r.ToDate == toDate),
+                                  r => r.AccountingPeriodId == expectedPeriodId),
                               It.IsAny<CancellationToken>()))
                       .ReturnsAsync(entriesList);
 
         var handler = new GetJournalEntriesQueryHandler(mockRepository.Object);
         var query = new GetJournalEntriesQuery
         {
-            DebitAccountId = debitAccountId,
-            CreditAccountId = creditAccountId,
-            FromDate = fromDate,
-            ToDate = toDate,
-            AccountingPeriodId = Guid.NewGuid()
+
+            AccountingPeriodId = expectedPeriodId,
+            AccountId = null,
+            AccountType = null
         };
 
         // Act
@@ -59,10 +53,7 @@ public class GetJournalEntriesQueryHandlerTests
         mockRepository.Verify(
             repo => repo.GetJournalEntries(
                 It.Is<GetJournalEntriesRequest>(
-                    r => r.DebitAccountId == debitAccountId
-                      && r.CreditAccountId == creditAccountId
-                      && r.FromDate == fromDate
-                      && r.ToDate == toDate),
+                    r => r.AccountingPeriodId == expectedPeriodId),
                 It.IsAny<CancellationToken>()),
             Times.Once);
     }

@@ -21,7 +21,9 @@ public class GetAccountQueryHandler(IAccountRepository accountRepo, IJournalRepo
         var journalEntries = (await journalRepo.GetJournalEntries(
                                   request: new GetJournalEntriesRequest
                                   {
-                                      AccountId = request.AccountId, AccountingPeriodId = request.AccountingPeriodId
+                                      AccountId = request.AccountId,
+                                      AccountingPeriodId = request.AccountingPeriodId,
+                                      AccountType = null
                                   },
                                   cancellationToken)).ToArray();
         var budgetEntries = (await budgetRepo.GetBudgetEntries(

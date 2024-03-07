@@ -6,9 +6,6 @@ namespace Kaesseli.Application.Journal;
 public class GetJournalEntriesQuery : IRequest<IEnumerable<GetJournalEntriesQueryResult>>
 {
     public required Guid AccountingPeriodId { get; init; }
-    public Guid? DebitAccountId { get; init; }
-    public  Guid? CreditAccountId { get; init; }
-    public  DateOnly? FromDate { get; init; }
-    public  DateOnly? ToDate { get; init; }
-    public  AccountType? AccountType { get; init; }
+    public required Guid? AccountId { get; init; }
+    public required AccountType? AccountType { get; init; }
 }

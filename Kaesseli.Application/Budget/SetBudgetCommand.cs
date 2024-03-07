@@ -3,7 +3,7 @@
 namespace Kaesseli.Application.Budget;
 
 // ReSharper disable once ClassNeverInstantiated.Global
-public class AddBudgetEntryCommand : IRequest<Guid>
+public class SetBudgetCommand : IRequest<Guid>
 {
     // ReSharper disable UnusedAutoPropertyAccessor.Global
     public required decimal Amount { get; init; }

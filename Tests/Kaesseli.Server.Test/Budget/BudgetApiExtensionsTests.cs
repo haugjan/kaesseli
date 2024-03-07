@@ -47,15 +47,15 @@ public class BudgetApiExtensionsTests
     }
 
     [Fact]
-    public async Task AddBudgetEntryEndpoint_ShouldReturnCreatedResult()
+    public async Task SetBudgetCommandEndpoint_ShouldReturnCreatedResult()
     {
         // Arrange
         var guid = Guid.NewGuid();
-        _mediatorMock.Setup(m => m.Send(It.IsAny<AddBudgetEntryCommand>(), default)).ReturnsAsync(guid);
+        _mediatorMock.Setup(m => m.Send(It.IsAny<SetBudgetCommand>(), default)).ReturnsAsync(guid);
 
-        var addBudgetEntryCommand = new SmartFaker<AddBudgetEntryCommand>().Generate();
+        var setBudgetCommand = new SmartFaker<SetBudgetCommand>().Generate();
         var content = new StringContent(
-            content: JsonSerializer.Serialize(addBudgetEntryCommand),
+            content: JsonSerializer.Serialize(setBudgetCommand),
             Encoding.UTF8,
             mediaType: "application/json");
 
@@ -66,7 +66,7 @@ public class BudgetApiExtensionsTests
         response.StatusCode.Should().Be(HttpStatusCode.Created);
         response.Headers.Location.Should()
                 .BeEquivalentTo(expectation: new Uri(uriString: $"/budgetEntry/{guid}", UriKind.Relative));
-        _mediatorMock.Verify(m => m.Send(It.IsAny<AddBudgetEntryCommand>(), default), Times.Once);
+        _mediatorMock.Verify(m => m.Send(It.IsAny<SetBudgetCommand>(), default), Times.Once);
     }
 
     [Fact]

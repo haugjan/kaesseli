@@ -25,7 +25,9 @@ public class GetAccountsSummaryQueryHandler(
         var journalEntries = await journalRepo.GetJournalEntries(
                                  request: new GetJournalEntriesRequest
                                  {
-                                     AccountingPeriodId = request.AccountingPeriodId
+                                     AccountingPeriodId = request.AccountingPeriodId,
+                                     AccountId = null,
+                                     AccountType = null
                                  },
                                  cancellationToken);
 

@@ -8,13 +8,13 @@ public static class BudgetApiExtensions
 {
     // ReSharper disable once UnusedMethodReturnValue.Global
     public static IEndpointRouteBuilder MapBudgetEndpoints(this IEndpointRouteBuilder app) =>
-        MapBudgetAddBudgetEntryEndpoint(app);
+        MapBudgetBudgetEntryEndpoint(app);
 
-    private static IEndpointRouteBuilder MapBudgetAddBudgetEntryEndpoint(IEndpointRouteBuilder app)
+    private static IEndpointRouteBuilder MapBudgetBudgetEntryEndpoint(IEndpointRouteBuilder app)
     {
         app.MapPost(
             pattern: "/budgetEntry",
-            async (IMediator mediator, AddBudgetEntryCommand command) =>
+            async (IMediator mediator, SetBudgetCommand command) =>
             {
                 var guid = await mediator.Send(command);
                 return Results.Created(uri: $"/budgetEntry/{guid}", guid);

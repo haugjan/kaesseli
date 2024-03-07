@@ -5,7 +5,7 @@ using Xunit;
 
 namespace Kaesseli.Application.Test.Budget;
 
-public class AddBudgetEntryCommandExtensionsTests
+public class SetBudgetCommandExtensionsTests
 {
     [Fact]
     public void ToBudgetEntry_ReturnBudgetEntry()
@@ -19,7 +19,7 @@ public class AddBudgetEntryCommandExtensionsTests
             Icon = "favorite",
             IconColor = "blue"
         };
-        var budgetEntryCommand = new AddBudgetEntryCommand
+        var budgetEntryCommand = new SetBudgetCommand
         {
             Amount = 42,
             Description = "Description",

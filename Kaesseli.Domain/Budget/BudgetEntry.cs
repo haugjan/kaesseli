@@ -8,8 +8,8 @@ public class BudgetEntry
     public required AccountingPeriod AccountingPeriod { get; init; }
     private readonly Account _account;
     public required Guid Id { get; init; }
-    public required string Description { get; init; }
-    public required decimal Amount { get; init; }
+    public required string Description { get; set; }
+    public required decimal Amount { get; set; }
 
     public required Account Account
     {

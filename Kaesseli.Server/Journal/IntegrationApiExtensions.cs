@@ -23,21 +23,15 @@ public static class IntegrationApiExtensions
             pattern: "/journalEntry",
             async (
                     IMediator mediator,
-                    Guid? debitAccountId,
-                    Guid? creditAccountId,
-                    DateOnly? from,
-                    DateOnly? to,
-                    AccountType? accountType,
-                    Guid accountingPeriodId) =>
+                    Guid accountingPeriodId,
+                    Guid? accountId,
+                    AccountType? accountType) =>
                 await mediator.Send(
                     request: new GetJournalEntriesQuery
                     {
-                        DebitAccountId = debitAccountId,
-                        CreditAccountId = creditAccountId,
-                        FromDate = from,
-                        ToDate = to,
-                        AccountType = accountType,
-                        AccountingPeriodId = accountingPeriodId
+                        AccountingPeriodId = accountingPeriodId,
+                        AccountId = accountId,
+                        AccountType = accountType
                     }));
         return app;
     }

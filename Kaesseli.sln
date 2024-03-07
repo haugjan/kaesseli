@@ -18,6 +18,7 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{B5E51834-AEC0-487A-9908-6F6E5E4151B4}"
 	ProjectSection(SolutionItems) = preProject
 		.gitignore = .gitignore
+		Dockerfile = Dockerfile
 		README.md = README.md
 	EndProjectSection
 EndProject
@@ -35,7 +36,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Kaesseli.Utility.Test", "Te
 EndProject
 Project("{54A90642-561A-4BB1-A94E-469ADEE60C69}") = "Kaesseli.Client", "Kaesseli.Client\Kaesseli.Client.esproj", "{B6D473F4-379A-4285-A3BA-4A9572B53ECB}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Kaesseli.Integration", "Tests\Kaesseli.Integration\Kaesseli.Integration.csproj", "{2072CF4A-2F97-430A-B91B-443BAE0DB7B7}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Kaesseli.Integration", "Tests\Kaesseli.Integration\Kaesseli.Integration.csproj", "{2072CF4A-2F97-430A-B91B-443BAE0DB7B7}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

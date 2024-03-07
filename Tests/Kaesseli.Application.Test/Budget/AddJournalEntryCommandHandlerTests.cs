@@ -15,11 +15,11 @@ public class AddJournalEntryCommandHandlerTests
         // Arrange
         var mockRepo = new Mock<IBudgetRepository>();
         var accountRepo = new Mock<IAccountRepository>();
-        var command = new SmartFaker<AddBudgetEntryCommand>().Generate();
+        var command = new SmartFaker<SetBudgetCommand>().Generate();
         var cancellationToken = new CancellationToken();
 
         mockRepo.Setup(
-                    repo => repo.AddBudgetEntry(
+                    repo => repo.SetBudget(
                         It.Is<BudgetEntry>(a => a.Amount == command.Amount && a.Description == command.Description),
                         cancellationToken))
                 .ReturnsAsync((BudgetEntry newBudgetEntry, CancellationToken _) => newBudgetEntry);
@@ -43,14 +43,14 @@ public class AddJournalEntryCommandHandlerTests
                                Description = string.Empty
                            });
 
-        var handler = new AddBudgetEntryCommandHandler(mockRepo.Object, accountRepo.Object);
+        var handler = new SetBudgetCommandHandler(mockRepo.Object, accountRepo.Object);
 
         // Act
         var result = await handler.Handle(command, CancellationToken.None);
 
         // Assert
         mockRepo.Verify(
-            repo => repo.AddBudgetEntry(
+            repo => repo.SetBudget(
                 It.Is<BudgetEntry>(
                     entry => entry.Amount == command.Amount
                           && entry.Description == command.Description
@@ -65,11 +65,11 @@ public class AddJournalEntryCommandHandlerTests
         // Arrange
         var mockRepo = new Mock<IBudgetRepository>();
         var accountRepo = new Mock<IAccountRepository>();
-        var command = new SmartFaker<AddBudgetEntryCommand>().Generate();
+        var command = new SmartFaker<SetBudgetCommand>().Generate();
         var cancellationToken = new CancellationToken();
 
         mockRepo.Setup(
-                    repo => repo.AddBudgetEntry(
+                    repo => repo.SetBudget(
                         It.Is<BudgetEntry>(a => a.Amount == command.Amount && a.Description == command.Description),
                         cancellationToken))
                 .ReturnsAsync((BudgetEntry newBudgetEntry, CancellationToken _) => newBudgetEntry);
@@ -94,14 +94,14 @@ public class AddJournalEntryCommandHandlerTests
                            });
 
 
-        var handler = new AddBudgetEntryCommandHandler(mockRepo.Object, accountRepo.Object);
+        var handler = new SetBudgetCommandHandler(mockRepo.Object, accountRepo.Object);
 
         // Act
         var result = await handler.Handle(command, CancellationToken.None);
 
         // Assert
         mockRepo.Verify(
-            repo => repo.AddBudgetEntry(
+            repo => repo.SetBudget(
                 It.Is<BudgetEntry>(
                     entry => entry.Amount == command.Amount
                           && entry.Description == command.Description

@@ -21,19 +21,14 @@ public class JournalRepository(KaesseliContext context) : IJournalRepository
         IQueryable<JournalEntry> entries = context.JournalEntries
                                                   .Include(journalEntry => journalEntry.DebitAccount)
                                                   .Include(journalEntry => journalEntry.CreditAccount)
-                                                  .Include(journalEntry => journalEntry.AccountingPeriod);
-        if (request.DebitAccountId is not null) entries = entries.Where(entry => entry.DebitAccount.Id == request.DebitAccountId);
-        if (request.CreditAccountId is not null) entries = entries.Where(entry => entry.CreditAccount.Id == request.DebitAccountId);
-
+                                                  .Include(journalEntry => journalEntry.AccountingPeriod)
+                                                  .Where(entry => entry.AccountingPeriod.Id == request.AccountingPeriodId);
         if (request.AccountId is not null)
         {
             entries = entries.Where(
                 journal => journal.CreditAccount.Id == request.AccountId
                         || journal.DebitAccount.Id == request.AccountId);
         }
-
-        if (request.FromDate is not null) entries = entries.Where(entry => entry.ValueDate >= request.FromDate);
-        if (request.ToDate is not null) entries = entries.Where(entry => entry.ValueDate < request.ToDate);
 
         if (request.AccountType is not null)
         {

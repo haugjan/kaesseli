@@ -18,35 +18,36 @@ public class JournalRepositoryTests
     public async Task GetJournalEntries_ShouldReturnFilteredEntries()
     {
         // Arrange
+        var expectedPeriodId = Guid.NewGuid();
+
         var options = new DbContextOptionsBuilder<KaesseliContext>()
                       .UseInMemoryDatabase(databaseName: "GetJournalEntriesDb")
                       .Options;
 
-        var journalEntry = new SmartFaker<JournalEntry>()
-                           .RuleFor(
-                               be => be.ValueDate,
-                               faker => new DateOnly(year: 2000 + faker.IndexFaker, month: 01, day: 01))
-                           .Generate(count: 2);
+        var firstEntry = new SmartFaker<JournalEntry>()
+                             .RuleFor(be=> be.AccountingPeriod, value: new AccountingPeriod
+                           {
+                               Id = expectedPeriodId,
+                               Description = string.Empty,
+                               FromInclusive = default,
+                               ToInclusive = default
+                           })
+                           .Generate();
+        var secondEntry = new SmartFaker<JournalEntry>()
+                         
+                         .Generate();
 
         await using var setupContext = CreateContext(options);
-        setupContext.JournalEntries.Add(entity: journalEntry.First());
-        setupContext.JournalEntries.Add(entity: journalEntry.Last());
+        setupContext.JournalEntries.Add(entity: firstEntry);
+        setupContext.JournalEntries.Add(entity: secondEntry);
         await setupContext.SaveChangesAsync();
 
         var repository = new JournalRepository(setupContext);
         var request = new GetJournalEntriesRequest
         {
-            CreditAccountId = null,
-            DebitAccountId = null,
-            FromDate = new DateOnly(
-                year: 2000,
-                month: 01,
-                day: 01),
-            ToDate = new DateOnly(
-                year: 2000,
-                month: 05,
-                day: 01),
-            AccountingPeriodId = Guid.NewGuid()
+            AccountingPeriodId = expectedPeriodId,
+            AccountId = null,
+            AccountType = null
         };
 
         // Act
@@ -54,7 +55,7 @@ public class JournalRepositoryTests
 
         // Assert
         entries.Should().HaveCount(expected: 1);
-        entries.All(e => e.ValueDate >= request.FromDate && e.ValueDate < request.ToDate)
+        entries.All(e => e.AccountingPeriod.Id == expectedPeriodId)
                .Should()
                .BeTrue();
     }

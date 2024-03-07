@@ -26,7 +26,7 @@ public static class InfrastructureServiceCollectionExtensions
                 .AddScoped<ICamtProcessor, CamtProcessor>()
                 .AddDbContext<KaesseliContext>(
                     options =>
-                        options.UseSqlite(connectionString: configuration.GetConnectionString(name: "BudgetDatabase")  ));
+                        options.UseSqlServer(connectionString: configuration.GetConnectionString(name: "BudgetDatabase")  ));
 
     private static IServiceCollection AddRepositories(this IServiceCollection services) =>
         services.AddScoped<IBudgetRepository, BudgetRepository>()

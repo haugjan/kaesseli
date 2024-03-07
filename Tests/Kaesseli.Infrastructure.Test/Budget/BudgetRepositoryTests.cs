@@ -103,11 +103,11 @@ public class BudgetRepositoryTests
     ];
 
     [Fact]
-    public async Task AddBudgetEntry_ShouldAddEntry()
+    public async Task SetBudgetCommand_ShouldAddEntry()
     {
         // Arrange
         var options = new DbContextOptionsBuilder<KaesseliContext>()
-                      .UseInMemoryDatabase(databaseName: "AddBudgetEntryDb")
+                      .UseInMemoryDatabase(databaseName: "SetBudgetDb")
                       .Options;
 
         var newEntry = new BudgetEntry
@@ -136,7 +136,7 @@ public class BudgetRepositoryTests
         var repository = new BudgetRepository(context);
 
         // Act
-        var result = await repository.AddBudgetEntry(newEntry, CancellationToken.None);
+        var result = await repository.SetBudget(newEntry, CancellationToken.None);
 
         // Assert
         result.Should().BeEquivalentTo(newEntry);

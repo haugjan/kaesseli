@@ -15,12 +15,9 @@ public class GetJournalEntriesQueryHandler(IJournalRepository repository) :
         var entries = await repository.GetJournalEntries(
                           request: new GetJournalEntriesRequest
                           {
-                              DebitAccountId = request.DebitAccountId,
-                              CreditAccountId = request.CreditAccountId,
                               AccountType = request.AccountType,
-                              FromDate = request.FromDate, 
-                              ToDate = request.ToDate,
-                              AccountingPeriodId = request.AccountingPeriodId
+                              AccountingPeriodId = request.AccountingPeriodId,
+                              AccountId = null
                           },
                           cancellationToken);
         return entries.Select(

@@ -18,7 +18,7 @@ public class AddAccountingPeriodCommandHandler : IRequestHandler<AddAccountingPe
                                    {
                                        Id = Guid.NewGuid(),
                                        Description = string.IsNullOrWhiteSpace(request.Description)
-                                                         ? $"{request.FromInclusive:d} - {request.ToInclusive:id}"
+                                                         ? $"{request.FromInclusive:d} - {request.ToInclusive:d}"
                                                          : request.Description,
                                        FromInclusive = request.FromInclusive,
                                        ToInclusive = request.ToInclusive

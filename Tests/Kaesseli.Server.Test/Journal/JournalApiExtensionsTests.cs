@@ -90,10 +90,6 @@ public class JournalApiExtensionsTests
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);
-        _mediatorMock.Verify(m => m.Send(It.Is<GetJournalEntriesQuery>(query => query.AccountingPeriodId == periodId
-                                                                               && query.FromDate == from
-                                                                                && query.ToDate == to
-                                                                                && query.DebitAccountId == debitAccountId
-                                                                                && query.CreditAccountId == creditAccountId), default), Times.Once);
+        _mediatorMock.Verify(m => m.Send(It.Is<GetJournalEntriesQuery>(query => query.AccountingPeriodId == periodId), default), Times.Once);
     }
 }
