@@ -14,5 +14,7 @@ public class GetAccountsSummaryQueryResult
     public required decimal AccountBalance{ get; init; }
     public required decimal? Budget{ get; init; }
     public required decimal? BudgetBalance{ get; init; }
+
+    public required decimal? CurrentBudget { get; init; }
     // ReSharper restore UnusedAutoPropertyAccessor.Global
 }

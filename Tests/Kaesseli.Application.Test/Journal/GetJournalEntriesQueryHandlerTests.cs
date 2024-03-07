@@ -37,7 +37,8 @@ public class GetJournalEntriesQueryHandlerTests
             DebitAccountId = debitAccountId,
             CreditAccountId = creditAccountId,
             FromDate = fromDate,
-            ToDate = toDate
+            ToDate = toDate,
+            AccountingPeriodId = Guid.NewGuid()
         };
 
         // Act

@@ -77,9 +77,10 @@ public class BudgetApiExtensionsTests
         _mediatorMock.Setup(m => m.Send(It.IsAny<GetBudgetEntriesQuery>(), default)).ReturnsAsync(budgetEntries);
 
         var accountId = Guid.NewGuid();
+        var periodId = Guid.NewGuid();
         var from = new DateOnly(year: 2023, month: 1, day: 1);
         var to = new DateOnly(year: 2023, month: 12, day: 31);
-        var queryString = $"?accountId={accountId}&from={from:yyyy-MM-dd}&to={to:yyyy-MM-dd}";
+        var queryString = $"?accountingPeriodId={periodId}&accountId={accountId}&from={from:yyyy-MM-dd}&to={to:yyyy-MM-dd}";
 
         // Act
         var response = await _client.GetAsync(requestUri: $"/budgetEntry{queryString}");

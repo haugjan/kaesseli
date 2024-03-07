@@ -1,4 +1,6 @@
 <template>
+
+  <!--TODO TypeScript-->
   <div class="q-pa-md">
     <q-file v-model="uploadedFile"
             label="Datei hochladen"

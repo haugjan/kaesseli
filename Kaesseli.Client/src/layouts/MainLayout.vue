@@ -11,6 +11,16 @@
           </q-avatar>
           Kässeli
         </q-toolbar-title>
+        
+    <q-select v-model="selectedPeriod"
+              :options="accountingPeriods"
+              option-value="id"
+              option-label="description"
+              emit-value
+              dense
+              standout 
+              map-options
+              @update:model-value="onAccountingPeriodSelect" />
         <q-toggle v-model="darkMode" icon="contrast" color="black" />
       </q-toolbar>
 
@@ -47,8 +57,6 @@
             <q-icon name="assignment_turned_in" />
           </q-item-section>
           <q-item-section>
-            <!--<q-item-label>Zuordnen</q-item-label>
-            <q-badge color="red" floating>4</q-badge>-->
             <div>
               Zuordnen
               <q-badge color="red" rounded align="top">{{totalOpenTransaction}}</q-badge>
@@ -65,10 +73,15 @@
   </q-layout>
 </template>
 
-<script>
-  import { ref, watch, onMounted } from 'vue';
+<script lang="ts">
+  import { ref, Ref, watch, onMounted, provide } from 'vue';
   import { useQuasar } from 'quasar';
   import axios from 'axios';
+
+  interface IAccountingPeriod {
+    id: string;
+    description: string;
+  }
 
   export default {
     setup() {
@@ -76,6 +89,9 @@
       const darkMode = ref(false);
       const $q = useQuasar()
       const totalOpenTransaction = ref(0);
+      const accountingPeriods: Ref<IAccountingPeriod[] | null> = ref(null);
+      const selectedPeriod: Ref<IAccountingPeriod | null> = ref(null)
+      provide('selectedPeriod', selectedPeriod);
 
       const fetchTotalOpen = async () => {
         try {
@@ -86,9 +102,27 @@
         }
       };
 
+      const fetchAccountingPeriods = async () => {
+        try {
+          const response = await axios.get('https://localhost:7123/accountingPeriod');
+          accountingPeriods.value = response.data;
+          if (selectedPeriod.value == null) {
+            selectedPeriod.value = accountingPeriods.value[accountingPeriods.value.length-1]
+          }
+        } catch (error) {
+          console.error('There was an error fetching the accounts:', error);
+        }
+      };
+
       onMounted(() => {
         fetchTotalOpen();
+        fetchAccountingPeriods();
       });
+
+      function onAccountingPeriodSelect(value) {
+        console.log('Ausgewähltes Konto:', value);
+        window.location.reload()
+      }
 
       watch(darkMode, (newValue) => {
         $q.dark.set(newValue)
@@ -101,7 +135,11 @@
         },
         darkMode,
         fetchTotalOpen,
-        totalOpenTransaction
+        totalOpenTransaction,
+        accountingPeriods,
+        onAccountingPeriodSelect,
+        selectedPeriod
+
       }
     }
   }

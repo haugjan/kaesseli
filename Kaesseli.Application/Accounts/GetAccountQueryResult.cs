@@ -14,6 +14,7 @@ public class GetAccountQueryResult
     // ReSharper disable once UnusedMember.Global
     public required decimal AccountBalance { get; init; }
     public required decimal? Budget { get; init; }
+    public required decimal? CurrentBudget { get; init; }
     public required decimal? BudgetBalance { get; init; }
     public required IEnumerable<GetAccountQueryResultEntry> Entries { get; init; }
     // ReSharper restore UnusedAutoPropertyAccessor.Global

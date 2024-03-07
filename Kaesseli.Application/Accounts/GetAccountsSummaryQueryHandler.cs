@@ -1,4 +1,5 @@
-﻿using Kaesseli.Domain.Accounts;
+﻿using Kaesseli.Application.Utility;
+using Kaesseli.Domain.Accounts;
 using Kaesseli.Domain.Budget;
 using Kaesseli.Domain.Journal;
 using MediatR;
@@ -9,36 +10,50 @@ namespace Kaesseli.Application.Accounts;
 public class GetAccountsSummaryQueryHandler(
     IAccountRepository accountRepo,
     IJournalRepository journalRepo,
-    IBudgetRepository budgetRepo) : IRequestHandler<GetAccountsSummaryQuery, IEnumerable<GetAccountsSummaryQueryResult>>
+    IBudgetRepository budgetRepo,
+    IDateTimeService dateTimeService) : IRequestHandler<GetAccountsSummaryQuery, IEnumerable<GetAccountsSummaryQueryResult>>
 {
+    private readonly IDateTimeService _dateTimeService = dateTimeService;
+
     public async Task<IEnumerable<GetAccountsSummaryQueryResult>> Handle(
         GetAccountsSummaryQuery request,
         CancellationToken cancellationToken)
     {
         var accounts = await accountRepo.GetAccounts(cancellationToken);
+        var accountingPeriod = await accountRepo.GetAccountingPeriod(request.AccountingPeriodId, cancellationToken);
 
         var journalEntries = await journalRepo.GetJournalEntries(
-                                 request: GetJournalEntriesRequest.Empty,
+                                 request: new GetJournalEntriesRequest
+                                 {
+                                     AccountingPeriodId = request.AccountingPeriodId
+                                 },
                                  cancellationToken);
 
         var budgetEntries = await budgetRepo.GetBudgetEntries(
-                                request: GetBudgetEntriesRequest.Empty,
+                                request: new GetBudgetEntriesRequest
+                                {
+                                    AccountingPeriodId = request.AccountingPeriodId
+                                },
                                 cancellationToken);
 
-        return accounts.Select(account => GetAccountSummary(account, journalEntries, budgetEntries));
+        return accounts.Select(account => GetAccountSummary(account, journalEntries, budgetEntries, accountingPeriod));
     }
 
-    private static GetAccountsSummaryQueryResult GetAccountSummary(
+    private GetAccountsSummaryQueryResult GetAccountSummary(
         Account account,
         IEnumerable<JournalEntry> journalEntries,
-        IEnumerable<BudgetEntry> budgetEntries)
+        IEnumerable<BudgetEntry> budgetEntries,
+        AccountingPeriod accountingPeriod)
     {
+        var today = _dateTimeService.ToDay;
+        budgetEntries = budgetEntries.ToArray();
         var accountBalance = account.GetAccountBalance(journalEntries);
         var budget = account.GetBudget(budgetEntries);
-        var budgetBalance = account.GetBudgetBalance(budget, accountBalance);
+        var currentBudget = account.GetCurrentBudget(budgetEntries, accountingPeriod, today);
+        var budgetBalance = account.GetBudgetBalance(currentBudget, accountBalance);
 
-        return account.ToAccountSummary(accountBalance, budget, budgetBalance);
+        return account.ToAccountSummary(accountBalance, budget, currentBudget, budgetBalance);
     }
 
-    
+
 }

@@ -19,9 +19,12 @@
           <q-chip color="blue-10" text-color="white" icon="account_balance_wallet">
             {{formatNumber(account.accountBalance)}}
           </q-chip>
-          <span v-if="account.parentTypeId === 2">
+          <span v-if="account.typeId === 3 || account.typeId === 4  ">
             <q-chip color="brown-7" text-color="white" icon="savings">
-              {{formatNumber(account.budget)}}
+              Σ {{formatNumber(account.budget)}}
+            </q-chip>
+            <q-chip color="brown-3" text-color="white" icon="savings">
+              📅 {{formatNumber(account.currentBudget)}}
             </q-chip>
             <q-chip v-if="account.budgetBalance >= 0" color="green-9" text-color="white" icon="balance">
               {{formatNumber(account.budgetBalance)}}
@@ -66,10 +69,9 @@
     name: string,
     type: string,
     typeId: number,
-    parentType: string,
-    parentTypeId: number,
     accountBalance: number,
     budget: number | null,
+    currentBudget: number | null
     budgetBalance: number | null
     entries: IAccountEntry[]
   }
@@ -86,13 +88,14 @@
 
 
 
-  import { defineComponent, ref, onMounted } from 'vue';
+  import { defineComponent, ref, onMounted, inject } from 'vue';
   import { useRoute } from 'vue-router';
   import axios from 'axios';
   export default defineComponent({
     setup(props) {
       const account = ref<IAccount | null>(null);
       const route = useRoute();
+      const selectedPeriod = inject('selectedPeriod');
 
       const columns = ref([
         { name: 'valueDate', required: true, label: 'Datum', align: 'left', field: (row: IAccountEntry) => formatDate(row.valueDate), sortable: true },
@@ -103,7 +106,7 @@
 
       const FetchEntries = async () => {
         try {
-          const response = await axios.get(`https://localhost:7123/account/${route.params.id}`);
+          const response = await axios.get(`https://localhost:7123/accountingPeriod/${selectedPeriod.value.id}/account/${route.params.id}`);
           account.value = response.data;
         } catch (error) {
           console.error('There was an error fetching the transactions:', error);

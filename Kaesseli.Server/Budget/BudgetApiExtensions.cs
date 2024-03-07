@@ -23,8 +23,8 @@ public static class BudgetApiExtensions
             pattern: "/budgetEntry",
             async (
                     IMediator mediator,
+                    Guid accountingPeriodId,
                     Guid? accountId,
-                    Guid? accountingPeriodId,
                     AccountType? accountType
                     ) =>
                 await mediator.Send(request: new GetBudgetEntriesQuery

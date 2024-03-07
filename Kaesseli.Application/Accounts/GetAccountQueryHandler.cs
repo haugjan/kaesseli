@@ -1,4 +1,5 @@
 ﻿using System.Collections.Immutable;
+using Kaesseli.Application.Utility;
 using Kaesseli.Domain.Accounts;
 using Kaesseli.Domain.Budget;
 using Kaesseli.Domain.Journal;
@@ -7,22 +8,33 @@ using MediatR;
 namespace Kaesseli.Application.Accounts;
 
 // ReSharper disable once UnusedType.Global
-public class GetAccountQueryHandler(IAccountRepository accountRepo, IJournalRepository journalRepo, IBudgetRepository budgetRepo)
+public class GetAccountQueryHandler(IAccountRepository accountRepo, IJournalRepository journalRepo, IBudgetRepository budgetRepo,
+                                    IDateTimeService dateTimeService)
     : IRequestHandler<GetAccountQuery, GetAccountQueryResult>
 {
+    private readonly IDateTimeService _dateTimeService = dateTimeService;
+
     public async Task<GetAccountQueryResult> Handle(GetAccountQuery request, CancellationToken cancellationToken)
     {
         var account = await accountRepo.GetAccount(request.AccountId, cancellationToken);
+        var period = await accountRepo.GetAccountingPeriod(request.AccountingPeriodId, cancellationToken);
         var journalEntries = (await journalRepo.GetJournalEntries(
-                                  request: new GetJournalEntriesRequest { AccountId = request.AccountId },
+                                  request: new GetJournalEntriesRequest
+                                  {
+                                      AccountId = request.AccountId, AccountingPeriodId = request.AccountingPeriodId
+                                  },
                                   cancellationToken)).ToArray();
         var budgetEntries = (await budgetRepo.GetBudgetEntries(
-                                 request: new GetBudgetEntriesRequest { AccountingPeriodId = null , AccountId = request.AccountId },
+                                 request: new GetBudgetEntriesRequest
+                                 {
+                                     AccountingPeriodId = request.AccountingPeriodId, AccountId = request.AccountId
+                                 },
                                  cancellationToken)).ToArray();
 
         var accountBalance = account.GetAccountBalance(journalEntries);
         var budget = account.GetBudget(budgetEntries);
-        var budgetBalance = account.GetBudgetBalance(budget, accountBalance);
+        var currentBudget = account.GetCurrentBudget(budgetEntries, period, _dateTimeService.ToDay);
+        var budgetBalance = account.GetBudgetBalance(currentBudget, accountBalance);
 
         return new GetAccountQueryResult
         {
@@ -38,7 +50,8 @@ public class GetAccountQueryHandler(IAccountRepository accountRepo, IJournalRepo
                 account.Id,
                 journalEntries,
                 budgetEntries),
-            IconColor = account.IconColor
+            IconColor = account.IconColor,
+            CurrentBudget = currentBudget
         };
     }
 
@@ -72,8 +85,8 @@ public class GetAccountQueryHandler(IAccountRepository accountRepo, IJournalRepo
 
     private static GetAccountQueryResultEntry CreateAccountQueryResultEntry(Guid accountId, JournalEntry entry)
     {
-        var account = entry.CreditAccount.Id == accountId 
-                          ? entry.CreditAccount 
+        var account = entry.CreditAccount.Id == accountId
+                          ? entry.CreditAccount
                           : entry.DebitAccount;
         var otherAccount = entry.CreditAccount.Id == accountId
                                ? entry.DebitAccount
@@ -87,7 +100,7 @@ public class GetAccountQueryHandler(IAccountRepository accountRepo, IJournalRepo
             ValueDate = entry.ValueDate,
             Description = entry.Description,
             Amount = amount,
-            AmountType = isDebit ? AmountType.Debit: AmountType.Credit,
+            AmountType = isDebit ? AmountType.Debit : AmountType.Credit,
             OtherAccount = otherAccount.Name,
             OtherAccountId = otherAccount.Id
         };

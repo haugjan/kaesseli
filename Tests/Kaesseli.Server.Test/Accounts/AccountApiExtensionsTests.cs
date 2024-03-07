@@ -95,35 +95,38 @@ public class AccountApiExtensionsTests
     public async Task GetAccountEndpoint_ShouldReturnAccounts()
     {
         // Arrange
+        var periodId = Guid.NewGuid();
         var accounts = new SmartFaker<GetAccountsQueryResult>().Generate(count: 3);
         var expectedAccount = accounts[index: 1];
         _mediatorMock.Setup(m => m.Send(It.Is<GetAccountQuery>(x=> x.AccountId==expectedAccount.Id), default))
                      .ReturnsAsync((GetAccountQuery _, CancellationToken _) => new GetAccountQueryResult
-        {
-            Id = expectedAccount.Id,
-            Name = expectedAccount.Name,
-            Icon = expectedAccount.Icon,
-            IconColor = expectedAccount.IconColor,
-            Type = expectedAccount.Type,
-            TypeId = expectedAccount.TypeId,
-            AccountBalance = 10,
-            Budget = 11,
-            BudgetBalance = 12,
-            Entries = Array.Empty<GetAccountQueryResultEntry>()
-        });
+                     {
+                         Id = expectedAccount.Id,
+                         Name = expectedAccount.Name,
+                         Icon = expectedAccount.Icon,
+                         IconColor = expectedAccount.IconColor,
+                         Type = expectedAccount.Type,
+                         TypeId = expectedAccount.TypeId,
+                         AccountBalance = 10,
+                         Budget = 11,
+                         BudgetBalance = 12,
+                         Entries = Array.Empty<GetAccountQueryResultEntry>(),
+                         CurrentBudget = 13
+                     });
 
         // Act
-        var response = await _client.GetAsync(requestUri: $"/account/{expectedAccount.Id}");
+        var response = await _client.GetAsync(requestUri: $"/accountingPeriod/{periodId}/account/{expectedAccount.Id}");
         var options = new JsonSerializerOptions
         {
             PropertyNamingPolicy = JsonNamingPolicy.CamelCase
         }; 
-        var accountResponse = JsonSerializer.Deserialize<GetAccountQueryResult>(json: await response.Content.ReadAsStringAsync(), options);
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);
+        var accountResponse = JsonSerializer.Deserialize<GetAccountQueryResult>(json: await response.Content.ReadAsStringAsync(), options);
         accountResponse.Should().BeEquivalentTo(expectedAccount);
-        _mediatorMock.Verify(m => m.Send(It.Is<GetAccountQuery>(query => query.AccountId == expectedAccount.Id), default), Times.Once);
+        _mediatorMock.Verify(m => m.Send(It.Is<GetAccountQuery>(query => query.AccountId == expectedAccount.Id 
+                                                                         && query.AccountingPeriodId == periodId), default), Times.Once);
 
     }
 

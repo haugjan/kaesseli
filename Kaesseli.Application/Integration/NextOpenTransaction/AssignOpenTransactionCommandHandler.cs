@@ -1,5 +1,4 @@
-﻿using Kaesseli.Application.Integration.TransactionAddedEvent;
-using Kaesseli.Domain.Journal;
+﻿using Kaesseli.Domain.Journal;
 using MediatR;
 
 namespace Kaesseli.Application.Integration.NextOpenTransaction;
@@ -19,13 +18,13 @@ public class AssignOpenTransactionCommandHandler : IRequestHandler<AssignOpenTra
     public async Task Handle(AssignOpenTransactionCommand request, CancellationToken cancellationToken)
     {
         await _journalRepo.AssignOpenTransaction(request.TransactionId, request.OtherAccountId, request.AccountingPeriodId, cancellationToken);
-        await  _mediator.Publish(
-            notification: new TransactionAddedNotification(
-                domainEvent: new Domain.Integration.TransactionAddedEvent
-                {
-                    TransactionId = request.TransactionId, 
-                    AccountId = request.OtherAccountId
-                }),
-            cancellationToken: cancellationToken);
+        //await  _mediator.Publish(
+        //    notification: new TransactionAddedNotification(
+        //        domainEvent: new Domain.Integration.TransactionAddedEvent
+        //        {
+        //            TransactionId = request.TransactionId, 
+        //            AccountId = request.OtherAccountId
+        //        }),
+        //    cancellationToken: cancellationToken);
     }
 }

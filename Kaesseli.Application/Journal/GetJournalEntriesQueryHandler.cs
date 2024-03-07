@@ -19,7 +19,8 @@ public class GetJournalEntriesQueryHandler(IJournalRepository repository) :
                               CreditAccountId = request.CreditAccountId,
                               AccountType = request.AccountType,
                               FromDate = request.FromDate, 
-                              ToDate = request.ToDate
+                              ToDate = request.ToDate,
+                              AccountingPeriodId = request.AccountingPeriodId
                           },
                           cancellationToken);
         return entries.Select(

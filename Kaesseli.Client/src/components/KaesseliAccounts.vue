@@ -46,7 +46,7 @@
 </template>
 
 <script lang="ts">
-  import { defineComponent, ref, Ref, onMounted } from 'vue';
+  import { defineComponent, ref, Ref, onMounted, inject } from 'vue';
   import axios from 'axios';
   import { useRouter } from 'vue-router'; // Importieren von useRouter
 
@@ -58,17 +58,21 @@
     iconColor: string;
     type: string;
     typeId: number;
-    parentType: string;
-    parentTypeId: number;
     accountBalance: number;
     budget: number | null;
+    currentBudget: number | null;
     budgetBalance: number | null;
   }
 
   export default defineComponent({
     name: 'KaesseliAccounts',
     setup() {
+
+      const current: Ref<IAccountSummary | null> = ref(null);
+      const router = useRouter();
+      const selectedPeriod = inject('selectedPeriod');
       const accounts = ref<IAccountSummary[]>([]);
+
       const accountTypes = ref([
         { name: 'Einkommen', icon: 'attach_money', color: 'green' },
         { name: 'Ausgaben', icon: 'money_off', color: 'red' },
@@ -76,20 +80,19 @@
         { name: 'Passiv', icon: 'account_balance_wallet', color: 'brown' }
       ]);
 
-      const current: Ref<IAccountSummary | null> = ref(null);
-      const router = useRouter();
 
       const columns = ref([
         { name: 'icon', required: true, label: '', align: 'left', field: (row: IAccountSummary) => row.icon, sortable: true },
         { name: 'name', required: true, label: 'Name', align: 'left', field: (row: IAccountSummary) => row.name, sortable: true },
         { name: 'accountBalance', label: 'Kontostand', align: 'right', field: (row: IAccountSummary) => formatNumber(row.accountBalance), sortable: true },
-        { name: 'budget', label: 'Budget', align: 'right', field: (row: IAccountSummary) => formatNumber(row.budget), sortable: true },
+        { name: 'budget', label: 'Σ Budget', align: 'right', field: (row: IAccountSummary) => formatNumber(row.budget), sortable: true },
+        { name: 'currentBudget', label: '📅 Budget', align: 'right', field: (row: IAccountSummary) => formatNumber(row.currentBudget), sortable: true },
         { name: 'budgetBalance', label: 'Budgetsaldo', align: 'right', field: (row: IAccountSummary) => formatNumber(row.budgetBalance), sortable: true, classes: 'budgetBalance' },
       ]);
 
       const fetchAccounts = async () => {
         try {
-          const response = await axios.get('https://localhost:7123/accountSummary');
+          const response = await axios.get(`https://localhost:7123/accountingPeriod/${selectedPeriod.value.id}/accountSummary`);
           accounts.value = response.data;
         } catch (error) {
           console.error('There was an error fetching the accounts:', error);

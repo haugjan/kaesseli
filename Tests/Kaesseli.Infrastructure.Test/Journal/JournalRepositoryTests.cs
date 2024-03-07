@@ -38,8 +38,15 @@ public class JournalRepositoryTests
         {
             CreditAccountId = null,
             DebitAccountId = null,
-            FromDate = new DateOnly(year: 2000, month: 01, day: 01),
-            ToDate = new DateOnly(year: 2000, month: 05, day: 01)
+            FromDate = new DateOnly(
+                year: 2000,
+                month: 01,
+                day: 01),
+            ToDate = new DateOnly(
+                year: 2000,
+                month: 05,
+                day: 01),
+            AccountingPeriodId = Guid.NewGuid()
         };
 
         // Act

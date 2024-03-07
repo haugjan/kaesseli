@@ -7,5 +7,5 @@ public class GetBudgetEntriesQuery : IRequest<IEnumerable<GetBudgetEntriesQueryR
 {
     public required Guid? AccountId { get; init; }
     public required AccountType? AccountType { get; init; }
-    public required Guid? AccountingPeriodId { get; init; }
+    public required Guid AccountingPeriodId { get; init; }
 }

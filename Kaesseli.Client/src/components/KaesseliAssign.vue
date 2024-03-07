@@ -28,8 +28,8 @@
   </div>
   <div v-if="transaction" class="row q-pa-md">
     <div v-for="account in transaction.suggestedAccounts" :key="account.id">
-      <q-chip clickable  @click="onClick(account)" size="md" :color="account.accountIconColor" :icon="account.accountIcon" text-color="white" square> {{account.accountName}}</q-chip>
-      
+      <q-chip clickable @click="onClick(account)" size="md" :color="account.accountIconColor" :icon="account.accountIcon" text-color="white" square> {{account.accountName}}</q-chip>
+
     </div>
   </div>
 </template>
@@ -57,14 +57,15 @@
     suggestedAccounts: ISuggestedAccount[];
   }
 
-  import { defineComponent, ref, onMounted } from 'vue';
+  import { defineComponent, ref, onMounted, inject } from 'vue';
   import axios from 'axios';
-import { is } from 'quasar';
+  import { is } from 'quasar';
 
   export default defineComponent({
     setup() {
 
       const transaction = ref<ITransaction | null>(null);
+      const selectedPeriod = inject('selectedPeriod');
 
       const FetchTransaction = async () => {
         try {
@@ -98,7 +99,8 @@ import { is } from 'quasar';
         try {
           await axios.patch('https://localhost:7123/transaction/journalEntry', {
             transactionId: transaction.value?.id,
-            otherAccountId: account.accountId
+            otherAccountId: account.accountId,
+            accountingPeriodId: selectedPeriod.value.id,
           });
           window.location.reload(); // Seite neu laden
         } catch (error) {

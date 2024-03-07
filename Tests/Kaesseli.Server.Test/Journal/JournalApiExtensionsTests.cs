@@ -81,14 +81,19 @@ public class JournalApiExtensionsTests
         var creditAccountId = Guid.NewGuid();
         var from = new DateOnly(year: 2023, month: 1, day: 1);
         var to = new DateOnly(year: 2023, month: 12, day: 31);
+        var periodId = Guid.NewGuid();
         var queryString =
-            $"?debitAccountId={debitAccountId}&creditAccountId={creditAccountId}&from={from:yyyy-MM-dd}&to={to:yyyy-MM-dd}";
+            $"?accountingPeriodId={periodId}&debitAccountId={debitAccountId}&creditAccountId={creditAccountId}&from={from:yyyy-MM-dd}&to={to:yyyy-MM-dd}";
 
         // Act
         var response = await _client.GetAsync(requestUri: $"/journalEntry{queryString}");
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);
-        _mediatorMock.Verify(m => m.Send(It.IsAny<GetJournalEntriesQuery>(), default), Times.Once);
+        _mediatorMock.Verify(m => m.Send(It.Is<GetJournalEntriesQuery>(query => query.AccountingPeriodId == periodId
+                                                                               && query.FromDate == from
+                                                                                && query.ToDate == to
+                                                                                && query.DebitAccountId == debitAccountId
+                                                                                && query.CreditAccountId == creditAccountId), default), Times.Once);
     }
 }

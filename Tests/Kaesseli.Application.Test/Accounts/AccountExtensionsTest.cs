@@ -7,7 +7,7 @@ namespace Kaesseli.Application.Test.Accounts;
 public class AccountExtensionsTest
 {
     [Fact]
-    public void Test()
+    public void ToAccountSummary_ReturnsTransformed()
     {
         //Arrange
         var account = new Account
@@ -20,7 +20,11 @@ public class AccountExtensionsTest
         };
 
         //Act
-        var summary = account.ToAccountSummary(accountBalance: 3m, budget: 5m, budgetBalance: 7m);
+        var summary = account.ToAccountSummary(
+            accountBalance: 3m,
+            budget: 5m,
+            currentBudget: 7m,
+            budgetBalance: 8m);
 
         //Assert
         summary.Id.Should().Be(account.Id);
@@ -28,6 +32,7 @@ public class AccountExtensionsTest
         summary.Name.Should().Be(account.Name);
         summary.AccountBalance.Should().Be(expected: 3m);
         summary.Budget.Should().Be(expected: 5m);
-        summary.BudgetBalance.Should().Be(expected: 7m);
+        summary.CurrentBudget.Should().Be(expected: 7m);
+        summary.BudgetBalance.Should().Be(expected: 8m);
     }
 }

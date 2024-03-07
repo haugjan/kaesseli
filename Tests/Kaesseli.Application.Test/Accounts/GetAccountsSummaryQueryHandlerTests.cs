@@ -1,5 +1,8 @@
-﻿using FluentAssertions;
+﻿using System.Security.Principal;
+using System.Threading;
+using FluentAssertions;
 using Kaesseli.Application.Accounts;
+using Kaesseli.Application.Utility;
 using Kaesseli.Domain.Accounts;
 using Kaesseli.Domain.Budget;
 using Kaesseli.Domain.Journal;
@@ -23,8 +26,10 @@ public class GetAccountsSummaryQueryHandlerTests
         var accountRepo = new Mock<IAccountRepository>();
         var journalRepo = new Mock<IJournalRepository>();
         var budgetRepo = new Mock<IBudgetRepository>();
-
-        var handler = new GetAccountsSummaryQueryHandler(accountRepo.Object, journalRepo.Object, budgetRepo.Object);
+        var dateTimeService = new Mock<IDateTimeService>();
+        var handler = new GetAccountsSummaryQueryHandler(accountRepo.Object, journalRepo.Object, budgetRepo.Object, dateTimeService.Object);
+        var cancellationToken = new CancellationToken();
+        var periodId = Guid.NewGuid();
 
         var accountToTest = new Account
         {
@@ -46,13 +51,24 @@ public class GetAccountsSummaryQueryHandlerTests
         var journalEntries = CreateTestJournalEntries(accountToTest, otherAccount);
         var budgetEntries = CreateTestBudgetEntries(accountToTest);
 
-        accountRepo.Setup(repo => repo.GetAccounts(It.IsAny<CancellationToken>())).ReturnsAsync(value: [otherAccount, accountToTest]);
+        accountRepo.Setup(repo => repo.GetAccounts(cancellationToken)).ReturnsAsync(value: [otherAccount, accountToTest]);
+        accountRepo.Setup(repo => repo.GetAccountingPeriod(periodId, cancellationToken))
+                                      .ReturnsAsync((Guid _, CancellationToken _)=> new AccountingPeriod
+                                      {
+                                          Id = periodId,
+                                          Description = periodId.ToString(),
+                                          FromInclusive = default,
+                                          ToInclusive = default
+                                      });
         journalRepo.Setup(repo => repo.GetJournalEntries(It.IsAny<GetJournalEntriesRequest>(), It.IsAny<CancellationToken>()))
                    .ReturnsAsync(journalEntries);
         budgetRepo.Setup(repo => repo.GetBudgetEntries(It.IsAny<GetBudgetEntriesRequest>(), It.IsAny<CancellationToken>()))
                   .ReturnsAsync(budgetEntries);
 
-        var query = new GetAccountsSummaryQuery();
+        var query = new GetAccountsSummaryQuery
+        {
+            AccountingPeriodId = periodId
+        };
 
         // Act
         var result = (await handler.Handle(query, CancellationToken.None)).ToArray();
@@ -80,8 +96,10 @@ public class GetAccountsSummaryQueryHandlerTests
         var accountRepo = new Mock<IAccountRepository>();
         var journalRepo = new Mock<IJournalRepository>();
         var budgetRepo = new Mock<IBudgetRepository>();
-
-        var handler = new GetAccountsSummaryQueryHandler(accountRepo.Object, journalRepo.Object, budgetRepo.Object);
+        var dateTime = new Mock<IDateTimeService>();
+        var handler = new GetAccountsSummaryQueryHandler(accountRepo.Object, journalRepo.Object, budgetRepo.Object, dateTime.Object);
+        var cancellationToken = new CancellationToken();
+        var periodId = Guid.NewGuid();
 
         var otherAccount = new Account
         {
@@ -103,15 +121,28 @@ public class GetAccountsSummaryQueryHandlerTests
         var journalEntries = CreateTestJournalEntries(accountToTest, otherAccount);
 
         accountRepo.Setup(repo => repo.GetAccounts(It.IsAny<CancellationToken>())).ReturnsAsync(value: [otherAccount, accountToTest]);
+        accountRepo.Setup(repo => repo.GetAccountingPeriod(periodId, cancellationToken))
+                   .ReturnsAsync(
+                       (Guid _, CancellationToken _) => new AccountingPeriod
+                       {
+                           Id = periodId,
+                           Description = periodId.ToString(),
+                           FromInclusive = default,
+                           ToInclusive = default
+                       });
+        
         journalRepo.Setup(repo => repo.GetJournalEntries(It.IsAny<GetJournalEntriesRequest>(), It.IsAny<CancellationToken>()))
                    .ReturnsAsync(journalEntries);
         budgetRepo.Setup(repo => repo.GetBudgetEntries(It.IsAny<GetBudgetEntriesRequest>(), It.IsAny<CancellationToken>()))
                   .ReturnsAsync(value: Array.Empty<BudgetEntry>());
 
-        var query = new GetAccountsSummaryQuery();
+        var query = new GetAccountsSummaryQuery
+        {
+            AccountingPeriodId = periodId
+        };
 
         // Act
-        var result = (await handler.Handle(query, CancellationToken.None)).ToArray();
+        var result = (await handler.Handle(query, cancellationToken)).ToArray();
 
         // Assert
         result.Length.Should().Be(expected: 2);

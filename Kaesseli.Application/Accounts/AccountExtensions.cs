@@ -7,6 +7,7 @@ internal static class AccountExtensions
     internal static GetAccountsSummaryQueryResult ToAccountSummary(this Account account, 
                                                                    decimal accountBalance, 
                                                                    decimal? budget,
+                                                                   decimal? currentBudget,
                                                                    decimal? budgetBalance) =>
         new()
         {
@@ -17,6 +18,7 @@ internal static class AccountExtensions
             TypeId = account.Type,
             AccountBalance = accountBalance,
             Budget = budget,
+            CurrentBudget = currentBudget,
             BudgetBalance = budgetBalance,
             IconColor = account.IconColor
         };

@@ -27,7 +27,8 @@ public static class IntegrationApiExtensions
                     Guid? creditAccountId,
                     DateOnly? from,
                     DateOnly? to,
-                    AccountType? accountType) =>
+                    AccountType? accountType,
+                    Guid accountingPeriodId) =>
                 await mediator.Send(
                     request: new GetJournalEntriesQuery
                     {
@@ -35,7 +36,8 @@ public static class IntegrationApiExtensions
                         CreditAccountId = creditAccountId,
                         FromDate = from,
                         ToDate = to,
-                        AccountType = accountType
+                        AccountType = accountType,
+                        AccountingPeriodId = accountingPeriodId
                     }));
         return app;
     }
