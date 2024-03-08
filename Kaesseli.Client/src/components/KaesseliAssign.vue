@@ -27,7 +27,11 @@
     </q-card>
   </div>
   <div v-if="transaction" class="row q-pa-md">
-    <div v-for="account in transaction.suggestedAccounts" :key="account.id">
+    <q-input ref="filterInput" filled dense v-model="filterText" label="Filter" @keyup.enter="handleEnter" />
+
+  </div>
+  <div v-if="transaction" class="row q-pa-md">
+    <div v-for="account in filteredAccounts" :key="account.id">
       <q-chip clickable @click="onClick(account)" size="md" :color="account.accountIconColor" :icon="account.accountIcon" text-color="white" square> {{account.accountName}}</q-chip>
 
     </div>
@@ -57,15 +61,25 @@
     suggestedAccounts: ISuggestedAccount[];
   }
 
-  import { defineComponent, ref, onMounted, inject } from 'vue';
+  import { defineComponent, ref, onMounted, computed, nextTick } from 'vue';
   import axios from 'axios';
-  import { is } from 'quasar';
 
   export default defineComponent({
     setup() {
 
       const transaction = ref<ITransaction | null>(null);
-      const selectedPeriod = inject('selectedPeriod');
+      const filterText = ref<string>("");
+      const filterInput = ref(null);
+
+
+      const filteredAccounts = computed(() => {
+        if (!transaction.value) {
+          return [];
+        }
+        return transaction.value.suggestedAccounts.filter((account) =>
+          account.accountName.toLowerCase().includes(filterText.value.toLowerCase())
+        );
+      });
 
       const FetchTransaction = async () => {
         try {
@@ -97,10 +111,14 @@
 
       const onClick = async (account: ISuggestedAccount) => {
         try {
+          const savedPeriodId: string | null = localStorage.getItem('selectedPeriod');
+          if (savedPeriodId === null) {
+            return;
+          }
           await axios.patch('https://localhost:7123/transaction/journalEntry', {
             transactionId: transaction.value?.id,
             otherAccountId: account.accountId,
-            accountingPeriodId: selectedPeriod.value.id,
+            accountingPeriodId: savedPeriodId,
           });
           window.location.reload(); // Seite neu laden
         } catch (error) {
@@ -108,8 +126,19 @@
         }
       };
 
-      onMounted(() => {
-        FetchTransaction();
+      const handleEnter = () => {
+        if (filteredAccounts.value.length === 1) {
+          onClick(filteredAccounts.value[0]);
+        }
+      };
+
+      onMounted(async () => {
+        await FetchTransaction();
+        nextTick(() => {
+          if (filterInput.value) {
+            filterInput.value.focus();
+          }
+        });
       });
 
       return {
@@ -117,7 +146,11 @@
         transaction,
         formatDate,
         formatNumber,
-        onClick
+        onClick,
+        filterText,
+        filteredAccounts,
+        handleEnter,
+        filterInput
       }
 
     }

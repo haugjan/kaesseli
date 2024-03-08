@@ -6,21 +6,24 @@
         <q-btn dense flat round icon="menu" @click="toggleLeftDrawer" />
 
         <q-toolbar-title>
-          <q-avatar>
-            <img src="https://cdn.quasar.dev/logo-v2/svg/logo-mono-white.svg">
-          </q-avatar>
-          Kässeli
+          <!-- Klickbare Region, die zur Startseite navigiert, ohne das Aussehen zu ändern -->
+          <div @click="router.push('/')" style="cursor: pointer;">
+            <q-avatar>
+              <img src="https://cdn.quasar.dev/logo-v2/svg/logo-mono-white.svg">
+            </q-avatar>
+            Kässeli
+          </div>
         </q-toolbar-title>
-        
-    <q-select v-model="selectedPeriod"
-              :options="accountingPeriods"
-              option-value="id"
-              option-label="description"
-              emit-value
-              dense
-              standout 
-              map-options
-              @update:model-value="onAccountingPeriodSelect" />
+
+        <q-select v-model="selectedPeriod"
+                  :options="accountingPeriods"
+                  option-value="id"
+                  option-label="description"
+                  emit-value
+                  dense
+                  standout
+                  map-options
+                  @update:model-value="onAccountingPeriodSelect" />
         <q-toggle v-model="darkMode" icon="contrast" color="black" />
       </q-toolbar>
 
@@ -74,14 +77,12 @@
 </template>
 
 <script lang="ts">
-  import { ref, Ref, watch, onMounted, provide } from 'vue';
+  import { ref, Ref, watch, onMounted } from 'vue';
   import { useQuasar } from 'quasar';
+  import { useRouter } from 'vue-router';
   import axios from 'axios';
+  import { IAccountingPeriod } from '../interfaces/IAccountingPeriod'; 
 
-  interface IAccountingPeriod {
-    id: string;
-    description: string;
-  }
 
   export default {
     setup() {
@@ -90,8 +91,8 @@
       const $q = useQuasar()
       const totalOpenTransaction = ref(0);
       const accountingPeriods: Ref<IAccountingPeriod[] | null> = ref(null);
-      const selectedPeriod: Ref<IAccountingPeriod | null> = ref(null)
-      provide('selectedPeriod', selectedPeriod);
+      const selectedPeriod: Ref<IAccountingPeriod | null | undefined> = ref(null)
+      const router = useRouter();
 
       const fetchTotalOpen = async () => {
         try {
@@ -106,8 +107,16 @@
         try {
           const response = await axios.get('https://localhost:7123/accountingPeriod');
           accountingPeriods.value = response.data;
+          if (accountingPeriods.value === null) {
+            return;
+          }
           if (selectedPeriod.value == null) {
-            selectedPeriod.value = accountingPeriods.value[accountingPeriods.value.length-1]
+            const savedPeriodId = localStorage.getItem('selectedPeriod');
+            if (savedPeriodId === null) {
+              selectedPeriod.value = accountingPeriods.value[accountingPeriods.value.length - 1];
+            } else {
+              selectedPeriod.value = accountingPeriods.value.find(period => period.id === savedPeriodId);
+            }
           }
         } catch (error) {
           console.error('There was an error fetching the accounts:', error);
@@ -119,9 +128,10 @@
         fetchAccountingPeriods();
       });
 
-      function onAccountingPeriodSelect(value) {
+      function onAccountingPeriodSelect(value: string) {
         console.log('Ausgewähltes Konto:', value);
-        window.location.reload()
+        localStorage.setItem('selectedPeriod', value);
+        window.location.reload();
       }
 
       watch(darkMode, (newValue) => {
@@ -138,7 +148,7 @@
         totalOpenTransaction,
         accountingPeriods,
         onAccountingPeriodSelect,
-        selectedPeriod
+        router
 
       }
     }

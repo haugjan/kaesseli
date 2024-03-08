@@ -14,7 +14,7 @@ internal class AccountRepository(KaesseliContext context) : IAccountRepository
     }
 
     public async Task<IEnumerable<Account>> GetAccounts(CancellationToken cancellationToken) =>
-        await context.Accounts.ToListAsync(cancellationToken);
+        await context.Accounts.OrderBy(account=>account.Name).ToListAsync(cancellationToken);
 
     public async Task<IEnumerable<Account>> GetAccounts(AccountType accountType, CancellationToken cancellationToken) =>
         await context.Accounts.Where(account => account.Type == accountType).ToListAsync(cancellationToken);

@@ -91,11 +91,12 @@
   import { defineComponent, ref, onMounted, inject } from 'vue';
   import { useRoute } from 'vue-router';
   import axios from 'axios';
+  import { IAccountingPeriod } from '../interfaces/IAccountingPeriod'; 
+
   export default defineComponent({
     setup(props) {
       const account = ref<IAccount | null>(null);
       const route = useRoute();
-      const selectedPeriod = inject('selectedPeriod');
 
       const columns = ref([
         { name: 'valueDate', required: true, label: 'Datum', align: 'left', field: (row: IAccountEntry) => formatDate(row.valueDate), sortable: true },
@@ -106,7 +107,11 @@
 
       const FetchEntries = async () => {
         try {
-          const response = await axios.get(`https://localhost:7123/accountingPeriod/${selectedPeriod.value.id}/account/${route.params.id}`);
+          const savedPeriodId: string | null = localStorage.getItem('selectedPeriod');
+          if (savedPeriodId === null) {
+            return;
+          }
+          const response = await axios.get(`https://localhost:7123/accountingPeriod/${savedPeriodId}/account/${route.params.id}`);
           account.value = response.data;
         } catch (error) {
           console.error('There was an error fetching the transactions:', error);

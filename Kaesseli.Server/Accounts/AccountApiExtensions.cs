@@ -42,6 +42,14 @@ public static class AccountApiExtensions
                     AccountingPeriodId = accountingPeriodId
                 }));
 
+        app.MapGet(
+            pattern: "/accountingPeriod/{accountingPeriodId}/overView",
+            async (IMediator mediator, Guid accountingPeriodId) =>
+                await mediator.Send(request: new GetFinancialOverviewCommand
+                {
+                    AccountingPeriodId = accountingPeriodId
+                }));
+
         app.MapPost(
             pattern: "/account",
             async (IMediator mediator, AddAccountCommand command) =>

@@ -49,7 +49,7 @@
   import { defineComponent, ref, Ref, onMounted, inject } from 'vue';
   import axios from 'axios';
   import { useRouter } from 'vue-router'; // Importieren von useRouter
-
+  import { IAccountingPeriod } from '../interfaces/IAccountingPeriod'; 
 
   interface IAccountSummary {
     id: string;
@@ -70,7 +70,6 @@
 
       const current: Ref<IAccountSummary | null> = ref(null);
       const router = useRouter();
-      const selectedPeriod = inject('selectedPeriod');
       const accounts = ref<IAccountSummary[]>([]);
 
       const accountTypes = ref([
@@ -92,7 +91,11 @@
 
       const fetchAccounts = async () => {
         try {
-          const response = await axios.get(`https://localhost:7123/accountingPeriod/${selectedPeriod.value.id}/accountSummary`);
+          const savedPeriodId: string | null = localStorage.getItem('selectedPeriod');
+          if (savedPeriodId === null) {
+            return;
+          }
+          const response = await axios.get(`https://localhost:7123/accountingPeriod/${savedPeriodId}/accountSummary`);
           accounts.value = response.data;
         } catch (error) {
           console.error('There was an error fetching the accounts:', error);
