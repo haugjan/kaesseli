@@ -1,18 +1,24 @@
 ﻿using FluentAssertions;
+using Kaesseli.Application.Utility;
 using Kaesseli.Domain.Integration;
 using Kaesseli.Domain.Journal;
 using Kaesseli.Infrastructure.Common;
 using Kaesseli.Infrastructure.Integration;
 using Kaesseli.TestUtilities.Faker;
 using Microsoft.EntityFrameworkCore;
+using Moq;
 using Xunit;
 
 namespace Kaesseli.Infrastructure.Test.Integration;
 
 public class TransactionRepositoryTests
 {
-    private static KaesseliContext CreateContext(DbContextOptions<KaesseliContext> options) =>
-        new(options);
+    private static KaesseliContext CreateContext(DbContextOptions<KaesseliContext> options)
+    {
+        var dateTimeService = new Mock<IDateTimeService>().Object;
+        var envService = new Mock<IEnvironmentService>().Object;
+        return new(options, dateTimeService, envService);
+    }
 
     [Fact]
     public async Task GetTransactionSummaries_ReturnsTransactionSummaries()

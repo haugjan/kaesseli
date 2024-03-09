@@ -91,12 +91,13 @@
   import { defineComponent, ref, onMounted, inject } from 'vue';
   import { useRoute } from 'vue-router';
   import axios from 'axios';
-  import { IAccountingPeriod } from '../interfaces/IAccountingPeriod'; 
+  import { useQuasar } from 'quasar'; 
 
   export default defineComponent({
     setup(props) {
       const account = ref<IAccount | null>(null);
       const route = useRoute();
+      const $q = useQuasar();
 
       const columns = ref([
         { name: 'valueDate', required: true, label: 'Datum', align: 'left', field: (row: IAccountEntry) => formatDate(row.valueDate), sortable: true },
@@ -114,7 +115,11 @@
           const response = await axios.get(`https://localhost:7123/accountingPeriod/${savedPeriodId}/account/${route.params.id}`);
           account.value = response.data;
         } catch (error) {
-          console.error('There was an error fetching the transactions:', error);
+          $q.notify({
+            type: 'negative',
+            message: 'There was an error fetching the entries',
+            caption: error
+          });
         }
       };
 

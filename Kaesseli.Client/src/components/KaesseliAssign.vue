@@ -28,11 +28,28 @@
   </div>
   <div v-if="transaction" class="row q-pa-md">
     <q-input ref="filterInput" filled dense v-model="filterText" label="Filter" @keyup.enter="handleEnter" />
-
   </div>
+
+  <div class="q-pa-md">
+    <q-list dense class="row qp-pa-md bg-blue-3">
+      <q-item class="col-lg-4 col-md-6 col-sm-12" dense v-for="account in splittingAccounts" v-bind:key="account.accountId">
+        <q-item-section dense>
+          <q-item-label>
+            <q-chip size="md" :color="account.suggestedAccount.accountIconColor" :icon="account.suggestedAccount.accountIcon" text-color="white" square>{{account.suggestedAccount.accountName}}</q-chip>
+          </q-item-label>
+        </q-item-section>
+        <q-item-section dense>
+          <q-input v-model="account.amount" type="number" label="Betrag" />
+        </q-item-section>
+
+      </q-item>
+    </q-list>
+    <q-btn v-if="splittingAccounts.length > 0" class="row text-primary" @click="splitAmount">Betrag aufteilen</q-btn>
+  </div>
+
   <div v-if="transaction" class="row q-pa-md">
     <div v-for="account in filteredAccounts" :key="account.id">
-      <q-chip clickable @click="onClick(account)" size="md" :color="account.accountIconColor" :icon="account.accountIcon" text-color="white" square> {{account.accountName}}</q-chip>
+      <q-chip clickable @click="onClick(account,  $event)" size="md" :color="account.accountIconColor" :icon="account.accountIcon" text-color="white" square> {{account.accountName}}</q-chip>
 
     </div>
   </div>
@@ -50,6 +67,11 @@
     relevance: number;
   }
 
+  interface ISplitAccount {
+    suggestedAccount: ISuggestedAccount;
+    amount: number;
+  }
+
   interface ITransaction {
     id: string;
     amount: number;
@@ -63,6 +85,8 @@
 
   import { defineComponent, ref, onMounted, computed, nextTick } from 'vue';
   import axios from 'axios';
+  import { useQuasar } from 'quasar'
+import { forEachChild } from 'typescript';
 
   export default defineComponent({
     setup() {
@@ -70,23 +94,31 @@
       const transaction = ref<ITransaction | null>(null);
       const filterText = ref<string>("");
       const filterInput = ref(null);
+      const splittingAccounts = ref<ISplitAccount[]>([]);
+      const $q = useQuasar();
 
+const filteredAccounts = computed(() => {
+  if (!transaction.value) {
+    return [];
+  }
 
-      const filteredAccounts = computed(() => {
-        if (!transaction.value) {
-          return [];
-        }
-        return transaction.value.suggestedAccounts.filter((account) =>
-          account.accountName.toLowerCase().includes(filterText.value.toLowerCase())
-        );
-      });
+  const splittingAccountIds = splittingAccounts.value.map(a => a.suggestedAccount.accountId);
+
+  return transaction.value.suggestedAccounts.filter((account) => {
+    return account.accountName.toLowerCase().includes(filterText.value.toLowerCase())
+           && !splittingAccountIds.includes(account.accountId);
+  });
+});
 
       const FetchTransaction = async () => {
         try {
           const response = await axios.get('https://localhost:7123/transaction/nextOpen');
           transaction.value = response.data;
         } catch (error) {
-          console.error('There was an error fetching the transactions:', error);
+          $q.notify({
+            type: 'negative',
+            message: 'Error updating the transaction: ' + error
+          });
         }
       };
 
@@ -109,7 +141,20 @@
         }).format(value);
       }
 
-      const onClick = async (account: ISuggestedAccount) => {
+      const onClick = async (account: ISuggestedAccount, event: MouseEvent) => {
+        if (event!=null && event.ctrlKey) {
+          splittingAccounts.value.push({ suggestedAccount: account, amount: transaction.value?.amount || 0 });
+
+          let sum = 0;
+          splittingAccounts.value.forEach((account, index)=>{{
+            account.amount = parseFloat((transaction.value?.amount /splittingAccounts.value.length).toFixed(2));
+            sum += account.amount;
+          }});
+          const lastAccount = splittingAccounts.value[splittingAccounts.value.length - 1];
+          lastAccount.amount += parseFloat((transaction.value.amount - sum).toFixed(2));
+          return; // Beendet die Funktion, um den restlichen Code nicht auszuführen
+        }
+
         try {
           const savedPeriodId: string | null = localStorage.getItem('selectedPeriod');
           if (savedPeriodId === null) {
@@ -122,13 +167,43 @@
           });
           window.location.reload(); // Seite neu laden
         } catch (error) {
-          console.error('Error updating the transaction:', error);
+          $q.notify({
+            type: 'negative',
+            message: 'There was an error updating transaction',
+            caption: error
+          });
+
         }
       };
 
+      const splitAmount = async () => {
+        try {
+
+          const savedPeriodId: string | null = localStorage.getItem('selectedPeriod');
+          if (savedPeriodId === null) {
+            return;
+          }
+          const entries = splittingAccounts.value.map(x => ({
+            amount: x.amount, otherAccountId: x.suggestedAccount.accountId
+          }))
+          await axios.patch('https://localhost:7123/transaction/journalEntry/split', {
+            accountingPeriodId: savedPeriodId,
+            transactionId: transaction.value?.id,
+            entries: entries
+          });
+          window.location.reload(); // Seite neu laden
+        } catch (error) {
+          $q.notify({
+            type: 'negative',
+            message: 'Error updating the transaction: ' + error
+          });;
+
+        }
+      }
+
       const handleEnter = () => {
         if (filteredAccounts.value.length === 1) {
-          onClick(filteredAccounts.value[0]);
+          onClick(filteredAccounts.value[0], null);
         }
       };
 
@@ -141,6 +216,7 @@
         });
       });
 
+
       return {
         FetchTransaction,
         transaction,
@@ -150,7 +226,9 @@
         filterText,
         filteredAccounts,
         handleEnter,
-        filterInput
+        filterInput,
+        splittingAccounts,
+        splitAmount
       }
 
     }

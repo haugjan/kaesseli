@@ -13,6 +13,7 @@
 <script lang="ts">
   import { defineComponent, ref, watch, onMounted } from 'vue';
   import axios from 'axios';
+  import { useQuasar } from 'quasar';
 
   interface ITransaction {
     id: string,
@@ -34,6 +35,7 @@
       },
     },
     setup(props) {
+      const $q = useQuasar();
       const transactions = ref<ITransaction[]>([]);
       const columns = ref([
         { name: 'valueDate', required: true, label: 'Datum', align: 'left', field: (row: ITransaction) => formatDate(row.valueDate), sortable: true },
@@ -46,7 +48,11 @@
           const response = await axios.get(`https://localhost:7123/transaction?transactionSummaryId=${summaryId}`);
           transactions.value = response.data;
         } catch (error) {
-          console.error('There was an error fetching the transactions:', error);
+          $q.notify({
+            type: 'negative',
+            message: 'There was an error fetching the transactions',
+            caption: error
+          });
         }
       };
       const formatDate = (dateStr: Date) => {

@@ -1,4 +1,5 @@
 ﻿using Kaesseli.Domain.Accounts;
+using Kaesseli.Domain.Integration;
 using Kaesseli.Domain.Journal;
 using Kaesseli.Infrastructure.Common;
 using Microsoft.EntityFrameworkCore;
@@ -18,11 +19,11 @@ public class JournalRepository(KaesseliContext context) : IJournalRepository
         GetJournalEntriesRequest request,
         CancellationToken cancellationToken)
     {
-        IQueryable<JournalEntry> entries = context.JournalEntries
-                                                  .Include(journalEntry => journalEntry.DebitAccount)
-                                                  .Include(journalEntry => journalEntry.CreditAccount)
-                                                  .Include(journalEntry => journalEntry.AccountingPeriod)
-                                                  .Where(entry => entry.AccountingPeriod.Id == request.AccountingPeriodId);
+        var entries = context.JournalEntries
+                             .Include(journalEntry => journalEntry.DebitAccount)
+                             .Include(journalEntry => journalEntry.CreditAccount)
+                             .Include(journalEntry => journalEntry.AccountingPeriod)
+                             .Where(entry => entry.AccountingPeriod.Id == request.AccountingPeriodId);
         if (request.AccountId is not null)
         {
             entries = entries.Where(
@@ -41,27 +42,48 @@ public class JournalRepository(KaesseliContext context) : IJournalRepository
     }
 
     public async Task AssignOpenTransaction(
-        Guid transactionId,
-        Guid otherAccountId,
         Guid accountingPeriodId,
+        Guid transactionId,
+        IEnumerable<AssignOpenTransactionEntry> entries,
         CancellationToken cancellationToken)
     {
+        entries = entries.ToArray();
         var transaction = await context.Transactions
                                        .Include(trans => trans.TransactionSummary)
                                        .ThenInclude(summary => summary!.Account)
                                        .SingleAsync(trans => trans.Id == transactionId, cancellationToken);
-        var otherAccount = await context.Accounts.FindAsync(otherAccountId, cancellationToken)
-                        ?? throw new EntityNotFoundException(entityType: typeof(Account), otherAccountId);
-
         var accountingPeriod = await context.AccountingPeriods.FindAsync(accountingPeriodId, cancellationToken)
                             ?? throw new EntityNotFoundException(entityType: typeof(AccountingPeriod), accountingPeriodId);
+        WrongAmountException.ThrowIfAmountNotMatch(transaction.Amount, entriesAmount: entries.Sum(entry => entry.Amount));
 
+        foreach (var entry in entries)
+            await AssignOpenTransaction(
+                accountingPeriod,
+                transaction,
+                entry.OtherAccountId,
+                entry.Amount,
+                cancellationToken);
+
+        await context.SaveChangesAsync(cancellationToken);
+    }
+
+
+
+    private async Task AssignOpenTransaction(
+        AccountingPeriod accountingPeriod,
+        Transaction transaction,
+        Guid otherAccountId,
+        decimal amount,
+        CancellationToken cancellationToken)
+    {
+        var otherAccount = await context.Accounts.FindAsync(otherAccountId, cancellationToken)
+                        ?? throw new EntityNotFoundException(entityType: typeof(Account), otherAccountId);
         var newJournalEntry = new JournalEntry
         {
             Id = Guid.NewGuid(),
             ValueDate = transaction.ValueDate,
             Description = transaction.Description,
-            Amount = transaction.Amount,
+            Amount = amount,
             DebitAccount = transaction.TransactionSummary!.Account,
             CreditAccount = otherAccount,
             Transaction = transaction,
@@ -69,6 +91,5 @@ public class JournalRepository(KaesseliContext context) : IJournalRepository
         };
 
         context.JournalEntries.Add(newJournalEntry);
-        await context.SaveChangesAsync(cancellationToken);
     }
 }

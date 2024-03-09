@@ -1,6 +1,4 @@
-﻿using System.Security.Principal;
-using System.Threading;
-using FluentAssertions;
+﻿using FluentAssertions;
 using Kaesseli.Application.Accounts;
 using Kaesseli.Application.Utility;
 using Kaesseli.Domain.Accounts;

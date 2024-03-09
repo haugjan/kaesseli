@@ -1,18 +1,24 @@
 ﻿using FluentAssertions;
+using Kaesseli.Application.Utility;
 using Kaesseli.Domain.Accounts;
 using Kaesseli.Domain.Journal;
 using Kaesseli.Infrastructure.Common;
 using Kaesseli.Infrastructure.Journal;
 using Kaesseli.TestUtilities.Faker;
 using Microsoft.EntityFrameworkCore;
+using Moq;
 using Xunit;
 
 namespace Kaesseli.Infrastructure.Test.Journal;
 
 public class JournalRepositoryTests
 {
-    private static KaesseliContext CreateContext(DbContextOptions<KaesseliContext> options) =>
-        new(options);
+    private static KaesseliContext CreateContext(DbContextOptions<KaesseliContext> options)
+    {
+        var dateTimeService = new Mock<IDateTimeService>().Object;
+        var envService = new Mock<IEnvironmentService>().Object;
+        return new(options, dateTimeService, envService);
+    }
 
     [Fact]
     public async Task GetJournalEntries_ShouldReturnFilteredEntries()

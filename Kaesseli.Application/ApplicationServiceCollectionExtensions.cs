@@ -8,6 +8,7 @@ public static class ApplicationServiceCollectionExtensions
     // ReSharper disable once UnusedMethodReturnValue.Global
     public static IServiceCollection AddApplicationServices(this IServiceCollection services) =>
         services.AddTransient<IDateTimeService, DateTimeService>()
+                .AddTransient<IEnvironmentService, EnvironmentService>()
                 .AddMediatR(
                     config =>
                         config.RegisterServicesFromAssembly(typeof(ApplicationServiceCollectionExtensions).Assembly));

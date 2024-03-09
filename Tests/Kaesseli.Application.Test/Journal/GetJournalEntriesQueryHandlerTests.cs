@@ -14,7 +14,6 @@ public class GetJournalEntriesQueryHandlerTests
     {
         // Arrange
         var mockRepository = new Mock<IJournalRepository>();
-        var fromDate = new DateOnly(year: 2020, month: 01, day: 01);
         var expectedPeriodId = Guid.NewGuid();
 
         var faker = new SmartFaker<JournalEntry>();

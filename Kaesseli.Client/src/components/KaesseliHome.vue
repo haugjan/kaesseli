@@ -45,7 +45,7 @@
 <script lang="ts">
   import { defineComponent, ref, inject, onMounted, Ref, watch } from 'vue';
   import axios from 'axios';
-  import { IAccountingPeriod } from '../interfaces/IAccountingPeriod';
+  import { useQuasar } from 'quasar';
 
   interface IFinancialCategory {
     accountBalance: number;
@@ -66,7 +66,7 @@
     setup() {
 
       const overview = ref<IFinancialOverview>();
-
+      const $q = useQuasar();
       const fetchOverview = async () => {
         try {
           const savedPeriodId: string | null = localStorage.getItem('selectedPeriod');
@@ -81,7 +81,11 @@
             { id: 2, name: 'Vermögen', icon: 'account_balance', color: 'blue', data: overview.value?.asset },
           ];
         } catch (error) {
-          console.error('There was an error fetching the accounts:', error);
+          $q.notify({
+            type: 'negative',
+            message: 'There was an error fetching the overview',
+            caption: error
+          });
         }
       };
 

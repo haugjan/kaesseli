@@ -1,9 +1,11 @@
 ﻿using FluentAssertions;
+using Kaesseli.Application.Utility;
 using Kaesseli.Domain.Accounts;
 using Kaesseli.Domain.Budget;
 using Kaesseli.Infrastructure.Budget;
 using Kaesseli.Infrastructure.Common;
 using Microsoft.EntityFrameworkCore;
+using Moq;
 using Xunit;
 
 namespace Kaesseli.Infrastructure.Test.Budget;
@@ -12,8 +14,12 @@ public class BudgetRepositoryTests
 {
     private static readonly Guid ExpectedAccountPeriodId = Guid.NewGuid();
 
-    private static KaesseliContext CreateContext(DbContextOptions<KaesseliContext> options) =>
-        new(options);
+    private static KaesseliContext CreateContext(DbContextOptions<KaesseliContext> options)
+    {
+        var dateTimeService = new Mock<IDateTimeService>().Object;
+        var envService = new Mock<IEnvironmentService>().Object;
+        return new(options, dateTimeService, envService);
+    }
 
     [Fact]
     public async Task GetBudgetEntries_ShouldReturnFilteredEntries()

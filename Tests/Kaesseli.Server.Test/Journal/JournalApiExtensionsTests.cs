@@ -3,6 +3,7 @@ using System.Text;
 using System.Text.Json;
 using FluentAssertions;
 using Kaesseli.Application.Journal;
+using Kaesseli.Domain.Accounts;
 using Kaesseli.Server.Journal;
 using Kaesseli.TestUtilities.Faker;
 using MediatR;
@@ -77,19 +78,22 @@ public class JournalApiExtensionsTests
         var journalEntries = new SmartFaker<GetJournalEntriesQueryResult>().Generate(count: 3);
         _mediatorMock.Setup(m => m.Send(It.IsAny<GetJournalEntriesQuery>(), default)).ReturnsAsync(journalEntries);
 
-        var debitAccountId = Guid.NewGuid();
-        var creditAccountId = Guid.NewGuid();
-        var from = new DateOnly(year: 2023, month: 1, day: 1);
-        var to = new DateOnly(year: 2023, month: 12, day: 31);
+        var accountId = Guid.NewGuid();
         var periodId = Guid.NewGuid();
+        const AccountType accountType = AccountType.Liability;
         var queryString =
-            $"?accountingPeriodId={periodId}&debitAccountId={debitAccountId}&creditAccountId={creditAccountId}&from={from:yyyy-MM-dd}&to={to:yyyy-MM-dd}";
+            $"?accountingPeriodId={periodId}&accountId={accountId}&accountType={accountType}";
 
         // Act
         var response = await _client.GetAsync(requestUri: $"/journalEntry{queryString}");
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);
-        _mediatorMock.Verify(m => m.Send(It.Is<GetJournalEntriesQuery>(query => query.AccountingPeriodId == periodId), default), Times.Once);
+        _mediatorMock
+            .Verify(m => m.Send(
+                                 It.Is<GetJournalEntriesQuery>(query 
+                                                                   => query.AccountingPeriodId == periodId 
+                                                                             && query.AccountType == accountType 
+                                                                   && query.AccountId == accountId), default), Times.Once);
     }
 }

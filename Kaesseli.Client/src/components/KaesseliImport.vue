@@ -22,8 +22,9 @@
   </div>
 </template>
 
-<script>
+<script lang="ts">
   import axios from 'axios';
+  import { useQuasar } from 'quasar'
 
   export default {
     data() {
@@ -38,11 +39,16 @@
     },
     methods: {
       async fetchAccounts() {
+        const $q = useQuasar();
         try {
           const response = await axios.get('https://localhost:7123/account?accountType=1');
           this.accounts = response.data;
         } catch (error) {
-          console.error('There was an error fetching the accounts:', error);
+          $q.notify({
+            type: 'negative',
+            message: 'There was an error fetching the accounts',
+            caption: error
+          });
         }
       },
       onFileChange() {
@@ -56,6 +62,7 @@
           alert('Bitte wählen Sie eine Datei und ein Konto aus.');
           return;
         }
+        const $q = useQuasar();
 
         let formData = new FormData();
         formData.append('file', this.uploadedFile);
@@ -69,8 +76,11 @@
           });
           alert('Datei erfolgreich hochgeladen!');
         } catch (error) {
-          console.error('Fehler beim Hochladen der Datei:', error);
-          alert('Fehler beim Hochladen der Datei.');
+          $q.notify({
+            type: 'negative',
+            message: 'Error uploading file',
+            caption: error
+          });
         }
       },
     },

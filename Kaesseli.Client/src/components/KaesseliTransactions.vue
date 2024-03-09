@@ -24,6 +24,7 @@
   import { defineComponent, ref, onMounted } from 'vue';
   import KaesseliTransactionTable from './KaesseliTransactionTable.vue';
   import axios from 'axios';
+  import { useQuasar } from 'quasar';
 
   interface ITransactionSummary {
     id: string;
@@ -46,13 +47,18 @@
       const selected = ref<ITransactionSummary | null>(null);
       const current = ref<ITransactionSummary | null>(null);
       const currentLabel = ref("Kontoauszug wählen");
+      const $q = useQuasar();
 
       const fetchSummaries = async () => {
         try {
           const response = await axios.get('https://localhost:7123/transactionSummary');
           summaries.value = response.data;
         } catch (error) {
-          console.error('There was an error fetching the summaries:', error);
+          $q.notify({
+            type: 'negative',
+            message: 'There was an error fetching the summaries',
+            caption: error
+          });
         }
       };
 

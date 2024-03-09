@@ -51,6 +51,13 @@ public static class IntegrationApiExtensions
                 await mediator.Send(cmd);
             });
 
+        app.MapPatch(
+            pattern: "/transaction/journalEntry/split",
+            async (IMediator mediator, [FromBody] SplitOpenTransactionCommand cmd) =>
+            {
+                await mediator.Send(cmd);
+            });
+
         app.MapPost(
                pattern: "/camt/upload",
                async (IMediator mediator, IFormFile file, [FromForm] Guid accountId) =>

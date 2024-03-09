@@ -99,7 +99,11 @@
           const response = await axios.get('https://localhost:7123/transaction/totalOpen');
           totalOpenTransaction.value = response.data;
         } catch (error) {
-          console.error('There was an error fetching the accounts:', error);
+          $q.notify({
+            type: 'negative',
+            message: 'There was an error fetching the accounts',
+            caption: error
+          });
         }
       };
 
@@ -119,7 +123,11 @@
             }
           }
         } catch (error) {
-          console.error('There was an error fetching the accounts:', error);
+          $q.notify({
+            type: 'negative',
+            message: 'There was an error fetching the accounting periods',
+            caption: error
+          });
         }
       };
 

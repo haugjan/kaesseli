@@ -50,6 +50,7 @@
   import axios from 'axios';
   import { useRouter } from 'vue-router'; // Importieren von useRouter
   import { IAccountingPeriod } from '../interfaces/IAccountingPeriod'; 
+  import { useQuasar } from 'quasar';
 
   interface IAccountSummary {
     id: string;
@@ -71,6 +72,7 @@
       const current: Ref<IAccountSummary | null> = ref(null);
       const router = useRouter();
       const accounts = ref<IAccountSummary[]>([]);
+      const q = useQuasar();
 
       const accountTypes = ref([
         { name: 'Einkommen', icon: 'attach_money', color: 'green' },
@@ -98,7 +100,12 @@
           const response = await axios.get(`https://localhost:7123/accountingPeriod/${savedPeriodId}/accountSummary`);
           accounts.value = response.data;
         } catch (error) {
-          console.error('There was an error fetching the accounts:', error);
+          $q.notify({
+            type: 'negative',
+            message: 'There was an error fetching the accounts',
+            caption: error
+
+          });
         }
       };
 

@@ -49,4 +49,8 @@ internal class TransactionRepository : ITransactionRepository
                              .CountAsync(tran => tran.JournalEntries!.Any() 
                                               == false, 
                                          cancellationToken: cancellationToken);}
+
+    public async Task<Transaction> GetTransaction(Guid requestTransactionId, CancellationToken cancellationToken) =>
+        await _context.Transactions.FindAsync(requestTransactionId, cancellationToken) 
+     ?? throw new EntityNotFoundException(entityType: typeof(Transaction), requestTransactionId);
 }

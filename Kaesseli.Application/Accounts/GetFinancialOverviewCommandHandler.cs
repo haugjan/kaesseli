@@ -4,6 +4,7 @@ using MediatR;
 
 namespace Kaesseli.Application.Accounts;
 
+// ReSharper disable once UnusedType.Global
 public class GetFinancialOverviewCommandHandler : IRequestHandler<GetFinancialOverviewCommand, GetFinancialOverviewCommandResult>
 {
     private readonly IMediator _mediator;
@@ -32,7 +33,7 @@ public class GetFinancialOverviewCommandHandler : IRequestHandler<GetFinancialOv
         };
     }
 
-    private AccountTypeSummary GetAccountTypeSummary(ImmutableList<GetAccountsSummaryQueryResult> summaries) =>
+    private static AccountTypeSummary GetAccountTypeSummary(ImmutableList<GetAccountsSummaryQueryResult> summaries) =>
         new()
         {
             AccountBalance = summaries.Sum(summary => summary.AccountBalance),

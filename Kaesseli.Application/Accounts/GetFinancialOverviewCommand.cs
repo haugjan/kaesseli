@@ -1,6 +1,4 @@
-﻿using Kaesseli.Domain.Budget;
-using Kaesseli.Domain.Journal;
-using MediatR;
+﻿using MediatR;
 
 namespace Kaesseli.Application.Accounts;
 
