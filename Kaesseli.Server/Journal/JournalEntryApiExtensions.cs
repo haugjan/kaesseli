@@ -2,9 +2,11 @@
 using Kaesseli.Domain.Accounts;
 using MediatR;
 
-namespace Kaesseli.Server.Journal;
+// ReSharper disable once CheckNamespace
+namespace Microsoft.AspNetCore.Routing;
 
-public static class IntegrationApiExtensions
+
+public static class JournalEntryApiExtensions
 {
     // ReSharper disable once UnusedMethodReturnValue.Global
     public static IEndpointRouteBuilder MapJournalEndpoints(this IEndpointRouteBuilder app) =>

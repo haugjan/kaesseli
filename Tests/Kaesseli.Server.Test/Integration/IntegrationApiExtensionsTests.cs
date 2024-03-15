@@ -1,7 +1,7 @@
 ﻿using System.Net;
 using System.Net.Http.Headers;
 using FluentAssertions;
-using Kaesseli.Application.Integration.Camt;
+using Kaesseli.Application.Integration.FileImport;
 using Kaesseli.Application.Integration.NextOpenTransaction;
 using Kaesseli.Application.Integration.TransactionQuery;
 using Kaesseli.Server.Integration;
@@ -68,7 +68,7 @@ public class IntegrationApiExtensionsTests
         var accountIdContent = new StringContent(content: accountId.ToString());
         formContent.Add(accountIdContent, name: "accountId");
         // Act
-        var response = await _client.PostAsync(requestUri: "/camt/upload", formContent);
+        var response = await _client.PostAsync(requestUri: "/file/upload", formContent);
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);

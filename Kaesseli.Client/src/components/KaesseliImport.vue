@@ -69,7 +69,7 @@
         formData.append('accountId', this.selectedAccount);
 
         try {
-          await axios.post('https://localhost:7123/camt/upload', formData, {
+          await axios.post('https://localhost:7123/file/upload', formData, {
             headers: {
               'Content-Type': 'multipart/form-data'
             }

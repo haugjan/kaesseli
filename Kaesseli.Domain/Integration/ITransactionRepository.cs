@@ -8,4 +8,5 @@ public interface ITransactionRepository
     Task<Transaction?> GetNextOpenTransaction(int skip, CancellationToken cancellationToken);
     Task<int> GetTotalOpenTransaction(CancellationToken cancellationToken);
     Task<Transaction> GetTransaction(Guid requestTransactionId, CancellationToken cancellationToken);
+    Task ChangeTotalOpenTransaction(int notificationAmount, CancellationToken cancellationToken);
 }

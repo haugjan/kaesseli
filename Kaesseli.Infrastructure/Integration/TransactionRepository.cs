@@ -31,26 +31,57 @@ internal class TransactionRepository : ITransactionRepository
                       .Where(tran => tran.TransactionSummary!.Id == transactionSummaryId)
                       .ToListAsync(cancellationToken);
 
-    public async Task<Transaction?> GetNextOpenTransaction(int skip, CancellationToken cancellationToken)
-    {
-        return await _context.Transactions
-                             .Include(tran=> tran.TransactionSummary)
-                             .Include(tran=> tran.JournalEntries)
-                             .Where(
-                   tran => tran.JournalEntries!.Any() == false)
-                             .OrderBy(tran=> tran.ValueDate)
-                             .Skip(skip)
-                             .FirstOrDefaultAsync(cancellationToken: cancellationToken);
-    }
+    public async Task<Transaction?> GetNextOpenTransaction(int skip, CancellationToken cancellationToken) =>
+        await _context.Transactions
+                      .Include(tran => tran.TransactionSummary)
+                      .Include(tran => tran.JournalEntries)
+                      .Where(tran => tran.JournalEntries!.Any() == false)
+                      .OrderBy(tran => tran.ValueDate)
+                      .Skip(skip)
+                      .FirstOrDefaultAsync(cancellationToken);
 
     public async Task<int> GetTotalOpenTransaction(CancellationToken cancellationToken)
     {
-        return await _context.Transactions
-                             .CountAsync(tran => tran.JournalEntries!.Any() 
-                                              == false, 
-                                         cancellationToken: cancellationToken);}
+        var statistic = await _context.TransactionStatistics.FirstOrDefaultAsync(cancellationToken);
+
+        if (statistic != null) return statistic.TotalOpenTransaction;
+
+        await using var tran = await _context.Database.BeginTransactionAsync(cancellationToken);
+        var totalOpen = await _context
+                              .Transactions
+                              .Where(tran => tran.JournalEntries!.Any() == false)
+                              .CountAsync(cancellationToken);
+
+        statistic = new TransactionStatistic { Id = Guid.NewGuid(), TotalOpenTransaction = totalOpen };
+        _context.TransactionStatistics.Add(statistic);
+        await _context.SaveChangesAsync(cancellationToken);
+        await tran.CommitAsync(cancellationToken);
+
+        return statistic.TotalOpenTransaction;
+    }
 
     public async Task<Transaction> GetTransaction(Guid requestTransactionId, CancellationToken cancellationToken) =>
-        await _context.Transactions.FindAsync(requestTransactionId, cancellationToken) 
+        await _context.Transactions.FindAsync(requestTransactionId, cancellationToken)
      ?? throw new EntityNotFoundException(entityType: typeof(Transaction), requestTransactionId);
+
+    public async Task ChangeTotalOpenTransaction(int notificationAmount, CancellationToken cancellationToken)
+    {
+        await using var tran = await _context.Database.BeginTransactionAsync(cancellationToken);
+        var statistic = await _context.TransactionStatistics.FirstOrDefaultAsync(cancellationToken);
+
+        statistic = AddStatisticEntryIfNull(statistic);
+        statistic.TotalOpenTransaction += notificationAmount;
+        await _context.SaveChangesAsync(cancellationToken);
+        await tran.CommitAsync(cancellationToken);
+    }
+
+    private TransactionStatistic AddStatisticEntryIfNull(TransactionStatistic? statistic)
+    {
+        if (statistic is not null) return statistic;
+
+        statistic = new TransactionStatistic { Id = Guid.NewGuid(), TotalOpenTransaction = 0 };
+        _context.TransactionStatistics.Add(statistic);
+
+        return statistic;
+    }
 }

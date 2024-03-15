@@ -1,8 +1,8 @@
-﻿namespace Kaesseli.Application.Integration.Camt;
+﻿namespace Kaesseli.Application.Integration.FileImport;
 
-public class CamtDocument
+public class FinancialDocument
 {
-    public required IEnumerable<CamtEntry> CamtEntries { get; init; }
+    public required IEnumerable<FinancialDocumentEntry> Entries { get; init; }
     public required decimal BalanceBefore { get; init; }
     public required decimal BalanceAfter { get; init; }
     public required DateOnly ValueDateFrom { get; init; }

@@ -1,5 +1,5 @@
 ﻿using FluentAssertions;
-using Kaesseli.Application.Integration.Camt;
+using Kaesseli.Application.Integration.FileImport;
 using Kaesseli.Infrastructure.Integration;
 using Xunit;
 
@@ -24,10 +24,10 @@ public class CamtProcessorTests
         current.Should().BeEquivalentTo(expected);
     }
 
-    private async Task<CamtDocument> CreateExpected2() =>
+    private async Task<FinancialDocument> CreateExpected2() =>
         new()
         {
-            CamtEntries = await CreateCamtEntries(),
+            Entries = await CreateCamtEntries(),
             BalanceBefore = 11708.31m,
             BalanceAfter = 19513.79m,
             ValueDateFrom = new DateOnly(year: 2024, month: 1, day: 22),
@@ -35,7 +35,7 @@ public class CamtProcessorTests
             Reference = "MSG20240201014110"
         };
 
-    private async Task<List<CamtEntry>> CreateCamtEntries() =>
+    private async Task<List<FinancialDocumentEntry>> CreateCamtEntries() =>
     [
         new()
         {

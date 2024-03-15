@@ -1,11 +1,11 @@
 ﻿using System.Xml.Serialization;
-using Kaesseli.Application.Integration.Camt;
+using Kaesseli.Application.Integration.FileImport;
 
 namespace Kaesseli.Infrastructure.Integration;
 
 internal class CamtProcessor : ICamtProcessor
 {
-    public async Task<CamtDocument> ReadCamtFile(Stream content, CancellationToken cancellationToken)
+    public async Task<FinancialDocument> ReadCamtFile(Stream content, CancellationToken cancellationToken)
     {
         var serializer = new XmlSerializer(type: typeof(Document));
         using var reader = new StreamReader(content);
@@ -16,9 +16,9 @@ internal class CamtProcessor : ICamtProcessor
 
         var firstStatement = document.BkToCstmrStmt.Stmt.Single();
 
-        var camtDocument = new CamtDocument
+        var financialDocument = new FinancialDocument
         {
-            CamtEntries = CreateCamtEntries(firstStatement),
+            Entries = CreateCamtEntries(firstStatement),
             BalanceBefore = firstStatement.Bal.Single(balance => balance.Tp.CdOrPrtry.Item is BalanceType12Code.OPBD).Amt.Value,
             BalanceAfter = firstStatement.Bal.Single(balance => balance.Tp.CdOrPrtry.Item is BalanceType12Code.CLBD).Amt.Value,
             ValueDateFrom = DateOnly.FromDateTime(firstStatement.FrToDt.FrDtTm),
@@ -26,13 +26,13 @@ internal class CamtProcessor : ICamtProcessor
             Reference = document.BkToCstmrStmt.GrpHdr.MsgId
         };
 
-        return camtDocument;
+        return financialDocument;
     }
 
-    private static IEnumerable<CamtEntry> CreateCamtEntries(AccountStatement4 accountStatement) =>
+    private static IEnumerable<FinancialDocumentEntry> CreateCamtEntries(AccountStatement4 accountStatement) =>
         accountStatement.Ntry
                         .Select(
-                            entry => new CamtEntry
+                            entry => new FinancialDocumentEntry
                             {
                                 RawText = entry.NtryDtls.ToYaml(),
                                 Description = entry.AddtlNtryInf,

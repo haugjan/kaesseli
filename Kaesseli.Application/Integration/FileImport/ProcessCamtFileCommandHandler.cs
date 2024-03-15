@@ -1,31 +1,37 @@
-﻿using Kaesseli.Domain.Accounts;
+﻿using Kaesseli.Application.Integration.NextOpenTransaction;
+using Kaesseli.Domain.Accounts;
 using Kaesseli.Domain.Integration;
 using Kaesseli.Domain.Journal;
 using MediatR;
 
-namespace Kaesseli.Application.Integration.Camt;
+namespace Kaesseli.Application.Integration.FileImport;
 
 public class ProcessCamtFileCommandHandler : IRequestHandler<ProcessCamtFileCommand, Guid>
 {
     private readonly ICamtProcessor _camtProcessor;
     private readonly ITransactionRepository _transactionRepository;
     private readonly IAccountRepository _accountRepo;
+    private readonly IMediator _mediator;
 
-    public ProcessCamtFileCommandHandler(ICamtProcessor camtProcessor, ITransactionRepository transactionRepository, IAccountRepository accountRepo)
+    public ProcessCamtFileCommandHandler(ICamtProcessor camtProcessor, ITransactionRepository transactionRepository, IAccountRepository accountRepo,
+                                         IMediator mediator)
     {
         _camtProcessor = camtProcessor;
         _transactionRepository = transactionRepository;
         _accountRepo = accountRepo;
+        _mediator = mediator;
     }
 
     public async Task<Guid> Handle(ProcessCamtFileCommand request, CancellationToken cancellationToken)
     {
-        var camtDocument = await _camtProcessor.ReadCamtFile(request.Content, cancellationToken);
+        var financialDocument = await _camtProcessor.ReadCamtFile(request.Content, cancellationToken);
         var account = await _accountRepo.GetAccount(request.AccountId, cancellationToken);
 
-        var  transactionSummary = camtDocument.ToTransactionSummary(account);
+        var  transactionSummary = financialDocument.ToTransactionSummary(account);
         await _transactionRepository.AddTransactionSummary(transactionSummary, cancellationToken);
-
+        await _mediator.Publish(
+            notification: new OpenTransactionAmountChangedEvent { Amount = transactionSummary.Transactions.Count() },
+            cancellationToken);
         return transactionSummary.Id;
     }
 

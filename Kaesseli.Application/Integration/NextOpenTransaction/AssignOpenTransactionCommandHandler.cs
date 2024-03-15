@@ -9,11 +9,13 @@ public class AssignOpenTransactionCommandHandler : IRequestHandler<AssignOpenTra
 {
     private readonly IJournalRepository _journalRepo;
     private readonly ITransactionRepository _tranRepo;
+    private readonly IMediator _mediator;
 
-    public AssignOpenTransactionCommandHandler(IJournalRepository journalRepo, ITransactionRepository tranRepo)
+    public AssignOpenTransactionCommandHandler(IJournalRepository journalRepo, ITransactionRepository tranRepo, IMediator mediator)
     {
         _journalRepo = journalRepo;
         _tranRepo = tranRepo;
+        _mediator = mediator;
     }
 
     public async Task Handle(AssignOpenTransactionCommand request, CancellationToken cancellationToken)
@@ -28,13 +30,8 @@ public class AssignOpenTransactionCommandHandler : IRequestHandler<AssignOpenTra
             request.TransactionId,
             entries,
             cancellationToken);
-        //await  _mediator.Publish(
-        //    notification: new TransactionAddedNotification(
-        //        domainEvent: new Domain.Integration.TransactionAddedEvent
-        //        {
-        //            TransactionId = request.TransactionId, 
-        //            AccountId = request.OtherAccountId
-        //        }),
-        //    cancellationToken: cancellationToken);
+        await _mediator.Publish(
+            notification: new OpenTransactionAmountChangedEvent { Amount = -1 },
+            cancellationToken);
     }
 }

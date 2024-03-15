@@ -2,7 +2,8 @@
 using Kaesseli.Domain.Accounts;
 using MediatR;
 
-namespace Kaesseli.Server.Budget;
+// ReSharper disable once CheckNamespace
+namespace Microsoft.AspNetCore.Routing;
 
 public static class BudgetApiExtensions
 {

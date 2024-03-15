@@ -1,10 +1,13 @@
-﻿using Kaesseli.Application.Integration.Camt;
+﻿using Kaesseli.Application.Integration.FileImport;
 using Kaesseli.Application.Integration.NextOpenTransaction;
 using Kaesseli.Application.Integration.TransactionQuery;
+using Kaesseli.Domain.Accounts;
+using Kaesseli.Domain.Integration;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 
-namespace Kaesseli.Server.Integration;
+// ReSharper disable once CheckNamespace
+namespace Microsoft.AspNetCore.Routing;
 
 public static class IntegrationApiExtensions
 {
@@ -44,6 +47,8 @@ public static class IntegrationApiExtensions
                 return await mediator.Send(query);
             });
 
+
+
         app.MapPatch(
             pattern: "/transaction/journalEntry",
             async (IMediator mediator, [FromBody] AssignOpenTransactionCommand cmd) =>
@@ -59,11 +64,19 @@ public static class IntegrationApiExtensions
             });
 
         app.MapPost(
-               pattern: "/camt/upload",
-               async (IMediator mediator, IFormFile file, [FromForm] Guid accountId) =>
+               pattern: "/file/upload",
+               async (IMediator mediator, IFormFile file, [FromForm] Guid accountId, [FromQuery] Guid accountingPeriodId) =>
                {
                    await using var stream = file.OpenReadStream();
-                   var command = new ProcessCamtFileCommand { Content = stream, AccountId = accountId };
+                   var command = new ProcessFileCommand
+                   {
+                       Content = stream,
+                       AccountId = accountId,
+                       FileType = file.FileName.EndsWith(".csv")
+                                      ? FileType.PostFinanceCsv
+                                      : FileType.Camt,
+                       AccountingPeriodId = accountingPeriodId
+                   };
 
                    return await mediator.Send(command);
                })

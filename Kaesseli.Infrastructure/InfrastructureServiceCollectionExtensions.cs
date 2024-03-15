@@ -1,9 +1,11 @@
-﻿using Kaesseli.Application.Integration.Camt;
+﻿using Kaesseli.Application.Integration.FileImport;
 using Kaesseli.Domain.Accounts;
+using Kaesseli.Domain.Automation;
 using Kaesseli.Domain.Budget;
 using Kaesseli.Domain.Integration;
 using Kaesseli.Domain.Journal;
 using Kaesseli.Infrastructure.Accounts;
+using Kaesseli.Infrastructure.Automation;
 using Kaesseli.Infrastructure.Budget;
 using Kaesseli.Infrastructure.Common;
 using Kaesseli.Infrastructure.Integration;
@@ -20,6 +22,7 @@ public static class InfrastructureServiceCollectionExtensions
     public static IServiceCollection AddInfrastructureServices(this IServiceCollection services, IConfiguration configuration) =>
         services.AddRepositories()
                 .AddScoped<ICamtProcessor, CamtProcessor>()
+                .AddScoped<IPostFinanceCsvProcessor, PostFinanceCsvProcessor>()
                 .AddDbContext<KaesseliContext>(
                     options =>
                         options.UseSqlServer(connectionString: configuration.GetConnectionString(name: "BudgetDatabase")  ));
@@ -28,6 +31,7 @@ public static class InfrastructureServiceCollectionExtensions
         services.AddScoped<IBudgetRepository, BudgetRepository>()
                 .AddScoped<IJournalRepository, JournalRepository>()
                 .AddScoped<IAccountRepository, AccountRepository>()
+                .AddScoped<IAutomationRepository, AutomationRepository>()
                 .AddScoped<ITransactionRepository, TransactionRepository>();
 
     public static void InitializeDatabase(this IServiceProvider serviceProvider)

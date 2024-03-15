@@ -30,10 +30,24 @@
       <q-card-section class="q-pt-none">
         {{ transaction.description }}
       </q-card-section>
+      <q-separator inset />
+
+      <q-card-section class="q-pt-none">
+
+      </q-card-section>
     </q-card>
   </div>
+  <q-expansion-item v-model="isAutomationActive" dense label="Automatisieren" class="q-pa-md">
+    <div class="row items-end">
+      <q-input label="Automatisieren" @update:model-value="automationInputChanged" v-model="automateInput" class="col-8"></q-input>
+      <q-chip>
+        <q-avatar size="md" color="red" text-color="white">{{nrOfPossibleAutomations}}</q-avatar>
+        Treffer
+      </q-chip>
+    </div>
+  </q-expansion-item>
   <div v-if="transaction" class="row q-pa-md">
-    <q-input ref="filterInput"
+    <q-input class="col-md-3 col-sm-6 col-xs-12" ref="filterInput"
              filled
              dense
              v-model="filterText"
@@ -57,7 +71,7 @@
           </q-item-label>
         </q-item-section>
         <q-item-section dense>
-          <q-input @update:model-value="splitAmountChanged(account)"
+          <q-input @update:model-value="assignMultipleAccoutnsChanged(account)"
                    v-model="account.amount"
                    type="number"
                    label="Betrag" />
@@ -66,13 +80,13 @@
     </q-list>
     <q-btn v-if="splittingAccounts.length > 0"
            class="row text-primary"
-           @click="splitAmount">Betrag aufteilen</q-btn>
+           @click="assignMultipleAccoutns">Betrag aufteilen</q-btn>
   </div>
 
   <div v-if="transaction" class="row q-pa-md">
     <div v-for="account in filteredAccounts" :key="account.id">
       <q-chip clickable
-              @click="onClick(account, $event)"
+              @click="onAccountClick(account, $event)"
               size="md"
               :color="account.accountIconColor"
               :icon="account.accountIcon"
@@ -114,7 +128,6 @@
   import { defineComponent, ref, onMounted, computed, nextTick } from 'vue';
   import axios from 'axios';
   import { useQuasar } from 'quasar';
-  import { forEachChild } from 'typescript';
 
   export default defineComponent({
     setup() {
@@ -122,6 +135,9 @@
       const filterText = ref<string>('');
       const filterInput = ref(null);
       const splittingAccounts = ref<ISplitAccount[]>([]);
+      const automateInput = ref<string>("");
+      const nrOfPossibleAutomations = ref<number>(0);
+      const isAutomationActive = ref(false);
       const $q = useQuasar();
 
       const filteredAccounts = computed(() => {
@@ -134,14 +150,19 @@
         );
 
         return transaction.value.suggestedAccounts.filter((account) => {
-          return (
-            account.accountName
-              .toLowerCase()
-              .includes(filterText.value.toLowerCase()) &&
-            !splittingAccountIds.includes(account.accountId)
-          );
+          // Teile den Filtertext in einzelne Wörter und verwende sie als Suchkriterien
+          const searchWords = filterText.value.toLowerCase().split(/\s+/);
+
+          // Prüfe, ob alle Suchwörter als Anfang von Wörtern im accountName vorkommen
+          return searchWords.every(word =>
+            account.accountName.toLowerCase().split(/\s+/).some(accountWord =>
+              accountWord.startsWith(word)
+            )
+          ) && !splittingAccountIds.includes(account.accountId);
         });
       });
+
+
 
       const FetchTransaction = async () => {
         try {
@@ -149,6 +170,7 @@
             'https://localhost:7123/transaction/nextOpen'
           );
           transaction.value = response.data;
+          automateInput.value = transaction.value?.description ?? "";
         } catch (error) {
           $q.notify({
             type: 'negative',
@@ -180,34 +202,33 @@
         }).format(value);
       }
 
-      const onClick = async (account: ISuggestedAccount, event: MouseEvent) => {
-        if (event != null && event.ctrlKey) {
-          if (transaction.value == null) return;
+      const addAccountToSplitList = (account: ISuggestedAccount) => {
+        if (transaction.value == null) return;
 
-          splittingAccounts.value.push({
-            suggestedAccount: account,
-            amount: transaction.value?.amount || 0,
-          });
+        splittingAccounts.value.push({
+          suggestedAccount: account,
+          amount: transaction.value?.amount || 0,
+        });
 
-          let sum = 0;
-          splittingAccounts.value.forEach((account, index) => {
-            {
-              account.amount = parseFloat(
-                (
-                  transaction.value.amount / splittingAccounts.value.length
-                ).toFixed(2)
-              );
-              sum += account.amount;
-            }
-          });
-          const lastAccount =
-            splittingAccounts.value[splittingAccounts.value.length - 1];
-          lastAccount.amount += parseFloat(
-            (transaction.value.amount - sum).toFixed(2)
-          );
-          return; // Beendet die Funktion, um den restlichen Code nicht auszuführen
-        }
+        let sum = 0;
+        splittingAccounts.value.forEach((account, index) => {
+          {
+            account.amount = parseFloat(
+              (
+                transaction.value.amount / splittingAccounts.value.length
+              ).toFixed(2)
+            );
+            sum += account.amount;
+          }
+        });
+        const lastAccount =
+          splittingAccounts.value[splittingAccounts.value.length - 1];
+        lastAccount.amount += parseFloat(
+          (transaction.value.amount - sum).toFixed(2)
+        );
+      }
 
+      const assignOneAccount = async (account: ISuggestedAccount) => {
         try {
           const savedPeriodId: string | null =
             localStorage.getItem('selectedPeriod');
@@ -227,9 +248,51 @@
             caption: error,
           });
         }
+      }
+
+      const submitAutomation = async (account: ISuggestedAccount) => {
+        if (!transaction.value) {
+          return;
+        }
+
+        const payload = {
+          automationText: automateInput.value,
+          accountingPeriodId: localStorage.getItem('selectedPeriod') || '',
+          entries: [{
+            otherAccountId: account.accountId,
+            amount: transaction.value.amount
+          }]
+        };
+
+        try {
+          await axios.post('https://localhost:7123/automation', payload);
+          $q.notify({
+            type: 'positive',
+            message: 'Automatisierung erfolgreich gesendet.'
+          });
+        } catch (error) {
+          $q.notify({
+            type: 'negative',
+            message: 'Fehler bei der Sendung der Automatisierung',
+            caption: error.message
+          });
+        }
       };
 
-      const splitAmount = async () => {
+
+      const onAccountClick = async (account: ISuggestedAccount, event: MouseEvent | null) => {
+        if (event != null && event.ctrlKey) {
+          addAccountToSplitList(account);
+        } else {
+          assignOneAccount(account)
+          if (isAutomationActive.value) {
+            submitAutomation(account);
+          }
+        }
+      };
+
+      
+      const assignMultipleAccoutns = async () => {
         try {
           const savedPeriodId: string | null =
             localStorage.getItem('selectedPeriod');
@@ -260,11 +323,11 @@
 
       const handleEnter = () => {
         if (filteredAccounts.value.length === 1) {
-          onClick(filteredAccounts.value[0], null);
+          assignOneAccount(filteredAccounts.value[0]);
         }
       };
 
-      const splitAmountChanged = async (splitAccount: ISplitAccount) => {
+      const assignMultipleAccoutnsChanged = async (splitAccount: ISplitAccount) => {
         if (splittingAccounts.value.length == 2) {
           await nextTick();
           const otherAccount = splittingAccounts.value.find(a => a !== splitAccount);
@@ -276,6 +339,14 @@
         }
       };
 
+      const automationInputChanged = async (inputText: string) => {
+        var response = await axios.get(
+          `https://localhost:7123/automation/nrMatchInput?input=${inputText}`
+        );
+        nrOfPossibleAutomations.value = response.data.nrOfPossibleAutomation;
+      }
+
+    
       onMounted(async () => {
         await FetchTransaction();
         nextTick(() => {
@@ -290,14 +361,18 @@
         transaction,
         formatDate,
         formatNumber,
-        onClick,
+        onAccountClick,
         filterText,
         filteredAccounts,
         handleEnter,
         filterInput,
         splittingAccounts,
-        splitAmount,
-        splitAmountChanged
+        assignMultipleAccoutns,
+        assignMultipleAccoutnsChanged,
+        automateInput,
+        nrOfPossibleAutomations,
+        automationInputChanged,
+        isAutomationActive
       };
     },
   });

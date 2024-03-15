@@ -4,6 +4,7 @@ using Kaesseli.Domain.Integration;
 using Kaesseli.Domain.Journal;
 using Microsoft.EntityFrameworkCore;
 using Kaesseli.Application.Utility;
+using Kaesseli.Domain.Automation;
 
 namespace Kaesseli.Infrastructure.Common;
 
@@ -37,6 +38,8 @@ public class KaesseliContext : DbContext
     public virtual DbSet<TransactionSummary> TransactionSummaries { get; init; } = null!;
     public virtual DbSet<Transaction> Transactions { get; init; } = null!;
     public virtual DbSet<AccountingPeriod> AccountingPeriods { get; init; } = null!;
+    public virtual DbSet<TransactionStatistic> TransactionStatistics { get; init; } = null!;
+    public virtual DbSet<AutomationEntry> Automations { get; init; } = null!;
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

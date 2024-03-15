@@ -1,6 +1,6 @@
-﻿namespace Kaesseli.Application.Integration.Camt;
+﻿namespace Kaesseli.Application.Integration.FileImport;
 
-public class CamtEntry
+public class FinancialDocumentEntry
 {
     public required string Description { get; init; }
     public required string RawText { get; init; }

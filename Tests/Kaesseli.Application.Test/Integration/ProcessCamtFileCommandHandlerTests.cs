@@ -1,8 +1,9 @@
 ﻿using FluentAssertions;
-using Kaesseli.Application.Integration.Camt;
+using Kaesseli.Application.Integration.FileImport;
 using Kaesseli.Domain.Accounts;
 using Kaesseli.Domain.Integration;
 using Kaesseli.TestUtilities.Faker;
+using MediatR;
 using Moq;
 using Xunit;
 
@@ -13,18 +14,19 @@ public class ProcessCamtFileCommandHandlerTests
     private readonly Mock<ICamtProcessor> _camtProcessorMock = new();
     private readonly Mock<ITransactionRepository> _transactionRepoMock = new();
     private readonly Mock<IAccountRepository> _accountRepoMock = new();
+    private readonly Mock<IMediator> _mediatorMock = new();
     private readonly ProcessCamtFileCommandHandler _handler;
 
     public ProcessCamtFileCommandHandlerTests() =>
-        _handler = new ProcessCamtFileCommandHandler(_camtProcessorMock.Object, _transactionRepoMock.Object, _accountRepoMock.Object);
+        _handler = new ProcessCamtFileCommandHandler(_camtProcessorMock.Object, _transactionRepoMock.Object, _accountRepoMock.Object, _mediatorMock.Object);
 
     [Fact]
     public async Task Handle_ShouldProcessCamtFileAndReturnEntryIds()
     {
         // Arrange
         var fakeCommand = new SmartFaker<ProcessCamtFileCommand>().Generate();
-        var fakeCamtDocument = new SmartFaker<CamtDocument>()
-                               .RuleFor(cd => cd.CamtEntries, value: new SmartFaker<CamtEntry>().Generate(count: 2))
+        var financialDocument = new SmartFaker<FinancialDocument>()
+                               .RuleFor(cd => cd.Entries, value: new SmartFaker<FinancialDocumentEntry>().Generate(count: 2))
                                .Generate();
         var cancellationToken = new CancellationToken();
         _accountRepoMock.Setup(repo => repo.GetAccount(fakeCommand.AccountId, cancellationToken))
@@ -39,7 +41,7 @@ public class ProcessCamtFileCommandHandlerTests
                                     IconColor = "blue"
                                 });
         _camtProcessorMock.Setup(x => x.ReadCamtFile(fakeCommand.Content, It.IsAny<CancellationToken>()))
-                          .ReturnsAsync(fakeCamtDocument);
+                          .ReturnsAsync(financialDocument);
 
         _transactionRepoMock.Setup(x => x.AddTransactionSummary(It.IsAny<TransactionSummary>(), cancellationToken))
                             .ReturnsAsync((TransactionSummary transactionSummary, CancellationToken _) => transactionSummary);
