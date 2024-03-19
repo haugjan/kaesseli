@@ -24,49 +24,57 @@
 
 <script lang="ts">
   import axios from 'axios';
-  import { useQuasar } from 'quasar'
+  import { useQuasar } from 'quasar';
+  import { onMounted, ref, Ref } from 'vue';
 
   export default {
-    data() {
-      return {
-        uploadedFile: null,
-        selectedAccount: null,
-        accounts: [],
-      };
-    },
-    mounted() {
-      this.fetchAccounts();
-    },
-    methods: {
-      async fetchAccounts() {
-        const $q = useQuasar();
+    setup() {
+
+      interface IAccount {
+        id: string;
+        name: string;
+        type: string;
+        typeId: number;
+        icon: string;
+        iconColor: string;
+      }
+
+
+      const uploadedFile: Ref<Blob | null> = ref(null);
+      const selectedAccount: Ref<string | null> = ref(null);
+      const accounts: Ref<IAccount[] | null> = ref(null);
+      const $q = useQuasar();
+
+      const fetchAccounts = async () => {
         try {
           const response = await axios.get('https://localhost:7123/account?accountType=1');
-          this.accounts = response.data;
+          accounts.value = response.data;
         } catch (error) {
           $q.notify({
             type: 'negative',
             message: 'There was an error fetching the accounts',
-            caption: error
+            caption: error instanceof Error ? error.message : String(error)
           });
         }
-      },
-      onFileChange() {
-        console.log('Datei ausgewählt:', this.uploadedFile);
-      },
-      onAccountSelect(value) {
+      };
+      const onFileChange = () => {
+        console.log('Datei ausgewählt:', uploadedFile);
+      };
+      const onAccountSelect = (value: IAccount) => {
         console.log('Ausgewähltes Konto:', value);
-      },
-      async uploadFile() {
-        if (!this.uploadedFile || !this.selectedAccount) {
+      }
+      const uploadFile = async () => {
+        if (!uploadedFile.value || !selectedAccount.value) {
           alert('Bitte wählen Sie eine Datei und ein Konto aus.');
           return;
-        }
-        const $q = useQuasar();
+        };
 
         let formData = new FormData();
-        formData.append('file', this.uploadedFile);
-        formData.append('accountId', this.selectedAccount);
+        const selectedPeriod: string | null = localStorage.getItem('selectedPeriod');
+        if (selectedPeriod == null) return;
+        formData.append('file', uploadedFile.value);
+        formData.append('accountId', selectedAccount.value);
+        formData.append('accountingPeriodId', selectedPeriod);
 
         try {
           await axios.post('https://localhost:7123/file/upload', formData, {
@@ -79,10 +87,26 @@
           $q.notify({
             type: 'negative',
             message: 'Error uploading file',
-            caption: error
+            caption: error instanceof Error ? error.message : String(error)
           });
         }
-      },
-    },
+      };
+
+      onMounted(() => {
+        fetchAccounts();
+      });
+
+      return {
+        onMounted,
+        fetchAccounts,
+        onFileChange,
+        onAccountSelect,
+        uploadFile,
+        uploadedFile,
+        accounts,
+        selectedAccount
+      }
+
+    }
   };
 </script>

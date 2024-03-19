@@ -22,6 +22,19 @@ public class AddAutomationCommandHandler : IRequestHandler<AddAutomationCommand,
 
     public async Task<Guid> Handle(AddAutomationCommand request, CancellationToken cancellationToken)
     {
+        var parts = new List<AutomationEntryPart>();
+        var sumOfAllEntries = request.Entries.Sum(entry => entry.Amount);
+        foreach (var entry in request.Entries)
+        {
+            parts.Add(
+                item: new AutomationEntryPart
+                {
+                    Id = Guid.NewGuid(), 
+                    Account = await GetAccount(entry.OtherAccountId, cancellationToken), 
+                    AmountProportion = entry.Amount / sumOfAllEntries
+                });
+        }
+
         var partsTasks = request.Entries.Select(
             async entry =>
                 new AutomationEntryPart
@@ -29,21 +42,20 @@ public class AddAutomationCommandHandler : IRequestHandler<AddAutomationCommand,
                     Account = await GetAccount(
                                   entry.OtherAccountId,
                                   cancellationToken),
-                    Amount = entry.Amount,
+                    AmountProportion = entry.Amount,
                     Id = Guid.NewGuid()
                 });
 
-        var parts = await Task.WhenAll(partsTasks);
+        //var parts = await Task.WhenAll(partsTasks);
         var automationEntry = new AutomationEntry { Id = Guid.NewGuid(), AutomationText = request.AutomationText, Parts = parts };
 
         await _automateRepository.AddAutomation(
             automationEntry,
             cancellationToken);
 
-        await _mediator.Send(request: new ApplyAllAutomationsCommand
-        {
-            AccountingPeriodId = request.AccountingPeriodId
-        }, cancellationToken);
+        await _mediator.Send(
+            request: new ApplyAllAutomationsCommand { AccountingPeriodId = request.AccountingPeriodId },
+            cancellationToken);
         return automationEntry.Id;
     }
 

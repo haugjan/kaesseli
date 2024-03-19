@@ -45,6 +45,15 @@ public class KaesseliContext : DbContext
     {
         base.OnModelCreating(modelBuilder);
 
+        modelBuilder.Entity<AutomationEntry>(
+            entity =>
+            {
+                entity.HasMany(ae => ae.Parts)
+                      .WithOne()
+                      .IsRequired()
+                      .OnDelete(DeleteBehavior.NoAction);
+            });
+
         modelBuilder.Entity<BudgetEntry>(
             entity =>
             {

@@ -14,6 +14,10 @@ internal class PostFinanceCsvProcessor : IPostFinanceCsvProcessor
         {
             Delimiter = ";",
             HasHeaderRecord = true,
+            ShouldSkipRecord = record =>
+            {
+                return record.Row.ColumnCount != 7;
+            }
         };
         using var csv = new CsvReader(reader, config);
         var records = csv.GetRecords<PostFinanceCsvSchema>();

@@ -65,7 +65,7 @@ public static class IntegrationApiExtensions
 
         app.MapPost(
                pattern: "/file/upload",
-               async (IMediator mediator, IFormFile file, [FromForm] Guid accountId, [FromQuery] Guid accountingPeriodId) =>
+               async (IMediator mediator, IFormFile file, [FromForm] Guid accountId, [FromForm] Guid accountingPeriodId) =>
                {
                    await using var stream = file.OpenReadStream();
                    var command = new ProcessFileCommand

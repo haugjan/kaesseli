@@ -175,7 +175,7 @@
           $q.notify({
             type: 'negative',
             message: 'Error updating the transaction: ',
-            caption: error,
+            caption: error instanceof Error ? error.message : String(error),
           });
         }
       };
@@ -245,7 +245,7 @@
           $q.notify({
             type: 'negative',
             message: 'There was an error updating transaction',
-            caption: error,
+            caption: error instanceof Error ? error.message : String(error),
           });
         }
       }
@@ -274,7 +274,7 @@
           $q.notify({
             type: 'negative',
             message: 'Fehler bei der Sendung der Automatisierung',
-            caption: error.message
+            caption: error instanceof Error ? error.message : String(error).message
           });
         }
       };
@@ -316,7 +316,7 @@
           $q.notify({
             type: 'negative',
             message: 'Error updating the transaction: ',
-            caption: error,
+            caption: error instanceof Error ? error.message : String(error),
           });
         }
       };

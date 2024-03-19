@@ -84,7 +84,7 @@
           $q.notify({
             type: 'negative',
             message: 'There was an error fetching the overview',
-            caption: error
+            caption: error instanceof Error ? error.message : String(error)
           });
         }
       };
