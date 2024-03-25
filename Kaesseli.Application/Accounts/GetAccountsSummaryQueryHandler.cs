@@ -50,11 +50,13 @@ public class GetAccountsSummaryQueryHandler(
         var today = _dateTimeService.ToDay;
         budgetEntries = budgetEntries.ToArray();
         var accountBalance = account.GetAccountBalance(journalEntries);
-        var budget = account.GetBudget(budgetEntries);
+        var budgetPerYear = account.GetBudgetPerYear(budgetEntries);
+        var budget = account.GetBudget(budgetEntries, accountingPeriod);
+        var budgetPerMonth = account.GetBudgetPerMonth(budgetEntries);
         var currentBudget = account.GetCurrentBudget(budgetEntries, accountingPeriod, today);
         var budgetBalance = account.GetBudgetBalance(currentBudget, accountBalance);
 
-        return account.ToAccountSummary(accountBalance, budget, currentBudget, budgetBalance);
+        return account.ToAccountSummary(accountBalance, budget,budgetPerMonth, budgetPerYear, currentBudget, budgetBalance);
     }
 
 

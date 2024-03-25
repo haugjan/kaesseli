@@ -177,7 +177,7 @@ public class AccountTests
             }
         };
         //Act
-        var budget = account.GetBudget(budgetEntries);
+        var budget = Account.GetBudget(budgetEntries);
 
         //Assert
         budget.Should().Be(expected: 10);

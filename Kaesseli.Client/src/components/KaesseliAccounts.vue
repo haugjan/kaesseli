@@ -5,7 +5,7 @@
     </q-breadcrumbs>
   </div>
   <div class="row">
-    <div v-for="type in accountTypes" :key="type" class="account-type q-pa-md col-md-6 col-sm-12">
+    <div v-for="type in accountTypes" :key="type" class="account-type q-pa-md col-lg-8 col-md-10 col-sm-12">
       <q-card>
         <span class="header">
           <q-card-section> <q-avatar size="md" text-color="white" :color="type.color" :icon="type.icon" class="q-mr-sm shadow-3" />{{ type.name }}</q-card-section>
@@ -61,6 +61,8 @@
     typeId: number;
     accountBalance: number;
     budget: number | null;
+    budgetPerMonth: number | null;
+    budgetPerYear: number | null;
     currentBudget: number | null;
     budgetBalance: number | null;
   }
@@ -86,7 +88,7 @@
         { name: 'icon', required: true, label: '', align: 'left', field: (row: IAccountSummary) => row.icon, sortable: true },
         { name: 'name', required: true, label: 'Name', align: 'left', field: (row: IAccountSummary) => row.name, sortable: true },
         { name: 'accountBalance', label: 'Kontostand', align: 'right', field: (row: IAccountSummary) => formatNumber(row.accountBalance), sortable: true },
-        { name: 'budget', label: 'Σ Budget', align: 'right', field: (row: IAccountSummary) => formatNumber(row.budget), sortable: true },
+        { name: 'budget', label: 'Budget p.M.', align: 'right', field: (row: IAccountSummary) => formatNumber(row.budgetPerMonth), sortable: true },
         { name: 'currentBudget', label: '📅 Budget', align: 'right', field: (row: IAccountSummary) => formatNumber(row.currentBudget), sortable: true },
         { name: 'budgetBalance', label: 'Budgetsaldo', align: 'right', field: (row: IAccountSummary) => formatNumber(row.budgetBalance), sortable: true, classes: 'budgetBalance' },
       ]);

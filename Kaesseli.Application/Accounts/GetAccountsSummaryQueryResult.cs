@@ -13,6 +13,8 @@ public class GetAccountsSummaryQueryResult
     public required AccountType TypeId { get; init; }
     public required decimal AccountBalance{ get; init; }
     public required decimal? Budget{ get; init; }
+    public required decimal? BudgetPerMonth{ get; init; }
+    public required decimal? BudgetPerYear{ get; init; }
     public required decimal? BudgetBalance{ get; init; }
 
     public required decimal? CurrentBudget { get; init; }

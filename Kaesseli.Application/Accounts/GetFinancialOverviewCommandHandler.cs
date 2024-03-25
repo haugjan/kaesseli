@@ -39,6 +39,8 @@ public class GetFinancialOverviewCommandHandler : IRequestHandler<GetFinancialOv
             AccountBalance = summaries.Sum(summary => summary.AccountBalance),
             Budget = summaries.Sum(summary => summary.Budget),
             CurrentBudget = summaries.Sum(summary => summary.CurrentBudget),
-            BudgetBalance = summaries.Sum(summary => summary.BudgetBalance)
+            BudgetBalance = summaries.Sum(summary => summary.BudgetBalance),
+            BudgetPerMonth = summaries.Sum(summary => summary.BudgetPerMonth),
+            BudgetPerYear = summaries.Sum(summary => summary.BudgetPerYear)
         };
 }

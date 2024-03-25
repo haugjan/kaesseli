@@ -26,20 +26,11 @@ public class Account
         return 0;
     }
 
-    public decimal? GetBudget(IEnumerable<BudgetEntry> entries)
-    {
-        var budgetEntries = entries.Where(entry => entry.Account.Id == Id)
-                                   .Select(entry => entry.Amount);
-
-        if (Type is not (AccountType.Asset or AccountType.Liability)) return budgetEntries.Sum();
-
-        if (budgetEntries.Any()) Log.Logger.Warning(messageTemplate: "Found budget entries on account type {AccountType}", Type);
-        return null;
-    }
+ 
 
     public decimal? GetCurrentBudget(IEnumerable<BudgetEntry> entries, AccountingPeriod accountingPeriod, DateOnly today)
     {
-        var budget = GetBudget(entries);
+        var budget = GetBudget(entries, accountingPeriod);
         if (budget == null) return null;
 
         var fromPeriod = accountingPeriod.FromInclusive;
@@ -58,4 +49,24 @@ public class Account
 
     public override string ToString() =>
         $"{Name} ({Type.DisplayName()})";
+
+    public decimal? GetBudgetPerYear(IEnumerable<BudgetEntry> entries)
+    {
+        var budgetEntries = entries.Where(entry => entry.Account.Id == Id)
+                                   .Select(entry => entry.Amount);
+
+        if (Type is not (AccountType.Asset or AccountType.Liability)) return budgetEntries.Sum();
+
+        if (budgetEntries.Any()) Log.Logger.Warning(messageTemplate: "Found budget entries on account type {AccountType}", Type);
+        return null;
+    }
+    public decimal? GetBudgetPerMonth(IEnumerable<BudgetEntry> entries) =>
+        GetBudgetPerYear(entries) / 12;
+
+    public  decimal? GetBudget(IEnumerable<BudgetEntry> entries, AccountingPeriod period)
+    {
+        var budgetPerYear = GetBudgetPerYear(entries);
+        var totalDays = (period.ToInclusive.ToDateTime(time: default) - period.FromInclusive.ToDateTime(time: default)).TotalDays;
+        return budgetPerYear / 365m * Convert.ToDecimal(totalDays);
+    }
 }

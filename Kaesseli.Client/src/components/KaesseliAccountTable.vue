@@ -23,7 +23,12 @@
             <q-chip color="brown-7" text-color="white" icon="savings">
               Σ {{formatNumber(account.budget)}}
             </q-chip>
-            <q-chip color="brown-3" text-color="white" icon="savings">
+            <q-chip color="brown-7" text-color="white" icon="savings">
+              pro Monat {{formatNumber(account.budgetPerMonth)}}
+            </q-chip>
+            <q-chip color="brown-7" text-color="white" icon="savings">
+              pro Jahr {{formatNumber(account.budgetPerYear)}}
+            </q-chip>            <q-chip color="brown-3" text-color="white" icon="savings">
               📅 {{formatNumber(account.currentBudget)}}
             </q-chip>
             <q-chip v-if="account.budgetBalance >= 0" color="green-9" text-color="white" icon="balance">
@@ -71,6 +76,8 @@
     typeId: number,
     accountBalance: number,
     budget: number | null,
+    budgetPerYear: number | null,
+    budgetPerMonth: number | null,
     currentBudget: number | null
     budgetBalance: number | null
     entries: IAccountEntry[]

@@ -71,7 +71,7 @@
           </q-item-label>
         </q-item-section>
         <q-item-section dense>
-          <q-input @update:model-value="assignMultipleAccoutnsChanged(account)"
+          <q-input @update:model-value="assignMultipleAccountsChanged(account)"
                    v-model="account.amount"
                    type="number"
                    label="Betrag" />
@@ -80,7 +80,7 @@
     </q-list>
     <q-btn v-if="splittingAccounts.length > 0"
            class="row text-primary"
-           @click="assignMultipleAccoutns">Betrag aufteilen</q-btn>
+           @click="onAssignMultipleAccountsClick">Betrag aufteilen</q-btn>
   </div>
 
   <div v-if="transaction" class="row q-pa-md">
@@ -250,7 +250,7 @@
         }
       }
 
-      const submitAutomation = async (account: ISuggestedAccount) => {
+      const submitAutomation = async (entries: ISplitAccount[]) => {
         if (!transaction.value) {
           return;
         }
@@ -258,10 +258,9 @@
         const payload = {
           automationText: automateInput.value,
           accountingPeriodId: localStorage.getItem('selectedPeriod') || '',
-          entries: [{
-            otherAccountId: account.accountId,
-            amount: transaction.value.amount
-          }]
+          entries: entries.map(entry => ({
+            otherAccountId: entry.suggestedAccount.accountId,
+              amount: entry.amount }))
         };
 
         try {
@@ -274,7 +273,7 @@
           $q.notify({
             type: 'negative',
             message: 'Fehler bei der Sendung der Automatisierung',
-            caption: error instanceof Error ? error.message : String(error).message
+            caption: error instanceof Error ? error.message : String(error)
           });
         }
       };
@@ -285,14 +284,23 @@
           addAccountToSplitList(account);
         } else {
           assignOneAccount(account)
-          if (isAutomationActive.value) {
-            submitAutomation(account);
+          if (isAutomationActive.value && transaction.value != null) {
+            submitAutomation([{amount: transaction.value.amount, suggestedAccount: account}]);
           }
         }
       };
 
       
-      const assignMultipleAccoutns = async () => {
+      const onAssignMultipleAccountsClick = async () => {
+        await assignMultipleAccounts();
+        if (isAutomationActive.value) {
+          submitAutomation(splittingAccounts.value);
+        }
+        window.location.reload(); // Seite neu laden
+
+      };
+
+      const assignMultipleAccounts = async () => {
         try {
           const savedPeriodId: string | null =
             localStorage.getItem('selectedPeriod');
@@ -311,7 +319,6 @@
               entries: entries,
             }
           );
-          window.location.reload(); // Seite neu laden
         } catch (error) {
           $q.notify({
             type: 'negative',
@@ -319,7 +326,7 @@
             caption: error instanceof Error ? error.message : String(error),
           });
         }
-      };
+      }
 
       const handleEnter = () => {
         if (filteredAccounts.value.length === 1) {
@@ -327,7 +334,7 @@
         }
       };
 
-      const assignMultipleAccoutnsChanged = async (splitAccount: ISplitAccount) => {
+      const assignMultipleAccountsChanged = async (splitAccount: ISplitAccount) => {
         if (splittingAccounts.value.length == 2) {
           await nextTick();
           const otherAccount = splittingAccounts.value.find(a => a !== splitAccount);
@@ -367,8 +374,8 @@
         handleEnter,
         filterInput,
         splittingAccounts,
-        assignMultipleAccoutns,
-        assignMultipleAccoutnsChanged,
+        onAssignMultipleAccountsClick,
+        assignMultipleAccountsChanged,
         automateInput,
         nrOfPossibleAutomations,
         automationInputChanged,

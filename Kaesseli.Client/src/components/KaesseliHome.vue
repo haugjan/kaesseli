@@ -9,7 +9,7 @@
         <q-separator dark inset />
         <q-card-section v-if="type.data !== undefined">
           <table>
-            <tr >
+            <tr>
               <td class="text-grey-6">Kontostand:</td>
               <td>
                 {{formatNumber(type.data.accountBalance)}}
@@ -19,6 +19,18 @@
               <td class="text-grey-6">Σ Budget:</td>
               <td>
                 {{formatNumber(type.data.budget)}}
+              </td>
+            </tr>
+            <tr v-if="type.id === 3 || type.id===4">
+              <td class="text-grey-6">Budget pro Jahr:</td>
+              <td>
+                {{formatNumber(type.data.budgetPerYear)}}
+              </td>
+            </tr>
+            <tr v-if="type.id === 3 || type.id===4">
+              <td class="text-grey-6">Budget pro Monat:</td>
+              <td>
+                {{formatNumber(type.data.budgetPerMonth)}}
               </td>
             </tr>
             <tr v-if="type.id === 3 || type.id===4">

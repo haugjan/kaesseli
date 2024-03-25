@@ -34,7 +34,9 @@ public class GetAccountQueryHandler(IAccountRepository accountRepo, IJournalRepo
                                  cancellationToken)).ToArray();
 
         var accountBalance = account.GetAccountBalance(journalEntries);
-        var budget = account.GetBudget(budgetEntries);
+        var budget = account.GetBudget(budgetEntries, period);
+        var budgetPerMonth = account.GetBudgetPerMonth(budgetEntries);
+        var budgetPerYear = account.GetBudgetPerYear(budgetEntries);
         var currentBudget = account.GetCurrentBudget(budgetEntries, period, _dateTimeService.ToDay);
         var budgetBalance = account.GetBudgetBalance(currentBudget, accountBalance);
 
@@ -47,6 +49,8 @@ public class GetAccountQueryHandler(IAccountRepository accountRepo, IJournalRepo
             TypeId = account.Type,
             AccountBalance = accountBalance,
             Budget = budget,
+            BudgetPerMonth = budgetPerMonth,
+            BudgetPerYear = budgetPerYear,
             BudgetBalance = budgetBalance,
             Entries = GetEntries(
                 account.Id,
