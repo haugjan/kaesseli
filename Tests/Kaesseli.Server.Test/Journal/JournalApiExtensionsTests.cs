@@ -4,7 +4,6 @@ using System.Text.Json;
 using FluentAssertions;
 using Kaesseli.Application.Journal;
 using Kaesseli.Domain.Accounts;
-using Kaesseli.Server.Journal;
 using Kaesseli.TestUtilities.Faker;
 using MediatR;
 using Microsoft.AspNetCore.Builder;
