@@ -49,12 +49,12 @@ internal class CamtProcessor : ICamtProcessor
                             });
 
     private static string? GetDebtor(ReportEntry4 entry) =>
-        entry.NtryDtls
+        entry.NtryDtls?
              .FirstOrDefault()?.TxDtls
              .FirstOrDefault()?
              .RltdPties?.Dbtr?.Nm;
     private static string? GetCreditor(ReportEntry4 entry) =>
-        entry.NtryDtls
+        entry.NtryDtls?
              .FirstOrDefault()?.TxDtls
              .FirstOrDefault()?
              .RltdPties?.Cdtr?.Nm;
