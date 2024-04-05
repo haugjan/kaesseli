@@ -23,8 +23,10 @@ public class AccountExtensionsTest
         var summary = account.ToAccountSummary(
             accountBalance: 3m,
             budget: 5m,
-            currentBudget: 7m,
-            budgetBalance: 8m);
+            budgetPerMonth: 7m,
+            budgetPerYear: 8m,
+            currentBudget: 100m,
+            budgetBalance: 1200m);
 
         //Assert
         summary.Id.Should().Be(account.Id);

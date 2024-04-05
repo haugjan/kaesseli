@@ -43,6 +43,7 @@
   <ItemGroup>
     <ProjectReference Include="..\..\..\Tests\Kaesseli\Kaesseli.TestUtilities\Kaesseli.TestUtilities.csproj" />
     <ProjectReference Include="..\..\Kaesseli.Infrastructure\Kaesseli.Infrastructure.csproj" />
+    <ProjectReference Include="..\Kaesseli.TestUtilities\Kaesseli.TestUtilities.csproj" />
   </ItemGroup>
 
 </Project>
