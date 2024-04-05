@@ -1,28 +1,95 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using Kaesseli.Domain.Accounts;
+using Kaesseli.Domain.Integration;
 using Kaesseli.Domain.Journal;
-using Kaesseli.Domain.Common;
+using Kaesseli.Infrastructure.Common;
+using Microsoft.EntityFrameworkCore;
 
-namespace Kaesseli.Infrastructure.Journal
+namespace Kaesseli.Infrastructure.Journal;
+
+public class JournalRepository(KaesseliContext context) : IJournalRepository
 {
-    public class JournalRepository : IJournalRepository
+    public async Task<JournalEntry> AddJournalEntry(JournalEntry newJournalEntryEntity, CancellationToken cancellationToken)
     {
-        public Task<JournalEntry> AddJournalEntry(JournalEntry newJournalEntryEntity)
+        context.JournalEntries.Add(newJournalEntryEntity);
+        await context.SaveChangesAsync(cancellationToken);
+        return newJournalEntryEntity;
+    }
+
+    public async Task<IEnumerable<JournalEntry>> GetJournalEntries(
+        GetJournalEntriesRequest request,
+        CancellationToken cancellationToken)
+    {
+        var entries = context.JournalEntries
+                             .Include(journalEntry => journalEntry.DebitAccount)
+                             .Include(journalEntry => journalEntry.CreditAccount)
+                             .Include(journalEntry => journalEntry.AccountingPeriod)
+                             .Where(entry => entry.AccountingPeriod.Id == request.AccountingPeriodId);
+        if (request.AccountId is not null)
         {
-            throw new NotImplementedException();
+            entries = entries.Where(
+                journal => journal.CreditAccount.Id == request.AccountId
+                        || journal.DebitAccount.Id == request.AccountId);
         }
 
-        public Task AssignAccount(Guid JournalId, Guid accountId)
+        if (request.AccountType is not null)
         {
-            throw new NotImplementedException();
+            entries = entries.Where(
+                entry => entry.DebitAccount.Type == request.AccountType
+                      || entry.CreditAccount.Type == request.AccountType);
         }
 
-        public Task<Account> GetAccount(Guid accountId)
+        return await entries.ToListAsync(cancellationToken);
+    }
+
+    public async Task AssignOpenTransaction(
+        Guid accountingPeriodId,
+        Guid transactionId,
+        IEnumerable<AssignOpenTransactionEntry> entries,
+        CancellationToken cancellationToken)
+    {
+        entries = entries.ToArray();
+        var transaction = await context.Transactions
+                                       .Include(trans => trans.TransactionSummary)
+                                       .ThenInclude(summary => summary!.Account)
+                                       .SingleAsync(trans => trans.Id == transactionId, cancellationToken);
+        var accountingPeriod = await context.AccountingPeriods.FindAsync(accountingPeriodId, cancellationToken)
+                            ?? throw new EntityNotFoundException(entityType: typeof(AccountingPeriod), accountingPeriodId);
+        WrongAmountException.ThrowIfAmountNotMatch(transaction.Amount, entriesAmount: entries.Sum(entry => entry.Amount));
+
+        foreach (var entry in entries)
+            await AssignOpenTransaction(
+                accountingPeriod,
+                transaction,
+                entry.OtherAccountId,
+                entry.Amount,
+                cancellationToken);
+
+        await context.SaveChangesAsync(cancellationToken);
+    }
+
+
+
+    private async Task AssignOpenTransaction(
+        AccountingPeriod accountingPeriod,
+        Transaction transaction,
+        Guid otherAccountId,
+        decimal amount,
+        CancellationToken cancellationToken)
+    {
+        var otherAccount = await context.Accounts.FindAsync(otherAccountId, cancellationToken)
+                        ?? throw new EntityNotFoundException(entityType: typeof(Account), otherAccountId);
+        var newJournalEntry = new JournalEntry
         {
-            throw new NotImplementedException();
-        }
+            Id = Guid.NewGuid(),
+            ValueDate = transaction.ValueDate,
+            Description = transaction.Description,
+            Amount = amount,
+            DebitAccount = transaction.TransactionSummary!.Account,
+            CreditAccount = otherAccount,
+            Transaction = transaction,
+            AccountingPeriod = accountingPeriod
+        };
+
+        context.JournalEntries.Add(newJournalEntry);
     }
 }

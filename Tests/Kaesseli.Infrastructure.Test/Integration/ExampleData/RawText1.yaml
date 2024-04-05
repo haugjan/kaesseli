@@ -1,0 +1,123 @@
+- Btch: 
+  TxDtls:
+  - Refs:
+      MsgId: MSG00000000000001
+      AcctSvcrRef: ACCTREF0000000001
+      PmtInfId: PMTINF0000000001
+      InstrId: INSTRID0000000001
+      EndToEndId: NOTPROVIDED
+      TxId: 
+      MndtId: 
+      ChqNb: 
+      ClrSysRef: 
+      AcctOwnrTxId: 
+      AcctSvcrTxId: 
+      MktInfrstrctrTxId: 
+      PrcgId: 
+      Prtry: 
+    Amt:
+      Ccy: CHF
+      Value: 29.95
+    CdtDbtInd: DBIT
+    AmtDtls: 
+    Avlbty: 
+    BkTxCd:
+      Domn:
+        Cd: PMNT
+        Fmly:
+          Cd: ICDT
+          SubFmlyCd: BOOK
+      Prtry: 
+    Chrgs: 
+    Intrst: 
+    RltdPties:
+      InitgPty: 
+      Dbtr: 
+      DbtrAcct: 
+      UltmtDbtr: 
+      Cdtr:
+        Nm: Fictional Company
+        PstlAdr:
+          AdrTp: ADDR
+          AdrTpSpecified: false
+          Dept: 
+          SubDept: 
+          StrtNm: Main Street 123
+          BldgNb: 
+          PstCd: 9999
+          TwnNm: Sample Town
+          CtrySubDvsn: 
+          Ctry: CH
+          AdrLine: 
+        Id: 
+        CtryOfRes: 
+        CtctDtls: 
+      CdtrAcct:
+        Id:
+          Item: CH4400000000000000000
+        Tp: 
+        Ccy: 
+        Nm: 
+      UltmtCdtr: 
+      TradgPty: 
+      Prtry: 
+    RltdAgts:
+      DbtrAgt: 
+      CdtrAgt:
+        FinInstnId:
+          BICFI: 
+          ClrSysMmbId:
+            ClrSysId: 
+            MmbId: 00000
+          Nm: Fictional Bank AG
+          PstlAdr:
+            AdrTp: ADDR
+            AdrTpSpecified: false
+            Dept: 
+            SubDept: 
+            StrtNm: 
+            BldgNb: 
+            PstCd: 
+            TwnNm: 
+            CtrySubDvsn: 
+            Ctry: CH
+            AdrLine:
+            - Bank Street 1, 9999 Sample City
+          Othr: 
+        BrnchId: 
+      IntrmyAgt1: 
+      IntrmyAgt2: 
+      IntrmyAgt3: 
+      RcvgAgt: 
+      DlvrgAgt: 
+      IssgAgt: 
+      SttlmPlc: 
+      Prtry: 
+    Purp: 
+    RltdRmtInf: 
+    RmtInf:
+      Ustrd: 
+      Strd:
+      - RfrdDocInf: 
+        RfrdDocAmt: 
+        CdtrRefInf:
+          Tp:
+            CdOrPrtry:
+              Item: SCOR
+            Issr: 
+          Ref: REFERENCE00000001
+        Invcr: 
+        Invcee: 
+        AddtlRmtInf: 
+    RltdDts: 
+    RltdPric: 
+    RltdQties: 
+    FinInstrmId: 
+    Tax: 
+    RtrInf: 
+    CorpActn: 
+    SfkpgAcct: 
+    CshDpst: 
+    CardTx: 
+    AddtlTxInf: 
+    SplmtryData: 

@@ -1,28 +1,51 @@
-﻿using Kaesseli.Domain.Common;
-namespace Kaesseli.Domain.Journal;
+﻿using System.Diagnostics.CodeAnalysis;
+using Kaesseli.Domain.Accounts;
+using Kaesseli.Domain.Integration;
 
+namespace Kaesseli.Domain.Journal;
 
 public class JournalEntry
 {
-    public Guid Id { get; set; }
-    public DateTimeOffset ValueDate { get; set; }
-    private Account? _account;
-
-    public string Description { get; set; } = string.Empty;
-    public decimal Amount { get; set; }
-    public Account? Account
+    private readonly Account _debitAccount;
+    private readonly Account _creditAccount;
+    public required Guid Id { get; init; }
+    public required AccountingPeriod AccountingPeriod { get; init; }
+    public required DateOnly ValueDate { get; init; }
+    public required string Description { get; init; }
+    public required decimal Amount { get; init; }
+    public required Account DebitAccount
     {
-        get => _account;
-        set
+        get => _debitAccount;
+        [MemberNotNull(member: nameof(_debitAccount))]
+        init
         {
-            ThrowIfAccountAlreadySet(value);
-            _account = value;
+            ThrowIfAccountsAreSame(CreditAccount, value);
+            _debitAccount = value;
         }
     }
 
-    private void ThrowIfAccountAlreadySet(Account? value)
+    public required Account CreditAccount
     {
-        if (_account is not null && _account?.Id != value?.Id)
-            throw new JournalEntriesImmutableException();
+        get => _creditAccount;
+        [MemberNotNull(member: nameof(_creditAccount))]
+        init
+        {
+            ThrowIfAccountsAreSame(DebitAccount, value);
+            _creditAccount = value;
+        }
     }
+
+    public required Transaction? Transaction { get; init; }
+
+    private static void ThrowIfAccountsAreSame(Account? firstAccount, Account? secondAccount)
+    {
+        if (firstAccount is null) return;
+        if (secondAccount is null) return;
+        if (firstAccount.Id != secondAccount.Id) return;
+
+        throw new AccountsMustNotBeSameException();
+    }
+
+    public override string ToString() =>
+        $"{DebitAccount.Name} - {CreditAccount.Name}: {Amount:C}";
 }

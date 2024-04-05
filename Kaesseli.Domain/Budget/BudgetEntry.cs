@@ -1,29 +1,34 @@
-﻿using Kaesseli.Domain.Common;
-using Kaesseli.Domain.Journal;
+﻿using System.Diagnostics.CodeAnalysis;
+using Kaesseli.Domain.Accounts;
 
 namespace Kaesseli.Domain.Budget;
 
 public class BudgetEntry
 {
-    private Account? _account;
-    public Guid Id { get; set; } = Guid.NewGuid();
-    public DateTimeOffset ValueDate { get; set; }
-    public string Description { get; set; } = string.Empty;
-    public decimal Amount { get; set; }
+    public required AccountingPeriod AccountingPeriod { get; init; }
+    private readonly Account _account;
+    public required Guid Id { get; init; }
+    public required string Description { get; set; }
+    public required decimal Amount { get; set; }
 
-    public Account? Account
+    public required Account Account
     {
         get => _account;
-        set
+        [MemberNotNull(member: nameof(_account))]
+        init
         {
-            ThrowIfAccountAlreadySet(value);
+            ThrowIfWrongAccountType(value);
             _account = value;
         }
     }
 
-    private void ThrowIfAccountAlreadySet(Account? value)
+    private static void ThrowIfWrongAccountType(Account value)
     {
-        if (_account is not null && _account?.Id != value?.Id)
-            throw new JournalEntriesImmutableException();
+        if (value.Type is AccountType.Asset 
+            or AccountType.Liability) 
+            throw new BudgetNotAllowedException(value.Type);
     }
+
+    public override string ToString() =>
+        $"Budget {Account.Name}: {Amount:C}";
 }

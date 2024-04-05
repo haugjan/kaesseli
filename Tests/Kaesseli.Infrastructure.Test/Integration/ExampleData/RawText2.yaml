@@ -1,0 +1,145 @@
+- Btch:
+    MsgId: 
+    PmtInfId: 
+    NbOfTxs: 1
+    TtlAmt: 
+    CdtDbtInd: CRDT
+    CdtDbtIndSpecified: false
+  TxDtls:
+  - Refs:
+      MsgId: MSG00000000000002
+      AcctSvcrRef: ACCTREF0000000002
+      PmtInfId: PMTINF0000000002
+      InstrId: INSTRID0000000002
+      EndToEndId: ENDTOENDID00000002
+      TxId: 
+      MndtId: 
+      ChqNb: 
+      ClrSysRef: 
+      AcctOwnrTxId: 
+      AcctSvcrTxId: 
+      MktInfrstrctrTxId: 
+      PrcgId: 
+      Prtry: 
+    Amt:
+      Ccy: CHF
+      Value: 13656.85
+    CdtDbtInd: CRDT
+    AmtDtls: 
+    Avlbty: 
+    BkTxCd:
+      Domn:
+        Cd: PMNT
+        Fmly:
+          Cd: RCDT
+          SubFmlyCd: AUTT
+      Prtry: 
+    Chrgs: 
+    Intrst: 
+    RltdPties:
+      InitgPty: 
+      Dbtr:
+        Nm: Another Fictional Company
+        PstlAdr:
+          AdrTp: ADDR
+          AdrTpSpecified: false
+          Dept: 
+          SubDept: 
+          StrtNm: Another Street 456
+          BldgNb: 8
+          PstCd: 8888
+          TwnNm: Another Town
+          CtrySubDvsn: 
+          Ctry: CH
+          AdrLine: 
+        Id: 
+        CtryOfRes: 
+        CtctDtls: 
+      DbtrAcct:
+        Id:
+          Item: CH3300000000000000000
+        Tp: 
+        Ccy: 
+        Nm: 
+      UltmtDbtr: 
+      Cdtr: 
+      CdtrAcct:
+        Id:
+          Item: CH9300000000000000000
+        Tp: 
+        Ccy: 
+        Nm: 
+      UltmtCdtr: 
+      TradgPty: 
+      Prtry: 
+    RltdAgts:
+      DbtrAgt:
+        FinInstnId:
+          BICFI: FICTCHZZXXX
+          ClrSysMmbId: 
+          Nm: Another Fictional Bank AG
+          PstlAdr:
+            AdrTp: ADDR
+            AdrTpSpecified: false
+            Dept: 
+            SubDept: 
+            StrtNm: 
+            BldgNb: 
+            PstCd: 
+            TwnNm: 
+            CtrySubDvsn: 
+            Ctry: 
+            AdrLine:
+            - Another Bank Street 2, 8888 Another City
+          Othr: 
+        BrnchId: 
+      CdtrAgt: 
+      IntrmyAgt1: 
+      IntrmyAgt2: 
+      IntrmyAgt3: 
+      RcvgAgt: 
+      DlvrgAgt: 
+      IssgAgt: 
+      SttlmPlc: 
+      Prtry: 
+    Purp:
+      Item: SALA
+      ItemElementName: Cd
+    RltdRmtInf: 
+    RmtInf:
+      Ustrd: 
+      Strd:
+      - RfrdDocInf: 
+        RfrdDocAmt: 
+        CdtrRefInf: 
+        Invcr: 
+        Invcee: 
+        AddtlRmtInf:
+        - Salary for January
+    RltdDts:
+      AccptncDtTm: 2024-01-25T20:00:00.0000000
+      AccptncDtTmSpecified: true
+      TradActvtyCtrctlSttlmDt: 0001-01-01T00:00:00.0000000
+      TradActvtyCtrctlSttlmDtSpecified: false
+      TradDt: 0001-01-01T00:00:00.0000000
+      TradDtSpecified: false
+      IntrBkSttlmDt: 0001-01-01T00:00:00.0000000
+      IntrBkSttlmDtSpecified: false
+      StartDt: 0001-01-01T00:00:00.0000000
+      StartDtSpecified: false
+      EndDt: 0001-01-01T00:00:00.0000000
+      EndDtSpecified: false
+      TxDtTm: 0001-01-01T00:00:00.0000000
+      TxDtTmSpecified: false
+      Prtry: 
+    RltdPric: 
+    RltdQties: 
+    FinInstrmId: 
+    Tax: 
+    RtrInf: 
+    CorpActn: 
+    SfkpgAcct: 
+    CshDpst: 
+    CardTx: 
+    AddtlTxInf: 
+    SplmtryData: 

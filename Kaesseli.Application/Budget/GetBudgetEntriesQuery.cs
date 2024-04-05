@@ -1,11 +1,11 @@
-﻿using MediatR;
+﻿using Kaesseli.Domain.Accounts;
+using MediatR;
 
 namespace Kaesseli.Application.Budget;
 
 public class GetBudgetEntriesQuery : IRequest<IEnumerable<GetBudgetEntriesQueryResult>>
 {
-
-    public Guid? AccountId { get; set; }
-    public DateOnly? FromDate { get; set; }
-    public DateOnly? ToDate { get; set; }
+    public required Guid? AccountId { get; init; }
+    public required AccountType? AccountType { get; init; }
+    public required Guid AccountingPeriodId { get; init; }
 }
