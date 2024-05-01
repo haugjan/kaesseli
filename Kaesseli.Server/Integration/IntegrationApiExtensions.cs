@@ -1,10 +1,13 @@
-﻿using Kaesseli.Application.Integration.FileImport;
+﻿using System.IO;
+using System.IO.Compression;
+using Kaesseli.Application.Integration.FileImport;
 using Kaesseli.Application.Integration.NextOpenTransaction;
 using Kaesseli.Application.Integration.TransactionQuery;
 using Kaesseli.Domain.Accounts;
 using Kaesseli.Domain.Integration;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Identity.Client;
 
 // ReSharper disable once CheckNamespace
 namespace Microsoft.AspNetCore.Routing;
@@ -67,21 +70,48 @@ public static class IntegrationApiExtensions
                pattern: "/file/upload",
                async (IMediator mediator, IFormFile file, [FromForm] Guid accountId, [FromForm] Guid accountingPeriodId) =>
                {
-                   await using var stream = file.OpenReadStream();
-                   var command = new ProcessFileCommand
-                   {
-                       Content = stream,
-                       AccountId = accountId,
-                       FileType = file.FileName.EndsWith(".csv")
-                                      ? FileType.PostFinanceCsv
-                                      : FileType.Camt,
-                       AccountingPeriodId = accountingPeriodId
-                   };
+                   var extension = System.IO.Path.GetExtension(file.FileName);
+                   if (extension == ".zip")
+                       return await UploadZippedFiles(file, accountId, accountingPeriodId, mediator);
 
-                   return await mediator.Send(command);
+                   await using var fileStream = file.OpenReadStream();
+                   return await UploadFile(fileStream, extension, accountId, accountingPeriodId, mediator);
                })
            .Accepts<IFormFile>(contentType: "multipart/form-data")
            .DisableAntiforgery();
         return app;
+    }
+
+    private static async Task<Guid> UploadZippedFiles(IFormFile file, Guid accountId, Guid accountingPeriodId, IMediator mediator)
+    {
+        await using var memoryStream = file.OpenReadStream();
+        using var archive = new ZipArchive(memoryStream);
+        foreach (var entry in archive.Entries)
+        {
+            await using var entryStream = entry.Open();
+            var extension = System.IO.Path.GetExtension(entry.FullName);
+            var formFile = new FormFile(entryStream, 0, entry.Length, entry.Name, entry.FullName);
+            await UploadFile(entryStream, extension, accountId, accountingPeriodId, mediator);
+        }
+        return Guid.Empty; // Return a default value or handle appropriately
+    }
+
+    private static async Task<Guid> UploadFile(Stream stream, string extension, Guid accountId, Guid accountingPeriodId, IMediator mediator)
+    {
+        var fileType = extension switch
+        {
+            ".csv" => FileType.PostFinanceCsv,
+            ".camt" or ".xml" => FileType.Camt,
+            _ => throw new ArgumentOutOfRangeException()
+        };
+        var command = new ProcessFileCommand
+        {
+            Content = stream,
+            AccountId = accountId,
+            FileType = fileType,
+            AccountingPeriodId = accountingPeriodId
+        };
+
+        return await mediator.Send(command);
     }
 }
