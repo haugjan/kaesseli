@@ -27,7 +27,10 @@ internal class AutomationRepository : IAutomationRepository
             .ToListAsync(cancellationToken);
 
     public async Task<IEnumerable<AutomationEntry>> GetAutomations(CancellationToken cancellationToken) =>
-        await _context.Automations.ToListAsync(cancellationToken);
+        await _context.Automations
+            .Include(auto=> auto.Parts)
+            .ThenInclude(part=> part.Account)
+            .ToListAsync(cancellationToken);
 
     private IQueryable<Transaction> GetTransactionsQueryable(string automationText)
     {
