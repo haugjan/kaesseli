@@ -26,7 +26,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\..\Tests\Kaesseli\Kaesseli.TestUtilities\Kaesseli.TestUtilities.csproj" />
     <ProjectReference Include="..\..\Kaesseli.Domain\Kaesseli.Domain.csproj" />
   </ItemGroup>
 

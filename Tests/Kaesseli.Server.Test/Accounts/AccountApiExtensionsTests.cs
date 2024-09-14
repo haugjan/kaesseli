@@ -111,7 +111,9 @@ public class AccountApiExtensionsTests
                          Budget = 11,
                          BudgetBalance = 12,
                          Entries = Array.Empty<GetAccountQueryResultEntry>(),
-                         CurrentBudget = 13
+                         CurrentBudget = 13,
+                         BudgetPerMonth = null,
+                         BudgetPerYear = null
                      });
 
         // Act
