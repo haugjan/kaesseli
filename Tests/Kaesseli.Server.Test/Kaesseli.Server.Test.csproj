@@ -10,7 +10,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="FluentAssertions" Version="6.12.0" />
+    <PackageReference Include="FluentAssertions" Version="6.12.1" />
     <PackageReference Include="MediatR" Version="12.2.0" />
     <PackageReference Include="Microsoft.AspNetCore.Http" Version="2.2.2" />
     <PackageReference Include="Microsoft.AspNetCore.Routing.Abstractions" Version="2.2.0" />
@@ -29,7 +29,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\..\Tests\Kaesseli\Kaesseli.TestUtilities\Kaesseli.TestUtilities.csproj" />
     <ProjectReference Include="..\..\Kaesseli.Application\Kaesseli.Application.csproj" />
     <ProjectReference Include="..\..\Kaesseli.Server\Kaesseli.Server.csproj" />
     <ProjectReference Include="..\Kaesseli.TestUtilities\Kaesseli.TestUtilities.csproj" />
