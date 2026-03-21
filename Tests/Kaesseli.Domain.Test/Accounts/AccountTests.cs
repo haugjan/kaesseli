@@ -21,24 +21,21 @@ public class AccountTests
             Id = Guid.NewGuid(),
             Name = "Account",
             Type = accountType,
-            Icon = "favorite",
-            IconColor = "blue"
+            Icon = new AccountIcon("favorite", "blue")
         };
         var otherAccount = new Account
         {
             Id = Guid.NewGuid(),
             Name = "Other account",
             Type = AccountType.Revenue,
-            Icon = "favorite",
-            IconColor = "blue"
+            Icon = new AccountIcon("favorite", "blue")
         };
         var yetAnotherAccount = new Account
         {
             Id = Guid.NewGuid(),
             Name = "Other account",
             Type = AccountType.Expense,
-            Icon = "favorite",
-            IconColor = "blue"
+            Icon = new AccountIcon("favorite", "blue")
         };
         var entries = new List<JournalEntry>
         {
@@ -105,7 +102,7 @@ public class AccountTests
         };
 
         //Act
-        var accountBalance = account.GetAccountBalance(entries);
+        var accountBalance = AccountBalanceCalculator.GetAccountBalance(account, entries);
 
         //Assert
         accountBalance.Should().Be(expectedBalance);

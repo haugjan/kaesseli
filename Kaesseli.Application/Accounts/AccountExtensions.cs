@@ -15,7 +15,7 @@ internal static class AccountExtensions
         {
             Id = account.Id,
             Name = account.Name,
-            Icon = account.Icon,
+            Icon = account.Icon.Name,
             Type = account.Type.DisplayName(),
             TypeId = account.Type,
             AccountBalance = accountBalance,
@@ -24,6 +24,6 @@ internal static class AccountExtensions
             BudgetPerYear = budgetPerYear,
             CurrentBudget = currentBudget,
             BudgetBalance = budgetBalance,
-            IconColor = account.IconColor
+            IconColor = account.Icon.Color
         };
 }

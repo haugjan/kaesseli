@@ -39,8 +39,8 @@ public static class TransactionExtensions
                 AccountName = account.Name,
                 AccountType = account.Type.DisplayName(),
                 AccountTypeId = account.Type,
-                AccountIcon = account.Icon,
-                AccountIconColor = account.IconColor
+                AccountIcon = account.Icon.Name,
+                AccountIconColor = account.Icon.Color
             }),
             AccountName = transaction.TransactionSummary!.Account.Name,
             AccountType = transaction.TransactionSummary!.Account.Type.DisplayName(),

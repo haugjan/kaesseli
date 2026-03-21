@@ -23,19 +23,11 @@ public class GetAccountsSummaryQueryHandler(
         var accountingPeriod = await accountRepo.GetAccountingPeriod(request.AccountingPeriodId, cancellationToken);
 
         var journalEntries = await journalRepo.GetJournalEntries(
-                                 request: new GetJournalEntriesRequest
-                                 {
-                                     AccountingPeriodId = request.AccountingPeriodId,
-                                     AccountId = null,
-                                     AccountType = null
-                                 },
+                                 request.AccountingPeriodId, accountId: null, accountType: null,
                                  cancellationToken);
 
         var budgetEntries = await budgetRepo.GetBudgetEntries(
-                                request: new GetBudgetEntriesRequest
-                                {
-                                    AccountingPeriodId = request.AccountingPeriodId
-                                },
+                                request.AccountingPeriodId, accountId: null, accountType: null,
                                 cancellationToken);
 
         return accounts.Select(account => GetAccountSummary(account, journalEntries, budgetEntries, accountingPeriod));
@@ -49,12 +41,12 @@ public class GetAccountsSummaryQueryHandler(
     {
         var today = _dateTimeService.ToDay;
         budgetEntries = budgetEntries.ToArray();
-        var accountBalance = account.GetAccountBalance(journalEntries);
-        var budgetPerYear = account.GetBudgetPerYear(budgetEntries);
-        var budget = account.GetBudget(budgetEntries, accountingPeriod);
-        var budgetPerMonth = account.GetBudgetPerMonth(budgetEntries);
-        var currentBudget = account.GetCurrentBudget(budgetEntries, accountingPeriod, today);
-        var budgetBalance = account.GetBudgetBalance(currentBudget, accountBalance);
+        var accountBalance = AccountBalanceCalculator.GetAccountBalance(account, journalEntries);
+        var budgetPerYear = AccountBalanceCalculator.GetBudgetPerYear(account, budgetEntries);
+        var budget = AccountBalanceCalculator.GetBudget(account, budgetEntries, accountingPeriod);
+        var budgetPerMonth = AccountBalanceCalculator.GetBudgetPerMonth(account, budgetEntries);
+        var currentBudget = AccountBalanceCalculator.GetCurrentBudget(account, budgetEntries, accountingPeriod, today);
+        var budgetBalance = AccountBalanceCalculator.GetBudgetBalance(account.Type, currentBudget, accountBalance);
 
         return account.ToAccountSummary(accountBalance, budget,budgetPerMonth, budgetPerYear, currentBudget, budgetBalance);
     }

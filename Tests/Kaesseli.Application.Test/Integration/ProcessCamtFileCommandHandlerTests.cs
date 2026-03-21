@@ -37,8 +37,7 @@ public class ProcessCamtFileCommandHandlerTests
                                     Id = accountId,
                                     Name = "Account",
                                     Type = AccountType.Expense,
-                                    Icon = "favorite",
-                                    IconColor = "blue"
+                                    Icon = new AccountIcon("favorite", "blue")
                                 });
         _camtProcessorMock.Setup(x => x.ReadCamtFile(fakeCommand.Content, It.IsAny<CancellationToken>()))
                           .ReturnsAsync(financialDocument);

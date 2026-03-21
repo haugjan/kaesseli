@@ -18,7 +18,7 @@ public class GetBudgetEntriesQueryHandler :
         CancellationToken cancellationToken)
     {
         var entries = await _repository.GetBudgetEntries(
-                          request: query.ToGetBudgetEntriesRequest(),
+                          query.AccountingPeriodId, query.AccountId, query.AccountType,
                           cancellationToken);
         return entries.Select(
                           entry => entry.ToGetBudgetEntriesQueryResult())

@@ -13,12 +13,7 @@ public class GetJournalEntriesQueryHandler(IJournalRepository repository) :
         CancellationToken cancellationToken)
     {
         var entries = await repository.GetJournalEntries(
-                          request: new GetJournalEntriesRequest
-                          {
-                              AccountType = request.AccountType,
-                              AccountingPeriodId = request.AccountingPeriodId,
-                              AccountId = null
-                          },
+                          request.AccountingPeriodId, accountId: null, request.AccountType,
                           cancellationToken);
         return entries.Select(
                           entry => new GetJournalEntriesQueryResult

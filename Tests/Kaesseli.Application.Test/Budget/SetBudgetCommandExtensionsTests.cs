@@ -16,8 +16,7 @@ public class SetBudgetCommandExtensionsTests
             Id = Guid.NewGuid(),
             Name = "Account",
             Type = AccountType.Expense,
-            Icon = "favorite",
-            IconColor = "blue"
+            Icon = new AccountIcon("favorite", "blue")
         };
         var budgetEntryCommand = new SetBudgetCommand
         {

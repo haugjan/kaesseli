@@ -1,4 +1,4 @@
-﻿namespace Kaesseli.Domain.Integration;
+namespace Kaesseli.Infrastructure.Integration;
 
 public class TransactionStatistic
 {

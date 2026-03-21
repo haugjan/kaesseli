@@ -1,5 +1,4 @@
 ﻿using Kaesseli.Application.Automation;
-using Kaesseli.Domain.Integration;
 using MediatR;
 
 namespace Kaesseli.Application.Integration.FileImport;

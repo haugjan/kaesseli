@@ -18,7 +18,7 @@ public class SplitOpenTransactionCommandHandler : IRequestHandler<SplitOpenTrans
     public async Task Handle(SplitOpenTransactionCommand request, CancellationToken cancellationToken)
     {
         var entries = request.Entries.Select(
-            entry => new AssignOpenTransactionEntry { OtherAccountId = entry.OtherAccountId, Amount = entry.Amount });
+            entry => (entry.OtherAccountId, entry.Amount));
         await _journalRepo.AssignOpenTransaction(request.AccountingPeriodId, request.TransactionId, entries, cancellationToken);
         await _mediator.Publish(
             notification: new OpenTransactionAmountChangedEvent { Amount = -1 },

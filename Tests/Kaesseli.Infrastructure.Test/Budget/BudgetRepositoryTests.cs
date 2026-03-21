@@ -37,10 +37,8 @@ public class BudgetRepositoryTests
         await setupContext.SaveChangesAsync();
 
         var repository = new BudgetRepository(setupContext);
-        var request = new GetBudgetEntriesRequest { AccountId = null, AccountingPeriodId = ExpectedAccountPeriodId };
-
         // Act
-        var entries = (await repository.GetBudgetEntries(request, CancellationToken.None)).ToArray();
+        var entries = (await repository.GetBudgetEntries(ExpectedAccountPeriodId, accountId: null, accountType: null, CancellationToken.None)).ToArray();
 
         // Assert
         entries.Should().HaveCount(expected: 1);
@@ -61,8 +59,7 @@ public class BudgetRepositoryTests
                 Id = Guid.NewGuid(),
                 Name = "Account 1",
                 Type = AccountType.Revenue,
-                Icon = "favorite",
-                IconColor = "blue"
+                Icon = new AccountIcon("favorite", "blue")
             },
             AccountingPeriod = new AccountingPeriod
             {
@@ -89,8 +86,7 @@ public class BudgetRepositoryTests
                 Id = Guid.NewGuid(),
                 Name = "Account 2",
                 Type = AccountType.Expense,
-                Icon = "favorite",
-                IconColor = "blue"
+                Icon = new AccountIcon("favorite", "blue")
             },
             AccountingPeriod = new AccountingPeriod
             {
@@ -124,8 +120,7 @@ public class BudgetRepositoryTests
                 Id = Guid.NewGuid(),
                 Name = "Account",
                 Type = AccountType.Expense,
-                Icon = "favorite",
-                IconColor = "blue"
+                Icon = new AccountIcon("favorite", "blue")
             },
             Description = "Description",
             Amount = 11.11m,

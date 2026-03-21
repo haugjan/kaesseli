@@ -1,4 +1,4 @@
-﻿namespace Kaesseli.Domain.Integration;
+namespace Kaesseli.Application.Integration.FileImport;
 
 public enum FileType
 {

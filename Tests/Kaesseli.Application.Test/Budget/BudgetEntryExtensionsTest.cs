@@ -21,8 +21,7 @@ public class BudgetEntryExtensionsTest
                 Id = Guid.NewGuid(),
                 Name = "Name",
                 Type = AccountType.Expense,
-                Icon = "favorite",
-                IconColor = "blue"
+                Icon = new AccountIcon("favorite", "blue")
             },
             AccountingPeriod = new AccountingPeriod
             {

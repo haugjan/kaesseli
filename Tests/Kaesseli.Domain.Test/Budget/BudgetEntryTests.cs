@@ -23,8 +23,7 @@ public class BudgetEntryTests
                 Id = Guid.NewGuid(),
                 Name = "Account",
                 Type = accountType,
-                Icon = "favorite",
-                IconColor = "blue"
+                Icon = new AccountIcon("favorite", "blue")
             },
             AccountingPeriod = new AccountingPeriod
             {
@@ -55,8 +54,7 @@ public class BudgetEntryTests
                 Id = Guid.NewGuid(),
                 Name = "Account",
                 Type = accountType,
-                Icon = "favorite",
-                IconColor = "blue"
+                Icon = new AccountIcon("favorite", "blue")
             },
             AccountingPeriod = new AccountingPeriod
             {

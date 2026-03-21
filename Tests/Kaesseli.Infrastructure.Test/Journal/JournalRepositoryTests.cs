@@ -49,15 +49,8 @@ public class JournalRepositoryTests
         await setupContext.SaveChangesAsync();
 
         var repository = new JournalRepository(setupContext);
-        var request = new GetJournalEntriesRequest
-        {
-            AccountingPeriodId = expectedPeriodId,
-            AccountId = null,
-            AccountType = null
-        };
-
         // Act
-        var entries = (await repository.GetJournalEntries(request, CancellationToken.None)).ToArray();
+        var entries = (await repository.GetJournalEntries(expectedPeriodId, accountId: null, accountType: null, CancellationToken.None)).ToArray();
 
         // Assert
         entries.Should().HaveCount(expected: 1);
@@ -82,16 +75,14 @@ public class JournalRepositoryTests
                 Id = Guid.NewGuid(),
                 Name = "CreditAccount",
                 Type = AccountType.Asset,
-                Icon = "favorite",
-                IconColor = "blue"
+                Icon = new AccountIcon("favorite", "blue")
             },
             DebitAccount = new Account
             {
                 Id = Guid.NewGuid(),
                 Name = "DebitAccount",
                 Type = AccountType.Asset,
-                Icon = "favorite",
-                IconColor = "blue"
+                Icon = new AccountIcon("favorite", "blue")
             },
             ValueDate = DateOnly.FromDateTime(DateTime.Now),
             Description = "Description",

@@ -1,4 +1,5 @@
-﻿using Kaesseli.Domain.Budget;
+﻿using Kaesseli.Domain.Accounts;
+using Kaesseli.Domain.Budget;
 using Kaesseli.Infrastructure.Common;
 using Microsoft.EntityFrameworkCore;
 
@@ -7,16 +8,16 @@ namespace Kaesseli.Infrastructure.Budget;
 public class BudgetRepository(KaesseliContext context) : IBudgetRepository
 {
     public async Task<IEnumerable<BudgetEntry>> GetBudgetEntries(
-        GetBudgetEntriesRequest request,
+        Guid accountingPeriodId, Guid? accountId, AccountType? accountType,
         CancellationToken cancellationToken)
     {
         var entries = context
                                                                       .BudgetEntries
                                                                       .Include(budget => budget.Account)
                                                                       .Include(budget => budget.AccountingPeriod)
-                                                                      .Where(entry => entry.AccountingPeriod.Id == request.AccountingPeriodId);
-        if (request.AccountId != null) entries = entries.Where(entry => entry.Account.Id == request.AccountId);
-        if (request.AccountType is not null) entries = entries.Where(entry => entry.Account.Type == request.AccountType);
+                                                                      .Where(entry => entry.AccountingPeriod.Id == accountingPeriodId);
+        if (accountId != null) entries = entries.Where(entry => entry.Account.Id == accountId);
+        if (accountType is not null) entries = entries.Where(entry => entry.Account.Type == accountType);
         return await entries.ToListAsync(cancellationToken);
     }
 

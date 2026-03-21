@@ -1,5 +1,6 @@
 ﻿using FluentAssertions;
 using Kaesseli.Application.Journal;
+using Kaesseli.Domain.Accounts;
 using Kaesseli.Domain.Journal;
 using Kaesseli.TestUtilities.Faker;
 using Moq;
@@ -20,8 +21,8 @@ public class GetJournalEntriesQueryHandlerTests
         var entriesList = faker.Generate(count: 5);
         mockRepository.Setup(
                           repo => repo.GetJournalEntries(
-                              It.Is<GetJournalEntriesRequest>(
-                                  r => r.AccountingPeriodId == expectedPeriodId),
+                              It.Is<Guid>(id => id == expectedPeriodId),
+                              It.IsAny<Guid?>(), It.IsAny<AccountType?>(),
                               It.IsAny<CancellationToken>()))
                       .ReturnsAsync(entriesList);
 
@@ -51,8 +52,8 @@ public class GetJournalEntriesQueryHandlerTests
 
         mockRepository.Verify(
             repo => repo.GetJournalEntries(
-                It.Is<GetJournalEntriesRequest>(
-                    r => r.AccountingPeriodId == expectedPeriodId),
+                It.Is<Guid>(id => id == expectedPeriodId),
+                It.IsAny<Guid?>(), It.IsAny<AccountType?>(),
                 It.IsAny<CancellationToken>()),
             Times.Once);
     }

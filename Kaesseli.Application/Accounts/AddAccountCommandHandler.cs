@@ -14,9 +14,8 @@ public class AddAccountCommandHandler(IAccountRepository repo) :
                           {
                               Type = request.Type,
                               Name = request.Name,
-                              Icon = request.Icon,
-                              Id = Guid.NewGuid(),
-                              IconColor = request.IconColor
+                              Icon = new AccountIcon(request.Icon, request.IconColor),
+                              Id = Guid.NewGuid()
                           },
                           cancellationToken);
         return account.Id;

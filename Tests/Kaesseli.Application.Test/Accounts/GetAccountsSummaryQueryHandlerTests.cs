@@ -34,16 +34,14 @@ public class GetAccountsSummaryQueryHandlerTests
             Id = Guid.NewGuid(),
             Name = "Current Account",
             Type = accountType,
-            Icon = "favorite",
-            IconColor = "blue"
+            Icon = new AccountIcon("favorite", "blue")
         };
         var otherAccount = new Account
         {
             Id = Guid.NewGuid(),
             Name = "Other Account",
             Type = AccountType.Expense,
-            Icon = "favorite",
-            IconColor = "blue"
+            Icon = new AccountIcon("favorite", "blue")
         };
 
         var journalEntries = CreateTestJournalEntries(accountToTest, otherAccount);
@@ -58,9 +56,9 @@ public class GetAccountsSummaryQueryHandlerTests
                                           FromInclusive = default,
                                           ToInclusive = default
                                       });
-        journalRepo.Setup(repo => repo.GetJournalEntries(It.IsAny<GetJournalEntriesRequest>(), It.IsAny<CancellationToken>()))
+        journalRepo.Setup(repo => repo.GetJournalEntries(It.IsAny<Guid>(), It.IsAny<Guid?>(), It.IsAny<AccountType?>(), It.IsAny<CancellationToken>()))
                    .ReturnsAsync(journalEntries);
-        budgetRepo.Setup(repo => repo.GetBudgetEntries(It.IsAny<GetBudgetEntriesRequest>(), It.IsAny<CancellationToken>()))
+        budgetRepo.Setup(repo => repo.GetBudgetEntries(It.IsAny<Guid>(), It.IsAny<Guid?>(), It.IsAny<AccountType?>(), It.IsAny<CancellationToken>()))
                   .ReturnsAsync(budgetEntries);
 
         var query = new GetAccountsSummaryQuery
@@ -104,16 +102,14 @@ public class GetAccountsSummaryQueryHandlerTests
             Id = Guid.NewGuid(),
             Name = "Other Account",
             Type = AccountType.Expense,
-            Icon = "favorite",
-            IconColor = "blue"
+            Icon = new AccountIcon("favorite", "blue")
         };
         var accountToTest = new Account
         {
             Id = Guid.NewGuid(),
             Name = "Current Account",
             Type = accountType,
-            Icon = "favorite",
-            IconColor = "blue"
+            Icon = new AccountIcon("favorite", "blue")
         };
 
         var journalEntries = CreateTestJournalEntries(accountToTest, otherAccount);
@@ -129,9 +125,9 @@ public class GetAccountsSummaryQueryHandlerTests
                            ToInclusive = default
                        });
         
-        journalRepo.Setup(repo => repo.GetJournalEntries(It.IsAny<GetJournalEntriesRequest>(), It.IsAny<CancellationToken>()))
+        journalRepo.Setup(repo => repo.GetJournalEntries(It.IsAny<Guid>(), It.IsAny<Guid?>(), It.IsAny<AccountType?>(), It.IsAny<CancellationToken>()))
                    .ReturnsAsync(journalEntries);
-        budgetRepo.Setup(repo => repo.GetBudgetEntries(It.IsAny<GetBudgetEntriesRequest>(), It.IsAny<CancellationToken>()))
+        budgetRepo.Setup(repo => repo.GetBudgetEntries(It.IsAny<Guid>(), It.IsAny<Guid?>(), It.IsAny<AccountType?>(), It.IsAny<CancellationToken>()))
                   .ReturnsAsync(value: Array.Empty<BudgetEntry>());
 
         var query = new GetAccountsSummaryQuery

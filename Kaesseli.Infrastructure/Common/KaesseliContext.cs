@@ -5,6 +5,7 @@ using Kaesseli.Domain.Journal;
 using Microsoft.EntityFrameworkCore;
 using Kaesseli.Application.Utility;
 using Kaesseli.Domain.Automation;
+using Kaesseli.Infrastructure.Integration;
 
 namespace Kaesseli.Infrastructure.Common;
 
@@ -44,6 +45,16 @@ public class KaesseliContext : DbContext
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
+
+        modelBuilder.Entity<Account>(
+            entity =>
+            {
+                entity.OwnsOne(a => a.Icon, b =>
+                {
+                    b.Property(i => i.Name).HasColumnName("Icon");
+                    b.Property(i => i.Color).HasColumnName("IconColor");
+                });
+            });
 
         modelBuilder.Entity<AutomationEntry>(
             entity =>

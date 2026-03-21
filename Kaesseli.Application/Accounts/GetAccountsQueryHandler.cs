@@ -18,8 +18,8 @@ public class GetAccountsQueryHandler(IAccountRepository repository)
                 Id = account.Id,
                 Name = account.Name,
                 TypeId = account.Type,
-                Icon = account.Icon,
-                IconColor = account.IconColor
+                Icon = account.Icon.Name,
+                IconColor = account.Icon.Color
             });
     }
 }

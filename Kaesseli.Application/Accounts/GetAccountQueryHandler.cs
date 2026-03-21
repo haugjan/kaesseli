@@ -19,32 +19,24 @@ public class GetAccountQueryHandler(IAccountRepository accountRepo, IJournalRepo
         var account = await accountRepo.GetAccount(request.AccountId, cancellationToken);
         var period = await accountRepo.GetAccountingPeriod(request.AccountingPeriodId, cancellationToken);
         var journalEntries = (await journalRepo.GetJournalEntries(
-                                  request: new GetJournalEntriesRequest
-                                  {
-                                      AccountId = request.AccountId,
-                                      AccountingPeriodId = request.AccountingPeriodId,
-                                      AccountType = null
-                                  },
+                                  request.AccountingPeriodId, request.AccountId, accountType: null,
                                   cancellationToken)).ToArray();
         var budgetEntries = (await budgetRepo.GetBudgetEntries(
-                                 request: new GetBudgetEntriesRequest
-                                 {
-                                     AccountingPeriodId = request.AccountingPeriodId, AccountId = request.AccountId
-                                 },
+                                 request.AccountingPeriodId, request.AccountId, accountType: null,
                                  cancellationToken)).ToArray();
 
-        var accountBalance = account.GetAccountBalance(journalEntries);
-        var budget = account.GetBudget(budgetEntries, period);
-        var budgetPerMonth = account.GetBudgetPerMonth(budgetEntries);
-        var budgetPerYear = account.GetBudgetPerYear(budgetEntries);
-        var currentBudget = account.GetCurrentBudget(budgetEntries, period, _dateTimeService.ToDay);
-        var budgetBalance = account.GetBudgetBalance(currentBudget, accountBalance);
+        var accountBalance = AccountBalanceCalculator.GetAccountBalance(account, journalEntries);
+        var budget = AccountBalanceCalculator.GetBudget(account, budgetEntries, period);
+        var budgetPerMonth = AccountBalanceCalculator.GetBudgetPerMonth(account, budgetEntries);
+        var budgetPerYear = AccountBalanceCalculator.GetBudgetPerYear(account, budgetEntries);
+        var currentBudget = AccountBalanceCalculator.GetCurrentBudget(account, budgetEntries, period, _dateTimeService.ToDay);
+        var budgetBalance = AccountBalanceCalculator.GetBudgetBalance(account.Type, currentBudget, accountBalance);
 
         return new GetAccountQueryResult
         {
             Id = account.Id,
             Name = account.Name,
-            Icon = account.Icon,
+            Icon = account.Icon.Name,
             Type = account.Type.DisplayName(),
             TypeId = account.Type,
             AccountBalance = accountBalance,
@@ -56,7 +48,7 @@ public class GetAccountQueryHandler(IAccountRepository accountRepo, IJournalRepo
                 account.Id,
                 journalEntries,
                 budgetEntries),
-            IconColor = account.IconColor,
+            IconColor = account.Icon.Color,
             CurrentBudget = currentBudget
         };
     }
@@ -98,7 +90,7 @@ public class GetAccountQueryHandler(IAccountRepository accountRepo, IJournalRepo
                                ? entry.DebitAccount
                                : entry.CreditAccount;
         var isDebit = entry.DebitAccount.Id == accountId;
-        var amount = account.GetSignedAmount(entry);
+        var amount = AccountBalanceCalculator.GetSignedAmount(account, entry);
 
         return new GetAccountQueryResultEntry
         {

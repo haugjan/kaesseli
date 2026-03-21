@@ -21,9 +21,9 @@ public class AssignOpenTransactionCommandHandler : IRequestHandler<AssignOpenTra
     public async Task Handle(AssignOpenTransactionCommand request, CancellationToken cancellationToken)
     {
         var transaction = await _tranRepo.GetTransaction(request.TransactionId, cancellationToken);
-        var entries = new List<AssignOpenTransactionEntry>
+        var entries = new List<(Guid OtherAccountId, decimal Amount)>
         {
-            new() { OtherAccountId = request.OtherAccountId, Amount = transaction.Amount }
+            (request.OtherAccountId, transaction.Amount)
         };
         await _journalRepo.AssignOpenTransaction(
             request.AccountingPeriodId,

@@ -4,7 +4,6 @@ using Kaesseli.Application.Integration.FileImport;
 using Kaesseli.Application.Integration.NextOpenTransaction;
 using Kaesseli.Application.Integration.TransactionQuery;
 using Kaesseli.Domain.Accounts;
-using Kaesseli.Domain.Integration;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Identity.Client;

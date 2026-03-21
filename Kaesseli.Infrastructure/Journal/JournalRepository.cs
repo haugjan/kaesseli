@@ -16,26 +16,26 @@ public class JournalRepository(KaesseliContext context) : IJournalRepository
     }
 
     public async Task<IEnumerable<JournalEntry>> GetJournalEntries(
-        GetJournalEntriesRequest request,
+        Guid accountingPeriodId, Guid? accountId, AccountType? accountType,
         CancellationToken cancellationToken)
     {
         var entries = context.JournalEntries
                              .Include(journalEntry => journalEntry.DebitAccount)
                              .Include(journalEntry => journalEntry.CreditAccount)
                              .Include(journalEntry => journalEntry.AccountingPeriod)
-                             .Where(entry => entry.AccountingPeriod.Id == request.AccountingPeriodId);
-        if (request.AccountId is not null)
+                             .Where(entry => entry.AccountingPeriod.Id == accountingPeriodId);
+        if (accountId is not null)
         {
             entries = entries.Where(
-                journal => journal.CreditAccount.Id == request.AccountId
-                        || journal.DebitAccount.Id == request.AccountId);
+                journal => journal.CreditAccount.Id == accountId
+                        || journal.DebitAccount.Id == accountId);
         }
 
-        if (request.AccountType is not null)
+        if (accountType is not null)
         {
             entries = entries.Where(
-                entry => entry.DebitAccount.Type == request.AccountType
-                      || entry.CreditAccount.Type == request.AccountType);
+                entry => entry.DebitAccount.Type == accountType
+                      || entry.CreditAccount.Type == accountType);
         }
 
         return await entries.ToListAsync(cancellationToken);
@@ -44,19 +44,19 @@ public class JournalRepository(KaesseliContext context) : IJournalRepository
     public async Task AssignOpenTransaction(
         Guid accountingPeriodId,
         Guid transactionId,
-        IEnumerable<AssignOpenTransactionEntry> entries,
+        IEnumerable<(Guid OtherAccountId, decimal Amount)> entries,
         CancellationToken cancellationToken)
     {
-        entries = entries.ToArray();
+        var entriesArray = entries.ToArray();
         var transaction = await context.Transactions
                                        .Include(trans => trans.TransactionSummary)
                                        .ThenInclude(summary => summary!.Account)
                                        .SingleAsync(trans => trans.Id == transactionId, cancellationToken);
         var accountingPeriod = await context.AccountingPeriods.FindAsync(accountingPeriodId, cancellationToken)
                             ?? throw new EntityNotFoundException(entityType: typeof(AccountingPeriod), accountingPeriodId);
-        WrongAmountException.ThrowIfAmountNotMatch(transaction.Amount, entriesAmount: entries.Sum(entry => entry.Amount));
+        WrongAmountException.ThrowIfAmountNotMatch(transaction.Amount, entriesAmount: entriesArray.Sum(entry => entry.Amount));
 
-        foreach (var entry in entries)
+        foreach (var entry in entriesArray)
             await AssignOpenTransaction(
                 accountingPeriod,
                 transaction,

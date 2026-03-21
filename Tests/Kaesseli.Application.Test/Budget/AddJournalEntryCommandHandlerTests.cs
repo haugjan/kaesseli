@@ -29,8 +29,7 @@ public class AddJournalEntryCommandHandlerTests
                        Id = Guid.NewGuid(),
                        Name = "Account",
                        Type = AccountType.Expense,
-                       Icon = "favorite",
-                       IconColor = "blue"
+                       Icon = new AccountIcon("favorite", "blue")
                    });
         accountRepo.Setup(repo => repo.GetAccountingPeriod(It.IsAny<Guid>(), cancellationToken))
                    .ReturnsAsync(
@@ -79,8 +78,7 @@ public class AddJournalEntryCommandHandlerTests
                        Id = Guid.NewGuid(),
                        Name = "Account",
                        Type = AccountType.Expense,
-                       Icon = "favorite",
-                       IconColor = "blue"
+                       Icon = new AccountIcon("favorite", "blue")
                    });
         accountRepo.Setup(repo => repo.GetAccountingPeriod(It.IsAny<Guid>(), cancellationToken))
                    .ReturnsAsync(

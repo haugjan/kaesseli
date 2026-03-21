@@ -32,8 +32,7 @@ public class AccountRepositoryTests
             Id = Guid.NewGuid(),
             Name = "Test Account",
             Type = AccountType.Asset,
-            Icon = "favorite",
-            IconColor = "blue"
+            Icon = new AccountIcon("favorite", "blue")
         };
 
         await using var context = CreateContext(options);
@@ -66,8 +65,7 @@ public class AccountRepositoryTests
                 Id = Guid.NewGuid(),
                 Name = "Account 1",
                 Type = AccountType.Expense,
-                Icon = "favorite",
-                IconColor = "blue"
+                Icon = new AccountIcon("favorite", "blue")
             });
         setupContext.Accounts.Add(
             entity: new Account
@@ -75,8 +73,7 @@ public class AccountRepositoryTests
                 Id = Guid.NewGuid(),
                 Name = "Account 2",
                 Type = AccountType.Expense,
-                Icon = "favorite",
-                IconColor = "blue"
+                Icon = new AccountIcon("favorite", "blue")
             });
         await setupContext.SaveChangesAsync(cancellationToken);
 
@@ -106,24 +103,21 @@ public class AccountRepositoryTests
                 Id = Guid.NewGuid(),
                 Name = "Account 1",
                 Type = AccountType.Asset,
-                Icon = "favorite",
-                IconColor = "blue"
+                Icon = new AccountIcon("favorite", "blue")
             },
             new()
             {
                 Id = Guid.NewGuid(),
                 Name = "Account 2",
                 Type = AccountType.Expense,
-                Icon = "favorite",
-                IconColor = "blue"
+                Icon = new AccountIcon("favorite", "blue")
             },
             new()
             {
                 Id = Guid.NewGuid(),
                 Name = "Account 3",
                 Type = AccountType.Asset,
-                Icon = "favorite",
-                IconColor = "blue"
+                Icon = new AccountIcon("favorite", "blue")
             }
         };
         setupContext.Accounts.AddRange(accounts);
@@ -152,8 +146,7 @@ public class AccountRepositoryTests
             Id = Guid.NewGuid(),
             Name = "Existing Account",
             Type = AccountType.Liability,
-            Icon = "favorite",
-            IconColor = "blue"
+            Icon = new AccountIcon("favorite", "blue")
         };
 
         await using var setupContext = CreateContext(options);

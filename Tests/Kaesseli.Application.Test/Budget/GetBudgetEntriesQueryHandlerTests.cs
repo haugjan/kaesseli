@@ -22,8 +22,8 @@ public class GetBudgetEntriesQueryHandlerTests
 
         mockRepository.Setup(
                           repo => repo.GetBudgetEntries(
-                              It.Is<GetBudgetEntriesRequest>(
-                                  r => r.AccountId == accountId && r.AccountingPeriodId == ExpectedAccountingPeriodId),
+                              It.Is<Guid>(id => id == ExpectedAccountingPeriodId),
+                              It.Is<Guid?>(id => id == accountId), It.IsAny<AccountType?>(),
                               It.IsAny<CancellationToken>()))
                       .ReturnsAsync(entriesList);
 
@@ -52,9 +52,8 @@ public class GetBudgetEntriesQueryHandlerTests
 
         mockRepository.Verify(
             repo => repo.GetBudgetEntries(
-                It.Is<GetBudgetEntriesRequest>(
-                    r => r.AccountId == accountId
-                      && r.AccountingPeriodId == ExpectedAccountingPeriodId),
+                It.Is<Guid>(id => id == ExpectedAccountingPeriodId),
+                It.Is<Guid?>(id => id == accountId), It.IsAny<AccountType?>(),
                 It.IsAny<CancellationToken>()),
             Times.Once);
     }
@@ -71,8 +70,7 @@ public class GetBudgetEntriesQueryHandlerTests
                 Id = Guid.NewGuid(),
                 Name = "Account 1",
                 Type = AccountType.Expense,
-                Icon = "favorite",
-                IconColor = "blue"
+                Icon = new AccountIcon("favorite", "blue")
             },
             AccountingPeriod = new AccountingPeriod
             {
@@ -93,8 +91,7 @@ public class GetBudgetEntriesQueryHandlerTests
                 Id = Guid.NewGuid(),
                 Name = "Account 2",
                 Type = AccountType.Revenue,
-                Icon = "favorite",
-                IconColor = "blue"
+                Icon = new AccountIcon("favorite", "blue")
             },
             AccountingPeriod = new AccountingPeriod
             {

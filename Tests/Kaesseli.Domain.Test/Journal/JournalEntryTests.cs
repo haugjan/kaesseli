@@ -15,16 +15,14 @@ public class JournalEntryTests
             Id = Guid.NewGuid(),
             Name = "A",
             Type = AccountType.Expense,
-            Icon = "favorite",
-            IconColor = "blue"
+            Icon = new AccountIcon("favorite", "blue")
         };
         var creditAccount = new Account
         {
             Id = Guid.NewGuid(),
             Name = "B",
             Type = AccountType.Expense,
-            Icon = "favorite",
-            IconColor = "blue"
+            Icon = new AccountIcon("favorite", "blue")
         };
 
         // Act & Assert
@@ -56,8 +54,7 @@ public class JournalEntryTests
             Id = Guid.NewGuid(),
             Name = "A",
             Type = AccountType.Expense,
-            Icon = "favorite",
-            IconColor = "blue"
+            Icon = new AccountIcon("favorite", "blue")
         };
 
         // Act & Assert
