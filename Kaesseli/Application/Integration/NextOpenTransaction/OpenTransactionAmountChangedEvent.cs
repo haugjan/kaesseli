@@ -1,14 +1,18 @@
-﻿using Kaesseli.Domain.Integration;
-using MediatR;
+using Kaesseli.Domain.Integration;
 
 namespace Kaesseli.Application.Integration.NextOpenTransaction;
 
-public class OpenTransactionAmountChangedEvent : INotification
+public class OpenTransactionAmountChangedEvent
 {
     public required int Amount { get; init; }
 }
 
-public class OpenTransactionAmountChangedEventHandler : INotificationHandler<OpenTransactionAmountChangedEvent>
+public interface IOpenTransactionAmountChangedEventHandler
+{
+    Task Handle(OpenTransactionAmountChangedEvent notification, CancellationToken cancellationToken);
+}
+
+public class OpenTransactionAmountChangedEventHandler : IOpenTransactionAmountChangedEventHandler
 {
     private readonly ITransactionRepository _tranRepo;
 

@@ -5,7 +5,6 @@ using FluentAssertions;
 using Kaesseli.Application.Journal;
 using Kaesseli.Domain.Accounts;
 using Kaesseli.TestUtilities.Faker;
-using MediatR;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Routing;
@@ -19,19 +18,19 @@ namespace Kaesseli.Server.Test.Journal;
 public class JournalApiExtensionsTests
 {
     private readonly HttpClient _client;
-    private readonly Mock<IMediator> _mediatorMock;
+    private readonly Mock<IAddJournalEntryCommandHandler> _addJournalEntryMock = new();
+    private readonly Mock<IGetJournalEntriesQueryHandler> _getJournalEntriesMock = new();
 
     public JournalApiExtensionsTests()
     {
-        _mediatorMock = new Mock<IMediator>();
-
         var server = new TestServer(
             builder: new WebHostBuilder()
                      .ConfigureServices(
                          services =>
                          {
                              services.AddRouting();
-                             services.AddSingleton(_mediatorMock.Object);
+                             services.AddSingleton(_addJournalEntryMock.Object);
+                             services.AddSingleton(_getJournalEntriesMock.Object);
                          })
                      .Configure(
                          app =>
@@ -52,7 +51,7 @@ public class JournalApiExtensionsTests
     {
         // Arrange
         var guid = Guid.NewGuid();
-        _mediatorMock.Setup(m => m.Send(It.IsAny<AddJournalEntryCommand>(), default)).ReturnsAsync(guid);
+        _addJournalEntryMock.Setup(m => m.Handle(It.IsAny<AddJournalEntryCommand>(), default)).ReturnsAsync(guid);
 
         var addJournalEntryCommand = new SmartFaker<AddJournalEntryCommand>().Generate();
         var content = new StringContent(
@@ -67,7 +66,7 @@ public class JournalApiExtensionsTests
         response.StatusCode.Should().Be(HttpStatusCode.Created);
         response.Headers.Location.Should()
                 .BeEquivalentTo(expectation: new Uri(uriString: $"/journalEntry/{guid}", UriKind.Relative));
-        _mediatorMock.Verify(m => m.Send(It.IsAny<AddJournalEntryCommand>(), default), Times.Once);
+        _addJournalEntryMock.Verify(m => m.Handle(It.IsAny<AddJournalEntryCommand>(), default), Times.Once);
     }
 
 
@@ -76,7 +75,7 @@ public class JournalApiExtensionsTests
     {
         // Arrange
         var journalEntries = new SmartFaker<GetJournalEntriesQueryResult>().Generate(count: 3);
-        _mediatorMock.Setup(m => m.Send(It.IsAny<GetJournalEntriesQuery>(), default)).ReturnsAsync(journalEntries);
+        _getJournalEntriesMock.Setup(m => m.Handle(It.IsAny<GetJournalEntriesQuery>(), default)).ReturnsAsync(journalEntries);
 
         var accountId = Guid.NewGuid();
         var periodId = Guid.NewGuid();
@@ -89,8 +88,8 @@ public class JournalApiExtensionsTests
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);
-        _mediatorMock
-            .Verify(m => m.Send(
+        _getJournalEntriesMock
+            .Verify(m => m.Handle(
                                  It.Is<GetJournalEntriesQuery>(query
                                                                    => query.AccountingPeriodId == periodId
                                                                              && query.AccountType == accountType

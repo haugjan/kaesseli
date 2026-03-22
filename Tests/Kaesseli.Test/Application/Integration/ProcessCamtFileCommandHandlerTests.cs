@@ -1,9 +1,9 @@
 using FluentAssertions;
 using Kaesseli.Application.Integration.FileImport;
+using Kaesseli.Application.Integration.NextOpenTransaction;
 using Kaesseli.Domain.Accounts;
 using Kaesseli.Domain.Integration;
 using Kaesseli.TestUtilities.Faker;
-using MediatR;
 using Moq;
 using Xunit;
 
@@ -14,11 +14,11 @@ public class ProcessCamtFileCommandHandlerTests
     private readonly Mock<ICamtProcessor> _camtProcessorMock = new();
     private readonly Mock<ITransactionRepository> _transactionRepoMock = new();
     private readonly Mock<IAccountRepository> _accountRepoMock = new();
-    private readonly Mock<IMediator> _mediatorMock = new();
+    private readonly Mock<IOpenTransactionAmountChangedEventHandler> _eventHandlerMock = new();
     private readonly ProcessCamtFileCommandHandler _handler;
 
     public ProcessCamtFileCommandHandlerTests() =>
-        _handler = new ProcessCamtFileCommandHandler(_camtProcessorMock.Object, _transactionRepoMock.Object, _accountRepoMock.Object, _mediatorMock.Object);
+        _handler = new ProcessCamtFileCommandHandler(_camtProcessorMock.Object, _transactionRepoMock.Object, _accountRepoMock.Object, _eventHandlerMock.Object);
 
     [Fact]
     public async Task Handle_ShouldProcessCamtFileAndReturnEntryIds()

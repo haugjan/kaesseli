@@ -1,10 +1,14 @@
-﻿using Kaesseli.Domain.Integration;
-using MediatR;
+using Kaesseli.Domain.Integration;
 
 namespace Kaesseli.Application.Integration.NextOpenTransaction;
 
+public interface IGetTotalOpenTransactionQueryHandler
+{
+    Task<int> Handle(GetTotalOpenTransactionQuery request, CancellationToken cancellationToken);
+}
+
 // ReSharper disable once UnusedType.Global
-public class GetTotalOpenTransactionQueryHandler : IRequestHandler<GetTotalOpenTransactionQuery, int>
+public class GetTotalOpenTransactionQueryHandler : IGetTotalOpenTransactionQueryHandler
 {
     private readonly ITransactionRepository _transRepo;
 

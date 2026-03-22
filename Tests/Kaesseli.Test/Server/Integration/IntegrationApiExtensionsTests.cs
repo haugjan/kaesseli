@@ -5,7 +5,6 @@ using Kaesseli.Application.Integration.FileImport;
 using Kaesseli.Application.Integration.NextOpenTransaction;
 using Kaesseli.Application.Integration.TransactionQuery;
 using Kaesseli.TestUtilities.Faker;
-using MediatR;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Routing;
@@ -20,19 +19,29 @@ namespace Kaesseli.Server.Test.Integration;
 public class IntegrationApiExtensionsTests
 {
     private readonly HttpClient _client;
-    private readonly Mock<IMediator> _mediatorMock;
+    private readonly Mock<IProcessFileCommandHandler> _processFileMock = new();
+    private readonly Mock<IGetTransactionSummariesQueryHandler> _getTransactionSummariesMock = new();
+    private readonly Mock<IGetTransactionsQueryHandler> _getTransactionsMock = new();
+    private readonly Mock<IGetNextOpenTransactionQueryHandler> _getNextOpenTransactionMock = new();
+    private readonly Mock<IGetTotalOpenTransactionQueryHandler> _getTotalOpenTransactionMock = new();
+    private readonly Mock<IAssignOpenTransactionCommandHandler> _assignOpenTransactionMock = new();
+    private readonly Mock<ISplitOpenTransactionCommandHandler> _splitOpenTransactionMock = new();
 
     public IntegrationApiExtensionsTests()
     {
-        _mediatorMock = new Mock<IMediator>();
-
         var server = new TestServer(
             builder: new WebHostBuilder()
                      .ConfigureServices(
                          services =>
                          {
                              services.AddRouting();
-                             services.AddSingleton(_mediatorMock.Object);
+                             services.AddSingleton(_processFileMock.Object);
+                             services.AddSingleton(_getTransactionSummariesMock.Object);
+                             services.AddSingleton(_getTransactionsMock.Object);
+                             services.AddSingleton(_getNextOpenTransactionMock.Object);
+                             services.AddSingleton(_getTotalOpenTransactionMock.Object);
+                             services.AddSingleton(_assignOpenTransactionMock.Object);
+                             services.AddSingleton(_splitOpenTransactionMock.Object);
                              services.AddAntiforgery();
                              services.AddLogging(
                                  loggingBuilder =>
@@ -57,7 +66,7 @@ public class IntegrationApiExtensionsTests
     {
         // Arrange
         var guid = Guid.NewGuid();
-        _mediatorMock.Setup(m => m.Send(It.IsAny<ProcessCamtFileCommand>(), default)).ReturnsAsync(guid);
+        _processFileMock.Setup(m => m.Handle(It.IsAny<ProcessFileCommand>(), default)).ReturnsAsync(guid);
 
         var formContent = new MultipartFormDataContent();
         var accountId = Guid.NewGuid();
@@ -72,7 +81,7 @@ public class IntegrationApiExtensionsTests
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);
-        _mediatorMock.Verify(m => m.Send(It.IsAny<ProcessCamtFileCommand>(), default), Times.Once);
+        _processFileMock.Verify(m => m.Handle(It.IsAny<ProcessFileCommand>(), default), Times.Once);
     }
 
     [Fact]
@@ -80,14 +89,14 @@ public class IntegrationApiExtensionsTests
     {
         // Arrange
         var transactionSummaries = new SmartFaker<GetTransactionSummariesQueryResult>().Generate(count: 3);
-        _mediatorMock.Setup(m => m.Send(It.IsAny<GetTransactionSummariesQuery>(), default)).ReturnsAsync(transactionSummaries);
+        _getTransactionSummariesMock.Setup(m => m.Handle(It.IsAny<GetTransactionSummariesQuery>(), default)).ReturnsAsync(transactionSummaries);
 
         // Act
         var response = await _client.GetAsync(requestUri: "/transactionSummary");
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);
-        _mediatorMock.Verify(m => m.Send(It.IsAny<GetTransactionSummariesQuery>(), default), Times.Once);
+        _getTransactionSummariesMock.Verify(m => m.Handle(It.IsAny<GetTransactionSummariesQuery>(), default), Times.Once);
     }
 
 
@@ -96,13 +105,13 @@ public class IntegrationApiExtensionsTests
     {
         // Arrange
         var nextOpenTransaction = new SmartFaker<GetNextOpenTransactionQueryResult>().Generate();
-        _mediatorMock.Setup(m => m.Send(It.IsAny<GetNextOpenTransactionQuery>(), default)).ReturnsAsync(nextOpenTransaction);
+        _getNextOpenTransactionMock.Setup(m => m.Handle(It.IsAny<GetNextOpenTransactionQuery>(), default)).ReturnsAsync(nextOpenTransaction);
 
         // Act
         var response = await _client.GetAsync(requestUri: "/transaction/nextOpen");
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);
-        _mediatorMock.Verify(m => m.Send(It.IsAny<GetNextOpenTransactionQuery>(), default), Times.Once);
+        _getNextOpenTransactionMock.Verify(m => m.Handle(It.IsAny<GetNextOpenTransactionQuery>(), default), Times.Once);
     }
 }

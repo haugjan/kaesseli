@@ -1,8 +1,6 @@
-﻿using MediatR;
+﻿namespace Kaesseli.Application.Integration.NextOpenTransaction;
 
-namespace Kaesseli.Application.Integration.NextOpenTransaction;
-
-public class GetNextOpenTransactionQuery : IRequest<GetNextOpenTransactionQueryResult>
+public class GetNextOpenTransactionQuery
 {
     public required int Skip { get; init; }
 }

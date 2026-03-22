@@ -1,8 +1,5 @@
-﻿using Kaesseli.Application.Automation;
-using Kaesseli.Application.Integration.TransactionQuery;
-using MediatR;
+using Kaesseli.Application.Automation;
 using Microsoft.AspNetCore.Mvc;
-using System;
 
 // ReSharper disable once CheckNamespace
 namespace Microsoft.AspNetCore.Routing;
@@ -18,17 +15,14 @@ public static class AutomationApiExtensions
     {
         app.MapGet(
             pattern: "/automation/nrMatchInput",
-            async (IMediator mediator, [FromQuery] string input) =>
-            {
-                var query = new GetNrOfPossibleAutomationQuery { AutomationText = input };
-                return await mediator.Send(query);
-            });
+            async (IGetNrOfPossibleAutomationQueryHandler handler, [FromQuery] string input) =>
+                await handler.Handle(new GetNrOfPossibleAutomationQuery { AutomationText = input }, default));
 
         app.MapPost(
             pattern: "/automation",
-            async (IMediator mediator, AddAutomationCommand addAutomationCommand) =>
+            async (IAddAutomationCommandHandler handler, AddAutomationCommand addAutomationCommand) =>
             {
-                var guid = await mediator.Send(addAutomationCommand);
+                var guid = await handler.Handle(addAutomationCommand, default);
                 return Results.Created(uri: $"/automation/{guid}", guid);
             });
 

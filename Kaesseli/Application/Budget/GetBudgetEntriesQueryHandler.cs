@@ -1,12 +1,15 @@
-﻿using System.Collections.Immutable;
+using System.Collections.Immutable;
 using Kaesseli.Domain.Budget;
-using MediatR;
 
 namespace Kaesseli.Application.Budget;
 
+public interface IGetBudgetEntriesQueryHandler
+{
+    Task<IEnumerable<GetBudgetEntriesQueryResult>> Handle(GetBudgetEntriesQuery query, CancellationToken cancellationToken);
+}
+
 // ReSharper disable once UnusedType.Global
-public class GetBudgetEntriesQueryHandler :
-    IRequestHandler<GetBudgetEntriesQuery, IEnumerable<GetBudgetEntriesQueryResult>>
+public class GetBudgetEntriesQueryHandler : IGetBudgetEntriesQueryHandler
 {
     private readonly IBudgetRepository _repository;
 

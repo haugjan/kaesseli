@@ -1,11 +1,14 @@
-﻿using Kaesseli.Domain.Accounts;
-using MediatR;
+using Kaesseli.Domain.Accounts;
 
 namespace Kaesseli.Application.Accounts;
 
+public interface IAddAccountCommandHandler
+{
+    Task<Guid> Handle(AddAccountCommand request, CancellationToken cancellationToken);
+}
+
 // ReSharper disable once UnusedType.Global
-public class AddAccountCommandHandler(IAccountRepository repo) :
-    IRequestHandler<AddAccountCommand, Guid>
+public class AddAccountCommandHandler(IAccountRepository repo) : IAddAccountCommandHandler
 {
     public async Task<Guid> Handle(AddAccountCommand request, CancellationToken cancellationToken)
     {

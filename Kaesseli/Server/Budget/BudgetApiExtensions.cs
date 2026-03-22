@@ -1,6 +1,5 @@
-﻿using Kaesseli.Application.Budget;
+using Kaesseli.Application.Budget;
 using Kaesseli.Domain.Accounts;
-using MediatR;
 
 // ReSharper disable once CheckNamespace
 namespace Microsoft.AspNetCore.Routing;
@@ -15,26 +14,26 @@ public static class BudgetApiExtensions
     {
         app.MapPost(
             pattern: "/budgetEntry",
-            async (IMediator mediator, SetBudgetCommand command) =>
+            async (ISetBudgetCommandHandler handler, SetBudgetCommand command) =>
             {
-                var guid = await mediator.Send(command);
+                var guid = await handler.Handle(command, default);
                 return Results.Created(uri: $"/budgetEntry/{guid}", guid);
             });
         app.MapGet(
             pattern: "/budgetEntry",
             async (
-                    IMediator mediator,
+                    IGetBudgetEntriesQueryHandler handler,
                     Guid accountingPeriodId,
                     Guid? accountId,
                     AccountType? accountType
                     ) =>
-                await mediator.Send(request: new GetBudgetEntriesQuery
+                await handler.Handle(query: new GetBudgetEntriesQuery
                 {
                     AccountId = accountId,
                     AccountType = accountType,
                     AccountingPeriodId = accountingPeriodId
-                }));
-       
+                }, default));
+
         return app;
     }
 }

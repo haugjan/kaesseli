@@ -1,7 +1,11 @@
-using System.Collections.Immutable;
-using System.Reflection;
 using FluentAssertions;
-using MediatR;
+using Kaesseli.Application.Accounts;
+using Kaesseli.Application.Automation;
+using Kaesseli.Application.Budget;
+using Kaesseli.Application.Integration.FileImport;
+using Kaesseli.Application.Integration.NextOpenTransaction;
+using Kaesseli.Application.Integration.TransactionQuery;
+using Kaesseli.Application.Journal;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Moq;
@@ -12,10 +16,9 @@ namespace Kaesseli.Server.Test;
 public class DependencyInjectionTests
 {
     [Fact]
-    public void ServiceProvider_CanResolveAllMediatRHandlers()
+    public void ServiceProvider_CanResolveAllHandlers()
     {
         // Arrange
-
         var configMock = new Mock<IConfiguration>();
         var configSectionMock = new Mock<IConfigurationSection>();
         configMock.Setup(cfg => cfg.GetSection(It.IsAny<string>()))
@@ -25,27 +28,43 @@ public class DependencyInjectionTests
             .AddApplicationServices()
             .AddInfrastructureServices(configMock.Object);
 
-        var assembly = Assembly.GetAssembly(type: typeof(ApplicationServiceCollectionExtensions));
-        var handlerTypes = assembly!.GetTypes()
-                                    .Where(
-                                        t => t.GetInterfaces()
-                                              .Any(
-                                                  i => i.IsGenericType
-                                                    && (i.GetGenericTypeDefinition() == typeof(IRequestHandler<,>)
-                                                     || i.GetGenericTypeDefinition() == typeof(INotificationHandler<>))))
-                                    .ToImmutableList();
-
-        foreach (var handlerType in handlerTypes) serviceCollection.AddTransient(handlerType);
-
         var serviceProvider = serviceCollection.BuildServiceProvider();
 
-        foreach (var handlerType in handlerTypes)
+        var handlerInterfaces = new[]
+        {
+            typeof(IAddAccountCommandHandler),
+            typeof(IAddAccountingPeriodCommandHandler),
+            typeof(IGetAccountQueryHandler),
+            typeof(IGetAccountsQueryHandler),
+            typeof(IGetAccountingPeriodsQueryHandler),
+            typeof(IGetAccountsSummaryQueryHandler),
+            typeof(IGetFinancialOverviewCommandHandler),
+            typeof(IAddAutomationCommandHandler),
+            typeof(IApplyAllAutomationsCommandHandler),
+            typeof(IGetNrOfPossibleAutomationQueryHandler),
+            typeof(ISetBudgetCommandHandler),
+            typeof(IGetBudgetEntriesQueryHandler),
+            typeof(IAddJournalEntryCommandHandler),
+            typeof(IGetJournalEntriesQueryHandler),
+            typeof(IProcessFileCommandHandler),
+            typeof(IProcessCamtFileCommandHandler),
+            typeof(IProcessPostFinanceCsvCommandHandler),
+            typeof(IOpenTransactionAmountChangedEventHandler),
+            typeof(IAssignOpenTransactionCommandHandler),
+            typeof(ISplitOpenTransactionCommandHandler),
+            typeof(IGetNextOpenTransactionQueryHandler),
+            typeof(IGetTotalOpenTransactionQueryHandler),
+            typeof(IGetTransactionsQueryHandler),
+            typeof(IGetTransactionSummariesQueryHandler),
+        };
+
+        foreach (var handlerInterface in handlerInterfaces)
         {
             // Act
-            var handler = serviceProvider.GetService(handlerType);
+            var handler = serviceProvider.GetService(handlerInterface);
 
             // Assert
-            handler.Should().NotBeNull(because: $"weil {handlerType.Name} im DI Container registriert und auflösbar sein sollte.");
+            handler.Should().NotBeNull(because: $"weil {handlerInterface.Name} im DI Container registriert und auflösbar sein sollte.");
         }
     }
 }

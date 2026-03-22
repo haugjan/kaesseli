@@ -4,7 +4,6 @@ using System.Text.Json;
 using FluentAssertions;
 using Kaesseli.Application.Budget;
 using Kaesseli.TestUtilities.Faker;
-using MediatR;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Routing;
@@ -18,19 +17,19 @@ namespace Kaesseli.Server.Test.Budget;
 public class BudgetApiExtensionsTests
 {
     private readonly HttpClient _client;
-    private readonly Mock<IMediator> _mediatorMock;
+    private readonly Mock<ISetBudgetCommandHandler> _setBudgetMock = new();
+    private readonly Mock<IGetBudgetEntriesQueryHandler> _getBudgetEntriesMock = new();
 
     public BudgetApiExtensionsTests()
     {
-        _mediatorMock = new Mock<IMediator>();
-
         var server = new TestServer(
             builder: new WebHostBuilder()
                      .ConfigureServices(
                          services =>
                          {
                              services.AddRouting();
-                             services.AddSingleton(_mediatorMock.Object);
+                             services.AddSingleton(_setBudgetMock.Object);
+                             services.AddSingleton(_getBudgetEntriesMock.Object);
                          })
                      .Configure(
                          app =>
@@ -51,7 +50,7 @@ public class BudgetApiExtensionsTests
     {
         // Arrange
         var guid = Guid.NewGuid();
-        _mediatorMock.Setup(m => m.Send(It.IsAny<SetBudgetCommand>(), default)).ReturnsAsync(guid);
+        _setBudgetMock.Setup(m => m.Handle(It.IsAny<SetBudgetCommand>(), default)).ReturnsAsync(guid);
 
         var setBudgetCommand = new SmartFaker<SetBudgetCommand>().Generate();
         var content = new StringContent(
@@ -66,7 +65,7 @@ public class BudgetApiExtensionsTests
         response.StatusCode.Should().Be(HttpStatusCode.Created);
         response.Headers.Location.Should()
                 .BeEquivalentTo(expectation: new Uri(uriString: $"/budgetEntry/{guid}", UriKind.Relative));
-        _mediatorMock.Verify(m => m.Send(It.IsAny<SetBudgetCommand>(), default), Times.Once);
+        _setBudgetMock.Verify(m => m.Handle(It.IsAny<SetBudgetCommand>(), default), Times.Once);
     }
 
     [Fact]
@@ -74,7 +73,7 @@ public class BudgetApiExtensionsTests
     {
         // Arrange
         var budgetEntries = new SmartFaker<GetBudgetEntriesQueryResult>().Generate(count: 3);
-        _mediatorMock.Setup(m => m.Send(It.IsAny<GetBudgetEntriesQuery>(), default)).ReturnsAsync(budgetEntries);
+        _getBudgetEntriesMock.Setup(m => m.Handle(It.IsAny<GetBudgetEntriesQuery>(), default)).ReturnsAsync(budgetEntries);
 
         var accountId = Guid.NewGuid();
         var periodId = Guid.NewGuid();
@@ -87,6 +86,6 @@ public class BudgetApiExtensionsTests
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);
-        _mediatorMock.Verify(m => m.Send(It.IsAny<GetBudgetEntriesQuery>(), default), Times.Once);
+        _getBudgetEntriesMock.Verify(m => m.Handle(It.IsAny<GetBudgetEntriesQuery>(), default), Times.Once);
     }
 }

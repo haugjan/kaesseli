@@ -1,8 +1,6 @@
-﻿using MediatR;
+﻿namespace Kaesseli.Application.Integration.FileImport;
 
-namespace Kaesseli.Application.Integration.FileImport;
-
-public class ProcessFileCommand : IRequest<Guid>
+public class ProcessFileCommand
 {
     // ReSharper disable UnusedAutoPropertyAccessor.Global
     public required FileType FileType { get; init; }

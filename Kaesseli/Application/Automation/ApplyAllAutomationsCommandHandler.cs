@@ -1,19 +1,23 @@
-﻿using Kaesseli.Application.Integration.NextOpenTransaction;
+using Kaesseli.Application.Integration.NextOpenTransaction;
 using Kaesseli.Domain.Automation;
 using Kaesseli.Domain.Integration;
-using MediatR;
 
 namespace Kaesseli.Application.Automation;
 
-public class ApplyAllAutomationsCommandHandler : IRequestHandler<ApplyAllAutomationsCommand>
+public interface IApplyAllAutomationsCommandHandler
+{
+    Task Handle(ApplyAllAutomationsCommand request, CancellationToken cancellationToken);
+}
+
+public class ApplyAllAutomationsCommandHandler : IApplyAllAutomationsCommandHandler
 {
     private readonly IAutomationRepository _automateRepository;
-    private readonly IMediator _mediator;
+    private readonly ISplitOpenTransactionCommandHandler _splitHandler;
 
-    public ApplyAllAutomationsCommandHandler(IAutomationRepository automateRepository, IMediator mediator)
+    public ApplyAllAutomationsCommandHandler(IAutomationRepository automateRepository, ISplitOpenTransactionCommandHandler splitHandler)
     {
         _automateRepository = automateRepository;
-        _mediator = mediator;
+        _splitHandler = splitHandler;
     }
 
     public async Task Handle(ApplyAllAutomationsCommand request, CancellationToken cancellationToken)
@@ -42,7 +46,6 @@ public class ApplyAllAutomationsCommandHandler : IRequestHandler<ApplyAllAutomat
         Transaction transaction,
         CancellationToken cancellationToken)
     {
-        var totalAmount = transaction;
         var entries = automationEntry.Parts.Take(count: automationEntry.Parts.Count() - 1)
                                      .Select(
                                          part => new SplitOpenTransactionEntry
@@ -57,7 +60,7 @@ public class ApplyAllAutomationsCommandHandler : IRequestHandler<ApplyAllAutomat
 
         entries.Add(item: new SplitOpenTransactionEntry { OtherAccountId = lastPart.Account.Id, Amount = remainingAmount });
 
-        await _mediator.Send(
+        await _splitHandler.Handle(
             request: new SplitOpenTransactionCommand
             {
                 AccountingPeriodId = accountingPeriodId,

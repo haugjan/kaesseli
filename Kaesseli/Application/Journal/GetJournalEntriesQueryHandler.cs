@@ -1,12 +1,15 @@
-﻿using System.Collections.Immutable;
+using System.Collections.Immutable;
 using Kaesseli.Domain.Journal;
-using MediatR;
 
 namespace Kaesseli.Application.Journal;
 
+public interface IGetJournalEntriesQueryHandler
+{
+    Task<IEnumerable<GetJournalEntriesQueryResult>> Handle(GetJournalEntriesQuery request, CancellationToken cancellationToken);
+}
+
 // ReSharper disable once UnusedType.Global
-public class GetJournalEntriesQueryHandler(IJournalRepository repository) :
-    IRequestHandler<GetJournalEntriesQuery, IEnumerable<GetJournalEntriesQueryResult>>
+public class GetJournalEntriesQueryHandler(IJournalRepository repository) : IGetJournalEntriesQueryHandler
 {
     public async Task<IEnumerable<GetJournalEntriesQueryResult>> Handle(
         GetJournalEntriesQuery request,

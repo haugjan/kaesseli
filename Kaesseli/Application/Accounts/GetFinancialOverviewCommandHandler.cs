@@ -1,24 +1,28 @@
-﻿using System.Collections.Immutable;
+using System.Collections.Immutable;
 using Kaesseli.Domain.Accounts;
-using MediatR;
 
 namespace Kaesseli.Application.Accounts;
 
-// ReSharper disable once UnusedType.Global
-public class GetFinancialOverviewCommandHandler : IRequestHandler<GetFinancialOverviewCommand, GetFinancialOverviewCommandResult>
+public interface IGetFinancialOverviewCommandHandler
 {
-    private readonly IMediator _mediator;
+    Task<GetFinancialOverviewCommandResult> Handle(GetFinancialOverviewCommand request, CancellationToken cancellationToken);
+}
 
-    public GetFinancialOverviewCommandHandler(IMediator mediator)
+// ReSharper disable once UnusedType.Global
+public class GetFinancialOverviewCommandHandler : IGetFinancialOverviewCommandHandler
+{
+    private readonly IGetAccountsSummaryQueryHandler _accountsSummaryHandler;
+
+    public GetFinancialOverviewCommandHandler(IGetAccountsSummaryQueryHandler accountsSummaryHandler)
     {
-        _mediator = mediator;
+        _accountsSummaryHandler = accountsSummaryHandler;
     }
 
     public async Task<GetFinancialOverviewCommandResult> Handle(
         GetFinancialOverviewCommand request,
         CancellationToken cancellationToken)
     {
-        var accountSummary = (await _mediator.Send(
+        var accountSummary = (await _accountsSummaryHandler.Handle(
                                   request: new GetAccountsSummaryQuery { AccountingPeriodId = request.AccountingPeriodId },
                                   cancellationToken))
                              .GroupBy(account => account.TypeId)

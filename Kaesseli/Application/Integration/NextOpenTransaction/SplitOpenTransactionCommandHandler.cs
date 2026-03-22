@@ -1,18 +1,22 @@
-﻿using Kaesseli.Domain.Journal;
-using MediatR;
+using Kaesseli.Domain.Journal;
 
 namespace Kaesseli.Application.Integration.NextOpenTransaction;
 
+public interface ISplitOpenTransactionCommandHandler
+{
+    Task Handle(SplitOpenTransactionCommand request, CancellationToken cancellationToken);
+}
+
 // ReSharper disable once UnusedType.Global
-public class SplitOpenTransactionCommandHandler : IRequestHandler<SplitOpenTransactionCommand>
+public class SplitOpenTransactionCommandHandler : ISplitOpenTransactionCommandHandler
 {
     private readonly IJournalRepository _journalRepo;
-    private readonly IMediator _mediator;
+    private readonly IOpenTransactionAmountChangedEventHandler _eventHandler;
 
-    public SplitOpenTransactionCommandHandler(IJournalRepository journalRepo, IMediator mediator)
+    public SplitOpenTransactionCommandHandler(IJournalRepository journalRepo, IOpenTransactionAmountChangedEventHandler eventHandler)
     {
         _journalRepo = journalRepo;
-        _mediator = mediator;
+        _eventHandler = eventHandler;
     }
 
     public async Task Handle(SplitOpenTransactionCommand request, CancellationToken cancellationToken)
@@ -20,7 +24,7 @@ public class SplitOpenTransactionCommandHandler : IRequestHandler<SplitOpenTrans
         var entries = request.Entries.Select(
             entry => (entry.OtherAccountId, entry.Amount));
         await _journalRepo.AssignOpenTransaction(request.AccountingPeriodId, request.TransactionId, entries, cancellationToken);
-        await _mediator.Publish(
+        await _eventHandler.Handle(
             notification: new OpenTransactionAmountChangedEvent { Amount = -1 },
             cancellationToken);
     }

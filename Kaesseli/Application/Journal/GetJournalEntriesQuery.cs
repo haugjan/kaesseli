@@ -1,9 +1,8 @@
 ﻿using Kaesseli.Domain.Accounts;
-using MediatR;
 
 namespace Kaesseli.Application.Journal;
 
-public class GetJournalEntriesQuery : IRequest<IEnumerable<GetJournalEntriesQueryResult>>
+public class GetJournalEntriesQuery
 {
     public required Guid AccountingPeriodId { get; init; }
     public required Guid? AccountId { get; init; }

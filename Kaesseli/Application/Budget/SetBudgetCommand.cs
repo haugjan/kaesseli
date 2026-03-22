@@ -1,9 +1,7 @@
-﻿using MediatR;
-
-namespace Kaesseli.Application.Budget;
+﻿namespace Kaesseli.Application.Budget;
 
 // ReSharper disable once ClassNeverInstantiated.Global
-public class SetBudgetCommand : IRequest<Guid>
+public class SetBudgetCommand
 {
     // ReSharper disable UnusedAutoPropertyAccessor.Global
     public required decimal Amount { get; init; }

@@ -1,9 +1,7 @@
-﻿using MediatR;
-
-namespace Kaesseli.Application.Integration.FileImport;
+﻿namespace Kaesseli.Application.Integration.FileImport;
 
 // ReSharper disable once ClassNeverInstantiated.Global
-public class ProcessCamtFileCommand : IRequest<Guid>
+public class ProcessCamtFileCommand
 {
     // ReSharper disable UnusedAutoPropertyAccessor.Global
     public required Stream Content { get; init; }

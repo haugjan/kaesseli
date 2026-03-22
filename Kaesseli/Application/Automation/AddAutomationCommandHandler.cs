@@ -1,23 +1,27 @@
-﻿using Kaesseli.Domain.Accounts;
+using Kaesseli.Domain.Accounts;
 using Kaesseli.Domain.Automation;
-using MediatR;
 
 namespace Kaesseli.Application.Automation;
 
-public class AddAutomationCommandHandler : IRequestHandler<AddAutomationCommand, Guid>
+public interface IAddAutomationCommandHandler
+{
+    Task<Guid> Handle(AddAutomationCommand request, CancellationToken cancellationToken);
+}
+
+public class AddAutomationCommandHandler : IAddAutomationCommandHandler
 {
     private readonly IAutomationRepository _automateRepository;
     private readonly IAccountRepository _accountRepository;
-    private readonly IMediator _mediator;
+    private readonly IApplyAllAutomationsCommandHandler _applyAllAutomationsHandler;
 
     public AddAutomationCommandHandler(
         IAutomationRepository automateRepository,
         IAccountRepository accountRepository,
-        IMediator mediator)
+        IApplyAllAutomationsCommandHandler applyAllAutomationsHandler)
     {
         _automateRepository = automateRepository;
         _accountRepository = accountRepository;
-        _mediator = mediator;
+        _applyAllAutomationsHandler = applyAllAutomationsHandler;
     }
 
     public async Task<Guid> Handle(AddAutomationCommand request, CancellationToken cancellationToken)
@@ -29,8 +33,8 @@ public class AddAutomationCommandHandler : IRequestHandler<AddAutomationCommand,
             parts.Add(
                 item: new AutomationEntryPart
                 {
-                    Id = Guid.NewGuid(), 
-                    Account = await GetAccount(entry.OtherAccountId, cancellationToken), 
+                    Id = Guid.NewGuid(),
+                    Account = await GetAccount(entry.OtherAccountId, cancellationToken),
                     AmountProportion = entry.Amount / sumOfAllEntries
                 });
         }
@@ -53,7 +57,7 @@ public class AddAutomationCommandHandler : IRequestHandler<AddAutomationCommand,
             automationEntry,
             cancellationToken);
 
-        await _mediator.Send(
+        await _applyAllAutomationsHandler.Handle(
             request: new ApplyAllAutomationsCommand { AccountingPeriodId = request.AccountingPeriodId },
             cancellationToken);
         return automationEntry.Id;

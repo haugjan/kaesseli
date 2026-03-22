@@ -1,14 +1,18 @@
-﻿using Kaesseli.Application.Utility;
+using Kaesseli.Application.Utility;
 using Kaesseli.Domain.Accounts;
 using Kaesseli.Domain.Journal;
-using MediatR;
 
 namespace Kaesseli.Application.Journal;
+
+public interface IAddJournalEntryCommandHandler
+{
+    Task<Guid> Handle(AddJournalEntryCommand request, CancellationToken cancellationToken);
+}
 
 public class AddJournalEntryCommandHandler(IJournalRepository journalRepository,
                                            IAccountRepository accountRepo,
                                            IDateTimeService dateTime)
-    : IRequestHandler<AddJournalEntryCommand, Guid>
+    : IAddJournalEntryCommandHandler
 {
     public async Task<Guid> Handle(AddJournalEntryCommand request, CancellationToken cancellationToken)
     {

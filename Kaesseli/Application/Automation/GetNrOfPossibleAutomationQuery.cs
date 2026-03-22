@@ -1,8 +1,6 @@
-﻿using MediatR;
+﻿namespace Kaesseli.Application.Automation;
 
-namespace Kaesseli.Application.Automation;
-
-public class GetNrOfPossibleAutomationQuery : IRequest<GetNrOfPossibleAutomationQueryResult>
+public class GetNrOfPossibleAutomationQuery
 {
     public required string AutomationText { get; init; }
 }

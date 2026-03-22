@@ -1,12 +1,15 @@
-﻿using System.Collections.Immutable;
+using System.Collections.Immutable;
 using Kaesseli.Domain.Integration;
-using MediatR;
 
 namespace Kaesseli.Application.Integration.TransactionQuery;
 
+public interface IGetTransactionsQueryHandler
+{
+    Task<IEnumerable<GetTransactionsQueryResult>> Handle(GetTransactionsQuery request, CancellationToken cancellationToken);
+}
+
 // ReSharper disable once UnusedType.Global
-public class GetTransactionsQueryHandler :
-    IRequestHandler<GetTransactionsQuery, IEnumerable<GetTransactionsQueryResult>>
+public class GetTransactionsQueryHandler : IGetTransactionsQueryHandler
 {
     private readonly ITransactionRepository _repo;
 

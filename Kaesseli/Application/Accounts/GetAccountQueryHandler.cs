@@ -1,16 +1,20 @@
-﻿using System.Collections.Immutable;
+using System.Collections.Immutable;
 using Kaesseli.Application.Utility;
 using Kaesseli.Domain.Accounts;
 using Kaesseli.Domain.Budget;
 using Kaesseli.Domain.Journal;
-using MediatR;
 
 namespace Kaesseli.Application.Accounts;
+
+public interface IGetAccountQueryHandler
+{
+    Task<GetAccountQueryResult> Handle(GetAccountQuery request, CancellationToken cancellationToken);
+}
 
 // ReSharper disable once UnusedType.Global
 public class GetAccountQueryHandler(IAccountRepository accountRepo, IJournalRepository journalRepo, IBudgetRepository budgetRepo,
                                     IDateTimeService dateTimeService)
-    : IRequestHandler<GetAccountQuery, GetAccountQueryResult>
+    : IGetAccountQueryHandler
 {
     private readonly IDateTimeService _dateTimeService = dateTimeService;
 

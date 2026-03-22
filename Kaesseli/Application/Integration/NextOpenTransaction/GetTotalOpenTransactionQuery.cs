@@ -1,5 +1,3 @@
-﻿using MediatR;
-
 namespace Kaesseli.Application.Integration.NextOpenTransaction;
 
-public class GetTotalOpenTransactionQuery : IRequest<int>;
+public class GetTotalOpenTransactionQuery;

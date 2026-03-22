@@ -1,9 +1,8 @@
 ﻿using Kaesseli.Application.Integration.NextOpenTransaction;
-using MediatR;
 
 namespace Kaesseli.Application.Automation;
 
-public class AddAutomationCommand : IRequest<Guid>
+public class AddAutomationCommand
 {
     public required string AutomationText { get; init; }
     public required Guid AccountingPeriodId { get; init; }

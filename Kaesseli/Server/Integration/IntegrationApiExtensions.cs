@@ -1,9 +1,8 @@
-﻿using System.IO;
+using System.IO;
 using System.IO.Compression;
 using Kaesseli.Application.Integration.FileImport;
 using Kaesseli.Application.Integration.NextOpenTransaction;
 using Kaesseli.Application.Integration.TransactionQuery;
-using MediatR;
 using Microsoft.AspNetCore.Mvc;
 
 // ReSharper disable once CheckNamespace
@@ -19,61 +18,42 @@ public static class IntegrationApiExtensions
     {
         app.MapGet(
             pattern: "/transactionSummary",
-            async (IMediator mediator) =>
-            {
-                var query = new GetTransactionSummariesQuery();
-                return await mediator.Send(query);
-            }
+            async (IGetTransactionSummariesQueryHandler handler) =>
+                await handler.Handle(new GetTransactionSummariesQuery(), default)
         );
         app.MapGet(
             pattern: "/transaction",
-            async (IMediator mediator, [FromQuery] Guid transactionSummaryId) =>
-            {
-                var query = new GetTransactionsQuery
-                {
-                    TransactionSummaryId = transactionSummaryId,
-                };
-                return await mediator.Send(query);
-            }
+            async (IGetTransactionsQueryHandler handler, [FromQuery] Guid transactionSummaryId) =>
+                await handler.Handle(new GetTransactionsQuery { TransactionSummaryId = transactionSummaryId }, default)
         );
 
         app.MapGet(
             pattern: "/transaction/nextOpen",
-            async (IMediator mediator, [FromQuery] int? skip) =>
-            {
-                var query = new GetNextOpenTransactionQuery { Skip = skip.GetValueOrDefault() };
-                return await mediator.Send(query);
-            }
+            async (IGetNextOpenTransactionQueryHandler handler, [FromQuery] int? skip) =>
+                await handler.Handle(new GetNextOpenTransactionQuery { Skip = skip.GetValueOrDefault() }, default)
         );
         app.MapGet(
             pattern: "/transaction/totalOpen",
-            async (IMediator mediator, [FromQuery] int? skip) =>
-            {
-                var query = new GetTotalOpenTransactionQuery();
-                return await mediator.Send(query);
-            }
+            async (IGetTotalOpenTransactionQueryHandler handler, [FromQuery] int? skip) =>
+                await handler.Handle(new GetTotalOpenTransactionQuery(), default)
         );
 
         app.MapPatch(
             pattern: "/transaction/journalEntry",
-            async (IMediator mediator, [FromBody] AssignOpenTransactionCommand cmd) =>
-            {
-                await mediator.Send(cmd);
-            }
+            async (IAssignOpenTransactionCommandHandler handler, [FromBody] AssignOpenTransactionCommand cmd) =>
+                await handler.Handle(cmd, default)
         );
 
         app.MapPatch(
             pattern: "/transaction/journalEntry/split",
-            async (IMediator mediator, [FromBody] SplitOpenTransactionCommand cmd) =>
-            {
-                await mediator.Send(cmd);
-            }
+            async (ISplitOpenTransactionCommandHandler handler, [FromBody] SplitOpenTransactionCommand cmd) =>
+                await handler.Handle(cmd, default)
         );
 
         app.MapPost(
                 pattern: "/file/upload",
                 async (
-                    IMediator mediator,
+                    IProcessFileCommandHandler handler,
                     IFormFile file,
                     [FromForm] Guid accountId,
                     [FromForm] Guid accountingPeriodId
@@ -85,7 +65,7 @@ public static class IntegrationApiExtensions
                             file,
                             accountId,
                             accountingPeriodId,
-                            mediator
+                            handler
                         );
 
                     await using var fileStream = file.OpenReadStream();
@@ -94,7 +74,7 @@ public static class IntegrationApiExtensions
                         extension,
                         accountId,
                         accountingPeriodId,
-                        mediator
+                        handler
                     );
                 }
             )
@@ -107,7 +87,7 @@ public static class IntegrationApiExtensions
         IFormFile file,
         Guid accountId,
         Guid accountingPeriodId,
-        IMediator mediator
+        IProcessFileCommandHandler handler
     )
     {
         await using var memoryStream = file.OpenReadStream();
@@ -117,7 +97,7 @@ public static class IntegrationApiExtensions
             await using var entryStream = entry.Open();
             var extension = System.IO.Path.GetExtension(entry.FullName);
             var formFile = new FormFile(entryStream, 0, entry.Length, entry.Name, entry.FullName);
-            await UploadFile(entryStream, extension, accountId, accountingPeriodId, mediator);
+            await UploadFile(entryStream, extension, accountId, accountingPeriodId, handler);
         }
         return Guid.Empty; // Return a default value or handle appropriately
     }
@@ -127,7 +107,7 @@ public static class IntegrationApiExtensions
         string extension,
         Guid accountId,
         Guid accountingPeriodId,
-        IMediator mediator
+        IProcessFileCommandHandler handler
     )
     {
         var fileType = extension switch
@@ -144,6 +124,6 @@ public static class IntegrationApiExtensions
             AccountingPeriodId = accountingPeriodId,
         };
 
-        return await mediator.Send(command);
+        return await handler.Handle(command, default);
     }
 }

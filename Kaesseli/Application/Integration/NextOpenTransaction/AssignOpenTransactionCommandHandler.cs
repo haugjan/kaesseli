@@ -1,21 +1,25 @@
-﻿using Kaesseli.Domain.Integration;
+using Kaesseli.Domain.Integration;
 using Kaesseli.Domain.Journal;
-using MediatR;
 
 namespace Kaesseli.Application.Integration.NextOpenTransaction;
 
+public interface IAssignOpenTransactionCommandHandler
+{
+    Task Handle(AssignOpenTransactionCommand request, CancellationToken cancellationToken);
+}
+
 // ReSharper disable once UnusedType.Global
-public class AssignOpenTransactionCommandHandler : IRequestHandler<AssignOpenTransactionCommand>
+public class AssignOpenTransactionCommandHandler : IAssignOpenTransactionCommandHandler
 {
     private readonly IJournalRepository _journalRepo;
     private readonly ITransactionRepository _tranRepo;
-    private readonly IMediator _mediator;
+    private readonly IOpenTransactionAmountChangedEventHandler _eventHandler;
 
-    public AssignOpenTransactionCommandHandler(IJournalRepository journalRepo, ITransactionRepository tranRepo, IMediator mediator)
+    public AssignOpenTransactionCommandHandler(IJournalRepository journalRepo, ITransactionRepository tranRepo, IOpenTransactionAmountChangedEventHandler eventHandler)
     {
         _journalRepo = journalRepo;
         _tranRepo = tranRepo;
-        _mediator = mediator;
+        _eventHandler = eventHandler;
     }
 
     public async Task Handle(AssignOpenTransactionCommand request, CancellationToken cancellationToken)
@@ -30,7 +34,7 @@ public class AssignOpenTransactionCommandHandler : IRequestHandler<AssignOpenTra
             request.TransactionId,
             entries,
             cancellationToken);
-        await _mediator.Publish(
+        await _eventHandler.Handle(
             notification: new OpenTransactionAmountChangedEvent { Amount = -1 },
             cancellationToken);
     }

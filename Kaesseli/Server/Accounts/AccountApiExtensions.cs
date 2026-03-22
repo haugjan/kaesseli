@@ -1,6 +1,5 @@
-﻿using Kaesseli.Application.Accounts;
+using Kaesseli.Application.Accounts;
 using Kaesseli.Domain.Accounts;
-using MediatR;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Kaesseli.Server.Accounts;
@@ -15,54 +14,52 @@ public static class AccountApiExtensions
     {
         app.MapGet(
             pattern: "/account",
-            async (IMediator mediator, [FromQuery] AccountType? accountType) =>
-                await mediator.Send(request: new GetAccountsQuery{AccountType = accountType}));
+            async (IGetAccountsQueryHandler handler, [FromQuery] AccountType? accountType) =>
+                await handler.Handle(request: new GetAccountsQuery { AccountType = accountType }, default));
 
         app.MapGet(
             pattern: "/accountingPeriod",
-            async (IMediator mediator) =>
-                await mediator.Send(request: new GetAccountingPeriodsQuery()));
-
+            async (IGetAccountingPeriodsQueryHandler handler) =>
+                await handler.Handle(request: new GetAccountingPeriodsQuery(), default));
 
         app.MapGet(
             pattern: "/accountingPeriod/{accountingPeriodId}/account/{accountId}",
-            async (IMediator mediator, Guid accountId, Guid accountingPeriodId) =>
-                await mediator.Send(request: new GetAccountQuery
+            async (IGetAccountQueryHandler handler, Guid accountId, Guid accountingPeriodId) =>
+                await handler.Handle(request: new GetAccountQuery
                 {
                     AccountId = accountId,
                     AccountingPeriodId = accountingPeriodId
-                }));
-
+                }, default));
 
         app.MapGet(
             pattern: "/accountingPeriod/{accountingPeriodId}/accountSummary",
-            async (IMediator mediator, Guid accountingPeriodId) =>
-                await mediator.Send(request: new GetAccountsSummaryQuery
+            async (IGetAccountsSummaryQueryHandler handler, Guid accountingPeriodId) =>
+                await handler.Handle(request: new GetAccountsSummaryQuery
                 {
                     AccountingPeriodId = accountingPeriodId
-                }));
+                }, default));
 
         app.MapGet(
             pattern: "/accountingPeriod/{accountingPeriodId}/overView",
-            async (IMediator mediator, Guid accountingPeriodId) =>
-                await mediator.Send(request: new GetFinancialOverviewCommand
+            async (IGetFinancialOverviewCommandHandler handler, Guid accountingPeriodId) =>
+                await handler.Handle(request: new GetFinancialOverviewCommand
                 {
                     AccountingPeriodId = accountingPeriodId
-                }));
+                }, default));
 
         app.MapPost(
             pattern: "/account",
-            async (IMediator mediator, AddAccountCommand command) =>
+            async (IAddAccountCommandHandler handler, AddAccountCommand command) =>
             {
-                var guid = await mediator.Send(command);
+                var guid = await handler.Handle(command, default);
                 return Results.Created(uri: $"/account/{guid}", guid);
             });
 
         app.MapPost(
             pattern: "/accountingPeriod",
-            async (IMediator mediator, AddAccountingPeriodCommand command) =>
+            async (IAddAccountingPeriodCommandHandler handler, AddAccountingPeriodCommand command) =>
             {
-                var guid = await mediator.Send(command);
+                var guid = await handler.Handle(command, default);
                 return Results.Created(uri: $"/accountingPeriod/{guid}", guid);
             });
 

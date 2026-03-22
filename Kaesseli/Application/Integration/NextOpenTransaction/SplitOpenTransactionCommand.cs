@@ -1,9 +1,7 @@
-﻿using MediatR;
-
-namespace Kaesseli.Application.Integration.NextOpenTransaction;
+﻿namespace Kaesseli.Application.Integration.NextOpenTransaction;
 
 // ReSharper disable once ClassNeverInstantiated.Global
-public class SplitOpenTransactionCommand : IRequest
+public class SplitOpenTransactionCommand
 {
     // ReSharper disable UnusedAutoPropertyAccessor.Global
     public required Guid AccountingPeriodId { get; init; }

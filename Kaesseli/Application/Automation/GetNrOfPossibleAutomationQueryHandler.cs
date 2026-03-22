@@ -1,11 +1,14 @@
-﻿using Kaesseli.Domain.Automation;
+using Kaesseli.Domain.Automation;
 using Kaesseli.Domain.Integration;
-using MediatR;
 
 namespace Kaesseli.Application.Automation;
 
-public class GetNrOfPossibleAutomationQueryHandler : IRequestHandler<GetNrOfPossibleAutomationQuery,
-    GetNrOfPossibleAutomationQueryResult>
+public interface IGetNrOfPossibleAutomationQueryHandler
+{
+    Task<GetNrOfPossibleAutomationQueryResult> Handle(GetNrOfPossibleAutomationQuery request, CancellationToken cancellationToken);
+}
+
+public class GetNrOfPossibleAutomationQueryHandler : IGetNrOfPossibleAutomationQueryHandler
 {
     private readonly IAutomationRepository _automationRepository;
 

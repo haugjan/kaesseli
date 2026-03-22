@@ -1,8 +1,6 @@
-﻿using MediatR;
+﻿namespace Kaesseli.Application.Accounts;
 
-namespace Kaesseli.Application.Accounts;
-
-public class GetAccountQuery : IRequest<GetAccountQueryResult>
+public class GetAccountQuery
 {
     public required Guid AccountId { get; init; }
     public required Guid AccountingPeriodId { get; init; }

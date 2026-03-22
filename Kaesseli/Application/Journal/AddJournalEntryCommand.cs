@@ -1,9 +1,7 @@
-﻿using MediatR;
-
-namespace Kaesseli.Application.Journal;
+﻿namespace Kaesseli.Application.Journal;
 
 // ReSharper disable once ClassNeverInstantiated.Global
-public class AddJournalEntryCommand : IRequest<Guid>
+public class AddJournalEntryCommand
 {
     // ReSharper disable UnusedAutoPropertyAccessor.Global
     public required decimal Amount { get; init; }

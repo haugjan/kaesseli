@@ -2,15 +2,18 @@
 
 // ReSharper disable once CheckNamespace
 namespace Kaesseli.Domain.Accounts;
+
 internal static class AccountExtensions
 {
-    internal static GetAccountsSummaryQueryResult ToAccountSummary(this Account account, 
-                                                                   decimal accountBalance, 
-                                                                   decimal? budget,
-                                                                   decimal? budgetPerMonth,
-                                                                   decimal? budgetPerYear,
-                                                                   decimal? currentBudget,
-                                                                   decimal? budgetBalance) =>
+    internal static GetAccountsSummaryQueryResult ToAccountSummary(
+        this Account account,
+        decimal accountBalance,
+        decimal? budget,
+        decimal? budgetPerMonth,
+        decimal? budgetPerYear,
+        decimal? currentBudget,
+        decimal? budgetBalance
+    ) =>
         new()
         {
             Id = account.Id,
@@ -24,6 +27,6 @@ internal static class AccountExtensions
             BudgetPerYear = budgetPerYear,
             CurrentBudget = currentBudget,
             BudgetBalance = budgetBalance,
-            IconColor = account.Icon.Color
+            IconColor = account.Icon.Color,
         };
 }

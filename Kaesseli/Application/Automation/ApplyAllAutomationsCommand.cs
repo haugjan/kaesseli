@@ -1,8 +1,6 @@
-﻿using MediatR;
+﻿namespace Kaesseli.Application.Automation;
 
-namespace Kaesseli.Application.Automation;
-
-public class ApplyAllAutomationsCommand : IRequest
+public class ApplyAllAutomationsCommand
 {
     public required Guid AccountingPeriodId { get; init; }
 }

@@ -1,11 +1,14 @@
-﻿using Kaesseli.Domain.Accounts;
-using MediatR;
+using Kaesseli.Domain.Accounts;
 
 namespace Kaesseli.Application.Accounts;
 
+public interface IGetAccountsQueryHandler
+{
+    Task<IEnumerable<GetAccountsQueryResult>> Handle(GetAccountsQuery request, CancellationToken cancellationToken);
+}
+
 // ReSharper disable once UnusedType.Global
-public class GetAccountsQueryHandler(IAccountRepository repository)
-    : IRequestHandler<GetAccountsQuery, IEnumerable<GetAccountsQueryResult>>
+public class GetAccountsQueryHandler(IAccountRepository repository) : IGetAccountsQueryHandler
 {
     public async Task<IEnumerable<GetAccountsQueryResult>> Handle(GetAccountsQuery request, CancellationToken cancellationToken)
     {

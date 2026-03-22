@@ -1,8 +1,6 @@
-﻿using MediatR;
+﻿namespace Kaesseli.Application.Accounts;
 
-namespace Kaesseli.Application.Accounts;
-
-public class GetFinancialOverviewCommand : IRequest<GetFinancialOverviewCommandResult>
+public class GetFinancialOverviewCommand
 {
     public required Guid AccountingPeriodId { get; init; }
 }

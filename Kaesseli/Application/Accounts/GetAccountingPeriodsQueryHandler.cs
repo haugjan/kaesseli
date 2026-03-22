@@ -1,10 +1,14 @@
-﻿using System.Collections.Immutable;
+using System.Collections.Immutable;
 using Kaesseli.Domain.Accounts;
-using MediatR;
 
 namespace Kaesseli.Application.Accounts;
 
-public class GetAccountingPeriodsQueryHandler: IRequestHandler<GetAccountingPeriodsQuery, IEnumerable<GetAccountingPeriodsQueryResult>>
+public interface IGetAccountingPeriodsQueryHandler
+{
+    Task<IEnumerable<GetAccountingPeriodsQueryResult>> Handle(GetAccountingPeriodsQuery request, CancellationToken cancellationToken);
+}
+
+public class GetAccountingPeriodsQueryHandler : IGetAccountingPeriodsQueryHandler
 {
     private readonly IAccountRepository _repo;
 
@@ -13,7 +17,7 @@ public class GetAccountingPeriodsQueryHandler: IRequestHandler<GetAccountingPeri
 
     public async Task<IEnumerable<GetAccountingPeriodsQueryResult>> Handle(GetAccountingPeriodsQuery request, CancellationToken cancellationToken)
     {
-        var result= await _repo.GetAccountingPeriods(cancellationToken);
+        var result = await _repo.GetAccountingPeriods(cancellationToken);
         return result.Select(ap => ap.ToGetAccountingPeriodsQueryResult()).ToImmutableList();
     }
 }

@@ -1,6 +1,5 @@
-﻿using Kaesseli.Application.Journal;
+using Kaesseli.Application.Journal;
 using Kaesseli.Domain.Accounts;
-using MediatR;
 
 // ReSharper disable once CheckNamespace
 namespace Microsoft.AspNetCore.Routing;
@@ -16,25 +15,25 @@ public static class JournalEntryApiExtensions
     {
         app.MapPost(
             pattern: "/journalEntry",
-            async (IMediator mediator, AddJournalEntryCommand command) =>
+            async (IAddJournalEntryCommandHandler handler, AddJournalEntryCommand command) =>
             {
-                var guid = await mediator.Send(command);
+                var guid = await handler.Handle(command, default);
                 return Results.Created(uri: $"/journalEntry/{guid}", guid);
             });
         app.MapGet(
             pattern: "/journalEntry",
             async (
-                    IMediator mediator,
+                    IGetJournalEntriesQueryHandler handler,
                     Guid accountingPeriodId,
                     Guid? accountId,
                     AccountType? accountType) =>
-                await mediator.Send(
+                await handler.Handle(
                     request: new GetJournalEntriesQuery
                     {
                         AccountingPeriodId = accountingPeriodId,
                         AccountId = accountId,
                         AccountType = accountType
-                    }));
+                    }, default));
         return app;
     }
 }

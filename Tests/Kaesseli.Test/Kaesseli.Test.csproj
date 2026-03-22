@@ -35,8 +35,7 @@
       <PrivateAssets>all</PrivateAssets>
     </PackageReference>
     <PackageReference Include="FluentAssertions" />
-    <PackageReference Include="MediatR" />
-    <PackageReference Include="Microsoft.AspNetCore.Http" />
+<PackageReference Include="Microsoft.AspNetCore.Http" />
     <PackageReference Include="Microsoft.AspNetCore.Routing.Abstractions" />
     <PackageReference Include="Microsoft.AspNetCore.TestHost" />
     <PackageReference Include="Microsoft.EntityFrameworkCore" />

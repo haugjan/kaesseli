@@ -1,9 +1,7 @@
-﻿using MediatR;
-
-namespace Kaesseli.Application.Accounts;
+﻿namespace Kaesseli.Application.Accounts;
 
 // ReSharper disable once ClassNeverInstantiated.Global
-public class AddAccountingPeriodCommand : IRequest<Guid>
+public class AddAccountingPeriodCommand
 {
     // ReSharper disable UnusedAutoPropertyAccessor.Global
     public required DateOnly FromInclusive { get; init; }
