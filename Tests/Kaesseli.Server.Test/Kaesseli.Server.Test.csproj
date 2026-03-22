@@ -1,5 +1,4 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
-
   <PropertyGroup>
     <TargetFramework>net8.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
@@ -29,9 +28,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\Kaesseli.Application\Kaesseli.Application.csproj" />
-    <ProjectReference Include="..\..\Kaesseli.Server\Kaesseli.Server.csproj" />
     <ProjectReference Include="..\Kaesseli.TestUtilities\Kaesseli.TestUtilities.csproj" />
   </ItemGroup>
-
 </Project>

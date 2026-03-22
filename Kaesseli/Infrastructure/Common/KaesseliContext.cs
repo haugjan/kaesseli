@@ -49,7 +49,7 @@ public class KaesseliContext : DbContext
         modelBuilder.Entity<Account>(
             entity =>
             {
-                entity.OwnsOne(a => a.Icon, b =>
+                entity.ComplexProperty(a => a.Icon, b =>
                 {
                     b.Property(i => i.Name).HasColumnName("Icon");
                     b.Property(i => i.Color).HasColumnName("IconColor");
