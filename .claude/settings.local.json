@@ -1,7 +1,9 @@
 {
   "permissions": {
     "allow": [
-      "Bash(dotnet build:*)"
+      "Bash(dotnet build:*)",
+      "Bash(find C:developmentkaesseli -type f \\\\\\(-name *.csproj -o -name *.sln -o -name Directory.*.props \\\\\\))",
+      "Bash(find C:developmentkaesseli -name Directory.*.props -o -name .props)"
     ]
   }
 }
