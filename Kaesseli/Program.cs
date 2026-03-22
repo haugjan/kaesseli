@@ -1,7 +1,7 @@
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.IdentityModel.Tokens;
-using Microsoft.OpenApi.Models;
+using Microsoft.OpenApi;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -48,23 +48,23 @@ builder.Services.AddSwaggerGen(c =>
     // });
 });
 
-builder.Services.AddCors(
-    options =>
-    {
-        options.AddPolicy(
-            "AllowSpecificOrigin",
-            b => b.WithOrigins("http://localhost:9500")
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy(
+        "AllowSpecificOrigin",
+        b =>
+            b.WithOrigins("http://localhost:9500")
                 .WithOrigins("https://localhost:9500")
                 .WithOrigins("http://localhost:9501")
                 .WithOrigins("https://localhost:9501")
                 .WithOrigins("http://localhost:9000")
                 .AllowAnyHeader()
-                .AllowAnyMethod());
-    });
+                .AllowAnyMethod()
+    );
+});
 
 builder.Services.AddInfrastructureServices(builder.Configuration);
 builder.Services.AddApplicationServices();
-
 
 // builder.Services.AddAuthorization(options => options.FallbackPolicy = new AuthorizationPolicyBuilder()
 //     .RequireAuthenticatedUser()
@@ -110,6 +110,5 @@ app.UseHttpsRedirection();
 app.MapKaesseliEndpoints();
 
 app.MapFallbackToFile("/index.html");
-
 
 app.Run();
