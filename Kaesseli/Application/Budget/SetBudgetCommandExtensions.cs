@@ -1,4 +1,4 @@
-﻿using Kaesseli.Domain.Accounts;
+using Kaesseli.Domain.Accounts;
 using Kaesseli.Domain.Budget;
 
 namespace Kaesseli.Application.Budget;
@@ -6,7 +6,7 @@ namespace Kaesseli.Application.Budget;
 internal static class SetBudgetCommandExtensions
 {
     internal static BudgetEntry ToBudgetEntry(
-        this SetBudgetCommand budgetCommand,
+        this SetBudget.Query budgetCommand,
         Account account,
         AccountingPeriod accountingPeriod) =>
         new()

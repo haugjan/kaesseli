@@ -1,11 +1,11 @@
-﻿using Kaesseli.Application.Budget;
+using Kaesseli.Application.Budget;
 
 // ReSharper disable once CheckNamespace
 namespace Kaesseli.Domain.Budget;
 
 internal static class BudgetEntryExtensions
 {
-    internal static GetBudgetEntriesQueryResult ToGetBudgetEntriesQueryResult(this BudgetEntry budgetEntry) =>
+    internal static GetBudgetEntries.Result ToGetBudgetEntriesQueryResult(this BudgetEntry budgetEntry) =>
         new()
         {
             Id = budgetEntry.Id,

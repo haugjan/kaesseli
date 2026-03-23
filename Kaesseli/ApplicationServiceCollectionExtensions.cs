@@ -18,34 +18,34 @@ public static class ApplicationServiceCollectionExtensions
             .AddTransient<IDateTimeService, DateTimeService>()
             .AddTransient<IEnvironmentService, EnvironmentService>()
             // Accounts
-            .AddTransient<IAddAccountCommandHandler, AddAccountCommandHandler>()
-            .AddTransient<IAddAccountingPeriodCommandHandler, AddAccountingPeriodCommandHandler>()
-            .AddTransient<IGetAccountQueryHandler, GetAccountQueryHandler>()
-            .AddTransient<IGetAccountsQueryHandler, GetAccountsQueryHandler>()
-            .AddTransient<IGetAccountingPeriodsQueryHandler, GetAccountingPeriodsQueryHandler>()
-            .AddTransient<IGetAccountsSummaryQueryHandler, GetAccountsSummaryQueryHandler>()
-            .AddTransient<IGetFinancialOverviewCommandHandler, GetFinancialOverviewCommandHandler>()
+            .AddTransient<AddAccount.IHandler, AddAccount.Handler>()
+            .AddTransient<AddAccountingPeriod.IHandler, AddAccountingPeriod.Handler>()
+            .AddTransient<GetAccount.IHandler, GetAccount.Handler>()
+            .AddTransient<GetAccounts.IHandler, GetAccounts.Handler>()
+            .AddTransient<GetAccountingPeriods.IHandler, GetAccountingPeriods.Handler>()
+            .AddTransient<GetAccountsSummary.IHandler, GetAccountsSummary.Handler>()
+            .AddTransient<GetFinancialOverview.IHandler, GetFinancialOverview.Handler>()
             // Automation
-            .AddTransient<IAddAutomationCommandHandler, AddAutomationCommandHandler>()
-            .AddTransient<IApplyAllAutomationsCommandHandler, ApplyAllAutomationsCommandHandler>()
-            .AddTransient<IGetNrOfPossibleAutomationQueryHandler, GetNrOfPossibleAutomationQueryHandler>()
+            .AddTransient<AddAutomation.IHandler, AddAutomation.Handler>()
+            .AddTransient<ApplyAllAutomations.IHandler, ApplyAllAutomations.Handler>()
+            .AddTransient<GetNrOfPossibleAutomation.IHandler, GetNrOfPossibleAutomation.Handler>()
             // Budget
-            .AddTransient<ISetBudgetCommandHandler, SetBudgetCommandHandler>()
-            .AddTransient<IGetBudgetEntriesQueryHandler, GetBudgetEntriesQueryHandler>()
+            .AddTransient<SetBudget.IHandler, SetBudget.Handler>()
+            .AddTransient<GetBudgetEntries.IHandler, GetBudgetEntries.Handler>()
             // Journal
-            .AddTransient<IAddJournalEntryCommandHandler, AddJournalEntryCommandHandler>()
-            .AddTransient<IGetJournalEntriesQueryHandler, GetJournalEntriesQueryHandler>()
+            .AddTransient<AddJournalEntry.IHandler, AddJournalEntry.Handler>()
+            .AddTransient<GetJournalEntries.IHandler, GetJournalEntries.Handler>()
             // Integration - FileImport
-            .AddTransient<IProcessFileCommandHandler, ProcessFileCommandHandler>()
-            .AddTransient<IProcessCamtFileCommandHandler, ProcessCamtFileCommandHandler>()
-            .AddTransient<IProcessPostFinanceCsvCommandHandler, ProcessPostFinanceCsvCommandHandler>()
+            .AddTransient<ProcessFile.IHandler, ProcessFile.Handler>()
+            .AddTransient<ProcessCamtFile.IHandler, ProcessCamtFile.Handler>()
+            .AddTransient<ProcessPostFinanceCsv.IHandler, ProcessPostFinanceCsv.Handler>()
             // Integration - NextOpenTransaction
-            .AddTransient<IOpenTransactionAmountChangedEventHandler, OpenTransactionAmountChangedEventHandler>()
-            .AddTransient<IAssignOpenTransactionCommandHandler, AssignOpenTransactionCommandHandler>()
-            .AddTransient<ISplitOpenTransactionCommandHandler, SplitOpenTransactionCommandHandler>()
-            .AddTransient<IGetNextOpenTransactionQueryHandler, GetNextOpenTransactionQueryHandler>()
-            .AddTransient<IGetTotalOpenTransactionQueryHandler, GetTotalOpenTransactionQueryHandler>()
+            .AddTransient<OpenTransactionAmountChanged.IHandler, OpenTransactionAmountChanged.Handler>()
+            .AddTransient<AssignOpenTransaction.IHandler, AssignOpenTransaction.Handler>()
+            .AddTransient<SplitOpenTransaction.IHandler, SplitOpenTransaction.Handler>()
+            .AddTransient<GetNextOpenTransaction.IHandler, GetNextOpenTransaction.Handler>()
+            .AddTransient<GetTotalOpenTransaction.IHandler, GetTotalOpenTransaction.Handler>()
             // Integration - TransactionQuery
-            .AddTransient<IGetTransactionsQueryHandler, GetTransactionsQueryHandler>()
-            .AddTransient<IGetTransactionSummariesQueryHandler, GetTransactionSummariesQueryHandler>();
+            .AddTransient<GetTransactions.IHandler, GetTransactions.Handler>()
+            .AddTransient<GetTransactionSummaries.IHandler, GetTransactionSummaries.Handler>();
 }

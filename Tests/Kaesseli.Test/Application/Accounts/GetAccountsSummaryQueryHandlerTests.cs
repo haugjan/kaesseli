@@ -25,7 +25,7 @@ public class GetAccountsSummaryQueryHandlerTests
         var journalRepo = new Mock<IJournalRepository>();
         var budgetRepo = new Mock<IBudgetRepository>();
         var dateTimeService = new Mock<IDateTimeService>();
-        var handler = new GetAccountsSummaryQueryHandler(accountRepo.Object, journalRepo.Object, budgetRepo.Object, dateTimeService.Object);
+        var handler = new GetAccountsSummary.Handler(accountRepo.Object, journalRepo.Object, budgetRepo.Object, dateTimeService.Object);
         var cancellationToken = new CancellationToken();
         var periodId = Guid.NewGuid();
 
@@ -61,7 +61,7 @@ public class GetAccountsSummaryQueryHandlerTests
         budgetRepo.Setup(repo => repo.GetBudgetEntries(It.IsAny<Guid>(), It.IsAny<Guid?>(), It.IsAny<AccountType?>(), It.IsAny<CancellationToken>()))
                   .ReturnsAsync(budgetEntries);
 
-        var query = new GetAccountsSummaryQuery
+        var query = new GetAccountsSummary.Query
         {
             AccountingPeriodId = periodId
         };
@@ -93,7 +93,7 @@ public class GetAccountsSummaryQueryHandlerTests
         var journalRepo = new Mock<IJournalRepository>();
         var budgetRepo = new Mock<IBudgetRepository>();
         var dateTime = new Mock<IDateTimeService>();
-        var handler = new GetAccountsSummaryQueryHandler(accountRepo.Object, journalRepo.Object, budgetRepo.Object, dateTime.Object);
+        var handler = new GetAccountsSummary.Handler(accountRepo.Object, journalRepo.Object, budgetRepo.Object, dateTime.Object);
         var cancellationToken = new CancellationToken();
         var periodId = Guid.NewGuid();
 
@@ -130,7 +130,7 @@ public class GetAccountsSummaryQueryHandlerTests
         budgetRepo.Setup(repo => repo.GetBudgetEntries(It.IsAny<Guid>(), It.IsAny<Guid?>(), It.IsAny<AccountType?>(), It.IsAny<CancellationToken>()))
                   .ReturnsAsync(value: Array.Empty<BudgetEntry>());
 
-        var query = new GetAccountsSummaryQuery
+        var query = new GetAccountsSummary.Query
         {
             AccountingPeriodId = periodId
         };

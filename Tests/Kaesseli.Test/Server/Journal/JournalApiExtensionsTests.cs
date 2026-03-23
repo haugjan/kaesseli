@@ -18,8 +18,8 @@ namespace Kaesseli.Server.Test.Journal;
 public class JournalApiExtensionsTests
 {
     private readonly HttpClient _client;
-    private readonly Mock<IAddJournalEntryCommandHandler> _addJournalEntryMock = new();
-    private readonly Mock<IGetJournalEntriesQueryHandler> _getJournalEntriesMock = new();
+    private readonly Mock<AddJournalEntry.IHandler> _addJournalEntryMock = new();
+    private readonly Mock<GetJournalEntries.IHandler> _getJournalEntriesMock = new();
 
     public JournalApiExtensionsTests()
     {
@@ -51,9 +51,9 @@ public class JournalApiExtensionsTests
     {
         // Arrange
         var guid = Guid.NewGuid();
-        _addJournalEntryMock.Setup(m => m.Handle(It.IsAny<AddJournalEntryCommand>(), default)).ReturnsAsync(guid);
+        _addJournalEntryMock.Setup(m => m.Handle(It.IsAny<AddJournalEntry.Query>(), default)).ReturnsAsync(guid);
 
-        var addJournalEntryCommand = new SmartFaker<AddJournalEntryCommand>().Generate();
+        var addJournalEntryCommand = new SmartFaker<AddJournalEntry.Query>().Generate();
         var content = new StringContent(
             content: JsonSerializer.Serialize(addJournalEntryCommand),
             Encoding.UTF8,
@@ -66,7 +66,7 @@ public class JournalApiExtensionsTests
         response.StatusCode.Should().Be(HttpStatusCode.Created);
         response.Headers.Location.Should()
                 .BeEquivalentTo(expectation: new Uri(uriString: $"/journalEntry/{guid}", UriKind.Relative));
-        _addJournalEntryMock.Verify(m => m.Handle(It.IsAny<AddJournalEntryCommand>(), default), Times.Once);
+        _addJournalEntryMock.Verify(m => m.Handle(It.IsAny<AddJournalEntry.Query>(), default), Times.Once);
     }
 
 
@@ -74,8 +74,8 @@ public class JournalApiExtensionsTests
     public async Task GetJournalEntriesEndpoint_ShouldReturnJournalEntries()
     {
         // Arrange
-        var journalEntries = new SmartFaker<GetJournalEntriesQueryResult>().Generate(count: 3);
-        _getJournalEntriesMock.Setup(m => m.Handle(It.IsAny<GetJournalEntriesQuery>(), default)).ReturnsAsync(journalEntries);
+        var journalEntries = new SmartFaker<GetJournalEntries.Result>().Generate(count: 3);
+        _getJournalEntriesMock.Setup(m => m.Handle(It.IsAny<GetJournalEntries.Query>(), default)).ReturnsAsync(journalEntries);
 
         var accountId = Guid.NewGuid();
         var periodId = Guid.NewGuid();
@@ -90,7 +90,7 @@ public class JournalApiExtensionsTests
         response.StatusCode.Should().Be(HttpStatusCode.OK);
         _getJournalEntriesMock
             .Verify(m => m.Handle(
-                                 It.Is<GetJournalEntriesQuery>(query
+                                 It.Is<GetJournalEntries.Query>(query
                                                                    => query.AccountingPeriodId == periodId
                                                                              && query.AccountType == accountType
                                                                    && query.AccountId == accountId), default), Times.Once);

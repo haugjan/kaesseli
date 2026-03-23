@@ -30,8 +30,8 @@ public class GetTransactionsQueryHandlerTests
                               => transactions1.Concat(transactions2)
                                               .Where(tran => tran.TransactionSummary!.Id == transactionSummaryId));
 
-        var handler = new GetTransactionsQueryHandler(mockRepository.Object);
-        var query = new GetTransactionsQuery { TransactionSummaryId = transactionSummaryGuid };
+        var handler = new GetTransactions.Handler(mockRepository.Object);
+        var query = new GetTransactions.Query { TransactionSummaryId = transactionSummaryGuid };
 
         // Act
         var result = (await handler.Handle(query, CancellationToken.None)).ToArray();

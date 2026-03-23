@@ -29,8 +29,8 @@ public class GetAccountQueryHandlerTests
         mockAccountRepo.Setup(repo => repo.GetAccount(It.Is<Guid>(guid => guid == expectedAccount.Id), cancellationToken))
                        .ReturnsAsync(expectedAccount);
 
-        var handler = new GetAccountQueryHandler(mockAccountRepo.Object, mockJournalRepo.Object, mockBudgetRepo.Object, mockDateTimeService.Object);
-        var query = new GetAccountQuery
+        var handler = new GetAccount.Handler(mockAccountRepo.Object, mockJournalRepo.Object, mockBudgetRepo.Object, mockDateTimeService.Object);
+        var query = new GetAccount.Query
         {
             AccountId = expectedAccount.Id,
             AccountingPeriodId = Guid.NewGuid()

@@ -14,7 +14,7 @@ public static class BudgetApiExtensions
     {
         app.MapPost(
             pattern: "/budgetEntry",
-            async (ISetBudgetCommandHandler handler, SetBudgetCommand command) =>
+            async (SetBudget.IHandler handler, SetBudget.Query command) =>
             {
                 var guid = await handler.Handle(command, default);
                 return Results.Created(uri: $"/budgetEntry/{guid}", guid);
@@ -22,12 +22,12 @@ public static class BudgetApiExtensions
         app.MapGet(
             pattern: "/budgetEntry",
             async (
-                    IGetBudgetEntriesQueryHandler handler,
+                    GetBudgetEntries.IHandler handler,
                     Guid accountingPeriodId,
                     Guid? accountId,
                     AccountType? accountType
                     ) =>
-                await handler.Handle(query: new GetBudgetEntriesQuery
+                await handler.Handle(query: new GetBudgetEntries.Query
                 {
                     AccountId = accountId,
                     AccountType = accountType,

@@ -1,4 +1,4 @@
-﻿using Kaesseli.Domain.Accounts;
+using Kaesseli.Domain.Accounts;
 using Kaesseli.Domain.Journal;
 
 namespace Kaesseli.Application.Journal;
@@ -6,7 +6,7 @@ namespace Kaesseli.Application.Journal;
 internal static class JournalEntryExtensions
 {
     internal static JournalEntry ToJournalEntry(
-        this AddJournalEntryCommand request,
+        this AddJournalEntry.Query request,
         DateOnly valueDate,
         Account debitAccount,
         Account creditAccount,

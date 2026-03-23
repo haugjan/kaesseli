@@ -18,42 +18,42 @@ public static class IntegrationApiExtensions
     {
         app.MapGet(
             pattern: "/transactionSummary",
-            async (IGetTransactionSummariesQueryHandler handler) =>
-                await handler.Handle(new GetTransactionSummariesQuery(), default)
+            async (GetTransactionSummaries.IHandler handler) =>
+                await handler.Handle(new GetTransactionSummaries.Query(), default)
         );
         app.MapGet(
             pattern: "/transaction",
-            async (IGetTransactionsQueryHandler handler, [FromQuery] Guid transactionSummaryId) =>
-                await handler.Handle(new GetTransactionsQuery { TransactionSummaryId = transactionSummaryId }, default)
+            async (GetTransactions.IHandler handler, [FromQuery] Guid transactionSummaryId) =>
+                await handler.Handle(new GetTransactions.Query { TransactionSummaryId = transactionSummaryId }, default)
         );
 
         app.MapGet(
             pattern: "/transaction/nextOpen",
-            async (IGetNextOpenTransactionQueryHandler handler, [FromQuery] int? skip) =>
-                await handler.Handle(new GetNextOpenTransactionQuery { Skip = skip.GetValueOrDefault() }, default)
+            async (GetNextOpenTransaction.IHandler handler, [FromQuery] int? skip) =>
+                await handler.Handle(new GetNextOpenTransaction.Query { Skip = skip.GetValueOrDefault() }, default)
         );
         app.MapGet(
             pattern: "/transaction/totalOpen",
-            async (IGetTotalOpenTransactionQueryHandler handler, [FromQuery] int? skip) =>
-                await handler.Handle(new GetTotalOpenTransactionQuery(), default)
+            async (GetTotalOpenTransaction.IHandler handler, [FromQuery] int? skip) =>
+                await handler.Handle(new GetTotalOpenTransaction.Query(), default)
         );
 
         app.MapPatch(
             pattern: "/transaction/journalEntry",
-            async (IAssignOpenTransactionCommandHandler handler, [FromBody] AssignOpenTransactionCommand cmd) =>
+            async (AssignOpenTransaction.IHandler handler, [FromBody] AssignOpenTransaction.Query cmd) =>
                 await handler.Handle(cmd, default)
         );
 
         app.MapPatch(
             pattern: "/transaction/journalEntry/split",
-            async (ISplitOpenTransactionCommandHandler handler, [FromBody] SplitOpenTransactionCommand cmd) =>
+            async (SplitOpenTransaction.IHandler handler, [FromBody] SplitOpenTransaction.Query cmd) =>
                 await handler.Handle(cmd, default)
         );
 
         app.MapPost(
                 pattern: "/file/upload",
                 async (
-                    IProcessFileCommandHandler handler,
+                    ProcessFile.IHandler handler,
                     IFormFile file,
                     [FromForm] Guid accountId,
                     [FromForm] Guid accountingPeriodId
@@ -87,7 +87,7 @@ public static class IntegrationApiExtensions
         IFormFile file,
         Guid accountId,
         Guid accountingPeriodId,
-        IProcessFileCommandHandler handler
+        ProcessFile.IHandler handler
     )
     {
         await using var memoryStream = file.OpenReadStream();
@@ -107,7 +107,7 @@ public static class IntegrationApiExtensions
         string extension,
         Guid accountId,
         Guid accountingPeriodId,
-        IProcessFileCommandHandler handler
+        ProcessFile.IHandler handler
     )
     {
         var fileType = extension switch
@@ -116,7 +116,7 @@ public static class IntegrationApiExtensions
             ".camt" or ".xml" => FileType.Camt,
             _ => throw new ArgumentOutOfRangeException(),
         };
-        var command = new ProcessFileCommand
+        var command = new ProcessFile.Query
         {
             Content = stream,
             AccountId = accountId,

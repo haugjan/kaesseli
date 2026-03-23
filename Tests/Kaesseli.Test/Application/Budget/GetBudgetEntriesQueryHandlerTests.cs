@@ -27,8 +27,8 @@ public class GetBudgetEntriesQueryHandlerTests
                               It.IsAny<CancellationToken>()))
                       .ReturnsAsync(entriesList);
 
-        var handler = new GetBudgetEntriesQueryHandler(mockRepository.Object);
-        var query = new GetBudgetEntriesQuery
+        var handler = new GetBudgetEntries.Handler(mockRepository.Object);
+        var query = new GetBudgetEntries.Query
         {
             AccountId = accountId,
             AccountType = null,

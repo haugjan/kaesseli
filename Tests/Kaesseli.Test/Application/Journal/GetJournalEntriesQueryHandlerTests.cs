@@ -26,10 +26,9 @@ public class GetJournalEntriesQueryHandlerTests
                               It.IsAny<CancellationToken>()))
                       .ReturnsAsync(entriesList);
 
-        var handler = new GetJournalEntriesQueryHandler(mockRepository.Object);
-        var query = new GetJournalEntriesQuery
+        var handler = new GetJournalEntries.Handler(mockRepository.Object);
+        var query = new GetJournalEntries.Query
         {
-
             AccountingPeriodId = expectedPeriodId,
             AccountId = null,
             AccountType = null

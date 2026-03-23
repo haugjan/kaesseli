@@ -1,11 +1,11 @@
-﻿using Kaesseli.Domain.Integration;
+using Kaesseli.Domain.Integration;
 
 // ReSharper disable once CheckNamespace
 namespace Kaesseli.Application.Integration.TransactionQuery;
 
 public static class TransactionSummaryExtensions
 {
-    public static GetTransactionSummariesQueryResult ToGetTransactionSummary(this TransactionSummary transactionSummary) =>
+    public static GetTransactionSummaries.Result ToGetTransactionSummary(this TransactionSummary transactionSummary) =>
         new()
         {
             Id = transactionSummary.Id,

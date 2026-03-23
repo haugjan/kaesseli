@@ -15,7 +15,7 @@ public static class JournalEntryApiExtensions
     {
         app.MapPost(
             pattern: "/journalEntry",
-            async (IAddJournalEntryCommandHandler handler, AddJournalEntryCommand command) =>
+            async (AddJournalEntry.IHandler handler, AddJournalEntry.Query command) =>
             {
                 var guid = await handler.Handle(command, default);
                 return Results.Created(uri: $"/journalEntry/{guid}", guid);
@@ -23,12 +23,12 @@ public static class JournalEntryApiExtensions
         app.MapGet(
             pattern: "/journalEntry",
             async (
-                    IGetJournalEntriesQueryHandler handler,
+                    GetJournalEntries.IHandler handler,
                     Guid accountingPeriodId,
                     Guid? accountId,
                     AccountType? accountType) =>
                 await handler.Handle(
-                    request: new GetJournalEntriesQuery
+                    request: new GetJournalEntries.Query
                     {
                         AccountingPeriodId = accountingPeriodId,
                         AccountId = accountId,

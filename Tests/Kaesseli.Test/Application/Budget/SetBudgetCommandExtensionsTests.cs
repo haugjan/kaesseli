@@ -18,7 +18,7 @@ public class SetBudgetCommandExtensionsTests
             Type = AccountType.Expense,
             Icon = new AccountIcon("favorite", "blue")
         };
-        var budgetEntryCommand = new SetBudgetCommand
+        var budgetEntryCommand = new SetBudget.Query
         {
             Amount = 42,
             Description = "Description",

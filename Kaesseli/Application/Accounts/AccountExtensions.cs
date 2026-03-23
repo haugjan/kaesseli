@@ -1,11 +1,11 @@
-﻿using Kaesseli.Application.Accounts;
+using Kaesseli.Application.Accounts;
 
 // ReSharper disable once CheckNamespace
 namespace Kaesseli.Domain.Accounts;
 
 internal static class AccountExtensions
 {
-    internal static GetAccountsSummaryQueryResult ToAccountSummary(
+    internal static GetAccountsSummary.Result ToAccountSummary(
         this Account account,
         decimal accountBalance,
         decimal? budget,

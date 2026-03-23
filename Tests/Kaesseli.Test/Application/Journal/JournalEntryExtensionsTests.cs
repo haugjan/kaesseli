@@ -14,7 +14,7 @@ public class JournalEntryExtensionsTests
         //Arrange
         var creditAccount = new SmartFaker<Account>().Generate();
         var debitAccount = new SmartFaker<Account>().Generate();
-        var command = new AddJournalEntryCommand
+        var command = new AddJournalEntry.Query
         {
             Amount = 42,
             Description = "Description",

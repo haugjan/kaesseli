@@ -13,7 +13,7 @@ public class AddAccountCommandHandlerTests
         // Arrange
         var mockRepo = new Mock<IAccountRepository>();
         const string name = "MyAccount";
-        var command = new AddAccountCommand
+        var command = new AddAccount.Query
         {
             Name = name,
             Type = AccountType.Expense,
@@ -28,7 +28,7 @@ public class AddAccountCommandHandlerTests
                         cancellationToken))
                 .ReturnsAsync((Account newAccount, CancellationToken _) => newAccount);
 
-        var handler = new AddAccountCommandHandler(mockRepo.Object);
+        var handler = new AddAccount.Handler(mockRepo.Object);
 
         // Act
         var result = await handler.Handle(command, CancellationToken.None);

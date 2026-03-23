@@ -17,8 +17,8 @@ namespace Kaesseli.Server.Test.Budget;
 public class BudgetApiExtensionsTests
 {
     private readonly HttpClient _client;
-    private readonly Mock<ISetBudgetCommandHandler> _setBudgetMock = new();
-    private readonly Mock<IGetBudgetEntriesQueryHandler> _getBudgetEntriesMock = new();
+    private readonly Mock<SetBudget.IHandler> _setBudgetMock = new();
+    private readonly Mock<GetBudgetEntries.IHandler> _getBudgetEntriesMock = new();
 
     public BudgetApiExtensionsTests()
     {
@@ -50,9 +50,9 @@ public class BudgetApiExtensionsTests
     {
         // Arrange
         var guid = Guid.NewGuid();
-        _setBudgetMock.Setup(m => m.Handle(It.IsAny<SetBudgetCommand>(), default)).ReturnsAsync(guid);
+        _setBudgetMock.Setup(m => m.Handle(It.IsAny<SetBudget.Query>(), default)).ReturnsAsync(guid);
 
-        var setBudgetCommand = new SmartFaker<SetBudgetCommand>().Generate();
+        var setBudgetCommand = new SmartFaker<SetBudget.Query>().Generate();
         var content = new StringContent(
             content: JsonSerializer.Serialize(setBudgetCommand),
             Encoding.UTF8,
@@ -65,15 +65,15 @@ public class BudgetApiExtensionsTests
         response.StatusCode.Should().Be(HttpStatusCode.Created);
         response.Headers.Location.Should()
                 .BeEquivalentTo(expectation: new Uri(uriString: $"/budgetEntry/{guid}", UriKind.Relative));
-        _setBudgetMock.Verify(m => m.Handle(It.IsAny<SetBudgetCommand>(), default), Times.Once);
+        _setBudgetMock.Verify(m => m.Handle(It.IsAny<SetBudget.Query>(), default), Times.Once);
     }
 
     [Fact]
     public async Task GetBudgetEntriesEndpoint_ShouldReturnBudgetEntries()
     {
         // Arrange
-        var budgetEntries = new SmartFaker<GetBudgetEntriesQueryResult>().Generate(count: 3);
-        _getBudgetEntriesMock.Setup(m => m.Handle(It.IsAny<GetBudgetEntriesQuery>(), default)).ReturnsAsync(budgetEntries);
+        var budgetEntries = new SmartFaker<GetBudgetEntries.Result>().Generate(count: 3);
+        _getBudgetEntriesMock.Setup(m => m.Handle(It.IsAny<GetBudgetEntries.Query>(), default)).ReturnsAsync(budgetEntries);
 
         var accountId = Guid.NewGuid();
         var periodId = Guid.NewGuid();
@@ -86,6 +86,6 @@ public class BudgetApiExtensionsTests
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);
-        _getBudgetEntriesMock.Verify(m => m.Handle(It.IsAny<GetBudgetEntriesQuery>(), default), Times.Once);
+        _getBudgetEntriesMock.Verify(m => m.Handle(It.IsAny<GetBudgetEntries.Query>(), default), Times.Once);
     }
 }

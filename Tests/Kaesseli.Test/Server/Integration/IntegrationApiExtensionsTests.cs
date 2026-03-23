@@ -19,13 +19,13 @@ namespace Kaesseli.Server.Test.Integration;
 public class IntegrationApiExtensionsTests
 {
     private readonly HttpClient _client;
-    private readonly Mock<IProcessFileCommandHandler> _processFileMock = new();
-    private readonly Mock<IGetTransactionSummariesQueryHandler> _getTransactionSummariesMock = new();
-    private readonly Mock<IGetTransactionsQueryHandler> _getTransactionsMock = new();
-    private readonly Mock<IGetNextOpenTransactionQueryHandler> _getNextOpenTransactionMock = new();
-    private readonly Mock<IGetTotalOpenTransactionQueryHandler> _getTotalOpenTransactionMock = new();
-    private readonly Mock<IAssignOpenTransactionCommandHandler> _assignOpenTransactionMock = new();
-    private readonly Mock<ISplitOpenTransactionCommandHandler> _splitOpenTransactionMock = new();
+    private readonly Mock<ProcessFile.IHandler> _processFileMock = new();
+    private readonly Mock<GetTransactionSummaries.IHandler> _getTransactionSummariesMock = new();
+    private readonly Mock<GetTransactions.IHandler> _getTransactionsMock = new();
+    private readonly Mock<GetNextOpenTransaction.IHandler> _getNextOpenTransactionMock = new();
+    private readonly Mock<GetTotalOpenTransaction.IHandler> _getTotalOpenTransactionMock = new();
+    private readonly Mock<AssignOpenTransaction.IHandler> _assignOpenTransactionMock = new();
+    private readonly Mock<SplitOpenTransaction.IHandler> _splitOpenTransactionMock = new();
 
     public IntegrationApiExtensionsTests()
     {
@@ -66,7 +66,7 @@ public class IntegrationApiExtensionsTests
     {
         // Arrange
         var guid = Guid.NewGuid();
-        _processFileMock.Setup(m => m.Handle(It.IsAny<ProcessFileCommand>(), default)).ReturnsAsync(guid);
+        _processFileMock.Setup(m => m.Handle(It.IsAny<ProcessFile.Query>(), default)).ReturnsAsync(guid);
 
         var formContent = new MultipartFormDataContent();
         var accountId = Guid.NewGuid();
@@ -81,22 +81,22 @@ public class IntegrationApiExtensionsTests
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);
-        _processFileMock.Verify(m => m.Handle(It.IsAny<ProcessFileCommand>(), default), Times.Once);
+        _processFileMock.Verify(m => m.Handle(It.IsAny<ProcessFile.Query>(), default), Times.Once);
     }
 
     [Fact]
     public async Task GetTransactionSummariesEndpoint_ShouldReturnTransactionSummaries()
     {
         // Arrange
-        var transactionSummaries = new SmartFaker<GetTransactionSummariesQueryResult>().Generate(count: 3);
-        _getTransactionSummariesMock.Setup(m => m.Handle(It.IsAny<GetTransactionSummariesQuery>(), default)).ReturnsAsync(transactionSummaries);
+        var transactionSummaries = new SmartFaker<GetTransactionSummaries.Result>().Generate(count: 3);
+        _getTransactionSummariesMock.Setup(m => m.Handle(It.IsAny<GetTransactionSummaries.Query>(), default)).ReturnsAsync(transactionSummaries);
 
         // Act
         var response = await _client.GetAsync(requestUri: "/transactionSummary");
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);
-        _getTransactionSummariesMock.Verify(m => m.Handle(It.IsAny<GetTransactionSummariesQuery>(), default), Times.Once);
+        _getTransactionSummariesMock.Verify(m => m.Handle(It.IsAny<GetTransactionSummaries.Query>(), default), Times.Once);
     }
 
 
@@ -104,14 +104,14 @@ public class IntegrationApiExtensionsTests
     public async Task G2etTransactionSummariesEndpoint_ShouldReturnTransactionSummaries()
     {
         // Arrange
-        var nextOpenTransaction = new SmartFaker<GetNextOpenTransactionQueryResult>().Generate();
-        _getNextOpenTransactionMock.Setup(m => m.Handle(It.IsAny<GetNextOpenTransactionQuery>(), default)).ReturnsAsync(nextOpenTransaction);
+        var nextOpenTransaction = new SmartFaker<GetNextOpenTransaction.Result>().Generate();
+        _getNextOpenTransactionMock.Setup(m => m.Handle(It.IsAny<GetNextOpenTransaction.Query>(), default)).ReturnsAsync(nextOpenTransaction);
 
         // Act
         var response = await _client.GetAsync(requestUri: "/transaction/nextOpen");
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);
-        _getNextOpenTransactionMock.Verify(m => m.Handle(It.IsAny<GetNextOpenTransactionQuery>(), default), Times.Once);
+        _getNextOpenTransactionMock.Verify(m => m.Handle(It.IsAny<GetNextOpenTransaction.Query>(), default), Times.Once);
     }
 }

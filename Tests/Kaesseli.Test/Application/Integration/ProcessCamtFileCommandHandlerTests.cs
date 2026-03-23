@@ -14,17 +14,17 @@ public class ProcessCamtFileCommandHandlerTests
     private readonly Mock<ICamtProcessor> _camtProcessorMock = new();
     private readonly Mock<ITransactionRepository> _transactionRepoMock = new();
     private readonly Mock<IAccountRepository> _accountRepoMock = new();
-    private readonly Mock<IOpenTransactionAmountChangedEventHandler> _eventHandlerMock = new();
-    private readonly ProcessCamtFileCommandHandler _handler;
+    private readonly Mock<OpenTransactionAmountChanged.IHandler> _eventHandlerMock = new();
+    private readonly ProcessCamtFile.Handler _handler;
 
     public ProcessCamtFileCommandHandlerTests() =>
-        _handler = new ProcessCamtFileCommandHandler(_camtProcessorMock.Object, _transactionRepoMock.Object, _accountRepoMock.Object, _eventHandlerMock.Object);
+        _handler = new ProcessCamtFile.Handler(_camtProcessorMock.Object, _transactionRepoMock.Object, _accountRepoMock.Object, _eventHandlerMock.Object);
 
     [Fact]
     public async Task Handle_ShouldProcessCamtFileAndReturnEntryIds()
     {
         // Arrange
-        var fakeCommand = new SmartFaker<ProcessCamtFileCommand>().Generate();
+        var fakeCommand = new SmartFaker<ProcessCamtFile.Query>().Generate();
         var financialDocument = new SmartFaker<FinancialDocument>()
                                .RuleFor(cd => cd.Entries, value: new SmartFaker<FinancialDocumentEntry>().Generate(count: 2))
                                .Generate();

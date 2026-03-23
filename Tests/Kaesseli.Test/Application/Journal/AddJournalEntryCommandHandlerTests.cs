@@ -17,7 +17,7 @@ public class AddJournalEntryCommandHandlerTests
         var mockJournalRepo = new Mock<IJournalRepository>();
         var mockAccountRepo = new Mock<IAccountRepository>();
         var dateTimeService = new Mock<IDateTimeService>();
-        var command = new SmartFaker<AddJournalEntryCommand>().Generate();
+        var command = new SmartFaker<AddJournalEntry.Query>().Generate();
         var cancellationToken = new CancellationToken();
 
         mockJournalRepo.Setup(
@@ -26,7 +26,7 @@ public class AddJournalEntryCommandHandlerTests
                                cancellationToken))
                        .ReturnsAsync((JournalEntry newJournalEntry, CancellationToken _) => newJournalEntry);
 
-        var handler = new AddJournalEntryCommandHandler(mockJournalRepo.Object, mockAccountRepo.Object, dateTimeService.Object);
+        var handler = new AddJournalEntry.Handler(mockJournalRepo.Object, mockAccountRepo.Object, dateTimeService.Object);
 
         // Act
         var result = await handler.Handle(command, CancellationToken.None);
@@ -49,7 +49,7 @@ public class AddJournalEntryCommandHandlerTests
         var mockJournalRepo = new Mock<IJournalRepository>();
         var mockAccountRepo = new Mock<IAccountRepository>();
         var dateTimeService = new Mock<IDateTimeService>();
-        var command = new SmartFaker<AddJournalEntryCommand>().RuleFor(c => c.ValueDate, _ => null).Generate();
+        var command = new SmartFaker<AddJournalEntry.Query>().RuleFor(c => c.ValueDate, _ => null).Generate();
         var cancellationToken = new CancellationToken();
         var currentDay = new DateOnly(year: 1982, month: 11, day: 3);
 
@@ -59,7 +59,7 @@ public class AddJournalEntryCommandHandlerTests
                         cancellationToken))
                 .ReturnsAsync((JournalEntry newJournalEntry, CancellationToken _) => newJournalEntry);
         dateTimeService.Setup(dts => dts.ToDay).Returns(currentDay);
-        var handler = new AddJournalEntryCommandHandler(mockJournalRepo.Object, mockAccountRepo.Object, dateTimeService.Object);
+        var handler = new AddJournalEntry.Handler(mockJournalRepo.Object, mockAccountRepo.Object, dateTimeService.Object);
 
         // Act
         var result = await handler.Handle(command, CancellationToken.None);

@@ -18,13 +18,13 @@ namespace Kaesseli.Server.Test.Accounts;
 public class AccountApiExtensionsTests
 {
     private readonly HttpClient _client;
-    private readonly Mock<IGetAccountsQueryHandler> _getAccountsMock = new();
-    private readonly Mock<IGetAccountingPeriodsQueryHandler> _getAccountingPeriodsMock = new();
-    private readonly Mock<IGetAccountQueryHandler> _getAccountMock = new();
-    private readonly Mock<IGetAccountsSummaryQueryHandler> _getAccountsSummaryMock = new();
-    private readonly Mock<IGetFinancialOverviewCommandHandler> _getFinancialOverviewMock = new();
-    private readonly Mock<IAddAccountCommandHandler> _addAccountMock = new();
-    private readonly Mock<IAddAccountingPeriodCommandHandler> _addAccountingPeriodMock = new();
+    private readonly Mock<GetAccounts.IHandler> _getAccountsMock = new();
+    private readonly Mock<GetAccountingPeriods.IHandler> _getAccountingPeriodsMock = new();
+    private readonly Mock<GetAccount.IHandler> _getAccountMock = new();
+    private readonly Mock<GetAccountsSummary.IHandler> _getAccountsSummaryMock = new();
+    private readonly Mock<GetFinancialOverview.IHandler> _getFinancialOverviewMock = new();
+    private readonly Mock<AddAccount.IHandler> _addAccountMock = new();
+    private readonly Mock<AddAccountingPeriod.IHandler> _addAccountingPeriodMock = new();
 
     public AccountApiExtensionsTests()
     {
@@ -61,15 +61,15 @@ public class AccountApiExtensionsTests
     {
         // Arrange
         var periodId = Guid.NewGuid();
-        var accounts = new SmartFaker<GetAccountsSummaryQueryResult>().Generate(count: 3);
-        _getAccountsSummaryMock.Setup(m => m.Handle(It.IsAny<GetAccountsSummaryQuery>(), default)).ReturnsAsync(accounts);
+        var accounts = new SmartFaker<GetAccountsSummary.Result>().Generate(count: 3);
+        _getAccountsSummaryMock.Setup(m => m.Handle(It.IsAny<GetAccountsSummary.Query>(), default)).ReturnsAsync(accounts);
 
         // Act
         var response = await _client.GetAsync(requestUri: $"/accountingPeriod/{periodId}/accountSummary");
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);
-        _getAccountsSummaryMock.Verify(m => m.Handle(It.IsAny<GetAccountsSummaryQuery>(), default), Times.Once);
+        _getAccountsSummaryMock.Verify(m => m.Handle(It.IsAny<GetAccountsSummary.Query>(), default), Times.Once);
     }
 
     [Fact]
@@ -77,10 +77,10 @@ public class AccountApiExtensionsTests
     {
         // Arrange
         var periodId = Guid.NewGuid();
-        var accounts = new SmartFaker<GetAccountsQueryResult>().Generate(count: 3);
+        var accounts = new SmartFaker<GetAccounts.Result>().Generate(count: 3);
         var expectedAccount = accounts[index: 1];
-        _getAccountMock.Setup(m => m.Handle(It.Is<GetAccountQuery>(x => x.AccountId == expectedAccount.Id), default))
-                       .ReturnsAsync((GetAccountQuery _, CancellationToken _) => new GetAccountQueryResult
+        _getAccountMock.Setup(m => m.Handle(It.Is<GetAccount.Query>(x => x.AccountId == expectedAccount.Id), default))
+                       .ReturnsAsync((GetAccount.Query _, CancellationToken _) => new GetAccount.Result
                        {
                            Id = expectedAccount.Id,
                            Name = expectedAccount.Name,
@@ -91,7 +91,7 @@ public class AccountApiExtensionsTests
                            AccountBalance = 10,
                            Budget = 11,
                            BudgetBalance = 12,
-                           Entries = Array.Empty<GetAccountQueryResultEntry>(),
+                           Entries = Array.Empty<GetAccount.ResultEntry>(),
                            CurrentBudget = 13,
                            BudgetPerMonth = null,
                            BudgetPerYear = null
@@ -106,9 +106,9 @@ public class AccountApiExtensionsTests
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);
-        var accountResponse = JsonSerializer.Deserialize<GetAccountQueryResult>(json: await response.Content.ReadAsStringAsync(), options);
+        var accountResponse = JsonSerializer.Deserialize<GetAccount.Result>(json: await response.Content.ReadAsStringAsync(), options);
         accountResponse.Should().BeEquivalentTo(expectedAccount);
-        _getAccountMock.Verify(m => m.Handle(It.Is<GetAccountQuery>(query => query.AccountId == expectedAccount.Id
+        _getAccountMock.Verify(m => m.Handle(It.Is<GetAccount.Query>(query => query.AccountId == expectedAccount.Id
                                                                              && query.AccountingPeriodId == periodId), default), Times.Once);
     }
 
@@ -117,9 +117,9 @@ public class AccountApiExtensionsTests
     {
         // Arrange
         var guid = Guid.NewGuid();
-        _addAccountMock.Setup(m => m.Handle(It.IsAny<AddAccountCommand>(), default)).ReturnsAsync(guid);
+        _addAccountMock.Setup(m => m.Handle(It.IsAny<AddAccount.Query>(), default)).ReturnsAsync(guid);
 
-        var addAccountCommand = new SmartFaker<AddAccountCommand>().Generate();
+        var addAccountCommand = new SmartFaker<AddAccount.Query>().Generate();
         var content = new StringContent(
             content: JsonSerializer.Serialize(addAccountCommand),
             Encoding.UTF8,
@@ -136,7 +136,7 @@ public class AccountApiExtensionsTests
                     .BeEquivalentTo(expectation: new Uri(uriString: $"/account/{guid}", UriKind.Relative));
         }
 
-        _addAccountMock.Verify(m => m.Handle(It.IsAny<AddAccountCommand>(), default), Times.Once);
+        _addAccountMock.Verify(m => m.Handle(It.IsAny<AddAccount.Query>(), default), Times.Once);
     }
 
     [Fact]
@@ -144,9 +144,9 @@ public class AccountApiExtensionsTests
     {
         // Arrange
         var expectedGuid = Guid.NewGuid();
-        _addAccountingPeriodMock.Setup(m => m.Handle(It.IsAny<AddAccountingPeriodCommand>(), default)).ReturnsAsync(expectedGuid);
+        _addAccountingPeriodMock.Setup(m => m.Handle(It.IsAny<AddAccountingPeriod.Query>(), default)).ReturnsAsync(expectedGuid);
 
-        var addAccountingPeriodCommand = new SmartFaker<AddAccountingPeriodCommand>().Generate();
+        var addAccountingPeriodCommand = new SmartFaker<AddAccountingPeriod.Query>().Generate();
         var content = new StringContent(
             content: JsonSerializer.Serialize(addAccountingPeriodCommand),
             Encoding.UTF8,
@@ -170,6 +170,6 @@ public class AccountApiExtensionsTests
         }
 
         currentGuid.Should().Be(expectedGuid);
-        _addAccountingPeriodMock.Verify(m => m.Handle(It.IsAny<AddAccountingPeriodCommand>(), default), Times.Once);
+        _addAccountingPeriodMock.Verify(m => m.Handle(It.IsAny<AddAccountingPeriod.Query>(), default), Times.Once);
     }
 }

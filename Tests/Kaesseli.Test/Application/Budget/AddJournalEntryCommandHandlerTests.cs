@@ -15,7 +15,7 @@ public class AddJournalEntryCommandHandlerTests
         // Arrange
         var mockRepo = new Mock<IBudgetRepository>();
         var accountRepo = new Mock<IAccountRepository>();
-        var command = new SmartFaker<SetBudgetCommand>().Generate();
+        var command = new SmartFaker<SetBudget.Query>().Generate();
         var cancellationToken = new CancellationToken();
 
         mockRepo.Setup(
@@ -42,7 +42,7 @@ public class AddJournalEntryCommandHandlerTests
                                Description = string.Empty
                            });
 
-        var handler = new SetBudgetCommandHandler(mockRepo.Object, accountRepo.Object);
+        var handler = new SetBudget.Handler(mockRepo.Object, accountRepo.Object);
 
         // Act
         var result = await handler.Handle(command, CancellationToken.None);
@@ -64,7 +64,7 @@ public class AddJournalEntryCommandHandlerTests
         // Arrange
         var mockRepo = new Mock<IBudgetRepository>();
         var accountRepo = new Mock<IAccountRepository>();
-        var command = new SmartFaker<SetBudgetCommand>().Generate();
+        var command = new SmartFaker<SetBudget.Query>().Generate();
         var cancellationToken = new CancellationToken();
 
         mockRepo.Setup(
@@ -92,7 +92,7 @@ public class AddJournalEntryCommandHandlerTests
                            });
 
 
-        var handler = new SetBudgetCommandHandler(mockRepo.Object, accountRepo.Object);
+        var handler = new SetBudget.Handler(mockRepo.Object, accountRepo.Object);
 
         // Act
         var result = await handler.Handle(command, CancellationToken.None);

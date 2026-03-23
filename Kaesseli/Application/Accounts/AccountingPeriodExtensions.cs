@@ -1,10 +1,10 @@
-﻿using Kaesseli.Domain.Accounts;
+using Kaesseli.Domain.Accounts;
 
 namespace Kaesseli.Application.Accounts;
 
 public static class AccountingPeriodExtensions
 {
-    public static GetAccountingPeriodsQueryResult ToGetAccountingPeriodsQueryResult(this AccountingPeriod accountingPeriod) =>
+    public static GetAccountingPeriods.Result ToGetAccountingPeriodsQueryResult(this AccountingPeriod accountingPeriod) =>
         new()
         {
             Id = accountingPeriod.Id,

@@ -21,8 +21,8 @@ public class GetTransactionSummariesQueryHandlerTests
         mockRepository.Setup(repo => repo.GetTransactionSummaries(It.IsAny<CancellationToken>()))
                       .ReturnsAsync(transactionSummaries);
 
-        var handler = new GetTransactionSummariesQueryHandler(mockRepository.Object);
-        var query = new GetTransactionSummariesQuery();
+        var handler = new GetTransactionSummaries.Handler(mockRepository.Object);
+        var query = new GetTransactionSummaries.Query();
 
         // Act
         var result = (await handler.Handle(query, CancellationToken.None)).ToArray();

@@ -16,7 +16,7 @@ public class GetNextOpenTransactionQueryHandlerTests
         // Arrange
         var mockTransactionRepository = new Mock<ITransactionRepository>();
         var mockAccountRepository = new Mock<IAccountRepository>();
-        var handler = new GetNextOpenTransactionQueryHandler(mockTransactionRepository.Object, mockAccountRepository.Object);
+        var handler = new GetNextOpenTransaction.Handler(mockTransactionRepository.Object, mockAccountRepository.Object);
 
         var expectedTransaction = new SmartFaker<Transaction>().Generate();
 
@@ -27,7 +27,7 @@ public class GetNextOpenTransactionQueryHandlerTests
         mockAccountRepository.Setup(r => r.GetAccounts(It.IsAny<CancellationToken>()))
                              .ReturnsAsync(accounts);
 
-        var request = new GetNextOpenTransactionQuery { Skip = 1 };
+        var request = new GetNextOpenTransaction.Query { Skip = 1 };
 
         // Act
         var result = await handler.Handle(request, CancellationToken.None);
@@ -46,12 +46,12 @@ public class GetNextOpenTransactionQueryHandlerTests
         // Arrange
         var mockTransactionRepository = new Mock<ITransactionRepository>();
         var mockAccountRepository = new Mock<IAccountRepository>();
-        var handler = new GetNextOpenTransactionQueryHandler(mockTransactionRepository.Object, mockAccountRepository.Object);
+        var handler = new GetNextOpenTransaction.Handler(mockTransactionRepository.Object, mockAccountRepository.Object);
 
         mockTransactionRepository.Setup(r => r.GetNextOpenTransaction(It.IsAny<int>(), It.IsAny<CancellationToken>()))
                                  .ReturnsAsync(value: null);
 
-        var request = new GetNextOpenTransactionQuery { Skip = 1 };
+        var request = new GetNextOpenTransaction.Query { Skip = 1 };
 
         // Act
         var result = await handler.Handle(request, CancellationToken.None);

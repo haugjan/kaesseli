@@ -22,8 +22,8 @@ public class GetAccountsQueryHandlerTests
         mockRepository.Setup(repo => repo.GetAccounts(cancellationToken))
                       .ReturnsAsync(accountsList);
 
-        var handler = new GetAccountsQueryHandler(mockRepository.Object);
-        var query = new GetAccountsQuery();
+        var handler = new GetAccounts.Handler(mockRepository.Object);
+        var query = new GetAccounts.Query();
 
         // Act
         var result = (await handler.Handle(query, cancellationToken)).ToArray();

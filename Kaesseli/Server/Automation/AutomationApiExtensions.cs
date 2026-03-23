@@ -15,12 +15,12 @@ public static class AutomationApiExtensions
     {
         app.MapGet(
             pattern: "/automation/nrMatchInput",
-            async (IGetNrOfPossibleAutomationQueryHandler handler, [FromQuery] string input) =>
-                await handler.Handle(new GetNrOfPossibleAutomationQuery { AutomationText = input }, default));
+            async (GetNrOfPossibleAutomation.IHandler handler, [FromQuery] string input) =>
+                await handler.Handle(new GetNrOfPossibleAutomation.Query { AutomationText = input }, default));
 
         app.MapPost(
             pattern: "/automation",
-            async (IAddAutomationCommandHandler handler, AddAutomationCommand addAutomationCommand) =>
+            async (AddAutomation.IHandler handler, AddAutomation.Query addAutomationCommand) =>
             {
                 var guid = await handler.Handle(addAutomationCommand, default);
                 return Results.Created(uri: $"/automation/{guid}", guid);

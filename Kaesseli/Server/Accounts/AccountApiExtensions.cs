@@ -14,18 +14,18 @@ public static class AccountApiExtensions
     {
         app.MapGet(
             pattern: "/account",
-            async (IGetAccountsQueryHandler handler, [FromQuery] AccountType? accountType) =>
-                await handler.Handle(request: new GetAccountsQuery { AccountType = accountType }, default));
+            async (GetAccounts.IHandler handler, [FromQuery] AccountType? accountType) =>
+                await handler.Handle(request: new GetAccounts.Query { AccountType = accountType }, default));
 
         app.MapGet(
             pattern: "/accountingPeriod",
-            async (IGetAccountingPeriodsQueryHandler handler) =>
-                await handler.Handle(request: new GetAccountingPeriodsQuery(), default));
+            async (GetAccountingPeriods.IHandler handler) =>
+                await handler.Handle(request: new GetAccountingPeriods.Query(), default));
 
         app.MapGet(
             pattern: "/accountingPeriod/{accountingPeriodId}/account/{accountId}",
-            async (IGetAccountQueryHandler handler, Guid accountId, Guid accountingPeriodId) =>
-                await handler.Handle(request: new GetAccountQuery
+            async (GetAccount.IHandler handler, Guid accountId, Guid accountingPeriodId) =>
+                await handler.Handle(request: new GetAccount.Query
                 {
                     AccountId = accountId,
                     AccountingPeriodId = accountingPeriodId
@@ -33,23 +33,23 @@ public static class AccountApiExtensions
 
         app.MapGet(
             pattern: "/accountingPeriod/{accountingPeriodId}/accountSummary",
-            async (IGetAccountsSummaryQueryHandler handler, Guid accountingPeriodId) =>
-                await handler.Handle(request: new GetAccountsSummaryQuery
+            async (GetAccountsSummary.IHandler handler, Guid accountingPeriodId) =>
+                await handler.Handle(request: new GetAccountsSummary.Query
                 {
                     AccountingPeriodId = accountingPeriodId
                 }, default));
 
         app.MapGet(
             pattern: "/accountingPeriod/{accountingPeriodId}/overView",
-            async (IGetFinancialOverviewCommandHandler handler, Guid accountingPeriodId) =>
-                await handler.Handle(request: new GetFinancialOverviewCommand
+            async (GetFinancialOverview.IHandler handler, Guid accountingPeriodId) =>
+                await handler.Handle(request: new GetFinancialOverview.Query
                 {
                     AccountingPeriodId = accountingPeriodId
                 }, default));
 
         app.MapPost(
             pattern: "/account",
-            async (IAddAccountCommandHandler handler, AddAccountCommand command) =>
+            async (AddAccount.IHandler handler, AddAccount.Query command) =>
             {
                 var guid = await handler.Handle(command, default);
                 return Results.Created(uri: $"/account/{guid}", guid);
@@ -57,7 +57,7 @@ public static class AccountApiExtensions
 
         app.MapPost(
             pattern: "/accountingPeriod",
-            async (IAddAccountingPeriodCommandHandler handler, AddAccountingPeriodCommand command) =>
+            async (AddAccountingPeriod.IHandler handler, AddAccountingPeriod.Query command) =>
             {
                 var guid = await handler.Handle(command, default);
                 return Results.Created(uri: $"/accountingPeriod/{guid}", guid);
