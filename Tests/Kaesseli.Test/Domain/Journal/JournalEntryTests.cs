@@ -2,7 +2,7 @@ using Kaesseli.Domain.Accounts;
 using Kaesseli.Domain.Journal;
 using Xunit;
 
-namespace Kaesseli.Domain.Test.Journal;
+namespace Kaesseli.Test.Domain.Journal;
 
 public class JournalEntryTests
 {
@@ -15,14 +15,14 @@ public class JournalEntryTests
             Id = Guid.NewGuid(),
             Name = "A",
             Type = AccountType.Expense,
-            Icon = new AccountIcon("favorite", "blue")
+            Icon = new AccountIcon("favorite", "blue"),
         };
         var creditAccount = new Account
         {
             Id = Guid.NewGuid(),
             Name = "B",
             Type = AccountType.Expense,
-            Icon = new AccountIcon("favorite", "blue")
+            Icon = new AccountIcon("favorite", "blue"),
         };
 
         // Act & Assert
@@ -40,8 +40,8 @@ public class JournalEntryTests
                 Id = Guid.NewGuid(),
                 FromInclusive = default,
                 ToInclusive = default,
-                Description = string.Empty
-            }
+                Description = string.Empty,
+            },
         };
     }
 
@@ -54,12 +54,12 @@ public class JournalEntryTests
             Id = Guid.NewGuid(),
             Name = "A",
             Type = AccountType.Expense,
-            Icon = new AccountIcon("favorite", "blue")
+            Icon = new AccountIcon("favorite", "blue"),
         };
 
         // Act & Assert
-        Assert.Throws<AccountsMustNotBeSameException>(
-            () => new JournalEntry
+        Assert.Throws<AccountsMustNotBeSameException>(() =>
+            new JournalEntry
             {
                 Id = Guid.NewGuid(),
                 ValueDate = DateOnly.FromDateTime(DateTime.Now),
@@ -73,8 +73,9 @@ public class JournalEntryTests
                     Id = Guid.NewGuid(),
                     FromInclusive = default,
                     ToInclusive = default,
-                    Description = string.Empty
-                }
-            });
+                    Description = string.Empty,
+                },
+            }
+        );
     }
 }

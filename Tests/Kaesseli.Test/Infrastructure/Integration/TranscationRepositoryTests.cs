@@ -4,12 +4,12 @@ using Kaesseli.Domain.Integration;
 using Kaesseli.Domain.Journal;
 using Kaesseli.Infrastructure.Common;
 using Kaesseli.Infrastructure.Integration;
-using Kaesseli.TestUtilities.Faker;
+using Kaesseli.Test.Faker;
 using Microsoft.EntityFrameworkCore;
 using Moq;
 using Xunit;
 
-namespace Kaesseli.Infrastructure.Test.Integration;
+namespace Kaesseli.Test.Infrastructure.Integration;
 
 public class TransactionRepositoryTests
 {
@@ -25,12 +25,12 @@ public class TransactionRepositoryTests
     {
         // Arrange
         var options = new DbContextOptionsBuilder<KaesseliContext>()
-                      .UseInMemoryDatabase(databaseName: "GetTransactionSummariesDb")
-                      .Options;
+            .UseInMemoryDatabase(databaseName: "GetTransactionSummariesDb")
+            .Options;
 
         var transactions = new SmartFaker<TransactionSummary>()
-                           .RuleFor(ts => ts.Transactions, value: new SmartFaker<Transaction>().Generate(count: 5))
-                           .Generate(count: 2);
+            .RuleFor(ts => ts.Transactions, value: new SmartFaker<Transaction>().Generate(count: 5))
+            .Generate(count: 2);
 
         await using var setupContext = CreateContext(options);
         setupContext.TransactionSummaries.AddRange(transactions);
@@ -51,11 +51,10 @@ public class TransactionRepositoryTests
     {
         // Arrange
         var options = new DbContextOptionsBuilder<KaesseliContext>()
-                      .UseInMemoryDatabase(databaseName: "GetTransactionsDb")
-                      .Options;
+            .UseInMemoryDatabase(databaseName: "GetTransactionsDb")
+            .Options;
 
-        var transactions = new SmartFaker<Transaction>()
-            .Generate(count: 2);
+        var transactions = new SmartFaker<Transaction>().Generate(count: 2);
 
         await using var setupContext = CreateContext(options);
         setupContext.Transactions.AddRange(transactions);
@@ -64,7 +63,12 @@ public class TransactionRepositoryTests
         var repository = new TransactionRepository(setupContext);
 
         // Act
-        var entries = (await repository.GetTransactions(transactions.Last().TransactionSummary!.Id, CancellationToken.None)).ToArray();
+        var entries = (
+            await repository.GetTransactions(
+                transactions.Last().TransactionSummary!.Id,
+                CancellationToken.None
+            )
+        ).ToArray();
 
         // Assert
         entries.Should().HaveCount(expected: 1);
@@ -76,30 +80,37 @@ public class TransactionRepositoryTests
     {
         // Arrange
         var options = new DbContextOptionsBuilder<KaesseliContext>()
-                      .UseInMemoryDatabase(databaseName: "AddTransactionDb")
-                      .Options;
+            .UseInMemoryDatabase(databaseName: "AddTransactionDb")
+            .Options;
 
-        var transactionSummary = new SmartFaker<TransactionSummary>().RuleFor(
-                                                                         statement => statement.Transactions,
-                                                                         value: new SmartFaker<Transaction>().Generate(count: 5))
-                                                                     .Generate();
+        var transactionSummary = new SmartFaker<TransactionSummary>()
+            .RuleFor(
+                statement => statement.Transactions,
+                value: new SmartFaker<Transaction>().Generate(count: 5)
+            )
+            .Generate();
 
         await using var context = CreateContext(options);
         var repository = new TransactionRepository(context);
 
         // Act
-        var result = await repository.AddTransactionSummary(transactionSummary, CancellationToken.None);
+        var result = await repository.AddTransactionSummary(
+            transactionSummary,
+            CancellationToken.None
+        );
 
         // Assert
         result.Should().BeEquivalentTo(transactionSummary);
 
         await using var assertContext = CreateContext(options);
-        var addedEntry = await assertContext.TransactionSummaries
-                                            .Where(be => be.Id == transactionSummary.Id)
-                                            .Include(statement => statement.Transactions)
-                                            .Include(statement => statement.Account)
-                                            .SingleAsync();
-        addedEntry.Should().BeEquivalentTo(transactionSummary, opt => opt.IgnoringCyclicReferences());
+        var addedEntry = await assertContext
+            .TransactionSummaries.Where(be => be.Id == transactionSummary.Id)
+            .Include(statement => statement.Transactions)
+            .Include(statement => statement.Account)
+            .SingleAsync();
+        addedEntry
+            .Should()
+            .BeEquivalentTo(transactionSummary, opt => opt.IgnoringCyclicReferences());
     }
 
     [Fact]
@@ -107,13 +118,13 @@ public class TransactionRepositoryTests
     {
         // Arrange
         var options = new DbContextOptionsBuilder<KaesseliContext>()
-                      .UseInMemoryDatabase(databaseName: "GetNextOpenTransactionDb")
-                      .Options;
+            .UseInMemoryDatabase(databaseName: "GetNextOpenTransactionDb")
+            .Options;
         var context = CreateContext(options);
         var repository = new TransactionRepository(context);
         var transaction = new SmartFaker<Transaction>()
-                          .RuleFor(t => t.JournalEntries, value: Array.Empty<JournalEntry>())
-                          .Generate();
+            .RuleFor(t => t.JournalEntries, value: Array.Empty<JournalEntry>())
+            .Generate();
         context.Transactions.Add(transaction);
         await context.SaveChangesAsync();
 

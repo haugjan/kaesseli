@@ -2,7 +2,7 @@ using FluentAssertions;
 using Kaesseli.Domain.Accounts;
 using Xunit;
 
-namespace Kaesseli.Domain.Test.Common;
+namespace Kaesseli.Test.Domain.Common;
 
 public class AccountTypeExtensionsTests
 {
@@ -12,7 +12,10 @@ public class AccountTypeExtensionsTests
     [InlineData(AccountType.Liability, "Passiv")]
     [InlineData(AccountType.Expense, "Ausgaben")]
     // ReSharper restore StringLiteralTypo
-    public void AccountTypeToString_ShouldReturnExpectedString(AccountType accountType, string expectedString)
+    public void AccountTypeToString_ShouldReturnExpectedString(
+        AccountType accountType,
+        string expectedString
+    )
     {
         // Act
         var result = accountType.DisplayName();

@@ -3,7 +3,7 @@ using Kaesseli.Application.Utility;
 using Microsoft.Extensions.DependencyInjection;
 using Xunit;
 
-namespace Kaesseli.Application.Test;
+namespace Kaesseli.Test.Application;
 
 public class ApplicationServiceCollectionExtensionsTests
 {

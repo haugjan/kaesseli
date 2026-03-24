@@ -3,12 +3,12 @@ using Kaesseli.Application.Utility;
 using Kaesseli.Domain.Accounts;
 using Kaesseli.Infrastructure.Accounts;
 using Kaesseli.Infrastructure.Common;
-using Kaesseli.TestUtilities.Faker;
+using Kaesseli.Test.Faker;
 using Microsoft.EntityFrameworkCore;
 using Moq;
 using Xunit;
 
-namespace Kaesseli.Infrastructure.Test.Accounts;
+namespace Kaesseli.Test.Infrastructure.Accounts;
 
 public class AccountRepositoryTests
 {
@@ -24,15 +24,15 @@ public class AccountRepositoryTests
     {
         // Arrange
         var options = new DbContextOptionsBuilder<KaesseliContext>()
-                      .UseInMemoryDatabase(databaseName: "AddAccountDb")
-                      .Options;
+            .UseInMemoryDatabase(databaseName: "AddAccountDb")
+            .Options;
 
         var account = new Account
         {
             Id = Guid.NewGuid(),
             Name = "Test Account",
             Type = AccountType.Asset,
-            Icon = new AccountIcon("favorite", "blue")
+            Icon = new AccountIcon("favorite", "blue"),
         };
 
         await using var context = CreateContext(options);
@@ -54,8 +54,8 @@ public class AccountRepositoryTests
     {
         // Arrange
         var options = new DbContextOptionsBuilder<KaesseliContext>()
-                      .UseInMemoryDatabase(databaseName: "GetAccountsDb")
-                      .Options;
+            .UseInMemoryDatabase(databaseName: "GetAccountsDb")
+            .Options;
         var cancellationToken = new CancellationToken();
 
         await using var setupContext = CreateContext(options);
@@ -65,16 +65,18 @@ public class AccountRepositoryTests
                 Id = Guid.NewGuid(),
                 Name = "Account 1",
                 Type = AccountType.Expense,
-                Icon = new AccountIcon("favorite", "blue")
-            });
+                Icon = new AccountIcon("favorite", "blue"),
+            }
+        );
         setupContext.Accounts.Add(
             entity: new Account
             {
                 Id = Guid.NewGuid(),
                 Name = "Account 2",
                 Type = AccountType.Expense,
-                Icon = new AccountIcon("favorite", "blue")
-            });
+                Icon = new AccountIcon("favorite", "blue"),
+            }
+        );
         await setupContext.SaveChangesAsync(cancellationToken);
 
         var repository = new AccountRepository(setupContext);
@@ -91,8 +93,8 @@ public class AccountRepositoryTests
     {
         // Arrange
         var options = new DbContextOptionsBuilder<KaesseliContext>()
-                      .UseInMemoryDatabase(databaseName: "GetAccountsDb")
-                      .Options;
+            .UseInMemoryDatabase(databaseName: "GetAccountsDb")
+            .Options;
         var cancellationToken = new CancellationToken();
 
         await using var setupContext = CreateContext(options);
@@ -103,22 +105,22 @@ public class AccountRepositoryTests
                 Id = Guid.NewGuid(),
                 Name = "Account 1",
                 Type = AccountType.Asset,
-                Icon = new AccountIcon("favorite", "blue")
+                Icon = new AccountIcon("favorite", "blue"),
             },
             new()
             {
                 Id = Guid.NewGuid(),
                 Name = "Account 2",
                 Type = AccountType.Expense,
-                Icon = new AccountIcon("favorite", "blue")
+                Icon = new AccountIcon("favorite", "blue"),
             },
             new()
             {
                 Id = Guid.NewGuid(),
                 Name = "Account 3",
                 Type = AccountType.Asset,
-                Icon = new AccountIcon("favorite", "blue")
-            }
+                Icon = new AccountIcon("favorite", "blue"),
+            },
         };
         setupContext.Accounts.AddRange(accounts);
         await setupContext.SaveChangesAsync(cancellationToken);
@@ -126,11 +128,17 @@ public class AccountRepositoryTests
         var repository = new AccountRepository(setupContext);
 
         // Act
-        var currentAccounts = (await repository.GetAccounts(AccountType.Asset, cancellationToken)).ToArray();
+        var currentAccounts = (
+            await repository.GetAccounts(AccountType.Asset, cancellationToken)
+        ).ToArray();
 
         // Assert
         currentAccounts.Should().HaveCount(expected: 2);
-        currentAccounts.Should().BeEquivalentTo(expectation: accounts.Where(account => account.Type == AccountType.Asset));
+        currentAccounts
+            .Should()
+            .BeEquivalentTo(
+                expectation: accounts.Where(account => account.Type == AccountType.Asset)
+            );
     }
 
     [Fact]
@@ -138,15 +146,15 @@ public class AccountRepositoryTests
     {
         // Arrange
         var options = new DbContextOptionsBuilder<KaesseliContext>()
-                      .UseInMemoryDatabase(databaseName: "GetAccountDb")
-                      .Options;
+            .UseInMemoryDatabase(databaseName: "GetAccountDb")
+            .Options;
 
         var account = new Account
         {
             Id = Guid.NewGuid(),
             Name = "Existing Account",
             Type = AccountType.Liability,
-            Icon = new AccountIcon("favorite", "blue")
+            Icon = new AccountIcon("favorite", "blue"),
         };
 
         await using var setupContext = CreateContext(options);
@@ -167,14 +175,15 @@ public class AccountRepositoryTests
     {
         // Arrange
         var options = new DbContextOptionsBuilder<KaesseliContext>()
-                      .UseInMemoryDatabase(databaseName: "GetAccountNotExistDb")
-                      .Options;
+            .UseInMemoryDatabase(databaseName: "GetAccountNotExistDb")
+            .Options;
 
         var repository = new AccountRepository(context: CreateContext(options));
 
         // Act & Assert
-        await Assert.ThrowsAsync<EntityNotFoundException>(
-            () => repository.GetAccount(accountId: Guid.NewGuid(), CancellationToken.None));
+        await Assert.ThrowsAsync<EntityNotFoundException>(() =>
+            repository.GetAccount(accountId: Guid.NewGuid(), CancellationToken.None)
+        );
     }
 
     [Fact]
@@ -182,8 +191,8 @@ public class AccountRepositoryTests
     {
         // Arrange
         var options = new DbContextOptionsBuilder<KaesseliContext>()
-                      .UseInMemoryDatabase(databaseName: "GetAccountingPeriodsDb")
-                      .Options;
+            .UseInMemoryDatabase(databaseName: "GetAccountingPeriodsDb")
+            .Options;
         var cancellationToken = new CancellationToken();
 
         await using var setupContext = CreateContext(options);
@@ -206,8 +215,8 @@ public class AccountRepositoryTests
     {
         // Arrange
         var options = new DbContextOptionsBuilder<KaesseliContext>()
-                      .UseInMemoryDatabase(databaseName: "GetAccountingPeriodDb")
-                      .Options;
+            .UseInMemoryDatabase(databaseName: "GetAccountingPeriodDb")
+            .Options;
         var cancellationToken = new CancellationToken();
 
         await using var setupContext = CreateContext(options);
@@ -220,7 +229,10 @@ public class AccountRepositoryTests
         var repository = new AccountRepository(setupContext);
 
         // Act
-        var currentPeriod = await repository.GetAccountingPeriod(expectedPeriod.Id, cancellationToken);
+        var currentPeriod = await repository.GetAccountingPeriod(
+            expectedPeriod.Id,
+            cancellationToken
+        );
 
         // Assert
         currentPeriod.Should().BeEquivalentTo(expectedPeriod);
@@ -231,15 +243,19 @@ public class AccountRepositoryTests
     {
         // Arrange
         var options = new DbContextOptionsBuilder<KaesseliContext>()
-                      .UseInMemoryDatabase(databaseName: "GetNotExistingAccountingPeriod")
-                      .Options;
+            .UseInMemoryDatabase(databaseName: "GetNotExistingAccountingPeriod")
+            .Options;
         var cancellationToken = new CancellationToken();
 
         await using var setupContext = CreateContext(options);
         var repository = new AccountRepository(setupContext);
 
         // Act
-        var getPeriod = async () => await repository.GetAccountingPeriod(accountingPeriodId: Guid.NewGuid(), cancellationToken);
+        var getPeriod = async () =>
+            await repository.GetAccountingPeriod(
+                accountingPeriodId: Guid.NewGuid(),
+                cancellationToken
+            );
 
         // Assert
         await getPeriod.Should().ThrowAsync<EntityNotFoundException>();

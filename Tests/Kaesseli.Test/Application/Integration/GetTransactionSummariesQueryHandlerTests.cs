@@ -1,11 +1,11 @@
 using FluentAssertions;
 using Kaesseli.Application.Integration.TransactionQuery;
 using Kaesseli.Domain.Integration;
-using Kaesseli.TestUtilities.Faker;
+using Kaesseli.Test.Faker;
 using Moq;
 using Xunit;
 
-namespace Kaesseli.Application.Test.Integration;
+namespace Kaesseli.Test.Application.Integration;
 
 public class GetTransactionSummariesQueryHandlerTests
 {
@@ -15,11 +15,12 @@ public class GetTransactionSummariesQueryHandlerTests
         // Arrange
         var mockRepository = new Mock<ITransactionRepository>();
         var transactionSummaries = new SmartFaker<TransactionSummary>()
-                                   .RuleFor(ts => ts.Transactions, value: new SmartFaker<Transaction>().Generate(count: 5))
-                                   .Generate(count: 5);
+            .RuleFor(ts => ts.Transactions, value: new SmartFaker<Transaction>().Generate(count: 5))
+            .Generate(count: 5);
 
-        mockRepository.Setup(repo => repo.GetTransactionSummaries(It.IsAny<CancellationToken>()))
-                      .ReturnsAsync(transactionSummaries);
+        mockRepository
+            .Setup(repo => repo.GetTransactionSummaries(It.IsAny<CancellationToken>()))
+            .ReturnsAsync(transactionSummaries);
 
         var handler = new GetTransactionSummaries.Handler(mockRepository.Object);
         var query = new GetTransactionSummaries.Query();
@@ -30,15 +31,16 @@ public class GetTransactionSummariesQueryHandlerTests
         // Assert
         result.Should().NotBeNull();
         result.Should().HaveCount(transactionSummaries.Count);
-        result.Should()
-              .BeEquivalentTo(
-                  transactionSummaries,
-                  options => options
-                             .Excluding(ts => ts.Account)
-                             .Excluding(ts => ts.Transactions));
+        result
+            .Should()
+            .BeEquivalentTo(
+                transactionSummaries,
+                options => options.Excluding(ts => ts.Account).Excluding(ts => ts.Transactions)
+            );
 
         mockRepository.Verify(
             repo => repo.GetTransactionSummaries(It.IsAny<CancellationToken>()),
-            Times.Once);
+            Times.Once
+        );
     }
 }

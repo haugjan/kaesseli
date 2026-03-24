@@ -3,7 +3,7 @@ using Kaesseli.Application.Budget;
 using Kaesseli.Domain.Accounts;
 using Xunit;
 
-namespace Kaesseli.Application.Test.Budget;
+namespace Kaesseli.Test.Application.Budget;
 
 public class SetBudgetCommandExtensionsTests
 {
@@ -16,21 +16,21 @@ public class SetBudgetCommandExtensionsTests
             Id = Guid.NewGuid(),
             Name = "Account",
             Type = AccountType.Expense,
-            Icon = new AccountIcon("favorite", "blue")
+            Icon = new AccountIcon("favorite", "blue"),
         };
         var budgetEntryCommand = new SetBudget.Query
         {
             Amount = 42,
             Description = "Description",
             AccountId = Guid.NewGuid(),
-            AccountingPeriodId = Guid.NewGuid()
+            AccountingPeriodId = Guid.NewGuid(),
         };
         var accountingPeriod = new AccountingPeriod
         {
             Id = Guid.NewGuid(),
             Description = string.Empty,
             FromInclusive = default,
-            ToInclusive = default
+            ToInclusive = default,
         };
 
         //Act

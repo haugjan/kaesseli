@@ -1,11 +1,11 @@
 using FluentAssertions;
 using Kaesseli.Application.Accounts;
 using Kaesseli.Domain.Accounts;
-using Kaesseli.TestUtilities.Faker;
+using Kaesseli.Test.Faker;
 using Moq;
 using Xunit;
 
-namespace Kaesseli.Application.Test.Accounts;
+namespace Kaesseli.Test.Application.Accounts;
 
 public class GetAccountingPeriodsCommandHandlerTest
 {
@@ -18,8 +18,9 @@ public class GetAccountingPeriodsCommandHandlerTest
         var command = new GetAccountingPeriods.Query();
         var cancellationToken = new CancellationToken();
         var expectedPeriods = new SmartFaker<AccountingPeriod>().Generate(count: 3);
-        accountRepoMock.Setup(repo => repo.GetAccountingPeriods(cancellationToken))
-                       .ReturnsAsync(expectedPeriods);
+        accountRepoMock
+            .Setup(repo => repo.GetAccountingPeriods(cancellationToken))
+            .ReturnsAsync(expectedPeriods);
 
         //Act
         var result = await handler.Handle(command, cancellationToken);

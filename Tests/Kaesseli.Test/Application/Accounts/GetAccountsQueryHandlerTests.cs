@@ -1,11 +1,11 @@
 using FluentAssertions;
 using Kaesseli.Application.Accounts;
 using Kaesseli.Domain.Accounts;
-using Kaesseli.TestUtilities.Faker;
+using Kaesseli.Test.Faker;
 using Moq;
 using Xunit;
 
-namespace Kaesseli.Application.Test.Accounts;
+namespace Kaesseli.Test.Application.Accounts;
 
 public class GetAccountsQueryHandlerTests
 {
@@ -14,13 +14,13 @@ public class GetAccountsQueryHandlerTests
     {
         // Arrange
         var mockRepository = new Mock<IAccountRepository>();
-        var faker = new SmartFaker<Account>()
-                    .RuleFor(a => a.Type, _ => AccountType.Asset);
+        var faker = new SmartFaker<Account>().RuleFor(a => a.Type, _ => AccountType.Asset);
         var cancellationToken = new CancellationToken();
 
         var accountsList = faker.Generate(count: 5);
-        mockRepository.Setup(repo => repo.GetAccounts(cancellationToken))
-                      .ReturnsAsync(accountsList);
+        mockRepository
+            .Setup(repo => repo.GetAccounts(cancellationToken))
+            .ReturnsAsync(accountsList);
 
         var handler = new GetAccounts.Handler(mockRepository.Object);
         var query = new GetAccounts.Query();
@@ -29,8 +29,11 @@ public class GetAccountsQueryHandlerTests
         var result = (await handler.Handle(query, cancellationToken)).ToArray();
 
         // Assert
-        result.Should().BeEquivalentTo(accountsList, options=> options.Excluding(al=> al.Type));
-        result.Select(r => r.Type).Should().BeEquivalentTo(expectation: accountsList.Select(a => a.Type.DisplayName()));
+        result.Should().BeEquivalentTo(accountsList, options => options.Excluding(al => al.Type));
+        result
+            .Select(r => r.Type)
+            .Should()
+            .BeEquivalentTo(expectation: accountsList.Select(a => a.Type.DisplayName()));
         mockRepository.Verify(repo => repo.GetAccounts(cancellationToken), Times.Once);
     }
 }

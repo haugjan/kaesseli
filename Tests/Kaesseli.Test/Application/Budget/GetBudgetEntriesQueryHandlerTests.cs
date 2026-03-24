@@ -5,7 +5,7 @@ using Kaesseli.Domain.Budget;
 using Moq;
 using Xunit;
 
-namespace Kaesseli.Application.Test.Budget;
+namespace Kaesseli.Test.Application.Budget;
 
 public class GetBudgetEntriesQueryHandlerTests
 {
@@ -20,19 +20,23 @@ public class GetBudgetEntriesQueryHandlerTests
 
         var entriesList = CreateBudgetEntries();
 
-        mockRepository.Setup(
-                          repo => repo.GetBudgetEntries(
-                              It.Is<Guid>(id => id == ExpectedAccountingPeriodId),
-                              It.Is<Guid?>(id => id == accountId), It.IsAny<AccountType?>(),
-                              It.IsAny<CancellationToken>()))
-                      .ReturnsAsync(entriesList);
+        mockRepository
+            .Setup(repo =>
+                repo.GetBudgetEntries(
+                    It.Is<Guid>(id => id == ExpectedAccountingPeriodId),
+                    It.Is<Guid?>(id => id == accountId),
+                    It.IsAny<AccountType?>(),
+                    It.IsAny<CancellationToken>()
+                )
+            )
+            .ReturnsAsync(entriesList);
 
         var handler = new GetBudgetEntries.Handler(mockRepository.Object);
         var query = new GetBudgetEntries.Query
         {
             AccountId = accountId,
             AccountType = null,
-            AccountingPeriodId = ExpectedAccountingPeriodId
+            AccountingPeriodId = ExpectedAccountingPeriodId,
         };
 
         // Act
@@ -41,65 +45,76 @@ public class GetBudgetEntriesQueryHandlerTests
         // Assert
         result.Should().NotBeNull();
         result.Should().HaveCount(entriesList.Count);
-        result.Should()
-              .BeEquivalentTo(
-                  entriesList,
-                  options => options.Using<DateTime>(
-                                        ctx => ctx.Subject.Should()
-                                                  .BeCloseTo(ctx.Expectation, precision: TimeSpan.FromSeconds(value: 1)))
-                                    .WhenTypeIs<DateTime>()
-                                    .ExcludingMissingMembers());
+        result
+            .Should()
+            .BeEquivalentTo(
+                entriesList,
+                options =>
+                    options
+                        .Using<DateTime>(ctx =>
+                            ctx.Subject.Should()
+                                .BeCloseTo(
+                                    ctx.Expectation,
+                                    precision: TimeSpan.FromSeconds(value: 1)
+                                )
+                        )
+                        .WhenTypeIs<DateTime>()
+                        .ExcludingMissingMembers()
+            );
 
         mockRepository.Verify(
-            repo => repo.GetBudgetEntries(
-                It.Is<Guid>(id => id == ExpectedAccountingPeriodId),
-                It.Is<Guid?>(id => id == accountId), It.IsAny<AccountType?>(),
-                It.IsAny<CancellationToken>()),
-            Times.Once);
+            repo =>
+                repo.GetBudgetEntries(
+                    It.Is<Guid>(id => id == ExpectedAccountingPeriodId),
+                    It.Is<Guid?>(id => id == accountId),
+                    It.IsAny<AccountType?>(),
+                    It.IsAny<CancellationToken>()
+                ),
+            Times.Once
+        );
     }
 
     private static List<BudgetEntry> CreateBudgetEntries() =>
-    [
-        new()
-        {
-            Id = Guid.NewGuid(),
-            Description = "Description 1",
-            Amount = 42.42m,
-            Account = new Account
+        [
+            new()
             {
                 Id = Guid.NewGuid(),
-                Name = "Account 1",
-                Type = AccountType.Expense,
-                Icon = new AccountIcon("favorite", "blue")
+                Description = "Description 1",
+                Amount = 42.42m,
+                Account = new Account
+                {
+                    Id = Guid.NewGuid(),
+                    Name = "Account 1",
+                    Type = AccountType.Expense,
+                    Icon = new AccountIcon("favorite", "blue"),
+                },
+                AccountingPeriod = new AccountingPeriod
+                {
+                    Id = ExpectedAccountingPeriodId,
+                    FromInclusive = default,
+                    ToInclusive = default,
+                    Description = string.Empty,
+                },
             },
-            AccountingPeriod = new AccountingPeriod
-            {
-                Id = ExpectedAccountingPeriodId,
-                FromInclusive = default,
-                ToInclusive = default,
-                Description = string.Empty
-            }
-        },
-
-        new()
-        {
-            Id = Guid.NewGuid(),
-            Description = "Description 2",
-            Amount = 24.24m,
-            Account = new Account
+            new()
             {
                 Id = Guid.NewGuid(),
-                Name = "Account 2",
-                Type = AccountType.Revenue,
-                Icon = new AccountIcon("favorite", "blue")
+                Description = "Description 2",
+                Amount = 24.24m,
+                Account = new Account
+                {
+                    Id = Guid.NewGuid(),
+                    Name = "Account 2",
+                    Type = AccountType.Revenue,
+                    Icon = new AccountIcon("favorite", "blue"),
+                },
+                AccountingPeriod = new AccountingPeriod
+                {
+                    Id = Guid.NewGuid(),
+                    FromInclusive = default,
+                    ToInclusive = default,
+                    Description = string.Empty,
+                },
             },
-            AccountingPeriod = new AccountingPeriod
-            {
-                Id = Guid.NewGuid(),
-                FromInclusive = default,
-                ToInclusive = default,
-                Description = string.Empty
-            }
-        }
-    ];
+        ];
 }

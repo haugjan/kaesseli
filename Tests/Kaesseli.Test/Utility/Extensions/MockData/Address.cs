@@ -1,4 +1,4 @@
-namespace Kaesseli.Utility.Test.Extensions.MockData;
+namespace Kaesseli.Test.Utility.Extensions.MockData;
 
 public class Address
 {

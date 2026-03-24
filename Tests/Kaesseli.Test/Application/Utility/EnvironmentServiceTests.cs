@@ -2,7 +2,7 @@ using FluentAssertions;
 using Kaesseli.Application.Utility;
 using Xunit;
 
-namespace Kaesseli.Application.Test.Utility;
+namespace Kaesseli.Test.Application.Utility;
 
 public class EnvironmentServiceTests
 {
@@ -13,7 +13,7 @@ public class EnvironmentServiceTests
         var service = new EnvironmentService();
 
         //Act
-        var currentUser=service.CurrentUser;
+        var currentUser = service.CurrentUser;
         var expectedUser = Environment.UserName;
 
         //Assert

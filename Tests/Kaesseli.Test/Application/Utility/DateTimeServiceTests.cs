@@ -2,7 +2,7 @@ using FluentAssertions;
 using Kaesseli.Application.Utility;
 using Xunit;
 
-namespace Kaesseli.Application.Test.Utility;
+namespace Kaesseli.Test.Application.Utility;
 
 public class DateTimeServiceTests
 {
@@ -75,6 +75,7 @@ public class DateTimeServiceTests
     private static void WaitShortyIfItsJustBeforeMidnight()
     {
         var now = DateTime.Now;
-        if (now.AddSeconds(value: 10).Day != now.Day) Thread.Sleep(timeout: TimeSpan.FromSeconds(value: 15));
+        if (now.AddSeconds(value: 10).Day != now.Day)
+            Thread.Sleep(timeout: TimeSpan.FromSeconds(value: 15));
     }
 }

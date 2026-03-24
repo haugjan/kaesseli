@@ -3,7 +3,7 @@ using Kaesseli.Domain.Accounts;
 using Kaesseli.Domain.Budget;
 using Xunit;
 
-namespace Kaesseli.Application.Test.Budget;
+namespace Kaesseli.Test.Application.Budget;
 
 public class BudgetEntryExtensionsTest
 {
@@ -21,22 +21,27 @@ public class BudgetEntryExtensionsTest
                 Id = Guid.NewGuid(),
                 Name = "Name",
                 Type = AccountType.Expense,
-                Icon = new AccountIcon("favorite", "blue")
+                Icon = new AccountIcon("favorite", "blue"),
             },
             AccountingPeriod = new AccountingPeriod
             {
                 Id = Guid.NewGuid(),
                 FromInclusive = default,
                 ToInclusive = default,
-                Description = string.Empty
-            }
+                Description = string.Empty,
+            },
         };
 
         //Act
         var queryResult = budgetEntry.ToGetBudgetEntriesQueryResult();
 
         //Assert
-        queryResult.Should().BeEquivalentTo(budgetEntry, options => options.Excluding(be => be.Account).Excluding(be=> be.AccountingPeriod));
+        queryResult
+            .Should()
+            .BeEquivalentTo(
+                budgetEntry,
+                options => options.Excluding(be => be.Account).Excluding(be => be.AccountingPeriod)
+            );
         queryResult.AccountId.Should().Be(budgetEntry.Account.Id);
         queryResult.AccountingPeriodId.Should().Be(budgetEntry.AccountingPeriod.Id);
     }

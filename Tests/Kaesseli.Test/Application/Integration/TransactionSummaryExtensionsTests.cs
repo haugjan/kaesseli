@@ -2,10 +2,10 @@ using FluentAssertions;
 using Kaesseli.Application.Integration.TransactionQuery;
 using Kaesseli.Domain.Accounts;
 using Kaesseli.Domain.Integration;
-using Kaesseli.TestUtilities.Faker;
+using Kaesseli.Test.Faker;
 using Xunit;
 
-namespace Kaesseli.Application.Test.Integration;
+namespace Kaesseli.Test.Application.Integration;
 
 public class TransactionSummaryExtensionsTests
 {
@@ -14,21 +14,23 @@ public class TransactionSummaryExtensionsTests
     {
         //Arrange
         var transactionSummary = new SmartFaker<TransactionSummary>()
-                                 .RuleFor(ts => ts.Transactions, value: new SmartFaker<Transaction>().Generate(count: 5))
-                                 .Generate();
+            .RuleFor(ts => ts.Transactions, value: new SmartFaker<Transaction>().Generate(count: 5))
+            .Generate();
 
         //Act
         var getTransactionSummary = transactionSummary.ToGetTransactionSummary();
 
         //Assert
-        getTransactionSummary.Should()
-                             .BeEquivalentTo(
-                                 transactionSummary,
-                                 options => options
-                                            .Excluding(ts => ts.Account)
-                                            .Excluding(ts => ts.Transactions));
+        getTransactionSummary
+            .Should()
+            .BeEquivalentTo(
+                transactionSummary,
+                options => options.Excluding(ts => ts.Account).Excluding(ts => ts.Transactions)
+            );
         getTransactionSummary.AccountName.Should().Be(transactionSummary.Account.Name);
-        getTransactionSummary.NrOfTransactions.Should().Be(expected: transactionSummary.Transactions.Count());
+        getTransactionSummary
+            .NrOfTransactions.Should()
+            .Be(expected: transactionSummary.Transactions.Count());
     }
 
     [Fact]
@@ -43,7 +45,5 @@ public class TransactionSummaryExtensionsTests
 
         //Assert
         current.Should().BeEquivalentTo(transaction, options => options.ExcludingMissingMembers());
-
     }
-
 }

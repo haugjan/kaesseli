@@ -4,7 +4,7 @@ using FluentAssertions;
 using Kaesseli.Application.Integration.FileImport;
 using Kaesseli.Application.Integration.NextOpenTransaction;
 using Kaesseli.Application.Integration.TransactionQuery;
-using Kaesseli.TestUtilities.Faker;
+using Kaesseli.Test.Faker;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Routing;
@@ -14,7 +14,7 @@ using Microsoft.Extensions.Logging;
 using Moq;
 using Xunit;
 
-namespace Kaesseli.Server.Test.Integration;
+namespace Kaesseli.Test.Server.Integration;
 
 public class IntegrationApiExtensionsTests
 {
@@ -31,32 +31,30 @@ public class IntegrationApiExtensionsTests
     {
         var server = new TestServer(
             builder: new WebHostBuilder()
-                     .ConfigureServices(
-                         services =>
-                         {
-                             services.AddRouting();
-                             services.AddSingleton(_processFileMock.Object);
-                             services.AddSingleton(_getTransactionSummariesMock.Object);
-                             services.AddSingleton(_getTransactionsMock.Object);
-                             services.AddSingleton(_getNextOpenTransactionMock.Object);
-                             services.AddSingleton(_getTotalOpenTransactionMock.Object);
-                             services.AddSingleton(_assignOpenTransactionMock.Object);
-                             services.AddSingleton(_splitOpenTransactionMock.Object);
-                             services.AddAntiforgery();
-                             services.AddLogging(
-                                 loggingBuilder =>
-                                 {
-                                     loggingBuilder.AddConsole();
-                                     loggingBuilder.AddDebug();
-                                 });
-                         })
-                     .Configure(
-                         app =>
-                         {
-                             app.UseRouting();
-                             app.UseAntiforgery();
-                             app.UseEndpoints(endpoints => endpoints.MapIntegrationEndpoints());
-                         }));
+                .ConfigureServices(services =>
+                {
+                    services.AddRouting();
+                    services.AddSingleton(_processFileMock.Object);
+                    services.AddSingleton(_getTransactionSummariesMock.Object);
+                    services.AddSingleton(_getTransactionsMock.Object);
+                    services.AddSingleton(_getNextOpenTransactionMock.Object);
+                    services.AddSingleton(_getTotalOpenTransactionMock.Object);
+                    services.AddSingleton(_assignOpenTransactionMock.Object);
+                    services.AddSingleton(_splitOpenTransactionMock.Object);
+                    services.AddAntiforgery();
+                    services.AddLogging(loggingBuilder =>
+                    {
+                        loggingBuilder.AddConsole();
+                        loggingBuilder.AddDebug();
+                    });
+                })
+                .Configure(app =>
+                {
+                    app.UseRouting();
+                    app.UseAntiforgery();
+                    app.UseEndpoints(endpoints => endpoints.MapIntegrationEndpoints());
+                })
+        );
 
         _client = server.CreateClient();
     }
@@ -66,7 +64,9 @@ public class IntegrationApiExtensionsTests
     {
         // Arrange
         var guid = Guid.NewGuid();
-        _processFileMock.Setup(m => m.Handle(It.IsAny<ProcessFile.Query>(), default)).ReturnsAsync(guid);
+        _processFileMock
+            .Setup(m => m.Handle(It.IsAny<ProcessFile.Query>(), default))
+            .ReturnsAsync(guid);
 
         var formContent = new MultipartFormDataContent();
         var accountId = Guid.NewGuid();
@@ -88,30 +88,41 @@ public class IntegrationApiExtensionsTests
     public async Task GetTransactionSummariesEndpoint_ShouldReturnTransactionSummaries()
     {
         // Arrange
-        var transactionSummaries = new SmartFaker<GetTransactionSummaries.Result>().Generate(count: 3);
-        _getTransactionSummariesMock.Setup(m => m.Handle(It.IsAny<GetTransactionSummaries.Query>(), default)).ReturnsAsync(transactionSummaries);
+        var transactionSummaries = new SmartFaker<GetTransactionSummaries.Result>().Generate(
+            count: 3
+        );
+        _getTransactionSummariesMock
+            .Setup(m => m.Handle(It.IsAny<GetTransactionSummaries.Query>(), default))
+            .ReturnsAsync(transactionSummaries);
 
         // Act
         var response = await _client.GetAsync(requestUri: "/transactionSummary");
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);
-        _getTransactionSummariesMock.Verify(m => m.Handle(It.IsAny<GetTransactionSummaries.Query>(), default), Times.Once);
+        _getTransactionSummariesMock.Verify(
+            m => m.Handle(It.IsAny<GetTransactionSummaries.Query>(), default),
+            Times.Once
+        );
     }
-
 
     [Fact]
     public async Task G2etTransactionSummariesEndpoint_ShouldReturnTransactionSummaries()
     {
         // Arrange
         var nextOpenTransaction = new SmartFaker<GetNextOpenTransaction.Result>().Generate();
-        _getNextOpenTransactionMock.Setup(m => m.Handle(It.IsAny<GetNextOpenTransaction.Query>(), default)).ReturnsAsync(nextOpenTransaction);
+        _getNextOpenTransactionMock
+            .Setup(m => m.Handle(It.IsAny<GetNextOpenTransaction.Query>(), default))
+            .ReturnsAsync(nextOpenTransaction);
 
         // Act
         var response = await _client.GetAsync(requestUri: "/transaction/nextOpen");
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);
-        _getNextOpenTransactionMock.Verify(m => m.Handle(It.IsAny<GetNextOpenTransaction.Query>(), default), Times.Once);
+        _getNextOpenTransactionMock.Verify(
+            m => m.Handle(It.IsAny<GetNextOpenTransaction.Query>(), default),
+            Times.Once
+        );
     }
 }

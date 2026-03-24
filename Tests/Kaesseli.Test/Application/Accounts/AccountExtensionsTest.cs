@@ -2,7 +2,7 @@ using FluentAssertions;
 using Kaesseli.Domain.Accounts;
 using Xunit;
 
-namespace Kaesseli.Application.Test.Accounts;
+namespace Kaesseli.Test.Application.Accounts;
 
 public class AccountExtensionsTest
 {
@@ -15,7 +15,7 @@ public class AccountExtensionsTest
             Id = Guid.NewGuid(),
             Name = "Account",
             Type = AccountType.Expense,
-            Icon = new AccountIcon("favorite", "blue")
+            Icon = new AccountIcon("favorite", "blue"),
         };
 
         //Act
@@ -25,7 +25,8 @@ public class AccountExtensionsTest
             budgetPerMonth: 7m,
             budgetPerYear: 8m,
             currentBudget: 100m,
-            budgetBalance: 1200m);
+            budgetBalance: 1200m
+        );
 
         //Assert
         summary.Id.Should().Be(account.Id);

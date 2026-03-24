@@ -1,10 +1,9 @@
 using FluentAssertions;
 using Kaesseli.Domain.Accounts;
-using Kaesseli.Domain.Budget;
 using Kaesseli.Domain.Journal;
 using Xunit;
 
-namespace Kaesseli.Domain.Test.Accounts;
+namespace Kaesseli.Test.Domain.Accounts;
 
 public class AccountTests
 {
@@ -13,7 +12,10 @@ public class AccountTests
     [InlineData(AccountType.Liability, 2)]
     [InlineData(AccountType.Revenue, 2)]
     [InlineData(AccountType.Expense, -2)]
-    public void GetAccountBalance_ReturnsCorrectSign(AccountType accountType, decimal expectedBalance)
+    public void GetAccountBalance_ReturnsCorrectSign(
+        AccountType accountType,
+        decimal expectedBalance
+    )
     {
         //Arrange
         var account = new Account
@@ -21,31 +23,28 @@ public class AccountTests
             Id = Guid.NewGuid(),
             Name = "Account",
             Type = accountType,
-            Icon = new AccountIcon("favorite", "blue")
+            Icon = new AccountIcon("favorite", "blue"),
         };
         var otherAccount = new Account
         {
             Id = Guid.NewGuid(),
             Name = "Other account",
             Type = AccountType.Revenue,
-            Icon = new AccountIcon("favorite", "blue")
+            Icon = new AccountIcon("favorite", "blue"),
         };
         var yetAnotherAccount = new Account
         {
             Id = Guid.NewGuid(),
             Name = "Other account",
             Type = AccountType.Expense,
-            Icon = new AccountIcon("favorite", "blue")
+            Icon = new AccountIcon("favorite", "blue"),
         };
         var entries = new List<JournalEntry>
         {
             new()
             {
                 Id = Guid.NewGuid(),
-                ValueDate = new DateOnly(
-                    year: 2000,
-                    month: 12,
-                    day: 13),
+                ValueDate = new DateOnly(year: 2000, month: 12, day: 13),
                 Description = "Description",
                 Amount = 3m,
                 DebitAccount = account,
@@ -56,16 +55,13 @@ public class AccountTests
                     Id = Guid.NewGuid(),
                     FromInclusive = default,
                     ToInclusive = default,
-                    Description = string.Empty
-                }
+                    Description = string.Empty,
+                },
             },
             new()
             {
                 Id = Guid.NewGuid(),
-                ValueDate = new DateOnly(
-                    year: 2000,
-                    month: 12,
-                    day: 13),
+                ValueDate = new DateOnly(year: 2000, month: 12, day: 13),
                 Description = "Description",
                 Amount = 5m,
                 DebitAccount = yetAnotherAccount,
@@ -76,16 +72,13 @@ public class AccountTests
                     Id = Guid.NewGuid(),
                     FromInclusive = default,
                     ToInclusive = default,
-                    Description = string.Empty
-                }
+                    Description = string.Empty,
+                },
             },
             new()
             {
                 Id = Guid.NewGuid(),
-                ValueDate = new DateOnly(
-                    year: 2000,
-                    month: 12,
-                    day: 13),
+                ValueDate = new DateOnly(year: 2000, month: 12, day: 13),
                 Description = "Description",
                 Amount = 42.42m,
                 DebitAccount = otherAccount,
@@ -96,9 +89,9 @@ public class AccountTests
                     Id = Guid.NewGuid(),
                     FromInclusive = default,
                     ToInclusive = default,
-                    Description = string.Empty
-                }
-            }
+                    Description = string.Empty,
+                },
+            },
         };
 
         //Act

@@ -1,10 +1,10 @@
 using FluentAssertions;
 using Kaesseli.Application.Journal;
 using Kaesseli.Domain.Accounts;
-using Kaesseli.TestUtilities.Faker;
+using Kaesseli.Test.Faker;
 using Xunit;
 
-namespace Kaesseli.Application.Test.Journal;
+namespace Kaesseli.Test.Application.Journal;
 
 public class JournalEntryExtensionsTests
 {
@@ -21,7 +21,7 @@ public class JournalEntryExtensionsTests
             ValueDate = null,
             CreditAccountId = creditAccount.Id,
             DebitAccountId = debitAccount.Id,
-            AccountingPeriodId = Guid.NewGuid()
+            AccountingPeriodId = Guid.NewGuid(),
         };
         var valueDate = new DateOnly(year: 1982, month: 12, day: 13);
         var accountIngPeriod = new AccountingPeriod
@@ -29,12 +29,16 @@ public class JournalEntryExtensionsTests
             Id = Guid.NewGuid(),
             Description = string.Empty,
             FromInclusive = default,
-            ToInclusive = default
+            ToInclusive = default,
         };
 
         //Act
-        var journalEntry = command.ToJournalEntry(valueDate: valueDate, debitAccount: debitAccount, creditAccount: creditAccount,
-                                                  accountingPeriod: accountIngPeriod);
+        var journalEntry = command.ToJournalEntry(
+            valueDate: valueDate,
+            debitAccount: debitAccount,
+            creditAccount: creditAccount,
+            accountingPeriod: accountIngPeriod
+        );
 
         //Assert
         journalEntry.Amount.Should().Be(command.Amount);

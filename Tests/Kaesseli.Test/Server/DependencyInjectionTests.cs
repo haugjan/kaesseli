@@ -11,7 +11,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Moq;
 using Xunit;
 
-namespace Kaesseli.Server.Test;
+namespace Kaesseli.Test.Server;
 
 public class DependencyInjectionTests
 {
@@ -21,12 +21,11 @@ public class DependencyInjectionTests
         // Arrange
         var configMock = new Mock<IConfiguration>();
         var configSectionMock = new Mock<IConfigurationSection>();
-        configMock.Setup(cfg => cfg.GetSection(It.IsAny<string>()))
-                  .Returns((string _) => configSectionMock.Object);
+        configMock
+            .Setup(cfg => cfg.GetSection(It.IsAny<string>()))
+            .Returns((string _) => configSectionMock.Object);
         var serviceCollection = new ServiceCollection();
-        serviceCollection
-            .AddApplicationServices()
-            .AddInfrastructureServices(configMock.Object);
+        serviceCollection.AddApplicationServices().AddInfrastructureServices(configMock.Object);
 
         var serviceProvider = serviceCollection.BuildServiceProvider();
 
@@ -64,7 +63,11 @@ public class DependencyInjectionTests
             var handler = serviceProvider.GetService(handlerInterface);
 
             // Assert
-            handler.Should().NotBeNull(because: $"weil {handlerInterface.Name} im DI Container registriert und auflösbar sein sollte.");
+            handler
+                .Should()
+                .NotBeNull(
+                    because: $"weil {handlerInterface.Name} im DI Container registriert und auflösbar sein sollte."
+                );
         }
     }
 }

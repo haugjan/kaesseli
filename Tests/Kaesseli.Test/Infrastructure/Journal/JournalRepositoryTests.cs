@@ -4,12 +4,12 @@ using Kaesseli.Domain.Accounts;
 using Kaesseli.Domain.Journal;
 using Kaesseli.Infrastructure.Common;
 using Kaesseli.Infrastructure.Journal;
-using Kaesseli.TestUtilities.Faker;
+using Kaesseli.Test.Faker;
 using Microsoft.EntityFrameworkCore;
 using Moq;
 using Xunit;
 
-namespace Kaesseli.Infrastructure.Test.Journal;
+namespace Kaesseli.Test.Infrastructure.Journal;
 
 public class JournalRepositoryTests
 {
@@ -27,21 +27,22 @@ public class JournalRepositoryTests
         var expectedPeriodId = Guid.NewGuid();
 
         var options = new DbContextOptionsBuilder<KaesseliContext>()
-                      .UseInMemoryDatabase(databaseName: "GetJournalEntriesDb")
-                      .Options;
+            .UseInMemoryDatabase(databaseName: "GetJournalEntriesDb")
+            .Options;
 
         var firstEntry = new SmartFaker<JournalEntry>()
-                             .RuleFor(be=> be.AccountingPeriod, value: new AccountingPeriod
-                           {
-                               Id = expectedPeriodId,
-                               Description = string.Empty,
-                               FromInclusive = default,
-                               ToInclusive = default
-                           })
-                           .Generate();
-        var secondEntry = new SmartFaker<JournalEntry>()
-
-                         .Generate();
+            .RuleFor(
+                be => be.AccountingPeriod,
+                value: new AccountingPeriod
+                {
+                    Id = expectedPeriodId,
+                    Description = string.Empty,
+                    FromInclusive = default,
+                    ToInclusive = default,
+                }
+            )
+            .Generate();
+        var secondEntry = new SmartFaker<JournalEntry>().Generate();
 
         await using var setupContext = CreateContext(options);
         setupContext.JournalEntries.Add(entity: firstEntry);
@@ -50,13 +51,18 @@ public class JournalRepositoryTests
 
         var repository = new JournalRepository(setupContext);
         // Act
-        var entries = (await repository.GetJournalEntries(expectedPeriodId, accountId: null, accountType: null, CancellationToken.None)).ToArray();
+        var entries = (
+            await repository.GetJournalEntries(
+                expectedPeriodId,
+                accountId: null,
+                accountType: null,
+                CancellationToken.None
+            )
+        ).ToArray();
 
         // Assert
         entries.Should().HaveCount(expected: 1);
-        entries.All(e => e.AccountingPeriod.Id == expectedPeriodId)
-               .Should()
-               .BeTrue();
+        entries.All(e => e.AccountingPeriod.Id == expectedPeriodId).Should().BeTrue();
     }
 
     [Fact]
@@ -64,8 +70,8 @@ public class JournalRepositoryTests
     {
         // Arrange
         var options = new DbContextOptionsBuilder<KaesseliContext>()
-                      .UseInMemoryDatabase(databaseName: "AddJournalEntryDb")
-                      .Options;
+            .UseInMemoryDatabase(databaseName: "AddJournalEntryDb")
+            .Options;
 
         var newEntry = new JournalEntry
         {
@@ -75,14 +81,14 @@ public class JournalRepositoryTests
                 Id = Guid.NewGuid(),
                 Name = "CreditAccount",
                 Type = AccountType.Asset,
-                Icon = new AccountIcon("favorite", "blue")
+                Icon = new AccountIcon("favorite", "blue"),
             },
             DebitAccount = new Account
             {
                 Id = Guid.NewGuid(),
                 Name = "DebitAccount",
                 Type = AccountType.Asset,
-                Icon = new AccountIcon("favorite", "blue")
+                Icon = new AccountIcon("favorite", "blue"),
             },
             ValueDate = DateOnly.FromDateTime(DateTime.Now),
             Description = "Description",
@@ -93,8 +99,8 @@ public class JournalRepositoryTests
                 Id = Guid.NewGuid(),
                 FromInclusive = default,
                 ToInclusive = default,
-                Description = string.Empty
-            }
+                Description = string.Empty,
+            },
         };
 
         await using var context = CreateContext(options);
@@ -107,12 +113,12 @@ public class JournalRepositoryTests
         result.Should().BeEquivalentTo(newEntry);
 
         await using var assertContext = CreateContext(options);
-        var addedEntry = await assertContext.JournalEntries
-                                            .Include(be => be.DebitAccount)
-                                            .Include(be => be.CreditAccount)
-                                            .Include(be => be.AccountingPeriod)
-                                            .Where(be => be.Id == newEntry.Id)
-                                            .SingleAsync();
+        var addedEntry = await assertContext
+            .JournalEntries.Include(be => be.DebitAccount)
+            .Include(be => be.CreditAccount)
+            .Include(be => be.AccountingPeriod)
+            .Where(be => be.Id == newEntry.Id)
+            .SingleAsync();
         addedEntry.Should().BeEquivalentTo(newEntry);
     }
 }

@@ -2,11 +2,11 @@ using FluentAssertions;
 using Kaesseli.Application.Journal;
 using Kaesseli.Domain.Accounts;
 using Kaesseli.Domain.Journal;
-using Kaesseli.TestUtilities.Faker;
+using Kaesseli.Test.Faker;
 using Moq;
 using Xunit;
 
-namespace Kaesseli.Application.Test.Journal;
+namespace Kaesseli.Test.Application.Journal;
 
 public class GetJournalEntriesQueryHandlerTests
 {
@@ -19,19 +19,23 @@ public class GetJournalEntriesQueryHandlerTests
 
         var faker = new SmartFaker<JournalEntry>();
         var entriesList = faker.Generate(count: 5);
-        mockRepository.Setup(
-                          repo => repo.GetJournalEntries(
-                              It.Is<Guid>(id => id == expectedPeriodId),
-                              It.IsAny<Guid?>(), It.IsAny<AccountType?>(),
-                              It.IsAny<CancellationToken>()))
-                      .ReturnsAsync(entriesList);
+        mockRepository
+            .Setup(repo =>
+                repo.GetJournalEntries(
+                    It.Is<Guid>(id => id == expectedPeriodId),
+                    It.IsAny<Guid?>(),
+                    It.IsAny<AccountType?>(),
+                    It.IsAny<CancellationToken>()
+                )
+            )
+            .ReturnsAsync(entriesList);
 
         var handler = new GetJournalEntries.Handler(mockRepository.Object);
         var query = new GetJournalEntries.Query
         {
             AccountingPeriodId = expectedPeriodId,
             AccountId = null,
-            AccountType = null
+            AccountType = null,
         };
 
         // Act
@@ -40,20 +44,32 @@ public class GetJournalEntriesQueryHandlerTests
         // Assert
         result.Should().NotBeNull();
         result.Should().HaveCount(entriesList.Count);
-        result.Should()
-              .BeEquivalentTo(
-                  entriesList,
-                  options => options.Using<DateTime>(
-                                        ctx => ctx.Subject.Should()
-                                                  .BeCloseTo(ctx.Expectation, precision: TimeSpan.FromSeconds(value: 1)))
-                                    .WhenTypeIs<DateTime>()
-                                    .ExcludingMissingMembers());
+        result
+            .Should()
+            .BeEquivalentTo(
+                entriesList,
+                options =>
+                    options
+                        .Using<DateTime>(ctx =>
+                            ctx.Subject.Should()
+                                .BeCloseTo(
+                                    ctx.Expectation,
+                                    precision: TimeSpan.FromSeconds(value: 1)
+                                )
+                        )
+                        .WhenTypeIs<DateTime>()
+                        .ExcludingMissingMembers()
+            );
 
         mockRepository.Verify(
-            repo => repo.GetJournalEntries(
-                It.Is<Guid>(id => id == expectedPeriodId),
-                It.IsAny<Guid?>(), It.IsAny<AccountType?>(),
-                It.IsAny<CancellationToken>()),
-            Times.Once);
+            repo =>
+                repo.GetJournalEntries(
+                    It.Is<Guid>(id => id == expectedPeriodId),
+                    It.IsAny<Guid?>(),
+                    It.IsAny<AccountType?>(),
+                    It.IsAny<CancellationToken>()
+                ),
+            Times.Once
+        );
     }
 }

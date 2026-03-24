@@ -2,7 +2,7 @@ using FluentAssertions;
 using Kaesseli.Domain.Accounts;
 using Xunit;
 
-namespace Kaesseli.Domain.Test.Common;
+namespace Kaesseli.Test.Domain.Common;
 
 public class AccountTypeTests
 {
