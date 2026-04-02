@@ -1,6 +1,5 @@
 using System.Net;
 using System.Net.Http.Headers;
-using FluentAssertions;
 using Kaesseli.Application.Integration.FileImport;
 using Kaesseli.Application.Integration.NextOpenTransaction;
 using Kaesseli.Application.Integration.TransactionQuery;
@@ -12,6 +11,7 @@ using Microsoft.AspNetCore.TestHost;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Moq;
+using Shouldly;
 using Xunit;
 
 namespace Kaesseli.Test.Server.Integration;
@@ -80,7 +80,7 @@ public class IntegrationApiExtensionsTests
         var response = await _client.PostAsync(requestUri: "/file/upload", formContent);
 
         // Assert
-        response.StatusCode.Should().Be(HttpStatusCode.OK);
+        response.StatusCode.ShouldBe(HttpStatusCode.OK);
         _processFileMock.Verify(m => m.Handle(It.IsAny<ProcessFile.Query>(), default), Times.Once);
     }
 
@@ -99,7 +99,7 @@ public class IntegrationApiExtensionsTests
         var response = await _client.GetAsync(requestUri: "/transactionSummary");
 
         // Assert
-        response.StatusCode.Should().Be(HttpStatusCode.OK);
+        response.StatusCode.ShouldBe(HttpStatusCode.OK);
         _getTransactionSummariesMock.Verify(
             m => m.Handle(It.IsAny<GetTransactionSummaries.Query>(), default),
             Times.Once
@@ -119,7 +119,7 @@ public class IntegrationApiExtensionsTests
         var response = await _client.GetAsync(requestUri: "/transaction/nextOpen");
 
         // Assert
-        response.StatusCode.Should().Be(HttpStatusCode.OK);
+        response.StatusCode.ShouldBe(HttpStatusCode.OK);
         _getNextOpenTransactionMock.Verify(
             m => m.Handle(It.IsAny<GetNextOpenTransaction.Query>(), default),
             Times.Once

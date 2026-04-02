@@ -1,9 +1,9 @@
-using FluentAssertions;
 using Kaesseli.Application.Integration.NextOpenTransaction;
 using Kaesseli.Domain.Accounts;
 using Kaesseli.Domain.Integration;
 using Kaesseli.Test.Faker;
 using Moq;
+using Shouldly;
 using Xunit;
 
 namespace Kaesseli.Test.Application.Integration;
@@ -38,10 +38,11 @@ public class GetNextOpenTransactionQueryHandlerTests
         var result = await handler.Handle(request, CancellationToken.None);
 
         // Assert
-        result.Should().NotBeNull();
-        result
-            .Should()
-            .BeEquivalentTo(expectedTransaction, options => options.ExcludingMissingMembers());
+        result.ShouldNotBeNull();
+        result!.Id.ShouldBe(expectedTransaction.Id);
+        result.Amount.ShouldBe(expectedTransaction.Amount);
+        result.Description.ShouldBe(expectedTransaction.Description);
+        result.ValueDate.ShouldBe(expectedTransaction.ValueDate);
         Assert.Equal(expectedTransaction.TransactionSummary?.Account.Name, result!.AccountName);
 
         Assert.Equal(accounts.Count, actual: result.SuggestedAccounts.Count());
@@ -68,6 +69,6 @@ public class GetNextOpenTransactionQueryHandlerTests
         var result = await handler.Handle(request, CancellationToken.None);
 
         // Assert
-        result.Should().BeNull();
+        result.ShouldBeNull();
     }
 }

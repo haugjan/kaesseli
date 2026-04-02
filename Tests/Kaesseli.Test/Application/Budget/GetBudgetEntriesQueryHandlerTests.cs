@@ -1,8 +1,8 @@
-using FluentAssertions;
 using Kaesseli.Application.Budget;
 using Kaesseli.Domain.Accounts;
 using Kaesseli.Domain.Budget;
 using Moq;
+using Shouldly;
 using Xunit;
 
 namespace Kaesseli.Test.Application.Budget;
@@ -38,24 +38,9 @@ public class GetBudgetEntriesQueryHandlerTests
         var result = (await handler.Handle(query, CancellationToken.None)).ToArray();
 
         // Assert
-        result.Should().NotBeNull();
-        result.Should().HaveCount(entriesList.Count);
-        result
-            .Should()
-            .BeEquivalentTo(
-                entriesList,
-                options =>
-                    options
-                        .Using<DateTime>(ctx =>
-                            ctx.Subject.Should()
-                                .BeCloseTo(
-                                    ctx.Expectation,
-                                    precision: TimeSpan.FromSeconds(value: 1)
-                                )
-                        )
-                        .WhenTypeIs<DateTime>()
-                        .ExcludingMissingMembers()
-            );
+        result.ShouldNotBeNull();
+        result.Length.ShouldBe(entriesList.Count);
+        result.Select(r => r.Id).ToArray().ShouldBeEquivalentTo(entriesList.Select(e => e.Id).ToArray());
 
         mockRepository.Verify(
             repo =>

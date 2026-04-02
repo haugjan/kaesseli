@@ -1,4 +1,3 @@
-using FluentAssertions;
 using Kaesseli.Application.Integration.FileImport;
 using Kaesseli.Infrastructure.Integration;
 using Xunit;
@@ -22,7 +21,7 @@ public class CamtProcessorTests
         var expected = await CreateExpected2();
 
         //Assert
-        current.Should().BeEquivalentTo(expected);
+        Assert.Equivalent(expected, current);
     }
 
     private async Task<FinancialDocument> CreateExpected2() =>

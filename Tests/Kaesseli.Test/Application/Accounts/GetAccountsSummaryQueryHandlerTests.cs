@@ -1,10 +1,10 @@
-using FluentAssertions;
 using Kaesseli.Application.Accounts;
 using Kaesseli.Application.Utility;
 using Kaesseli.Domain.Accounts;
 using Kaesseli.Domain.Budget;
 using Kaesseli.Domain.Journal;
 using Moq;
+using Shouldly;
 using Xunit;
 
 namespace Kaesseli.Test.Application.Accounts;
@@ -98,17 +98,17 @@ public class GetAccountsSummaryQueryHandlerTests
         var result = (await handler.Handle(query, CancellationToken.None)).ToArray();
 
         // Assert
-        result.Length.Should().Be(expected: 2);
-        result.First().Id.Should().Be(otherAccount.Id);
+        result.Length.ShouldBe(2);
+        result.First().Id.ShouldBe(otherAccount.Id);
 
         var summaryToTest = result[1];
-        summaryToTest.Id.Should().Be(accountToTest.Id);
-        summaryToTest.AccountBalance.Should().Be(accountBalance);
-        summaryToTest.Budget.Should().Be(BudgetAmount);
-        summaryToTest.BudgetBalance.Should().Be(expected: budgetBalance);
-        summaryToTest.Name.Should().Be(accountToTest.Name);
-        summaryToTest.Type.Should().Be(expected: accountToTest.Type.DisplayName());
-        summaryToTest.TypeId.Should().Be(accountToTest.Type);
+        summaryToTest.Id.ShouldBe(accountToTest.Id);
+        summaryToTest.AccountBalance.ShouldBe(accountBalance);
+        summaryToTest.Budget.ShouldBe(BudgetAmount);
+        summaryToTest.BudgetBalance.ShouldBe(budgetBalance);
+        summaryToTest.Name.ShouldBe(accountToTest.Name);
+        summaryToTest.Type.ShouldBe(accountToTest.Type.DisplayName());
+        summaryToTest.TypeId.ShouldBe(accountToTest.Type);
     }
 
     [Theory]
@@ -193,17 +193,17 @@ public class GetAccountsSummaryQueryHandlerTests
         var result = (await handler.Handle(query, cancellationToken)).ToArray();
 
         // Assert
-        result.Length.Should().Be(expected: 2);
-        result.First().Id.Should().Be(otherAccount.Id);
+        result.Length.ShouldBe(2);
+        result.First().Id.ShouldBe(otherAccount.Id);
 
         var summaryToTest = result[1];
-        summaryToTest.Id.Should().Be(accountToTest.Id);
-        summaryToTest.AccountBalance.Should().Be(accountBalance);
-        summaryToTest.Budget.Should().BeNull();
-        summaryToTest.BudgetBalance.Should().BeNull();
-        summaryToTest.Name.Should().Be(accountToTest.Name);
-        summaryToTest.Type.Should().Be(expected: accountToTest.Type.DisplayName());
-        summaryToTest.TypeId.Should().Be(accountToTest.Type);
+        summaryToTest.Id.ShouldBe(accountToTest.Id);
+        summaryToTest.AccountBalance.ShouldBe(accountBalance);
+        summaryToTest.Budget.ShouldBeNull();
+        summaryToTest.BudgetBalance.ShouldBeNull();
+        summaryToTest.Name.ShouldBe(accountToTest.Name);
+        summaryToTest.Type.ShouldBe(accountToTest.Type.DisplayName());
+        summaryToTest.TypeId.ShouldBe(accountToTest.Type);
     }
 
     private static IEnumerable<BudgetEntry> CreateTestBudgetEntries(Account accountToTest) =>

@@ -1,5 +1,5 @@
-using FluentAssertions;
 using Kaesseli.Application.Utility;
+using Shouldly;
 using Xunit;
 
 namespace Kaesseli.Test.Application.Utility;
@@ -18,7 +18,7 @@ public class DateTimeServiceTests
         var expected = DateOnly.FromDateTime(DateTime.Today);
 
         //Assert
-        currentDay.Should().Be(expected);
+        currentDay.ShouldBe(expected);
     }
 
     [Fact]
@@ -35,7 +35,7 @@ public class DateTimeServiceTests
         // Assert
         var difference = (expectedTime - actualTime).Duration();
 
-        difference.Should().BeLessOrEqualTo(tolerance);
+        difference.ShouldBeLessThanOrEqualTo(tolerance);
     }
 
     [Fact]
@@ -52,7 +52,7 @@ public class DateTimeServiceTests
         // Assert
         var difference = (expected - actual).Duration();
 
-        difference.Should().BeLessOrEqualTo(tolerance);
+        difference.ShouldBeLessThanOrEqualTo(tolerance);
     }
 
     [Fact]
@@ -69,7 +69,7 @@ public class DateTimeServiceTests
         // Assert
         var difference = (expected - actual).Duration();
 
-        difference.Should().BeLessOrEqualTo(tolerance);
+        difference.ShouldBeLessThanOrEqualTo(tolerance);
     }
 
     private static void WaitShortyIfItsJustBeforeMidnight()

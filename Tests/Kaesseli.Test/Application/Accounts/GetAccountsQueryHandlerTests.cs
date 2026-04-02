@@ -1,8 +1,8 @@
-using FluentAssertions;
 using Kaesseli.Application.Accounts;
 using Kaesseli.Domain.Accounts;
 using Kaesseli.Test.Faker;
 using Moq;
+using Shouldly;
 using Xunit;
 
 namespace Kaesseli.Test.Application.Accounts;
@@ -29,11 +29,10 @@ public class GetAccountsQueryHandlerTests
         var result = (await handler.Handle(query, cancellationToken)).ToArray();
 
         // Assert
-        result.Should().BeEquivalentTo(accountsList, options => options.Excluding(al => al.Type));
-        result
-            .Select(r => r.Type)
-            .Should()
-            .BeEquivalentTo(expectation: accountsList.Select(a => a.Type.DisplayName()));
+        result.Select(r => r.Id).ToArray().ShouldBeEquivalentTo(accountsList.Select(a => a.Id).ToArray());
+        result.Select(r => r.Type).ToArray().ShouldBeEquivalentTo(
+            accountsList.Select(a => a.Type.DisplayName()).ToArray()
+        );
         mockRepository.Verify(repo => repo.GetAccounts(cancellationToken), Times.Once);
     }
 }

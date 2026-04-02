@@ -1,4 +1,3 @@
-using FluentAssertions;
 using Kaesseli.Application.Utility;
 using Kaesseli.Domain.Accounts;
 using Kaesseli.Infrastructure.Accounts;
@@ -6,6 +5,7 @@ using Kaesseli.Infrastructure.Common;
 using Kaesseli.Test.Faker;
 using Microsoft.EntityFrameworkCore;
 using Moq;
+using Shouldly;
 using Xunit;
 
 namespace Kaesseli.Test.Infrastructure.Accounts;
@@ -42,11 +42,11 @@ public class AccountRepositoryTests
         var result = await repository.AddAccount(account, CancellationToken.None);
 
         // Assert
-        result.Should().BeEquivalentTo(account);
+        Assert.Equivalent(account, result);
 
         await using var assertContext = CreateContext(options);
         var addedAccount = await assertContext.Accounts.FindAsync(account.Id);
-        addedAccount.Should().BeEquivalentTo(account);
+        Assert.Equivalent(account, addedAccount);
     }
 
     [Fact]
@@ -85,7 +85,7 @@ public class AccountRepositoryTests
         var accounts = await repository.GetAccounts(cancellationToken);
 
         // Assert
-        accounts.Should().HaveCount(expected: 2);
+        accounts.Count().ShouldBe(2);
     }
 
     [Fact]
@@ -133,12 +133,8 @@ public class AccountRepositoryTests
         ).ToArray();
 
         // Assert
-        currentAccounts.Should().HaveCount(expected: 2);
-        currentAccounts
-            .Should()
-            .BeEquivalentTo(
-                expectation: accounts.Where(account => account.Type == AccountType.Asset)
-            );
+        currentAccounts.Length.ShouldBe(2);
+        Assert.Equivalent(accounts.Where(account => account.Type == AccountType.Asset), currentAccounts);
     }
 
     [Fact]
@@ -167,7 +163,7 @@ public class AccountRepositoryTests
         var result = await repository.GetAccount(account.Id, CancellationToken.None);
 
         // Assert
-        result.Should().BeEquivalentTo(account);
+        Assert.Equivalent(account, result);
     }
 
     [Fact]
@@ -207,7 +203,7 @@ public class AccountRepositoryTests
         var currentPeriods = await repository.GetAccountingPeriods(cancellationToken);
 
         // Assert
-        currentPeriods.Should().BeEquivalentTo(expectedPeriods);
+        Assert.Equivalent(expectedPeriods, currentPeriods);
     }
 
     [Fact]
@@ -235,7 +231,7 @@ public class AccountRepositoryTests
         );
 
         // Assert
-        currentPeriod.Should().BeEquivalentTo(expectedPeriod);
+        Assert.Equivalent(expectedPeriod, currentPeriod);
     }
 
     [Fact]
@@ -250,14 +246,12 @@ public class AccountRepositoryTests
         await using var setupContext = CreateContext(options);
         var repository = new AccountRepository(setupContext);
 
-        // Act
-        var getPeriod = async () =>
+        // Act & Assert
+        await Should.ThrowAsync<EntityNotFoundException>(async () =>
             await repository.GetAccountingPeriod(
                 accountingPeriodId: Guid.NewGuid(),
                 cancellationToken
-            );
-
-        // Assert
-        await getPeriod.Should().ThrowAsync<EntityNotFoundException>();
+            )
+        );
     }
 }

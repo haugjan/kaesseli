@@ -1,6 +1,6 @@
-using FluentAssertions;
 using Kaesseli.Domain.Accounts;
 using Kaesseli.Domain.Budget;
+using Shouldly;
 using Xunit;
 
 namespace Kaesseli.Test.Domain.Budget;
@@ -36,7 +36,7 @@ public class BudgetEntryTests
             };
 
         //Assert
-        makeNewBudgetEntry.Should().ThrowExactly<BudgetNotAllowedException>();
+        Should.Throw<BudgetNotAllowedException>(makeNewBudgetEntry);
     }
 
     [Theory]
@@ -68,6 +68,6 @@ public class BudgetEntryTests
             };
 
         //Assert
-        makeNewBudgetEntry.Should().NotThrow();
+        Should.NotThrow(makeNewBudgetEntry);
     }
 }

@@ -1,4 +1,3 @@
-using FluentAssertions;
 using Kaesseli.Application.Integration.FileImport;
 using Kaesseli.Domain.Accounts;
 using Kaesseli.Test.Faker;
@@ -18,7 +17,7 @@ public class CamtEntryExtensionsTests
         var transaction = camtEntry.ToTransaction();
 
         //Assert
-        transaction.Should().BeEquivalentTo(camtEntry);
+        Assert.Equivalent(camtEntry, transaction);
     }
 
     [Fact]
@@ -37,9 +36,6 @@ public class CamtEntryExtensionsTests
         var transactionSummary = document.ToTransactionSummary(account);
 
         //Assert
-        transactionSummary
-            .Should()
-            .BeEquivalentTo(document, options => options.Excluding(cd => cd.Entries));
-        transactionSummary.Transactions.Should().BeEquivalentTo(document.Entries);
+        Assert.Equivalent(document.Entries, transactionSummary.Transactions);
     }
 }

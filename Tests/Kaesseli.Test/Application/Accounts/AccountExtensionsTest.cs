@@ -1,5 +1,5 @@
-using FluentAssertions;
 using Kaesseli.Domain.Accounts;
+using Shouldly;
 using Xunit;
 
 namespace Kaesseli.Test.Application.Accounts;
@@ -29,12 +29,12 @@ public class AccountExtensionsTest
         );
 
         //Assert
-        summary.Id.Should().Be(account.Id);
-        summary.Type.Should().Be(expected: account.Type.DisplayName());
-        summary.Name.Should().Be(account.Name);
-        summary.AccountBalance.Should().Be(expected: 3m);
-        summary.Budget.Should().Be(expected: 5m);
-        summary.CurrentBudget.Should().Be(expected: 7m);
-        summary.BudgetBalance.Should().Be(expected: 8m);
+        summary.Id.ShouldBe(account.Id);
+        summary.Type.ShouldBe(account.Type.DisplayName());
+        summary.Name.ShouldBe(account.Name);
+        summary.AccountBalance.ShouldBe(3m);
+        summary.Budget.ShouldBe(5m);
+        summary.CurrentBudget.ShouldBe(7m);
+        summary.BudgetBalance.ShouldBe(8m);
     }
 }

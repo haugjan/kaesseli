@@ -1,4 +1,3 @@
-using FluentAssertions;
 using Kaesseli.Application.Utility;
 using Kaesseli.Domain.Integration;
 using Kaesseli.Domain.Journal;
@@ -7,6 +6,7 @@ using Kaesseli.Infrastructure.Integration;
 using Kaesseli.Test.Faker;
 using Microsoft.EntityFrameworkCore;
 using Moq;
+using Shouldly;
 using Xunit;
 
 namespace Kaesseli.Test.Infrastructure.Integration;
@@ -42,8 +42,8 @@ public class TransactionRepositoryTests
         var entries = (await repository.GetTransactionSummaries(CancellationToken.None)).ToArray();
 
         // Assert
-        entries.Should().HaveCount(expected: 2);
-        entries.Should().BeEquivalentTo(transactions);
+        entries.Length.ShouldBe(2);
+        Assert.Equivalent(transactions, entries);
     }
 
     [Fact]
@@ -71,8 +71,8 @@ public class TransactionRepositoryTests
         ).ToArray();
 
         // Assert
-        entries.Should().HaveCount(expected: 1);
-        entries.Should().BeEquivalentTo(expectation: [transactions.Last()]);
+        entries.Length.ShouldBe(1);
+        Assert.Equivalent(new[] { transactions.Last() }, entries);
     }
 
     [Fact]
@@ -100,7 +100,7 @@ public class TransactionRepositoryTests
         );
 
         // Assert
-        result.Should().BeEquivalentTo(transactionSummary);
+        Assert.Equivalent(transactionSummary, result);
 
         await using var assertContext = CreateContext(options);
         var addedEntry = await assertContext
@@ -108,9 +108,7 @@ public class TransactionRepositoryTests
             .Include(statement => statement.Transactions)
             .Include(statement => statement.Account)
             .SingleAsync();
-        addedEntry
-            .Should()
-            .BeEquivalentTo(transactionSummary, opt => opt.IgnoringCyclicReferences());
+        Assert.Equivalent(transactionSummary, addedEntry);
     }
 
     [Fact]

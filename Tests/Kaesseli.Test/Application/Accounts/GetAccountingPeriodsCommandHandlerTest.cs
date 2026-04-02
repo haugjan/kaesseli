@@ -1,4 +1,3 @@
-using FluentAssertions;
 using Kaesseli.Application.Accounts;
 using Kaesseli.Domain.Accounts;
 using Kaesseli.Test.Faker;
@@ -26,6 +25,6 @@ public class GetAccountingPeriodsCommandHandlerTest
         var result = await handler.Handle(command, cancellationToken);
 
         //Assert
-        result.Should().BeEquivalentTo(expectedPeriods);
+        Assert.Equivalent(expectedPeriods, result);
     }
 }

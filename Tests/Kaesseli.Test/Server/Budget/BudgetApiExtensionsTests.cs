@@ -1,7 +1,6 @@
 using System.Net;
 using System.Text;
 using System.Text.Json;
-using FluentAssertions;
 using Kaesseli.Application.Budget;
 using Kaesseli.Test.Faker;
 using Microsoft.AspNetCore.Builder;
@@ -10,6 +9,7 @@ using Microsoft.AspNetCore.Routing;
 using Microsoft.AspNetCore.TestHost;
 using Microsoft.Extensions.DependencyInjection;
 using Moq;
+using Shouldly;
 using Xunit;
 
 namespace Kaesseli.Test.Server.Budget;
@@ -63,12 +63,10 @@ public class BudgetApiExtensionsTests
         var response = await _client.PostAsync(requestUri: "/budgetEntry", content);
 
         // Assert
-        response.StatusCode.Should().Be(HttpStatusCode.Created);
-        response
-            .Headers.Location.Should()
-            .BeEquivalentTo(
-                expectation: new Uri(uriString: $"/budgetEntry/{guid}", UriKind.Relative)
-            );
+        response.StatusCode.ShouldBe(HttpStatusCode.Created);
+        response.Headers.Location.ShouldBe(
+            new Uri(uriString: $"/budgetEntry/{guid}", UriKind.Relative)
+        );
         _setBudgetMock.Verify(m => m.Handle(It.IsAny<SetBudget.Query>(), default), Times.Once);
     }
 
@@ -92,7 +90,7 @@ public class BudgetApiExtensionsTests
         var response = await _client.GetAsync(requestUri: $"/budgetEntry{queryString}");
 
         // Assert
-        response.StatusCode.Should().Be(HttpStatusCode.OK);
+        response.StatusCode.ShouldBe(HttpStatusCode.OK);
         _getBudgetEntriesMock.Verify(
             m => m.Handle(It.IsAny<GetBudgetEntries.Query>(), default),
             Times.Once

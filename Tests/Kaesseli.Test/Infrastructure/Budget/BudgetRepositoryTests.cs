@@ -1,4 +1,3 @@
-using FluentAssertions;
 using Kaesseli.Application.Utility;
 using Kaesseli.Domain.Accounts;
 using Kaesseli.Domain.Budget;
@@ -6,6 +5,7 @@ using Kaesseli.Infrastructure.Budget;
 using Kaesseli.Infrastructure.Common;
 using Microsoft.EntityFrameworkCore;
 using Moq;
+using Shouldly;
 using Xunit;
 
 namespace Kaesseli.Test.Infrastructure.Budget;
@@ -48,8 +48,8 @@ public class BudgetRepositoryTests
         ).ToArray();
 
         // Assert
-        entries.Should().HaveCount(expected: 1);
-        entries.All(e => e.AccountingPeriod.Id == ExpectedAccountPeriodId).Should().BeTrue();
+        entries.Length.ShouldBe(1);
+        entries.All(e => e.AccountingPeriod.Id == ExpectedAccountPeriodId).ShouldBeTrue();
     }
 
     private static List<BudgetEntry> CreateBudgetEntries() =>
@@ -132,7 +132,7 @@ public class BudgetRepositoryTests
         var result = await repository.SetBudget(newEntry, CancellationToken.None);
 
         // Assert
-        result.Should().BeEquivalentTo(newEntry);
+        Assert.Equivalent(newEntry, result);
 
         await using var assertContext = CreateContext(options);
         var addedEntry = await assertContext
@@ -140,6 +140,6 @@ public class BudgetRepositoryTests
             .Include(be => be.AccountingPeriod)
             .Where(be => be.Id == newEntry.Id)
             .SingleAsync();
-        addedEntry.Should().BeEquivalentTo(newEntry);
+        Assert.Equivalent(newEntry, addedEntry);
     }
 }

@@ -1,4 +1,3 @@
-using FluentAssertions;
 using Kaesseli.Application.Utility;
 using Kaesseli.Domain.Accounts;
 using Kaesseli.Domain.Journal;
@@ -7,6 +6,7 @@ using Kaesseli.Infrastructure.Journal;
 using Kaesseli.Test.Faker;
 using Microsoft.EntityFrameworkCore;
 using Moq;
+using Shouldly;
 using Xunit;
 
 namespace Kaesseli.Test.Infrastructure.Journal;
@@ -61,8 +61,8 @@ public class JournalRepositoryTests
         ).ToArray();
 
         // Assert
-        entries.Should().HaveCount(expected: 1);
-        entries.All(e => e.AccountingPeriod.Id == expectedPeriodId).Should().BeTrue();
+        entries.Length.ShouldBe(1);
+        entries.All(e => e.AccountingPeriod.Id == expectedPeriodId).ShouldBeTrue();
     }
 
     [Fact]
@@ -110,7 +110,7 @@ public class JournalRepositoryTests
         var result = await repository.AddJournalEntry(newEntry, CancellationToken.None);
 
         // Assert
-        result.Should().BeEquivalentTo(newEntry);
+        Assert.Equivalent(newEntry, result);
 
         await using var assertContext = CreateContext(options);
         var addedEntry = await assertContext
@@ -119,6 +119,6 @@ public class JournalRepositoryTests
             .Include(be => be.AccountingPeriod)
             .Where(be => be.Id == newEntry.Id)
             .SingleAsync();
-        addedEntry.Should().BeEquivalentTo(newEntry);
+        Assert.Equivalent(newEntry, addedEntry);
     }
 }

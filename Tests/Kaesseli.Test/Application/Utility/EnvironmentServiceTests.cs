@@ -1,5 +1,5 @@
-using FluentAssertions;
 using Kaesseli.Application.Utility;
+using Shouldly;
 using Xunit;
 
 namespace Kaesseli.Test.Application.Utility;
@@ -17,6 +17,6 @@ public class EnvironmentServiceTests
         var expectedUser = Environment.UserName;
 
         //Assert
-        currentUser.Should().Be(expectedUser);
+        currentUser.ShouldBe(expectedUser);
     }
 }

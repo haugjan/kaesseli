@@ -1,7 +1,6 @@
 using System.Net;
 using System.Text;
 using System.Text.Json;
-using FluentAssertions;
 using Kaesseli.Application.Accounts;
 using Kaesseli.Server.Accounts;
 using Kaesseli.Test.Faker;
@@ -10,6 +9,7 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.TestHost;
 using Microsoft.Extensions.DependencyInjection;
 using Moq;
+using Shouldly;
 using Xunit;
 
 namespace Kaesseli.Test.Server.Accounts;
@@ -69,7 +69,7 @@ public class AccountApiExtensionsTests
         );
 
         // Assert
-        response.StatusCode.Should().Be(HttpStatusCode.OK);
+        response.StatusCode.ShouldBe(HttpStatusCode.OK);
         _getAccountsSummaryMock.Verify(
             m => m.Handle(It.IsAny<GetAccountsSummary.Query>(), default),
             Times.Once
@@ -115,12 +115,12 @@ public class AccountApiExtensionsTests
         };
 
         // Assert
-        response.StatusCode.Should().Be(HttpStatusCode.OK);
+        response.StatusCode.ShouldBe(HttpStatusCode.OK);
         var accountResponse = JsonSerializer.Deserialize<GetAccount.Result>(
             json: await response.Content.ReadAsStringAsync(),
             options
         );
-        accountResponse.Should().BeEquivalentTo(expectedAccount);
+        Assert.Equivalent(expectedAccount, accountResponse);
         _getAccountMock.Verify(
             m =>
                 m.Handle(
@@ -154,14 +154,12 @@ public class AccountApiExtensionsTests
         var response = await _client.PostAsync(requestUri: "/account", content);
 
         // Assert
-        response.StatusCode.Should().Be(HttpStatusCode.Created);
+        response.StatusCode.ShouldBe(HttpStatusCode.Created);
         if (_client.BaseAddress != null)
         {
-            response
-                .Headers.Location.Should()
-                .BeEquivalentTo(
-                    expectation: new Uri(uriString: $"/account/{guid}", UriKind.Relative)
-                );
+            response.Headers.Location.ShouldBe(
+                new Uri(uriString: $"/account/{guid}", UriKind.Relative)
+            );
         }
 
         _addAccountMock.Verify(m => m.Handle(It.IsAny<AddAccount.Query>(), default), Times.Once);
@@ -195,20 +193,18 @@ public class AccountApiExtensionsTests
         );
 
         // Assert
-        response.StatusCode.Should().Be(HttpStatusCode.Created);
+        response.StatusCode.ShouldBe(HttpStatusCode.Created);
         if (_client.BaseAddress != null)
         {
-            response
-                .Headers.Location.Should()
-                .BeEquivalentTo(
-                    expectation: new Uri(
-                        uriString: $"/accountingPeriod/{expectedGuid}",
-                        UriKind.Relative
-                    )
-                );
+            response.Headers.Location.ShouldBe(
+                new Uri(
+                    uriString: $"/accountingPeriod/{expectedGuid}",
+                    UriKind.Relative
+                )
+            );
         }
 
-        currentGuid.Should().Be(expectedGuid);
+        currentGuid.ShouldBe(expectedGuid);
         _addAccountingPeriodMock.Verify(
             m => m.Handle(It.IsAny<AddAccountingPeriod.Query>(), default),
             Times.Once

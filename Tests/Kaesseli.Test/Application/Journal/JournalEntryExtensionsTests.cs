@@ -1,7 +1,7 @@
-using FluentAssertions;
 using Kaesseli.Application.Journal;
 using Kaesseli.Domain.Accounts;
 using Kaesseli.Test.Faker;
+using Shouldly;
 using Xunit;
 
 namespace Kaesseli.Test.Application.Journal;
@@ -39,12 +39,12 @@ public class JournalEntryExtensionsTests
         );
 
         //Assert
-        journalEntry.Amount.Should().Be(command.Amount);
-        journalEntry.Id.Should().NotBe(Guid.Empty);
-        journalEntry.CreditAccount.Should().Be(creditAccount);
-        journalEntry.DebitAccount.Should().Be(debitAccount);
-        journalEntry.ValueDate.Should().Be(valueDate);
-        journalEntry.Description.Should().Be(command.Description);
-        journalEntry.AccountingPeriod.Should().Be(accountIngPeriod);
+        journalEntry.Amount.ShouldBe(command.Amount);
+        journalEntry.Id.ShouldNotBe(Guid.Empty);
+        journalEntry.CreditAccount.ShouldBe(creditAccount);
+        journalEntry.DebitAccount.ShouldBe(debitAccount);
+        journalEntry.ValueDate.ShouldBe(valueDate);
+        journalEntry.Description.ShouldBe(command.Description);
+        journalEntry.AccountingPeriod.ShouldBe(accountIngPeriod);
     }
 }

@@ -1,10 +1,10 @@
-using FluentAssertions;
 using Kaesseli.Application.Integration.FileImport;
 using Kaesseli.Application.Integration.NextOpenTransaction;
 using Kaesseli.Domain.Accounts;
 using Kaesseli.Domain.Integration;
 using Kaesseli.Test.Faker;
 using Moq;
+using Shouldly;
 using Xunit;
 
 namespace Kaesseli.Test.Application.Integration;
@@ -71,6 +71,6 @@ public class ProcessCamtFileCommandHandlerTests
             x => x.AddTransactionSummary(It.IsAny<TransactionSummary>(), cancellationToken),
             Times.Once
         );
-        result.Should().NotBe(Guid.Empty);
+        result.ShouldNotBe(Guid.Empty);
     }
 }

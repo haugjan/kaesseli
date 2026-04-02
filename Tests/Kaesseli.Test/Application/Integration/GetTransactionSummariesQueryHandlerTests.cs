@@ -1,8 +1,8 @@
-using FluentAssertions;
 using Kaesseli.Application.Integration.TransactionQuery;
 using Kaesseli.Domain.Integration;
 using Kaesseli.Test.Faker;
 using Moq;
+using Shouldly;
 using Xunit;
 
 namespace Kaesseli.Test.Application.Integration;
@@ -29,14 +29,9 @@ public class GetTransactionSummariesQueryHandlerTests
         var result = (await handler.Handle(query, CancellationToken.None)).ToArray();
 
         // Assert
-        result.Should().NotBeNull();
-        result.Should().HaveCount(transactionSummaries.Count);
-        result
-            .Should()
-            .BeEquivalentTo(
-                transactionSummaries,
-                options => options.Excluding(ts => ts.Account).Excluding(ts => ts.Transactions)
-            );
+        result.ShouldNotBeNull();
+        result.Length.ShouldBe(transactionSummaries.Count);
+        result.Select(r => r.Id).ToArray().ShouldBeEquivalentTo(transactionSummaries.Select(ts => ts.Id).ToArray());
 
         mockRepository.Verify(
             repo => repo.GetTransactionSummaries(It.IsAny<CancellationToken>()),

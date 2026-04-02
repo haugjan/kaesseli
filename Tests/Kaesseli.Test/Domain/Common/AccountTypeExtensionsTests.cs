@@ -1,5 +1,5 @@
-using FluentAssertions;
 using Kaesseli.Domain.Accounts;
+using Shouldly;
 using Xunit;
 
 namespace Kaesseli.Test.Domain.Common;
@@ -21,7 +21,7 @@ public class AccountTypeExtensionsTests
         var result = accountType.DisplayName();
 
         // Assert
-        result.Should().Be(expectedString);
+        result.ShouldBe(expectedString);
     }
 
     [Fact]
@@ -32,6 +32,6 @@ public class AccountTypeExtensionsTests
         var toDisplayName = () => accountType.DisplayName();
 
         // Act & Assert
-        toDisplayName.Should().Throw<ArgumentOutOfRangeException>();
+        Should.Throw<ArgumentOutOfRangeException>(toDisplayName);
     }
 }

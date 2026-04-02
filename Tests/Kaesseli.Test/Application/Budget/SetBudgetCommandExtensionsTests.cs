@@ -1,6 +1,6 @@
-using FluentAssertions;
 using Kaesseli.Application.Budget;
 using Kaesseli.Domain.Accounts;
+using Shouldly;
 using Xunit;
 
 namespace Kaesseli.Test.Application.Budget;
@@ -31,10 +31,10 @@ public class SetBudgetCommandExtensionsTests
         var budgetEntry = budgetEntryCommand.ToBudgetEntry(account, accountingPeriod);
 
         //Assert
-        budgetEntry.Account.Should().Be(account);
-        budgetEntry.Amount.Should().Be(budgetEntryCommand.Amount);
-        budgetEntry.Description.Should().Be(budgetEntryCommand.Description);
-        budgetEntry.Id.Should().NotBe(Guid.Empty);
-        budgetEntry.AccountingPeriod.Should().Be(accountingPeriod);
+        budgetEntry.Account.ShouldBe(account);
+        budgetEntry.Amount.ShouldBe(budgetEntryCommand.Amount);
+        budgetEntry.Description.ShouldBe(budgetEntryCommand.Description);
+        budgetEntry.Id.ShouldNotBe(Guid.Empty);
+        budgetEntry.AccountingPeriod.ShouldBe(accountingPeriod);
     }
 }

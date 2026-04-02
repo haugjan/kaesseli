@@ -1,4 +1,3 @@
-using FluentAssertions;
 using Kaesseli.Application.Accounts;
 using Kaesseli.Application.Utility;
 using Kaesseli.Domain.Accounts;
@@ -43,9 +42,7 @@ public class GetAccountQueryHandlerTests
         var result = await handler.Handle(query, cancellationToken);
 
         // Assert
-        result
-            .Should()
-            .BeEquivalentTo(expectedAccount, options => options.Excluding(acc => acc.Type));
+        Assert.Equivalent(expectedAccount, result);
         mockAccountRepo.Verify(
             repo =>
                 repo.GetAccount(It.Is<Guid>(guid => guid == expectedAccount.Id), cancellationToken),

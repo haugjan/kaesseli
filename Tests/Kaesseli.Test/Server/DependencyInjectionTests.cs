@@ -1,4 +1,3 @@
-using FluentAssertions;
 using Kaesseli.Application.Accounts;
 using Kaesseli.Application.Automation;
 using Kaesseli.Application.Budget;
@@ -9,6 +8,7 @@ using Kaesseli.Application.Journal;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Moq;
+using Shouldly;
 using Xunit;
 
 namespace Kaesseli.Test.Server;
@@ -63,11 +63,9 @@ public class DependencyInjectionTests
             var handler = serviceProvider.GetService(handlerInterface);
 
             // Assert
-            handler
-                .Should()
-                .NotBeNull(
-                    because: $"weil {handlerInterface.Name} im DI Container registriert und auflösbar sein sollte."
-                );
+            handler.ShouldNotBeNull(
+                $"weil {handlerInterface.Name} im DI Container registriert und auflösbar sein sollte."
+            );
         }
     }
 }

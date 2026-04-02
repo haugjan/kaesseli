@@ -1,5 +1,5 @@
-using FluentAssertions;
 using Kaesseli.Domain.Accounts;
+using Shouldly;
 using Xunit;
 
 namespace Kaesseli.Test.Domain.Common;
@@ -17,6 +17,6 @@ public class AccountTypeTests
         var accountTypeValue = (int)accountType;
 
         // Assert
-        accountTypeValue.Should().Be(expectedValue);
+        accountTypeValue.ShouldBe(expectedValue);
     }
 }

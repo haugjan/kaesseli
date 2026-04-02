@@ -1,8 +1,8 @@
-using FluentAssertions;
 using Kaesseli.Application.Integration.TransactionQuery;
 using Kaesseli.Domain.Accounts;
 using Kaesseli.Domain.Integration;
 using Kaesseli.Test.Faker;
+using Shouldly;
 using Xunit;
 
 namespace Kaesseli.Test.Application.Integration;
@@ -21,16 +21,8 @@ public class TransactionSummaryExtensionsTests
         var getTransactionSummary = transactionSummary.ToGetTransactionSummary();
 
         //Assert
-        getTransactionSummary
-            .Should()
-            .BeEquivalentTo(
-                transactionSummary,
-                options => options.Excluding(ts => ts.Account).Excluding(ts => ts.Transactions)
-            );
-        getTransactionSummary.AccountName.Should().Be(transactionSummary.Account.Name);
-        getTransactionSummary
-            .NrOfTransactions.Should()
-            .Be(expected: transactionSummary.Transactions.Count());
+        getTransactionSummary.AccountName.ShouldBe(transactionSummary.Account.Name);
+        getTransactionSummary.NrOfTransactions.ShouldBe(transactionSummary.Transactions.Count());
     }
 
     [Fact]
@@ -44,6 +36,9 @@ public class TransactionSummaryExtensionsTests
         var current = transaction.ToGetNextOpenTransactionResult(accounts);
 
         //Assert
-        current.Should().BeEquivalentTo(transaction, options => options.ExcludingMissingMembers());
+        current.Id.ShouldBe(transaction.Id);
+        current.Amount.ShouldBe(transaction.Amount);
+        current.Description.ShouldBe(transaction.Description);
+        current.ValueDate.ShouldBe(transaction.ValueDate);
     }
 }

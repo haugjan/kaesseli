@@ -1,6 +1,6 @@
-using FluentAssertions;
 using Kaesseli.Application.Utility;
 using Microsoft.Extensions.DependencyInjection;
+using Shouldly;
 using Xunit;
 
 namespace Kaesseli.Test.Application;
@@ -19,6 +19,6 @@ public class ApplicationServiceCollectionExtensionsTests
         var dateTimeService = serviceProvider.GetService<IDateTimeService>();
 
         //Assert
-        dateTimeService.Should().NotBe(unexpected: null);
+        dateTimeService.ShouldNotBeNull();
     }
 }

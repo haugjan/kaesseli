@@ -1,7 +1,6 @@
 using System.Net;
 using System.Text;
 using System.Text.Json;
-using FluentAssertions;
 using Kaesseli.Application.Journal;
 using Kaesseli.Domain.Accounts;
 using Kaesseli.Test.Faker;
@@ -11,6 +10,7 @@ using Microsoft.AspNetCore.Routing;
 using Microsoft.AspNetCore.TestHost;
 using Microsoft.Extensions.DependencyInjection;
 using Moq;
+using Shouldly;
 using Xunit;
 
 namespace Kaesseli.Test.Server.Journal;
@@ -64,12 +64,10 @@ public class JournalApiExtensionsTests
         var response = await _client.PostAsync(requestUri: "/journalEntry", content);
 
         // Assert
-        response.StatusCode.Should().Be(HttpStatusCode.Created);
-        response
-            .Headers.Location.Should()
-            .BeEquivalentTo(
-                expectation: new Uri(uriString: $"/journalEntry/{guid}", UriKind.Relative)
-            );
+        response.StatusCode.ShouldBe(HttpStatusCode.Created);
+        response.Headers.Location.ShouldBe(
+            new Uri(uriString: $"/journalEntry/{guid}", UriKind.Relative)
+        );
         _addJournalEntryMock.Verify(
             m => m.Handle(It.IsAny<AddJournalEntry.Query>(), default),
             Times.Once
@@ -95,7 +93,7 @@ public class JournalApiExtensionsTests
         var response = await _client.GetAsync(requestUri: $"/journalEntry{queryString}");
 
         // Assert
-        response.StatusCode.Should().Be(HttpStatusCode.OK);
+        response.StatusCode.ShouldBe(HttpStatusCode.OK);
         _getJournalEntriesMock.Verify(
             m =>
                 m.Handle(

@@ -1,6 +1,6 @@
-using FluentAssertions;
 using Kaesseli.Domain.Accounts;
 using Kaesseli.Domain.Journal;
+using Shouldly;
 using Xunit;
 
 namespace Kaesseli.Test.Domain.Accounts;
@@ -98,86 +98,6 @@ public class AccountTests
         var accountBalance = AccountBalanceCalculator.GetAccountBalance(account, entries);
 
         //Assert
-        accountBalance.Should().Be(expectedBalance);
+        accountBalance.ShouldBe(expectedBalance);
     }
-    //TODO fix
-    //[Fact]
-    //public void GetBudget_ReturnCorrectBudget()
-    //{
-    //    //Arrange
-    //    var account = new Account
-    //    {
-    //        Id = Guid.NewGuid(),
-    //        Name = "Account",
-    //        Type = AccountType.Revenue,
-    //        Icon = "favorite",
-    //        IconColor = "blue"
-    //    };
-    //    var otherAccount = new Account
-    //    {
-    //        Id = Guid.NewGuid(),
-    //        Name = "Account",
-    //        Type = AccountType.Revenue,
-    //        Icon = "favorite",
-    //        IconColor = "blue"
-    //    };
-    //    var budgetEntries = new List<BudgetEntry>
-    //    {
-    //        new()
-    //        {
-    //            Id = Guid.NewGuid(),
-    //            Description = "Description",
-    //            Amount = 3,
-    //            Account = account,
-    //            AccountingPeriod = new AccountingPeriod
-    //            {
-    //                Id = Guid.NewGuid(),
-    //                FromInclusive = default,
-    //                ToInclusive = default,
-    //                Description = string.Empty
-    //            }
-    //        },
-    //        new()
-    //        {
-    //            Id = Guid.NewGuid(),
-    //            Description = "Description",
-    //            Amount = 5,
-    //            Account = otherAccount,
-    //            AccountingPeriod = new AccountingPeriod
-    //            {
-    //                Id = Guid.NewGuid(),
-    //                FromInclusive = default,
-    //                ToInclusive = default,
-    //                Description = string.Empty
-    //            }
-    //        },
-    //        new()
-    //        {
-    //            Id = Guid.NewGuid(),
-    //            Description = "Description",
-    //            Amount = 7,
-    //            Account = account,
-    //            AccountingPeriod = new AccountingPeriod
-    //            {
-    //                Id = default,
-    //                Description = string.Empty,
-    //                FromInclusive = default,
-    //                ToInclusive = default
-    //            }
-    //        }
-    //    };
-    //    //Act
-    //    var budget = Account.GetBudget(
-    //        budgetEntries,
-    //        period: new AccountingPeriod
-    //        {
-    //            Id = default,
-    //            Description = string.Empty,
-    //            FromInclusive = default,
-    //            ToInclusive = default
-    //        });
-
-    //    //Assert
-    //    budget.Should().Be(expected: 10);
-    //}
 }

@@ -1,5 +1,5 @@
-using FluentAssertions;
 using Kaesseli.Test.Utility.Extensions.MockData;
+using Shouldly;
 using Xunit;
 
 namespace Kaesseli.Test.Utility.Extensions;
@@ -37,6 +37,6 @@ public class ObjectExtensionsTests
         var current = person.ToYaml();
 
         //Assert
-        current.Should().Be(expected);
+        current.ShouldBe(expected);
     }
 }
