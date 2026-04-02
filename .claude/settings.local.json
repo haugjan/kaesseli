@@ -12,7 +12,9 @@
       "Bash(xargs grep:*)",
       "Bash(grep -r \"AutoMapper\\\\|IMapper\\\\|CreateMap\\\\|MapFrom\\\\|ForMember\\\\|AddAutoMapper\" /c/development/kaesseli/Kaesseli --include=*.cs)",
       "Bash(grep -r \"AutoMapper\\\\|IMapper\\\\|CreateMap\\\\|MapFrom\\\\|ForMember\\\\|AddAutoMapper\" /c/development/kaesseli/Tests --include=*.cs)",
-      "Bash(find /c/development/kaesseli -type f -name *.cs)"
+      "Bash(find /c/development/kaesseli -type f -name *.cs)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)"
     ]
   }
 }
