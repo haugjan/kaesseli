@@ -14,15 +14,13 @@ public class JournalEntryExtensionsTests
         //Arrange
         var creditAccount = new SmartFaker<Account>().Generate();
         var debitAccount = new SmartFaker<Account>().Generate();
-        var command = new AddJournalEntry.Query
-        {
-            Amount = 42,
-            Description = "Description",
-            ValueDate = null,
-            CreditAccountId = creditAccount.Id,
-            DebitAccountId = debitAccount.Id,
-            AccountingPeriodId = Guid.NewGuid(),
-        };
+        var command = new AddJournalEntry.Query(
+            Amount: 42,
+            Description: "Description",
+            ValueDate: null,
+            DebitAccountId: debitAccount.Id,
+            CreditAccountId: creditAccount.Id,
+            AccountingPeriodId: Guid.NewGuid());
         var valueDate = new DateOnly(year: 1982, month: 12, day: 13);
         var accountIngPeriod = new AccountingPeriod
         {

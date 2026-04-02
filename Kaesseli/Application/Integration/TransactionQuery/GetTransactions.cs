@@ -5,27 +5,20 @@ namespace Kaesseli.Application.Integration.TransactionQuery;
 
 public static class GetTransactions
 {
-    public record Query
-    {
-        public required Guid TransactionSummaryId { get; init; }
-    }
+    public record Query(Guid TransactionSummaryId);
 
-    public class Result
-    {
-        // ReSharper disable UnusedAutoPropertyAccessor.Global
-        public required Guid Id { get; init; }
-        public required string RawText { get; init; }
-        public required decimal Amount { get; init; }
-        public required DateOnly ValueDate { get; init; }
-        public required DateOnly BookDate { get; init; }
-        public required string Description { get; init; }
-        public required string Reference { get; init; }
-        public required string TransactionCode { get; init; }
-        public required string TransactionCodeDetail { get; init; }
-        public required string? Debtor { get; init; }
-        public required string? Creditor { get; init; }
-        // ReSharper restore UnusedAutoPropertyAccessor.Global
-    }
+    public record Result(
+        Guid Id,
+        string RawText,
+        decimal Amount,
+        DateOnly ValueDate,
+        DateOnly BookDate,
+        string Description,
+        string Reference,
+        string TransactionCode,
+        string TransactionCodeDetail,
+        string? Debtor,
+        string? Creditor);
 
     public interface IHandler
     {
@@ -33,16 +26,11 @@ public static class GetTransactions
     }
 
     // ReSharper disable once UnusedType.Global
-    public class Handler : IHandler
+    public class Handler(ITransactionRepository repo) : IHandler
     {
-        private readonly ITransactionRepository _repo;
-
-        public Handler(ITransactionRepository repo) =>
-            _repo = repo;
-
         public async Task<IEnumerable<Result>> Handle(Query request, CancellationToken cancellationToken)
         {
-            var transactions = await _repo.GetTransactions(request.TransactionSummaryId, cancellationToken);
+            var transactions = await repo.GetTransactions(request.TransactionSummaryId, cancellationToken);
             return transactions.Select(transaction => transaction.ToGetTransactionSummary()).ToImmutableList();
         }
     }

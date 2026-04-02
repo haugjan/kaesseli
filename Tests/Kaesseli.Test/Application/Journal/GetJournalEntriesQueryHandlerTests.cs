@@ -31,12 +31,7 @@ public class GetJournalEntriesQueryHandlerTests
             .ReturnsAsync(entriesList);
 
         var handler = new GetJournalEntries.Handler(mockRepository.Object);
-        var query = new GetJournalEntries.Query
-        {
-            AccountingPeriodId = expectedPeriodId,
-            AccountId = null,
-            AccountType = null,
-        };
+        var query = new GetJournalEntries.Query(AccountingPeriodId: expectedPeriodId, AccountId: null, AccountType: null);
 
         // Act
         var result = (await handler.Handle(query, CancellationToken.None)).ToArray();

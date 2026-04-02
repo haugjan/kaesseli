@@ -37,11 +37,7 @@ public class GetAccountQueryHandlerTests
             mockBudgetRepo.Object,
             mockDateTimeService.Object
         );
-        var query = new GetAccount.Query
-        {
-            AccountId = expectedAccount.Id,
-            AccountingPeriodId = Guid.NewGuid(),
-        };
+        var query = new GetAccount.Query(AccountId: expectedAccount.Id, AccountingPeriodId: Guid.NewGuid());
 
         // Act
         var result = await handler.Handle(query, cancellationToken);

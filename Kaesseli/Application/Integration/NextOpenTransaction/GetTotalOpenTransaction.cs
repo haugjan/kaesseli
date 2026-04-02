@@ -12,18 +12,11 @@ public static class GetTotalOpenTransaction
     }
 
     // ReSharper disable once UnusedType.Global
-    public class Handler : IHandler
+    public class Handler(ITransactionRepository transRepo) : IHandler
     {
-        private readonly ITransactionRepository _transRepo;
-
-        public Handler(ITransactionRepository transRepo)
-        {
-            _transRepo = transRepo;
-        }
-
         public async Task<int> Handle(Query request, CancellationToken cancellationToken)
         {
-            return await _transRepo.GetTotalOpenTransaction(cancellationToken);
+            return await transRepo.GetTotalOpenTransaction(cancellationToken);
         }
     }
 }

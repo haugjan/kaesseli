@@ -5,7 +5,14 @@
       "Bash(find C:developmentkaesseli -type f \\\\\\(-name *.csproj -o -name *.sln -o -name Directory.*.props \\\\\\))",
       "Bash(find C:developmentkaesseli -name Directory.*.props -o -name .props)",
       "Bash(dotnet test:*)",
-      "Bash(cd:*)"
+      "Bash(cd:*)",
+      "Bash(grep -r AutoMapper /c/development/kaesseli --include=*.cs)",
+      "Bash(grep -ri automapper /c/development/kaesseli --include=*.cs)",
+      "Bash(find /c/development/kaesseli -name *.cs -type f)",
+      "Bash(xargs grep:*)",
+      "Bash(grep -r \"AutoMapper\\\\|IMapper\\\\|CreateMap\\\\|MapFrom\\\\|ForMember\\\\|AddAutoMapper\" /c/development/kaesseli/Kaesseli --include=*.cs)",
+      "Bash(grep -r \"AutoMapper\\\\|IMapper\\\\|CreateMap\\\\|MapFrom\\\\|ForMember\\\\|AddAutoMapper\" /c/development/kaesseli/Tests --include=*.cs)",
+      "Bash(find /c/development/kaesseli -type f -name *.cs)"
     ]
   }
 }

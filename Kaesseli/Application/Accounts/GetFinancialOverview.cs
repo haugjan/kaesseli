@@ -5,20 +5,13 @@ namespace Kaesseli.Application.Accounts;
 
 public static class GetFinancialOverview
 {
-    public record Query
-    {
-        public required Guid AccountingPeriodId { get; init; }
-    }
+    public record Query(Guid AccountingPeriodId);
 
-    public class Result
-    {
-        // ReSharper disable UnusedAutoPropertyAccessor.Global
-        public required AccountTypeSummary Expense { get; init; }
-        public required AccountTypeSummary Revenue { get; init; }
-        public required AccountTypeSummary Liability { get; set; }
-        public required AccountTypeSummary Asset { get; init; }
-        // ReSharper restore UnusedAutoPropertyAccessor.Global
-    }
+    public record Result(
+        AccountTypeSummary Expense,
+        AccountTypeSummary Revenue,
+        AccountTypeSummary Liability,
+        AccountTypeSummary Asset);
 
     public class AccountTypeSummary
     {
@@ -71,30 +64,21 @@ public static class GetFinancialOverview
     }
 
     // ReSharper disable once UnusedType.Global
-    public class Handler : IHandler
+    public class Handler(GetAccountsSummary.IHandler accountsSummaryHandler) : IHandler
     {
-        private readonly GetAccountsSummary.IHandler _accountsSummaryHandler;
-
-        public Handler(GetAccountsSummary.IHandler accountsSummaryHandler)
-        {
-            _accountsSummaryHandler = accountsSummaryHandler;
-        }
-
         public async Task<Result> Handle(Query request, CancellationToken cancellationToken)
         {
-            var accountSummary = (await _accountsSummaryHandler.Handle(
-                                      request: new GetAccountsSummary.Query { AccountingPeriodId = request.AccountingPeriodId },
+            var accountSummary = (await accountsSummaryHandler.Handle(
+                                      request: new GetAccountsSummary.Query(request.AccountingPeriodId),
                                       cancellationToken))
                                  .GroupBy(account => account.TypeId)
                                  .ToDictionary(account => account.Key, account => account.ToImmutableList());
 
-            return new()
-            {
-                Expense = GetAccountTypeSummary(summaries: accountSummary[AccountType.Expense]),
-                Revenue = GetAccountTypeSummary(summaries: accountSummary[AccountType.Revenue]),
-                Liability = GetAccountTypeSummary(summaries: accountSummary[AccountType.Liability]),
-                Asset = GetAccountTypeSummary(summaries: accountSummary[AccountType.Asset])
-            };
+            return new Result(
+                Expense: GetAccountTypeSummary(summaries: accountSummary[AccountType.Expense]),
+                Revenue: GetAccountTypeSummary(summaries: accountSummary[AccountType.Revenue]),
+                Liability: GetAccountTypeSummary(summaries: accountSummary[AccountType.Liability]),
+                Asset: GetAccountTypeSummary(summaries: accountSummary[AccountType.Asset]));
         }
 
         private static AccountTypeSummary GetAccountTypeSummary(ImmutableList<GetAccountsSummary.Result> summaries) =>

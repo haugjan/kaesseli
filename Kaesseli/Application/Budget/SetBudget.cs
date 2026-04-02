@@ -6,15 +6,7 @@ namespace Kaesseli.Application.Budget;
 public static class SetBudget
 {
     // ReSharper disable once ClassNeverInstantiated.Global
-    public record Query
-    {
-        // ReSharper disable UnusedAutoPropertyAccessor.Global
-        public required decimal Amount { get; init; }
-        public required string Description { get; init; }
-        public required Guid AccountId { get; init; }
-        public required Guid AccountingPeriodId { get; init; }
-        // ReSharper restore UnusedAutoPropertyAccessor.Global
-    }
+    public record Query(decimal Amount, string Description, Guid AccountId, Guid AccountingPeriodId);
 
     public interface IHandler
     {

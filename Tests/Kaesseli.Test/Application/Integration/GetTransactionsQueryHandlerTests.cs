@@ -35,7 +35,7 @@ public class GetTransactionsQueryHandlerTests
             );
 
         var handler = new GetTransactions.Handler(mockRepository.Object);
-        var query = new GetTransactions.Query { TransactionSummaryId = transactionSummaryGuid };
+        var query = new GetTransactions.Query(transactionSummaryGuid);
 
         // Act
         var result = (await handler.Handle(query, CancellationToken.None)).ToArray();

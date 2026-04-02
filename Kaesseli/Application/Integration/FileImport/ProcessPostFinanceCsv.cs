@@ -2,11 +2,7 @@ namespace Kaesseli.Application.Integration.FileImport;
 
 public static class ProcessPostFinanceCsv
 {
-    public record Query
-    {
-        public required Stream Content { get; init; }
-        public required Guid AccountId { get; init; }
-    }
+    public record Query(Stream Content, Guid AccountId);
 
     public interface IHandler
     {

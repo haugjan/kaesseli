@@ -24,13 +24,13 @@ public static class IntegrationApiExtensions
         app.MapGet(
             pattern: "/transaction",
             async (GetTransactions.IHandler handler, [FromQuery] Guid transactionSummaryId) =>
-                await handler.Handle(new GetTransactions.Query { TransactionSummaryId = transactionSummaryId }, default)
+                await handler.Handle(new GetTransactions.Query(transactionSummaryId), default)
         );
 
         app.MapGet(
             pattern: "/transaction/nextOpen",
             async (GetNextOpenTransaction.IHandler handler, [FromQuery] int? skip) =>
-                await handler.Handle(new GetNextOpenTransaction.Query { Skip = skip.GetValueOrDefault() }, default)
+                await handler.Handle(new GetNextOpenTransaction.Query(skip.GetValueOrDefault()), default)
         );
         app.MapGet(
             pattern: "/transaction/totalOpen",
@@ -116,13 +116,11 @@ public static class IntegrationApiExtensions
             ".camt" or ".xml" => FileType.Camt,
             _ => throw new ArgumentOutOfRangeException(),
         };
-        var command = new ProcessFile.Query
-        {
-            Content = stream,
-            AccountId = accountId,
-            FileType = fileType,
-            AccountingPeriodId = accountingPeriodId,
-        };
+        var command = new ProcessFile.Query(
+            FileType: fileType,
+            Content: stream,
+            AccountId: accountId,
+            AccountingPeriodId: accountingPeriodId);
 
         return await handler.Handle(command, default);
     }

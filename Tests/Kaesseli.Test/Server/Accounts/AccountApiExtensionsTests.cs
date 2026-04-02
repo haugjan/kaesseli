@@ -89,22 +89,20 @@ public class AccountApiExtensionsTests
             )
             .ReturnsAsync(
                 (GetAccount.Query _, CancellationToken _) =>
-                    new GetAccount.Result
-                    {
-                        Id = expectedAccount.Id,
-                        Name = expectedAccount.Name,
-                        Icon = expectedAccount.Icon,
-                        IconColor = expectedAccount.IconColor,
-                        Type = expectedAccount.Type,
-                        TypeId = expectedAccount.TypeId,
-                        AccountBalance = 10,
-                        Budget = 11,
-                        BudgetBalance = 12,
-                        Entries = Array.Empty<GetAccount.ResultEntry>(),
-                        CurrentBudget = 13,
-                        BudgetPerMonth = null,
-                        BudgetPerYear = null,
-                    }
+                    new GetAccount.Result(
+                        Id: expectedAccount.Id,
+                        Name: expectedAccount.Name,
+                        Icon: expectedAccount.Icon,
+                        IconColor: expectedAccount.IconColor,
+                        Type: expectedAccount.Type,
+                        TypeId: expectedAccount.TypeId,
+                        AccountBalance: 10,
+                        Budget: 11,
+                        BudgetPerMonth: null,
+                        BudgetPerYear: null,
+                        CurrentBudget: 13,
+                        BudgetBalance: 12,
+                        Entries: Array.Empty<GetAccount.ResultEntry>())
             );
 
         // Act

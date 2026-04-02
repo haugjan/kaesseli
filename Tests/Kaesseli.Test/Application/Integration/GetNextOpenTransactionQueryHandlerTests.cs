@@ -32,7 +32,7 @@ public class GetNextOpenTransactionQueryHandlerTests
             .Setup(r => r.GetAccounts(It.IsAny<CancellationToken>()))
             .ReturnsAsync(accounts);
 
-        var request = new GetNextOpenTransaction.Query { Skip = 1 };
+        var request = new GetNextOpenTransaction.Query(1);
 
         // Act
         var result = await handler.Handle(request, CancellationToken.None);
@@ -62,7 +62,7 @@ public class GetNextOpenTransactionQueryHandlerTests
             .Setup(r => r.GetNextOpenTransaction(It.IsAny<int>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(value: null);
 
-        var request = new GetNextOpenTransaction.Query { Skip = 1 };
+        var request = new GetNextOpenTransaction.Query(1);
 
         // Act
         var result = await handler.Handle(request, CancellationToken.None);

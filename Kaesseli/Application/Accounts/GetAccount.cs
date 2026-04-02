@@ -8,44 +8,31 @@ namespace Kaesseli.Application.Accounts;
 
 public static class GetAccount
 {
-    public record Query
-    {
-        public required Guid AccountId { get; init; }
-        public required Guid AccountingPeriodId { get; init; }
-    }
+    public record Query(Guid AccountId, Guid AccountingPeriodId);
 
-    public class Result
-    {
-        // ReSharper disable UnusedAutoPropertyAccessor.Global
-        public required Guid Id { get; init; }
-        public required string Name { get; init; }
-        public required string Icon { get; init; }
-        public required string IconColor { get; init; }
-        public required string Type { get; init; }
-        public required AccountType TypeId { get; init; }
-        // ReSharper disable once UnusedMember.Global
-        public required decimal AccountBalance { get; init; }
-        public required decimal? Budget { get; init; }
-        public required decimal? BudgetPerMonth { get; init; }
-        public required decimal? BudgetPerYear { get; init; }
-        public required decimal? CurrentBudget { get; init; }
-        public required decimal? BudgetBalance { get; init; }
-        public required IEnumerable<ResultEntry> Entries { get; init; }
-        // ReSharper restore UnusedAutoPropertyAccessor.Global
-    }
+    public record Result(
+        Guid Id,
+        string Name,
+        string Icon,
+        string IconColor,
+        string Type,
+        AccountType TypeId,
+        decimal AccountBalance,
+        decimal? Budget,
+        decimal? BudgetPerMonth,
+        decimal? BudgetPerYear,
+        decimal? CurrentBudget,
+        decimal? BudgetBalance,
+        IEnumerable<ResultEntry> Entries);
 
-    public class ResultEntry
-    {
-        // ReSharper disable UnusedAutoPropertyAccessor.Global
-        public required Guid Id { get; init; }
-        public required DateOnly ValueDate { get; init; }
-        public required string Description { get; init; }
-        public required decimal Amount { get; init; }
-        public required AmountType AmountType { get; init; }
-        public required string? OtherAccount { get; init; }
-        public required Guid? OtherAccountId { get; init; }
-        // ReSharper restore UnusedAutoPropertyAccessor.Global
-    }
+    public record ResultEntry(
+        Guid Id,
+        DateOnly ValueDate,
+        string Description,
+        decimal Amount,
+        AmountType AmountType,
+        string? OtherAccount,
+        Guid? OtherAccountId);
 
     public interface IHandler
     {
@@ -77,22 +64,20 @@ public static class GetAccount
             var currentBudget = AccountBalanceCalculator.GetCurrentBudget(account, budgetEntries, period, _dateTimeService.ToDay);
             var budgetBalance = AccountBalanceCalculator.GetBudgetBalance(account.Type, currentBudget, accountBalance);
 
-            return new Result
-            {
-                Id = account.Id,
-                Name = account.Name,
-                Icon = account.Icon.Name,
-                Type = account.Type.DisplayName(),
-                TypeId = account.Type,
-                AccountBalance = accountBalance,
-                Budget = budget,
-                BudgetPerMonth = budgetPerMonth,
-                BudgetPerYear = budgetPerYear,
-                BudgetBalance = budgetBalance,
-                Entries = GetEntries(account.Id, journalEntries, budgetEntries),
-                IconColor = account.Icon.Color,
-                CurrentBudget = currentBudget
-            };
+            return new Result(
+                Id: account.Id,
+                Name: account.Name,
+                Icon: account.Icon.Name,
+                IconColor: account.Icon.Color,
+                Type: account.Type.DisplayName(),
+                TypeId: account.Type,
+                AccountBalance: accountBalance,
+                Budget: budget,
+                BudgetPerMonth: budgetPerMonth,
+                BudgetPerYear: budgetPerYear,
+                CurrentBudget: currentBudget,
+                BudgetBalance: budgetBalance,
+                Entries: GetEntries(account.Id, journalEntries, budgetEntries));
         }
 
         private static IEnumerable<ResultEntry> GetEntries(
@@ -111,16 +96,14 @@ public static class GetAccount
         }
 
         private static ResultEntry CreateResultEntry(BudgetEntry entry) =>
-            new()
-            {
-                Id = entry.Id,
-                ValueDate = entry.AccountingPeriod.FromInclusive,
-                Description = entry.Description,
-                Amount = entry.Amount,
-                AmountType = AmountType.Budget,
-                OtherAccount = null,
-                OtherAccountId = null
-            };
+            new(
+                Id: entry.Id,
+                ValueDate: entry.AccountingPeriod.FromInclusive,
+                Description: entry.Description,
+                Amount: entry.Amount,
+                AmountType: AmountType.Budget,
+                OtherAccount: null,
+                OtherAccountId: null);
 
         private static ResultEntry CreateResultEntry(Guid accountId, JournalEntry entry)
         {
@@ -133,16 +116,14 @@ public static class GetAccount
             var isDebit = entry.DebitAccount.Id == accountId;
             var amount = AccountBalanceCalculator.GetSignedAmount(account, entry);
 
-            return new ResultEntry
-            {
-                Id = entry.Id,
-                ValueDate = entry.ValueDate,
-                Description = entry.Description,
-                Amount = amount,
-                AmountType = isDebit ? AmountType.Debit : AmountType.Credit,
-                OtherAccount = otherAccount.Name,
-                OtherAccountId = otherAccount.Id
-            };
+            return new ResultEntry(
+                Id: entry.Id,
+                ValueDate: entry.ValueDate,
+                Description: entry.Description,
+                Amount: amount,
+                AmountType: isDebit ? AmountType.Debit : AmountType.Credit,
+                OtherAccount: otherAccount.Name,
+                OtherAccountId: otherAccount.Id);
         }
     }
 }

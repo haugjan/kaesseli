@@ -4,28 +4,18 @@ namespace Kaesseli.Application.Integration.NextOpenTransaction;
 
 public static class OpenTransactionAmountChanged
 {
-    public class Event
-    {
-        public required int Amount { get; init; }
-    }
+    public record Event(int Amount);
 
     public interface IHandler
     {
         Task Handle(Event notification, CancellationToken cancellationToken);
     }
 
-    public class Handler : IHandler
+    public class Handler(ITransactionRepository tranRepo) : IHandler
     {
-        private readonly ITransactionRepository _tranRepo;
-
-        public Handler(ITransactionRepository tranRepo)
-        {
-            _tranRepo = tranRepo;
-        }
-
         public async Task Handle(Event notification, CancellationToken cancellationToken)
         {
-            await _tranRepo.ChangeTotalOpenTransaction(notification.Amount, cancellationToken);
+            await tranRepo.ChangeTotalOpenTransaction(notification.Amount, cancellationToken);
         }
     }
 }

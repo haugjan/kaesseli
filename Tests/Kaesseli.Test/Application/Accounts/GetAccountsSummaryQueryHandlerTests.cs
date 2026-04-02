@@ -92,7 +92,7 @@ public class GetAccountsSummaryQueryHandlerTests
             )
             .ReturnsAsync(budgetEntries);
 
-        var query = new GetAccountsSummary.Query { AccountingPeriodId = periodId };
+        var query = new GetAccountsSummary.Query(periodId);
 
         // Act
         var result = (await handler.Handle(query, CancellationToken.None)).ToArray();
@@ -187,7 +187,7 @@ public class GetAccountsSummaryQueryHandlerTests
             )
             .ReturnsAsync(value: Array.Empty<BudgetEntry>());
 
-        var query = new GetAccountsSummary.Query { AccountingPeriodId = periodId };
+        var query = new GetAccountsSummary.Query(periodId);
 
         // Act
         var result = (await handler.Handle(query, cancellationToken)).ToArray();

@@ -18,13 +18,7 @@ public class SetBudgetCommandExtensionsTests
             Type = AccountType.Expense,
             Icon = new AccountIcon("favorite", "blue"),
         };
-        var budgetEntryCommand = new SetBudget.Query
-        {
-            Amount = 42,
-            Description = "Description",
-            AccountId = Guid.NewGuid(),
-            AccountingPeriodId = Guid.NewGuid(),
-        };
+        var budgetEntryCommand = new SetBudget.Query(Amount: 42, Description: "Description", AccountId: Guid.NewGuid(), AccountingPeriodId: Guid.NewGuid());
         var accountingPeriod = new AccountingPeriod
         {
             Id = Guid.NewGuid(),

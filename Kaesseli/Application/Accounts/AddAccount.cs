@@ -5,13 +5,7 @@ namespace Kaesseli.Application.Accounts;
 public static class AddAccount
 {
     // ReSharper disable once ClassNeverInstantiated.Global
-    public record Query
-    {
-        public required string Name { get; init; }
-        public required AccountType Type { get; init; }
-        public required string Icon { get; init; }
-        public required string IconColor { get; init; }
-    }
+    public record Query(string Name, AccountType Type, string Icon, string IconColor);
 
     public interface IHandler
     {

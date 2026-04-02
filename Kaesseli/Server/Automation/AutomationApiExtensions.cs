@@ -16,7 +16,7 @@ public static class AutomationApiExtensions
         app.MapGet(
             pattern: "/automation/nrMatchInput",
             async (GetNrOfPossibleAutomation.IHandler handler, [FromQuery] string input) =>
-                await handler.Handle(new GetNrOfPossibleAutomation.Query { AutomationText = input }, default));
+                await handler.Handle(new GetNrOfPossibleAutomation.Query(input), default));
 
         app.MapPost(
             pattern: "/automation",

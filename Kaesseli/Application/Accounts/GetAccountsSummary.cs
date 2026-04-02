@@ -7,28 +7,21 @@ namespace Kaesseli.Application.Accounts;
 
 public static class GetAccountsSummary
 {
-    public record Query
-    {
-        public required Guid AccountingPeriodId { get; init; }
-    }
+    public record Query(Guid AccountingPeriodId);
 
-    public class Result
-    {
-        // ReSharper disable UnusedAutoPropertyAccessor.Global
-        public required Guid Id { get; init; }
-        public required string Name { get; init; }
-        public required string Icon { get; set; }
-        public required string IconColor { get; set; }
-        public required string Type { get; init; }
-        public required AccountType TypeId { get; init; }
-        public required decimal AccountBalance { get; init; }
-        public required decimal? Budget { get; init; }
-        public required decimal? BudgetPerMonth { get; init; }
-        public required decimal? BudgetPerYear { get; init; }
-        public required decimal? BudgetBalance { get; init; }
-        public required decimal? CurrentBudget { get; init; }
-        // ReSharper restore UnusedAutoPropertyAccessor.Global
-    }
+    public record Result(
+        Guid Id,
+        string Name,
+        string Icon,
+        string IconColor,
+        string Type,
+        AccountType TypeId,
+        decimal AccountBalance,
+        decimal? Budget,
+        decimal? BudgetPerMonth,
+        decimal? BudgetPerYear,
+        decimal? BudgetBalance,
+        decimal? CurrentBudget);
 
     public interface IHandler
     {

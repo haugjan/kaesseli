@@ -28,12 +28,10 @@ public static class JournalEntryApiExtensions
                     Guid? accountId,
                     AccountType? accountType) =>
                 await handler.Handle(
-                    request: new GetJournalEntries.Query
-                    {
-                        AccountingPeriodId = accountingPeriodId,
-                        AccountId = accountId,
-                        AccountType = accountType
-                    }, default));
+                    request: new GetJournalEntries.Query(
+                        AccountingPeriodId: accountingPeriodId,
+                        AccountId: accountId,
+                        AccountType: accountType), default));
         return app;
     }
 }

@@ -14,19 +14,17 @@ internal static class AccountExtensions
         decimal? currentBudget,
         decimal? budgetBalance
     ) =>
-        new()
-        {
-            Id = account.Id,
-            Name = account.Name,
-            Icon = account.Icon.Name,
-            Type = account.Type.DisplayName(),
-            TypeId = account.Type,
-            AccountBalance = accountBalance,
-            Budget = budget,
-            BudgetPerMonth = budgetPerMonth,
-            BudgetPerYear = budgetPerYear,
-            CurrentBudget = currentBudget,
-            BudgetBalance = budgetBalance,
-            IconColor = account.Icon.Color,
-        };
+        new(
+            Id: account.Id,
+            Name: account.Name,
+            Icon: account.Icon.Name,
+            IconColor: account.Icon.Color,
+            Type: account.Type.DisplayName(),
+            TypeId: account.Type,
+            AccountBalance: accountBalance,
+            Budget: budget,
+            BudgetPerMonth: budgetPerMonth,
+            BudgetPerYear: budgetPerYear,
+            BudgetBalance: budgetBalance,
+            CurrentBudget: currentBudget);
 }

@@ -6,24 +6,9 @@ namespace Kaesseli.Application.Journal;
 
 public static class GetJournalEntries
 {
-    public record Query
-    {
-        public required Guid AccountingPeriodId { get; init; }
-        public required Guid? AccountId { get; init; }
-        public required AccountType? AccountType { get; init; }
-    }
+    public record Query(Guid AccountingPeriodId, Guid? AccountId, AccountType? AccountType);
 
-    public class Result
-    {
-        // ReSharper disable UnusedAutoPropertyAccessor.Global
-        public required Guid Id { get; init; }
-        public required Guid? DebitAccountId { get; init; }
-        public required Guid? CreditAccountId { get; init; }
-        public required decimal Amount { get; init; }
-        public required string Description { get; init; }
-        public required DateOnly ValueDate { get; init; }
-        // ReSharper restore UnusedAutoPropertyAccessor.Global
-    }
+    public record Result(Guid Id, Guid? DebitAccountId, Guid? CreditAccountId, decimal Amount, string Description, DateOnly ValueDate);
 
     public interface IHandler
     {
@@ -39,15 +24,13 @@ public static class GetJournalEntries
                               request.AccountingPeriodId, accountId: null, request.AccountType,
                               cancellationToken);
             return entries.Select(
-                              entry => new Result
-                              {
-                                  Id = entry.Id,
-                                  Amount = entry.Amount,
-                                  Description = entry.Description,
-                                  DebitAccountId = entry.DebitAccount.Id,
-                                  CreditAccountId = entry.CreditAccount.Id,
-                                  ValueDate = entry.ValueDate
-                              }).ToImmutableList();
+                              entry => new Result(
+                                  Id: entry.Id,
+                                  Amount: entry.Amount,
+                                  Description: entry.Description,
+                                  DebitAccountId: entry.DebitAccount.Id,
+                                  CreditAccountId: entry.CreditAccount.Id,
+                                  ValueDate: entry.ValueDate)).ToImmutableList();
         }
     }
 }

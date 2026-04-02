@@ -6,7 +6,21 @@ namespace Kaesseli.Test.Faker;
 public sealed class SmartFaker<T> : Faker<T>
     where T : class
 {
-    public SmartFaker() =>
+    public SmartFaker()
+    {
+        var constructors = typeof(T).GetConstructors();
+        if (!constructors.Any(c => c.GetParameters().Length == 0))
+        {
+            var ctor = constructors[0];
+            CustomInstantiator(f =>
+            {
+                var parameters = ctor.GetParameters()
+                    .Select(p => GetValueByType(p.ParameterType, f))
+                    .ToArray();
+                return (T)ctor.Invoke(parameters);
+            });
+        }
+
         Rules(
             (faker, obj) =>
             {
@@ -14,52 +28,53 @@ public sealed class SmartFaker<T> : Faker<T>
                     SetPropertyIfCanWrite(prop, faker, obj);
             }
         );
+    }
 
     private static void SetPropertyIfCanWrite(PropertyInfo prop, Bogus.Faker faker, T obj)
     {
         if (!prop.CanWrite)
             return;
 
-        var value = GetValue(prop, faker);
+        var value = GetValueByType(prop.PropertyType, faker);
 
         if (value != null)
             prop.SetValue(obj, value);
     }
 
-    private static object? GetValue(PropertyInfo prop, Bogus.Faker faker)
+    private static object? GetValueByType(Type type, Bogus.Faker faker)
     {
-        var value = prop.PropertyType switch
+        var value = type switch
         {
-            { } type when type == typeof(string) => faker.Lorem.Sentence(),
-            { } type when type == typeof(int) => faker.Random.Int(),
-            { } type when type == typeof(double) => faker.Random.Double(),
-            { } type when type == typeof(float) => faker.Random.Float(),
-            { } type when type == typeof(decimal) => faker.Random.Decimal(),
-            { } type when type == typeof(long) => faker.Random.Long(),
-            { } type when type == typeof(bool) => faker.Random.Bool(),
-            { } type when type == typeof(DateTime) => faker.Date.Recent(),
-            { } type when type == typeof(Guid) => LongToGuid(value: faker.Random.Long()),
-            { } type when type == typeof(DateOnly) => faker.Date.BetweenDateOnly(
+            { } t when t == typeof(string) => faker.Lorem.Sentence(),
+            { } t when t == typeof(int) => faker.Random.Int(),
+            { } t when t == typeof(double) => faker.Random.Double(),
+            { } t when t == typeof(float) => faker.Random.Float(),
+            { } t when t == typeof(decimal) => faker.Random.Decimal(),
+            { } t when t == typeof(long) => faker.Random.Long(),
+            { } t when t == typeof(bool) => faker.Random.Bool(),
+            { } t when t == typeof(DateTime) => faker.Date.Recent(),
+            { } t when t == typeof(Guid) => LongToGuid(value: faker.Random.Long()),
+            { } t when t == typeof(DateOnly) => faker.Date.BetweenDateOnly(
                 start: new DateOnly(year: 2000, month: 01, day: 01),
                 end: new DateOnly(year: 2010, month: 01, day: 01)
             ),
-            { } type when type == typeof(DateOnly?) => faker.Date.BetweenDateOnly(
+            { } t when t == typeof(DateOnly?) => faker.Date.BetweenDateOnly(
                 start: new DateOnly(year: 2000, month: 01, day: 01),
                 end: new DateOnly(year: 2010, month: 01, day: 01)
             ),
-            { } type when type == typeof(TimeOnly) => TimeOnly.FromTimeSpan(
+            { } t when t == typeof(TimeOnly) => TimeOnly.FromTimeSpan(
                 timeSpan: faker.Date.Timespan()
             ),
-            { } type when type == typeof(byte) => faker.Random.Byte(),
-            { } type when type == typeof(sbyte) => faker.Random.SByte(),
-            { } type when type == typeof(short) => faker.Random.Short(),
-            { } type when type == typeof(ushort) => faker.Random.UShort(),
-            { } type when type == typeof(uint) => faker.Random.UInt(),
-            { } type when type == typeof(ulong) => faker.Random.ULong(),
-            { } type when type == typeof(char) => faker.Random.Char(),
-            { IsEnum: true } type => faker.PickRandom(items: type.GetEnumValues().Cast<int>()),
-            { } type when type == typeof(List<string>) => faker.Lorem.Words(),
-            { } type when type == typeof(Dictionary<string, string>) => faker
+            { } t when t == typeof(byte) => faker.Random.Byte(),
+            { } t when t == typeof(sbyte) => faker.Random.SByte(),
+            { } t when t == typeof(short) => faker.Random.Short(),
+            { } t when t == typeof(ushort) => faker.Random.UShort(),
+            { } t when t == typeof(uint) => faker.Random.UInt(),
+            { } t when t == typeof(ulong) => faker.Random.ULong(),
+            { } t when t == typeof(char) => faker.Random.Char(),
+            { IsEnum: true } t => faker.PickRandom(t.GetEnumValues().Cast<object>().ToArray()),
+            { } t when t == typeof(List<string>) => faker.Lorem.Words(),
+            { } t when t == typeof(Dictionary<string, string>) => faker
                 .Make(
                     count: faker.Random.Int(min: 1, max: 5),
                     _ => new KeyValuePair<string, string>(
@@ -68,11 +83,11 @@ public sealed class SmartFaker<T> : Faker<T>
                     )
                 )
                 .ToDictionary(kvp => kvp.Key, kvp => kvp.Value),
-            { IsPrimitive: false } type
-                when type != typeof(string)
-                    && !type.IsEnum
-                    && type.GetConstructor(Type.EmptyTypes) != null => Activator.CreateInstance(
-                type
+            { IsPrimitive: false } t
+                when t != typeof(string)
+                    && !t.IsEnum
+                    && t.GetConstructor(Type.EmptyTypes) != null => Activator.CreateInstance(
+                t
             ) switch
             {
                 null => null,
@@ -90,7 +105,7 @@ public sealed class SmartFaker<T> : Faker<T>
             if (prop.SetMethod != null && (!prop.CanWrite || prop.SetMethod.IsPublic == false))
                 continue;
 
-            var propValue = GetValue(prop, faker);
+            var propValue = GetValueByType(prop.PropertyType, faker);
             if (propValue != null)
                 prop.SetValue(instance, propValue);
         }

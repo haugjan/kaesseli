@@ -7,17 +7,7 @@ namespace Kaesseli.Application.Journal;
 public static class AddJournalEntry
 {
     // ReSharper disable once ClassNeverInstantiated.Global
-    public record Query
-    {
-        // ReSharper disable UnusedAutoPropertyAccessor.Global
-        public required decimal Amount { get; init; }
-        public required string Description { get; init; }
-        public required DateOnly? ValueDate { get; init; }
-        public required Guid DebitAccountId { get; init; }
-        public required Guid CreditAccountId { get; init; }
-        public required Guid AccountingPeriodId { get; init; }
-        // ReSharper restore UnusedAutoPropertyAccessor.Global
-    }
+    public record Query(decimal Amount, string Description, DateOnly? ValueDate, Guid DebitAccountId, Guid CreditAccountId, Guid AccountingPeriodId);
 
     public interface IHandler
     {

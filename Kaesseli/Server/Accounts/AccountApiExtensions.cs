@@ -15,7 +15,7 @@ public static class AccountApiExtensions
         app.MapGet(
             pattern: "/account",
             async (GetAccounts.IHandler handler, [FromQuery] AccountType? accountType) =>
-                await handler.Handle(request: new GetAccounts.Query { AccountType = accountType }, default));
+                await handler.Handle(request: new GetAccounts.Query(accountType), default));
 
         app.MapGet(
             pattern: "/accountingPeriod",
@@ -25,27 +25,17 @@ public static class AccountApiExtensions
         app.MapGet(
             pattern: "/accountingPeriod/{accountingPeriodId}/account/{accountId}",
             async (GetAccount.IHandler handler, Guid accountId, Guid accountingPeriodId) =>
-                await handler.Handle(request: new GetAccount.Query
-                {
-                    AccountId = accountId,
-                    AccountingPeriodId = accountingPeriodId
-                }, default));
+                await handler.Handle(request: new GetAccount.Query(AccountId: accountId, AccountingPeriodId: accountingPeriodId), default));
 
         app.MapGet(
             pattern: "/accountingPeriod/{accountingPeriodId}/accountSummary",
             async (GetAccountsSummary.IHandler handler, Guid accountingPeriodId) =>
-                await handler.Handle(request: new GetAccountsSummary.Query
-                {
-                    AccountingPeriodId = accountingPeriodId
-                }, default));
+                await handler.Handle(request: new GetAccountsSummary.Query(accountingPeriodId), default));
 
         app.MapGet(
             pattern: "/accountingPeriod/{accountingPeriodId}/overView",
             async (GetFinancialOverview.IHandler handler, Guid accountingPeriodId) =>
-                await handler.Handle(request: new GetFinancialOverview.Query
-                {
-                    AccountingPeriodId = accountingPeriodId
-                }, default));
+                await handler.Handle(request: new GetFinancialOverview.Query(accountingPeriodId), default));
 
         app.MapPost(
             pattern: "/account",

@@ -4,21 +4,11 @@ namespace Kaesseli.Application.Accounts;
 
 public static class GetAccounts
 {
-    public record Query
-    {
-        public AccountType? AccountType { get; init; }
-    }
+    public record Query(AccountType? AccountType = null);
 
-    public class Result
+    public record Result(Guid Id, string Name, AccountType TypeId, string Icon, string IconColor)
     {
-        // ReSharper disable UnusedAutoPropertyAccessor.Global
-        public required Guid Id { get; init; }
-        public required string Name { get; init; }
         public string Type => TypeId.DisplayName();
-        public required AccountType TypeId { get; init; }
-        public required string Icon { get; init; }
-        public required string IconColor { get; init; }
-        // ReSharper restore UnusedAutoPropertyAccessor.Global
     }
 
     public interface IHandler
@@ -35,14 +25,12 @@ public static class GetAccounts
                                ? await repository.GetAccounts(cancellationToken)
                                : await repository.GetAccounts(request.AccountType.Value, cancellationToken);
             return accounts.Select(
-                account => new Result
-                {
-                    Id = account.Id,
-                    Name = account.Name,
-                    TypeId = account.Type,
-                    Icon = account.Icon.Name,
-                    IconColor = account.Icon.Color
-                });
+                account => new Result(
+                    Id: account.Id,
+                    Name: account.Name,
+                    TypeId: account.Type,
+                    Icon: account.Icon.Name,
+                    IconColor: account.Icon.Color));
         }
     }
 }

@@ -5,14 +5,7 @@ namespace Kaesseli.Application.Accounts;
 public static class AddAccountingPeriod
 {
     // ReSharper disable once ClassNeverInstantiated.Global
-    public record Query
-    {
-        // ReSharper disable UnusedAutoPropertyAccessor.Global
-        public required DateOnly FromInclusive { get; init; }
-        public required DateOnly ToInclusive { get; init; }
-        public required string? Description { get; init; }
-        // ReSharper restore UnusedAutoPropertyAccessor.Global
-    }
+    public record Query(DateOnly FromInclusive, DateOnly ToInclusive, string? Description);
 
     public interface IHandler
     {
@@ -20,16 +13,11 @@ public static class AddAccountingPeriod
     }
 
     // ReSharper disable once UnusedType.Global
-    public class Handler : IHandler
+    public class Handler(IAccountRepository accountRepository) : IHandler
     {
-        private readonly IAccountRepository _accountRepository;
-
-        public Handler(IAccountRepository accountRepository) =>
-            _accountRepository = accountRepository;
-
         public async Task<Guid> Handle(Query request, CancellationToken cancellationToken)
         {
-            var accountingPeriod = await _accountRepository.AddAccountingPeriod(
+            var accountingPeriod = await accountRepository.AddAccountingPeriod(
                                        accountingPeriod: new AccountingPeriod
                                        {
                                            Id = Guid.NewGuid(),

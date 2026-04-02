@@ -32,12 +32,7 @@ public class GetBudgetEntriesQueryHandlerTests
             .ReturnsAsync(entriesList);
 
         var handler = new GetBudgetEntries.Handler(mockRepository.Object);
-        var query = new GetBudgetEntries.Query
-        {
-            AccountId = accountId,
-            AccountType = null,
-            AccountingPeriodId = ExpectedAccountingPeriodId,
-        };
+        var query = new GetBudgetEntries.Query(AccountId: accountId, AccountType: null, AccountingPeriodId: ExpectedAccountingPeriodId);
 
         // Act
         var result = (await handler.Handle(query, CancellationToken.None)).ToArray();

@@ -27,12 +27,10 @@ public static class BudgetApiExtensions
                     Guid? accountId,
                     AccountType? accountType
                     ) =>
-                await handler.Handle(query: new GetBudgetEntries.Query
-                {
-                    AccountId = accountId,
-                    AccountType = accountType,
-                    AccountingPeriodId = accountingPeriodId
-                }, default));
+                await handler.Handle(query: new GetBudgetEntries.Query(
+                    AccountId: accountId,
+                    AccountType: accountType,
+                    AccountingPeriodId: accountingPeriodId), default));
 
         return app;
     }
