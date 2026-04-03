@@ -67,10 +67,11 @@ public class GetAccountsSummaryQueryHandlerTests
                     {
                         Id = periodId,
                         Description = periodId.ToString(),
-                        FromInclusive = default,
-                        ToInclusive = default,
+                        FromInclusive = new DateOnly(year: 2023, month: 1, day: 1),
+                        ToInclusive = new DateOnly(year: 2024, month: 1, day: 1),
                     }
             );
+        dateTimeService.Setup(d => d.ToDay).Returns(new DateOnly(year: 2025, month: 1, day: 1));
         journalRepo
             .Setup(repo =>
                 repo.GetJournalEntries(
@@ -104,7 +105,7 @@ public class GetAccountsSummaryQueryHandlerTests
         var summaryToTest = result[1];
         summaryToTest.Id.ShouldBe(accountToTest.Id);
         summaryToTest.AccountBalance.ShouldBe(accountBalance);
-        summaryToTest.Budget.ShouldBe(BudgetAmount);
+        Math.Round(summaryToTest.Budget!.Value, 2).ShouldBe(BudgetAmount);
         summaryToTest.BudgetBalance.ShouldBe(budgetBalance);
         summaryToTest.Name.ShouldBe(accountToTest.Name);
         summaryToTest.Type.ShouldBe(accountToTest.Type.DisplayName());

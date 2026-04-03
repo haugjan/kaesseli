@@ -34,7 +34,9 @@ public class AccountExtensionsTest
         summary.Name.ShouldBe(account.Name);
         summary.AccountBalance.ShouldBe(3m);
         summary.Budget.ShouldBe(5m);
-        summary.CurrentBudget.ShouldBe(7m);
-        summary.BudgetBalance.ShouldBe(8m);
+        summary.BudgetPerMonth.ShouldBe(7m);
+        summary.BudgetPerYear.ShouldBe(8m);
+        summary.CurrentBudget.ShouldBe(100m);
+        summary.BudgetBalance.ShouldBe(1200m);
     }
 }

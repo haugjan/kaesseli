@@ -1,3 +1,3 @@
 namespace Kaesseli.Domain.Accounts;
 
-public readonly record struct AccountIcon(string Name, string Color);
+public record AccountIcon(string Name, string Color);

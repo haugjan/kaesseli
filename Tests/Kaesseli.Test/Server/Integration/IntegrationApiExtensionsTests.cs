@@ -72,10 +72,12 @@ public class IntegrationApiExtensionsTests
         var accountId = Guid.NewGuid();
         var fileContent = new ByteArrayContent(content: "Dummy File Content"u8.ToArray());
         fileContent.Headers.ContentType = MediaTypeHeaderValue.Parse(input: "multipart/form-data");
-        formContent.Add(fileContent, name: "file", fileName: "dummy_file.txt");
+        formContent.Add(fileContent, name: "file", fileName: "dummy_file.camt");
 
         var accountIdContent = new StringContent(content: accountId.ToString());
         formContent.Add(accountIdContent, name: "accountId");
+        var accountingPeriodIdContent = new StringContent(content: Guid.NewGuid().ToString());
+        formContent.Add(accountingPeriodIdContent, name: "accountingPeriodId");
         // Act
         var response = await _client.PostAsync(requestUri: "/file/upload", formContent);
 

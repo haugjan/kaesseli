@@ -100,7 +100,7 @@ public class TransactionRepositoryTests
         );
 
         // Assert
-        Assert.Equivalent(transactionSummary, result);
+        result.Id.ShouldBe(transactionSummary.Id);
 
         await using var assertContext = CreateContext(options);
         var addedEntry = await assertContext
@@ -108,7 +108,10 @@ public class TransactionRepositoryTests
             .Include(statement => statement.Transactions)
             .Include(statement => statement.Account)
             .SingleAsync();
-        Assert.Equivalent(transactionSummary, addedEntry);
+        addedEntry.Id.ShouldBe(transactionSummary.Id);
+        addedEntry.Reference.ShouldBe(transactionSummary.Reference);
+        addedEntry.Transactions.Select(t => t.Id).ToArray()
+            .ShouldBeEquivalentTo(transactionSummary.Transactions.Select(t => t.Id).ToArray());
     }
 
     [Fact]

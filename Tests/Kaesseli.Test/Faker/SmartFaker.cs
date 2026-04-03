@@ -93,6 +93,10 @@ public sealed class SmartFaker<T> : Faker<T>
                 null => null,
                 var instance => PopulateComplexType(instance, faker),
             },
+            { IsPrimitive: false } t
+                when t != typeof(string)
+                    && !t.IsEnum
+                    && t.GetConstructor(Type.EmptyTypes) == null => TryInvokeFirstConstructor(t, faker),
             _ => null,
         };
         return value;
@@ -111,6 +115,17 @@ public sealed class SmartFaker<T> : Faker<T>
         }
 
         return instance;
+    }
+
+    private static object? TryInvokeFirstConstructor(Type type, Bogus.Faker faker)
+    {
+        var ctor = type.GetConstructors().FirstOrDefault(c => c.IsPublic);
+        if (ctor == null) return null;
+        var parameters = ctor.GetParameters()
+            .Select(p => GetValueByType(p.ParameterType, faker))
+            .ToArray();
+        try { return ctor.Invoke(parameters); }
+        catch { return null; }
     }
 
     private static Guid LongToGuid(long value)

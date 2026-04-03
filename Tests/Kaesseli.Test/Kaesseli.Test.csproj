@@ -16,14 +16,14 @@
 
   <ItemGroup>
     <EmbeddedResource Include="Infrastructure\Integration\ExampleData\Example.camt">
-      <LogicalName>Kaesseli.Infrastructure.Test.Integration.ExampleData.Example.camt</LogicalName>
+      <LogicalName>Kaesseli.Test.Infrastructure.Integration.ExampleData.Example.camt</LogicalName>
       <CopyToOutputDirectory>Never</CopyToOutputDirectory>
     </EmbeddedResource>
     <EmbeddedResource Include="Infrastructure\Integration\ExampleData\RawText1.yaml">
-      <LogicalName>Kaesseli.Infrastructure.Test.Integration.ExampleData.RawText1.yaml</LogicalName>
+      <LogicalName>Kaesseli.Test.Infrastructure.Integration.ExampleData.RawText1.yaml</LogicalName>
     </EmbeddedResource>
     <EmbeddedResource Include="Infrastructure\Integration\ExampleData\RawText2.yaml">
-      <LogicalName>Kaesseli.Infrastructure.Test.Integration.ExampleData.RawText2.yaml</LogicalName>
+      <LogicalName>Kaesseli.Test.Infrastructure.Integration.ExampleData.RawText2.yaml</LogicalName>
     </EmbeddedResource>
   </ItemGroup>
 

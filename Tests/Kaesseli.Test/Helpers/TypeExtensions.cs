@@ -8,7 +8,7 @@ public static class TypeExtensions
     {
         await using var stream = ReadResourceAsStream(type, fileName);
         using var reader = new StreamReader(stream: stream);
-        return await reader.ReadToEndAsync();
+        return (await reader.ReadToEndAsync()).Replace("\r\n", "\n");
     }
 
     public static Stream ReadResourceAsStream(this Type type, string fileName)

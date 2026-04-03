@@ -49,7 +49,7 @@ public class KaesseliContext : DbContext
         modelBuilder.Entity<Account>(
             entity =>
             {
-                entity.ComplexProperty(a => a.Icon, b =>
+                entity.OwnsOne(a => a.Icon, b =>
                 {
                     b.Property(i => i.Name).HasColumnName("Icon");
                     b.Property(i => i.Color).HasColumnName("IconColor");
@@ -109,7 +109,7 @@ public class KaesseliContext : DbContext
                       .WithOne(x => x.TransactionSummary);
             });
 
-        foreach (var entityType in modelBuilder.Model.GetEntityTypes())
+        foreach (var entityType in modelBuilder.Model.GetEntityTypes().Where(e => !e.IsOwned()))
         {
             // Hinzufügen von Shadow Properties
             modelBuilder.Entity(entityType.ClrType).Property<DateTimeOffset>(propertyName: InsertDateColumnName).HasDefaultValueSql(sql: "GETDATE()");

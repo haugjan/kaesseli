@@ -13,7 +13,7 @@ public static class ObjectExtensions
         var serializer = new SerializerBuilder()
                          .WithTypeConverter(typeConverter: new DateOnlyYamlConverter())
                          .Build();
-        return serializer.Serialize(obj);
+        return serializer.Serialize(obj).Replace("\r\n", "\n");
     }
 
     private class DateOnlyYamlConverter : IYamlTypeConverter

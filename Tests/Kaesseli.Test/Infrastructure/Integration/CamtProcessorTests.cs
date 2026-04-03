@@ -1,11 +1,15 @@
 using Kaesseli.Application.Integration.FileImport;
 using Kaesseli.Infrastructure.Integration;
+using Shouldly;
 using Xunit;
 
 namespace Kaesseli.Test.Infrastructure.Integration;
 
 public class CamtProcessorTests
 {
+    private static string NormalizeYaml(string? yaml) =>
+        string.Join("\n", (yaml ?? "").Replace("\r\n", "\n").Split('\n').Select(l => l.TrimEnd())) + "\n";
+
     [Fact]
     public async Task ReadCamtFile_ReturnsCorrectData()
     {
@@ -21,7 +25,31 @@ public class CamtProcessorTests
         var expected = await CreateExpected2();
 
         //Assert
-        Assert.Equivalent(expected, current);
+        current.BalanceBefore.ShouldBe(expected.BalanceBefore);
+        current.BalanceAfter.ShouldBe(expected.BalanceAfter);
+        current.ValueDateFrom.ShouldBe(expected.ValueDateFrom);
+        current.ValueDateTo.ShouldBe(expected.ValueDateTo);
+        current.Reference.ShouldBe(expected.Reference);
+
+        var currentEntries = current.Entries.ToArray();
+        var expectedEntries = (await CreateCamtEntries()).ToArray();
+        currentEntries.Length.ShouldBe(expectedEntries.Length);
+
+        for (var i = 0; i < expectedEntries.Length; i++)
+        {
+            var e = expectedEntries[i];
+            var a = currentEntries[i];
+            a.Description.ShouldBe(e.Description);
+            a.Amount.ShouldBe(e.Amount);
+            a.ValueDate.ShouldBe(e.ValueDate);
+            a.BookDate.ShouldBe(e.BookDate);
+            a.Reference.ShouldBe(e.Reference);
+            a.TransactionCode.ShouldBe(e.TransactionCode);
+            a.Debtor.ShouldBe(e.Debtor);
+            a.Creditor.ShouldBe(e.Creditor);
+            NormalizeYaml(a.RawText).ShouldBe(NormalizeYaml(e.RawText));
+            NormalizeYaml(a.TransactionCodeDetail).ShouldBe(NormalizeYaml(e.TransactionCodeDetail));
+        }
     }
 
     private async Task<FinancialDocument> CreateExpected2() =>

@@ -54,7 +54,7 @@ public class AccountRepositoryTests
     {
         // Arrange
         var options = new DbContextOptionsBuilder<KaesseliContext>()
-            .UseInMemoryDatabase(databaseName: "GetAccountsDb")
+            .UseInMemoryDatabase(databaseName: "GetAllAccountsDb")
             .Options;
         var cancellationToken = new CancellationToken();
 
