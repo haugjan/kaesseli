@@ -1,4 +1,4 @@
-﻿using Kaesseli.Domain.Accounts;
+using Kaesseli.Domain.Accounts;
 using Kaesseli.Domain.Budget;
 using Kaesseli.Domain.Integration;
 using Kaesseli.Domain.Journal;
@@ -46,76 +46,75 @@ public class KaesseliContext : DbContext
     {
         base.OnModelCreating(modelBuilder);
 
-        modelBuilder.Entity<Account>(
-            entity =>
-            {
-                entity.OwnsOne(a => a.Icon, b =>
-                {
-                    b.Property(i => i.Name).HasColumnName("Icon");
-                    b.Property(i => i.Color).HasColumnName("IconColor");
-                });
-            });
+        modelBuilder.Entity<Account>(entity =>
+        {
+            entity.ToContainer("Accounts");
+            entity.HasPartitionKey(a => a.Id);
+            entity.OwnsOne(a => a.Icon);
+        });
 
-        modelBuilder.Entity<AutomationEntry>(
-            entity =>
-            {
-                entity.HasMany(ae => ae.Parts)
-                      .WithOne()
-                      .IsRequired()
-                      .OnDelete(DeleteBehavior.NoAction);
-            });
+        modelBuilder.Entity<AccountingPeriod>(entity =>
+        {
+            entity.ToContainer("AccountingPeriods");
+            entity.HasPartitionKey(a => a.Id);
+        });
 
-        modelBuilder.Entity<BudgetEntry>(
-            entity =>
-            {
-                entity.HasOne(be => be.Account)
-                      .WithMany()
-                      .IsRequired()
-                      .OnDelete(DeleteBehavior.NoAction);
+        modelBuilder.Entity<AutomationEntry>(entity =>
+        {
+            entity.ToContainer("Automations");
+            entity.HasPartitionKey(a => a.Id);
+            entity.HasMany(ae => ae.Parts).WithOne().IsRequired();
+        });
 
-                entity.HasOne(be => be.AccountingPeriod)
-                      .WithMany()
-                      .IsRequired()
-                      .OnDelete(DeleteBehavior.NoAction);
-            });
-        
-        modelBuilder.Entity<JournalEntry>(
-            entity =>
-            {
-                entity.HasOne(je => je.DebitAccount)
-                      .WithMany()
-                      .HasForeignKey("DebitAccountId")
-                      .IsRequired()
-                      .OnDelete(DeleteBehavior.NoAction);
+        modelBuilder.Entity<AutomationEntryPart>(entity =>
+        {
+            entity.ToContainer("AutomationEntryParts");
+            entity.HasPartitionKey(a => a.Id);
+        });
 
-                entity.HasOne(je => je.CreditAccount)
-                      .WithMany()
-                      .HasForeignKey("CreditAccountId")
-                      .IsRequired()
-                      .OnDelete(DeleteBehavior.NoAction);
-                entity.HasOne(je => je.Transaction)
-                      .WithMany(tran => tran.JournalEntries);
-            });
+        modelBuilder.Entity<BudgetEntry>(entity =>
+        {
+            entity.ToContainer("BudgetEntries");
+            entity.HasPartitionKey(b => b.Id);
+            entity.HasOne(be => be.Account).WithMany().IsRequired();
+            entity.HasOne(be => be.AccountingPeriod).WithMany().IsRequired();
+        });
 
-        modelBuilder.Entity<TransactionSummary>(
-            entity =>
-            {
-                entity.HasOne(je => je.Account)
-                      .WithMany()
-                      .HasForeignKey("AccountId")
-                      .IsRequired()
-                      .OnDelete(DeleteBehavior.Restrict);
-                entity.HasMany(statement => statement.Transactions)
-                      .WithOne(x => x.TransactionSummary);
-            });
+        modelBuilder.Entity<JournalEntry>(entity =>
+        {
+            entity.ToContainer("JournalEntries");
+            entity.HasPartitionKey(j => j.Id);
+            entity.HasOne(je => je.DebitAccount).WithMany().IsRequired();
+            entity.HasOne(je => je.CreditAccount).WithMany().IsRequired();
+            entity.HasOne(je => je.Transaction).WithMany(t => t.JournalEntries);
+        });
+
+        modelBuilder.Entity<TransactionSummary>(entity =>
+        {
+            entity.ToContainer("TransactionSummaries");
+            entity.HasPartitionKey(ts => ts.Id);
+            entity.HasOne(ts => ts.Account).WithMany().IsRequired();
+            entity.HasMany(ts => ts.Transactions).WithOne(t => t.TransactionSummary);
+        });
+
+        modelBuilder.Entity<Transaction>(entity =>
+        {
+            entity.ToContainer("Transactions");
+            entity.HasPartitionKey(t => t.Id);
+        });
+
+        modelBuilder.Entity<TransactionStatistic>(entity =>
+        {
+            entity.ToContainer("TransactionStatistics");
+            entity.HasPartitionKey(ts => ts.Id);
+        });
 
         foreach (var entityType in modelBuilder.Model.GetEntityTypes().Where(e => !e.IsOwned()))
         {
-            // Hinzufügen von Shadow Properties
-            modelBuilder.Entity(entityType.ClrType).Property<DateTimeOffset>(propertyName: InsertDateColumnName).HasDefaultValueSql(sql: "GETDATE()");
-            modelBuilder.Entity(entityType.ClrType).Property<string>(propertyName: InsertUserColumnName);
-            modelBuilder.Entity(entityType.ClrType).Property<DateTimeOffset>(propertyName: EditDateColumnName).HasDefaultValueSql(sql: "GETDATE()");
-            modelBuilder.Entity(entityType.ClrType).Property<string>(propertyName: EditUserColumnName);
+            modelBuilder.Entity(entityType.ClrType).Property<DateTimeOffset>(InsertDateColumnName);
+            modelBuilder.Entity(entityType.ClrType).Property<string>(InsertUserColumnName);
+            modelBuilder.Entity(entityType.ClrType).Property<DateTimeOffset>(EditDateColumnName);
+            modelBuilder.Entity(entityType.ClrType).Property<string>(EditUserColumnName);
         }
     }
 

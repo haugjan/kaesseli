@@ -23,9 +23,29 @@ public static class InfrastructureServiceCollectionExtensions
         services.AddRepositories()
                 .AddScoped<ICamtProcessor, CamtProcessor>()
                 .AddScoped<IPostFinanceCsvProcessor, PostFinanceCsvProcessor>()
-                .AddDbContext<KaesseliContext>(
-                    options =>
-                        options.UseSqlServer(connectionString: configuration.GetConnectionString(name: "BudgetDatabase")  ));
+                .AddDbContext<KaesseliContext>(options =>
+                {
+                    var endpoint = configuration["CosmosDb:Endpoint"]!;
+                    var key = configuration["CosmosDb:Key"]!;
+                    var database = configuration["CosmosDb:Database"]!;
+                    var isLocalEmulator = endpoint.Contains("localhost", StringComparison.OrdinalIgnoreCase);
+
+                    options.UseCosmos(
+                        accountEndpoint: endpoint,
+                        accountKey: key,
+                        databaseName: database,
+                        cosmosOptionsAction: isLocalEmulator
+                            ? cosmos => cosmos.HttpClientFactory(() =>
+                            {
+                                var handler = new HttpClientHandler
+                                {
+                                    ServerCertificateCustomValidationCallback =
+                                        HttpClientHandler.DangerousAcceptAnyServerCertificateValidator
+                                };
+                                return new HttpClient(handler);
+                            })
+                            : null);
+                });
 
     private static IServiceCollection AddRepositories(this IServiceCollection services) =>
         services.AddScoped<IBudgetRepository, BudgetRepository>()

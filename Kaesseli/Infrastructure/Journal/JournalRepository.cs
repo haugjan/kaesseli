@@ -52,7 +52,7 @@ public class JournalRepository(KaesseliContext context) : IJournalRepository
                                        .Include(trans => trans.TransactionSummary)
                                        .ThenInclude(summary => summary!.Account)
                                        .SingleAsync(trans => trans.Id == transactionId, cancellationToken);
-        var accountingPeriod = await context.AccountingPeriods.FindAsync(accountingPeriodId, cancellationToken)
+        var accountingPeriod = await context.AccountingPeriods.FirstOrDefaultAsync(ap => ap.Id == accountingPeriodId, cancellationToken)
                             ?? throw new EntityNotFoundException(entityType: typeof(AccountingPeriod), accountingPeriodId);
         WrongAmountException.ThrowIfAmountNotMatch(transaction.Amount, entriesAmount: entriesArray.Sum(entry => entry.Amount));
 
@@ -76,7 +76,7 @@ public class JournalRepository(KaesseliContext context) : IJournalRepository
         decimal amount,
         CancellationToken cancellationToken)
     {
-        var otherAccount = await context.Accounts.FindAsync(otherAccountId, cancellationToken)
+        var otherAccount = await context.Accounts.FirstOrDefaultAsync(a => a.Id == otherAccountId, cancellationToken)
                         ?? throw new EntityNotFoundException(entityType: typeof(Account), otherAccountId);
         var newJournalEntry = new JournalEntry
         {

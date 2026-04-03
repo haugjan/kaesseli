@@ -25,7 +25,9 @@
       "Bash(dotnet new:*)",
       "Bash(taskkill /PID 71636 /F)",
       "Bash(taskkill:*)",
-      "Bash(docker rm kaesseli-cosmosdb:*)"
+      "Bash(docker rm kaesseli-cosmosdb:*)",
+      "Bash(dotnet script:*)",
+      "Read(//c/Users/Jan.Haug/.nuget/packages/microsoft.entityframeworkcore.cosmos/10.0.5/**)"
     ]
   }
 }

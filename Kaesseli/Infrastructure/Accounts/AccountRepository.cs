@@ -24,7 +24,7 @@ internal class AccountRepository(KaesseliContext context) : IAccountRepository
      ?? throw new EntityNotFoundException(entityType: typeof(Account), accountId);
 
     public async Task<AccountingPeriod> GetAccountingPeriod(Guid accountingPeriodId, CancellationToken cancellationToken) =>
-        await context.AccountingPeriods.FindAsync(accountingPeriodId, cancellationToken)
+        await context.AccountingPeriods.FirstOrDefaultAsync(ap => ap.Id == accountingPeriodId, cancellationToken)
      ?? throw new EntityNotFoundException(entityType: typeof(AccountingPeriod), accountingPeriodId);
 
     public async Task<AccountingPeriod> AddAccountingPeriod(AccountingPeriod accountingPeriod, CancellationToken cancellationToken)

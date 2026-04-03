@@ -34,11 +34,16 @@ internal class AutomationRepository : IAutomationRepository
 
     private IQueryable<Transaction> GetTransactionsQueryable(string automationText)
     {
-        var inputText = automationText
-                        .Replace(oldValue: "*", newValue: "%")
-                        .Replace(oldValue: "?", newValue: "_");
+        var pattern = "^" + System.Text.RegularExpressions.Regex.Escape(automationText)
+                                   .Replace(@"\*", ".*")
+                                   .Replace(@"\?", ".") + "$";
+        var regex = new System.Text.RegularExpressions.Regex(
+            pattern, System.Text.RegularExpressions.RegexOptions.IgnoreCase);
+
         return _context.Transactions
                        .Where(tran => tran.JournalEntries!.Any() == false)
-                       .Where(tran => EF.Functions.Like(tran.Description, inputText));
+                       .AsEnumerable()
+                       .Where(tran => regex.IsMatch(tran.Description))
+                       .AsQueryable();
     }
 }
