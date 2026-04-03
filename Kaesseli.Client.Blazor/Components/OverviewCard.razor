@@ -1,0 +1,76 @@
+@using Kaesseli.Client.Blazor.Models
+
+<MudCard Elevation="0" Style="border: 1px solid var(--mud-palette-divider); border-radius: 12px;">
+    <MudCardHeader>
+        <CardHeaderAvatar>
+            <MudAvatar Style="@($"background-color: {IconColor}20; color: {IconColor};")" Size="Size.Medium">
+                <MudIcon Icon="@Icon" />
+            </MudAvatar>
+        </CardHeaderAvatar>
+        <CardHeaderContent>
+            <MudText Typo="Typo.h6">@Title</MudText>
+        </CardHeaderContent>
+    </MudCardHeader>
+    <MudDivider />
+    <MudCardContent Class="pt-4">
+        <MudSimpleTable Dense="true" Hover="false" Bordered="false" Style="background: transparent;">
+            <tbody>
+                <tr>
+                    <td style="color: var(--mud-palette-text-secondary); width: 55%;">Kontostand</td>
+                    <td style="font-weight: 600; text-align: right;">@FormatNumber(Summary.AccountBalance)</td>
+                </tr>
+                @if (ShowBudget)
+                {
+                    @if (Summary.Budget.HasValue)
+                    {
+                        <tr>
+                            <td style="color: var(--mud-palette-text-secondary);">Σ Budget</td>
+                            <td style="text-align: right;">@FormatNumber(Summary.Budget.Value)</td>
+                        </tr>
+                    }
+                    @if (Summary.BudgetPerYear.HasValue)
+                    {
+                        <tr>
+                            <td style="color: var(--mud-palette-text-secondary);">Budget pro Jahr</td>
+                            <td style="text-align: right;">@FormatNumber(Summary.BudgetPerYear.Value)</td>
+                        </tr>
+                    }
+                    @if (Summary.BudgetPerMonth.HasValue)
+                    {
+                        <tr>
+                            <td style="color: var(--mud-palette-text-secondary);">Budget pro Monat</td>
+                            <td style="text-align: right;">@FormatNumber(Summary.BudgetPerMonth.Value)</td>
+                        </tr>
+                    }
+                    @if (Summary.CurrentBudget.HasValue)
+                    {
+                        <tr>
+                            <td style="color: var(--mud-palette-text-secondary);">📅 Budget</td>
+                            <td style="text-align: right;">@FormatNumber(Summary.CurrentBudget.Value)</td>
+                        </tr>
+                    }
+                    @if (Summary.BudgetBalance.HasValue)
+                    {
+                        <tr>
+                            <td style="color: var(--mud-palette-text-secondary);">Budgetsaldo</td>
+                            <td style="text-align: right; font-weight: 700; color: @(Summary.BudgetBalance.Value >= 0 ? "#21BA45" : "#C10015");">
+                                @FormatNumber(Summary.BudgetBalance.Value)
+                            </td>
+                        </tr>
+                    }
+                }
+            </tbody>
+        </MudSimpleTable>
+    </MudCardContent>
+</MudCard>
+
+@code {
+    [Parameter, EditorRequired] public string Title { get; set; } = "";
+    [Parameter, EditorRequired] public string Icon { get; set; } = "";
+    [Parameter, EditorRequired] public string IconColor { get; set; } = "";
+    [Parameter, EditorRequired] public AccountTypeSummaryDto Summary { get; set; } = null!;
+    [Parameter] public bool ShowBudget { get; set; }
+
+    static string FormatNumber(decimal value) =>
+        value.ToString("N2", System.Globalization.CultureInfo.CurrentCulture);
+}

@@ -1,6 +1,74 @@
 @page "/"
+@using Kaesseli.Client.Blazor.Models
+@using Kaesseli.Client.Blazor.Services
+@inject KaesseliApiService Api
+@inject AccountingPeriodState PeriodState
+@implements IDisposable
 
-<PageTitle>Käseli</PageTitle>
+<PageTitle>Käseli – Übersicht</PageTitle>
 
-<MudText Typo="Typo.h4" GutterBottom="true">Hello World</MudText>
-<MudText Typo="Typo.body1">Willkommen bei Käseli – deinem smarten Haushaltsbuch.</MudText>
+@if (_overview is null)
+{
+    <MudGrid>
+        @for (var i = 0; i < 3; i++)
+        {
+            <MudItem xs="12" sm="6" lg="4">
+                <MudSkeleton SkeletonType="SkeletonType.Rectangle" Height="220px" />
+            </MudItem>
+        }
+    </MudGrid>
+}
+else
+{
+    <MudGrid>
+        <MudItem xs="12" sm="6" lg="4">
+            <OverviewCard Title="Einkommen"
+                          Icon="@Icons.Material.Rounded.TrendingUp"
+                          IconColor="#21BA45"
+                          Summary="_overview.Revenue"
+                          ShowBudget="true" />
+        </MudItem>
+        <MudItem xs="12" sm="6" lg="4">
+            <OverviewCard Title="Ausgaben"
+                          Icon="@Icons.Material.Rounded.TrendingDown"
+                          IconColor="#C10015"
+                          Summary="_overview.Expense"
+                          ShowBudget="true" />
+        </MudItem>
+        <MudItem xs="12" sm="6" lg="4">
+            <OverviewCard Title="Vermögen"
+                          Icon="@Icons.Material.Rounded.AccountBalance"
+                          IconColor="#4254F3"
+                          Summary="_overview.Asset"
+                          ShowBudget="false" />
+        </MudItem>
+    </MudGrid>
+}
+
+@code {
+    FinancialOverviewDto? _overview;
+
+    protected override async Task OnInitializedAsync()
+    {
+        PeriodState.OnChange += OnPeriodChanged;
+        await LoadAsync();
+    }
+
+    void OnPeriodChanged()
+    {
+        _ = InvokeAsync(async () =>
+        {
+            _overview = null;
+            await LoadAsync();
+            StateHasChanged();
+        });
+    }
+
+    async Task LoadAsync()
+    {
+        if (PeriodState.SelectedPeriodId is null) return;
+        _overview = await Api.GetOverviewAsync(PeriodState.SelectedPeriodId.Value);
+    }
+
+    public void Dispose() => PeriodState.OnChange -= OnPeriodChanged;
+}

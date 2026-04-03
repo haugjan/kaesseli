@@ -1,5 +1,10 @@
 @inherits LayoutComponentBase
 @using Kaesseli.Client.Blazor.Theme
+@using Kaesseli.Client.Blazor.Services
+@using Kaesseli.Client.Blazor.Models
+@inject KaesseliApiService Api
+@inject AccountingPeriodState PeriodState
+@inject IJSRuntime JS
 
 <MudThemeProvider Theme="_theme" IsDarkMode="_isDarkMode" />
 <MudPopoverProvider />
@@ -11,6 +16,19 @@
         <MudIconButton Icon="@Icons.Material.Rounded.Menu" Color="Color.Dark" Edge="Edge.Start"
                        OnClick="@(_ => _drawerOpen = !_drawerOpen)" />
         <MudSpacer />
+        @if (PeriodState.Periods.Any())
+        {
+            <MudSelect T="Guid" Value="PeriodState.SelectedPeriodId!.Value"
+                       ValueChanged="OnPeriodChanged"
+                       Variant="Variant.Outlined" Margin="Margin.Dense"
+                       Style="min-width: 180px; margin-right: 8px;"
+                       AnchorOrigin="Origin.BottomLeft">
+                @foreach (var period in PeriodState.Periods)
+                {
+                    <MudSelectItem Value="period.Id">@period.Description</MudSelectItem>
+                }
+            </MudSelect>
+        }
         <MudIconButton Icon="@(_isDarkMode ? Icons.Material.Rounded.LightMode : Icons.Material.Rounded.DarkMode)"
                        Color="Color.Dark"
                        OnClick="@(_ => _isDarkMode = !_isDarkMode)" />
@@ -36,4 +54,18 @@
     readonly MudTheme _theme = KaesseliTheme.Create();
     bool _isDarkMode;
     bool _drawerOpen = true;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var periods = (await Api.GetAccountingPeriodsAsync())?.ToList() ?? [];
+        var savedId = await JS.InvokeAsync<string?>("localStorage.getItem", "selectedPeriod");
+        var parsed = Guid.TryParse(savedId, out var id) ? id : (Guid?)null;
+        PeriodState.Initialize(periods, parsed);
+    }
+
+    async Task OnPeriodChanged(Guid id)
+    {
+        PeriodState.SelectPeriod(id);
+        await JS.InvokeVoidAsync("localStorage.setItem", "selectedPeriod", id.ToString());
+    }
 }
