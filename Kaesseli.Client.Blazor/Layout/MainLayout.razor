@@ -1,31 +1,39 @@
 @inherits LayoutComponentBase
+@using Kaesseli.Client.Blazor.Theme
 
-<MudThemeProvider />
+<MudThemeProvider Theme="_theme" IsDarkMode="_isDarkMode" />
 <MudPopoverProvider />
 <MudDialogProvider />
 <MudSnackbarProvider />
 
 <MudLayout>
-    <MudAppBar Color="Color.Primary" Elevation="1">
-        <MudIconButton Icon="@Icons.Material.Filled.Menu" Color="Color.Inherit" Edge="Edge.Start"
+    <MudAppBar Elevation="0" Style="border-bottom: 1px solid var(--mud-palette-divider);">
+        <MudIconButton Icon="@Icons.Material.Rounded.Menu" Color="Color.Dark" Edge="Edge.Start"
                        OnClick="@(_ => _drawerOpen = !_drawerOpen)" />
-        <MudText Typo="Typo.h6">Käseli</MudText>
+        <MudSpacer />
+        <MudIconButton Icon="@(_isDarkMode ? Icons.Material.Rounded.LightMode : Icons.Material.Rounded.DarkMode)"
+                       Color="Color.Dark"
+                       OnClick="@(_ => _isDarkMode = !_isDarkMode)" />
     </MudAppBar>
 
-    <MudDrawer @bind-Open="_drawerOpen" Elevation="2">
-        <MudDrawerHeader>
-            <MudText Typo="Typo.h6">Navigation</MudText>
-        </MudDrawerHeader>
+    <MudDrawer @bind-Open="_drawerOpen" Elevation="0" Variant="DrawerVariant.Responsive" ClipMode="DrawerClipMode.Never">
+        <div class="drawer-header">
+            <MudIcon Icon="@Icons.Material.Rounded.Savings" Style="color: #76B041;" Size="Size.Medium" />
+            <MudText Style="font-weight: 700; font-size: 1.1rem; color: #FFFFFF; letter-spacing: -0.2px;">Käseli</MudText>
+        </div>
+        <MudDivider Style="border-color: rgba(255,255,255,0.08);" />
         <NavMenu />
     </MudDrawer>
 
     <MudMainContent>
-        <MudContainer MaxWidth="MaxWidth.ExtraLarge" Class="mt-4">
+        <MudContainer MaxWidth="MaxWidth.ExtraLarge" Class="pa-6">
             @Body
         </MudContainer>
     </MudMainContent>
 </MudLayout>
 
 @code {
+    readonly MudTheme _theme = KaesseliTheme.Create();
+    bool _isDarkMode;
     bool _drawerOpen = true;
 }
