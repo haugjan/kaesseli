@@ -1,0 +1,17 @@
+<Solution>
+  <Configurations>
+    <Platform Name="Any CPU" />
+    <Platform Name="x64" />
+    <Platform Name="x86" />
+  </Configurations>
+  <Folder Name="/Solution Items/">
+    <File Path="Dockerfile" />
+    <File Path="README.md" />
+  </Folder>
+  <Folder Name="/Tests/">
+    <Project Path="Tests/Kaesseli.Test/Kaesseli.Test.csproj" />
+  </Folder>
+  <Project Path="Kaesseli.Client.Blazor/Kaesseli.Client.Blazor.csproj" />
+  <Project Path="Kaesseli.Client/Kaesseli.Client.esproj" />
+  <Project Path="Kaesseli/Kaesseli.csproj" />
+</Solution>
