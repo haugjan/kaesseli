@@ -7,9 +7,9 @@ html, body {
 }
 
 #blazor-error-ui {
-    color-scheme: light only;
-    background: #FEF3C7;
-    border-top: 1px solid #F59E0B;
+    background: #C10015;
+    color: #FFFFFF;
+    border-top: none;
     bottom: 0;
     box-sizing: border-box;
     display: none;
@@ -19,6 +19,12 @@ html, body {
     width: 100%;
     z-index: 1000;
     font-size: 0.875rem;
+    font-family: Inter, sans-serif;
+}
+
+#blazor-error-ui a {
+    color: #FFFFFF;
+    font-weight: 600;
 }
 
 #blazor-error-ui .dismiss {
@@ -26,6 +32,7 @@ html, body {
     position: absolute;
     right: 0.75rem;
     top: 0.5rem;
+    opacity: 0.8;
 }
 
 .loading-progress {

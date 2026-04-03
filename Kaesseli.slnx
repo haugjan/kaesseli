@@ -8,6 +8,10 @@
     <File Path="Dockerfile" />
     <File Path="README.md" />
   </Folder>
+  <Folder Name="/Deploy/">
+    <File Path="Kaesseli.Deploy/docker-compose.yml" />
+    <Project Path="Kaesseli.Deploy/Kaesseli.Deploy.csproj" />
+  </Folder>
   <Folder Name="/Tests/">
     <Project Path="Tests/Kaesseli.Test/Kaesseli.Test.csproj" />
   </Folder>

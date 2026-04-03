@@ -21,7 +21,11 @@
       "Bash(rm:*)",
       "Bash(dotnet new blazorwasm:*)",
       "Bash(dotnet sln add:*)",
-      "Bash(dotnet add:*)"
+      "Bash(dotnet add:*)",
+      "Bash(dotnet new:*)",
+      "Bash(taskkill /PID 71636 /F)",
+      "Bash(taskkill:*)",
+      "Bash(docker rm kaesseli-cosmosdb:*)"
     ]
   }
 }
