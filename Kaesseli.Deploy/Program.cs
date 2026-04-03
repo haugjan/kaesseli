@@ -1,36 +1,37 @@
-using System.Diagnostics;
+using Kaesseli.Application.Utility;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
 
-var composeFile = Path.Combine(AppContext.BaseDirectory, "docker-compose.yml");
+var environment = Environment.GetEnvironmentVariable("DOTNET_ENVIRONMENT") ?? "Production";
 
-Console.WriteLine("Starting CosmosDB local emulator...");
+var configuration = new ConfigurationBuilder()
+    .AddJsonFile(Path.Combine(AppContext.BaseDirectory, "appsettings.json"), optional: true)
+    .AddJsonFile(Path.Combine(AppContext.BaseDirectory, $"appsettings.{environment}.json"), optional: true)
+    .AddJsonFile(Path.Combine(AppContext.BaseDirectory, "appsettings.user.json"), optional: true)
+    .Build();
 
-var process = Process.Start(new ProcessStartInfo
+var services = new ServiceCollection();
+services.AddLogging();
+services.AddSingleton<IConfiguration>(configuration);
+services.AddSingleton<IDateTimeService, DeployDateTimeService>();
+services.AddSingleton<IEnvironmentService, DeployEnvironmentService>();
+services.AddInfrastructureServices(configuration);
+
+await using var provider = services.BuildServiceProvider();
+
+Console.WriteLine("Initializing CosmosDB database...");
+await provider.InitializeDatabaseAsync();
+Console.WriteLine("Database initialized successfully.");
+
+internal sealed class DeployDateTimeService : IDateTimeService
 {
-    FileName = "docker",
-    Arguments = $"compose -f \"{composeFile}\" up -d",
-    UseShellExecute = false,
-    RedirectStandardOutput = true,
-    RedirectStandardError = true,
-});
-
-if (process is null)
-{
-    Console.Error.WriteLine("Failed to start docker. Is Docker Desktop running?");
-    return 1;
+    public DateTime Now => DateTime.Now;
+    public DateTimeOffset UtcNow => DateTimeOffset.UtcNow;
+    public DateOnly ToDay => DateOnly.FromDateTime(DateTime.Today);
+    public TimeOnly TimeOfDay => TimeOnly.FromDateTime(DateTime.Now);
 }
 
-var readOutput = process.StandardOutput.BaseStream.CopyToAsync(Console.OpenStandardOutput());
-var readError  = process.StandardError.BaseStream.CopyToAsync(Console.OpenStandardError());
-await Task.WhenAll(readOutput, readError, process.WaitForExitAsync());
-
-if (process.ExitCode != 0)
+internal sealed class DeployEnvironmentService : IEnvironmentService
 {
-    Console.Error.WriteLine($"docker compose exited with code {process.ExitCode}");
-    return process.ExitCode;
+    public string CurrentUser => "deploy";
 }
-
-Console.WriteLine();
-Console.WriteLine("CosmosDB emulator is running.");
-Console.WriteLine("  Endpoint : https://localhost:8081");
-Console.WriteLine("  Explorer : https://localhost:8081/_explorer/index.html");
-return 0;

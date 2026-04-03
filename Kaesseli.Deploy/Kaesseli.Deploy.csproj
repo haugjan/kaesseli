@@ -8,7 +8,17 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Content Include="docker-compose.yml">
+    <ProjectReference Include="..\Kaesseli\Kaesseli.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Include="..\Kaesseli\appsettings.json" Link="appsettings.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="..\Kaesseli\appsettings.Development.json" Link="appsettings.Development.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="..\Kaesseli\appsettings.user.json" Link="appsettings.user.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
   </ItemGroup>
