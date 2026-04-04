@@ -16,4 +16,10 @@ public class KaesseliApiService(HttpClient httpClient)
 
     public Task<AccountDetailDto?> GetAccountDetailAsync(Guid periodId, Guid accountId, CancellationToken ct = default)
         => httpClient.GetFromJsonAsync<AccountDetailDto>($"accountingPeriod/{periodId}/account/{accountId}", ct);
+
+    public Task<IEnumerable<TransactionSummaryDto>?> GetTransactionSummariesAsync(CancellationToken ct = default)
+        => httpClient.GetFromJsonAsync<IEnumerable<TransactionSummaryDto>>("transactionSummary", ct);
+
+    public Task<IEnumerable<TransactionDto>?> GetTransactionsAsync(Guid transactionSummaryId, CancellationToken ct = default)
+        => httpClient.GetFromJsonAsync<IEnumerable<TransactionDto>>($"transaction?transactionSummaryId={transactionSummaryId}", ct);
 }

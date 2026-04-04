@@ -1,0 +1,77 @@
+@page "/transactions"
+@using Kaesseli.Client.Blazor.Models
+@using Kaesseli.Client.Blazor.Services
+@inject KaesseliApiService Api
+
+<PageTitle>Kontoauszüge</PageTitle>
+
+<MudSelect T="Guid?" Value="_selectedId" ValueChanged="OnSummarySelected"
+           Label="Kontoauszug wählen" Variant="Variant.Outlined" Class="mb-4"
+           AnchorOrigin="Origin.BottomLeft" Style="max-width: 500px;">
+    @if (_summaries is not null)
+    {
+        @foreach (var s in _summaries)
+        {
+            <MudSelectItem T="Guid?" Value="@((Guid?)s.Id)">
+                @s.AccountName @s.ValueDateFrom.ToString("dd.MM.yyyy") – @s.ValueDateTo.ToString("dd.MM.yyyy")
+            </MudSelectItem>
+        }
+    }
+</MudSelect>
+
+@if (_selectedId is null)
+{
+    <MudText Typo="Typo.body1" Color="Color.Secondary">Bitte wählen Sie einen Kontoauszug aus.</MudText>
+}
+else if (_transactions is null)
+{
+    <MudSkeleton SkeletonType="SkeletonType.Rectangle" Height="300px" />
+}
+else
+{
+    <MudCard Elevation="0" Style="border: 1px solid var(--mud-palette-divider); border-radius: 12px;">
+        <MudCardContent Class="pa-0">
+            <MudTable Items="_transactions" Dense="true" Hover="true" Elevation="0" Style="background: transparent;">
+                <HeaderContent>
+                    <MudTh>Datum</MudTh>
+                    <MudTh>Beschreibung</MudTh>
+                    <MudTh Style="text-align: right;">Betrag</MudTh>
+                </HeaderContent>
+                <RowTemplate>
+                    <MudTd DataLabel="Datum">@context.ValueDate.ToString("dd.MM.yyyy")</MudTd>
+                    <MudTd DataLabel="Beschreibung">@context.Description</MudTd>
+                    <MudTd DataLabel="Betrag" Style="@AmountStyle(context.Amount)">@context.Amount.ToString("N2")</MudTd>
+                </RowTemplate>
+            </MudTable>
+        </MudCardContent>
+    </MudCard>
+}
+
+@code {
+    private List<TransactionSummaryDto>? _summaries;
+    private List<TransactionDto>? _transactions;
+    private Guid? _selectedId;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var result = await Api.GetTransactionSummariesAsync();
+        _summaries = result?.ToList() ?? [];
+    }
+
+    private async Task OnSummarySelected(Guid? id)
+    {
+        _selectedId = id;
+        _transactions = null;
+
+        if (id is null) return;
+
+        var result = await Api.GetTransactionsAsync(id.Value);
+        _transactions = result?.ToList() ?? [];
+    }
+
+    private static string AmountStyle(decimal amount)
+    {
+        var color = amount >= 0 ? "color: #21BA45;" : "color: #C10015;";
+        return $"text-align: right; font-weight: 700; {color}";
+    }
+}
