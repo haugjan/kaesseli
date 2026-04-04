@@ -148,6 +148,7 @@ public static class InfrastructureServiceCollectionExtensions
         };
 
         context.Accounts.AddRange(bankAccount, cash, creditCard, salary, groceries, rent, transport, leisure);
+        await context.SaveChangesAsync();
 
         // Budget entries (only Revenue/Expense accounts allowed)
         context.BudgetEntries.AddRange(
@@ -273,8 +274,11 @@ public static class InfrastructureServiceCollectionExtensions
             },
         ]);
 
+        await context.SaveChangesAsync();
+
         context.Transactions.AddRange(assignedTransactions);
         context.Transactions.AddRange(openTransactions);
+        await context.SaveChangesAsync();
 
         // Journal entries
         context.JournalEntries.AddRange(
