@@ -1,25 +1,24 @@
-using Microsoft.OpenApi;
+using Scalar.AspNetCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Configuration.AddJsonFile("appsettings.user.json", optional: true, reloadOnChange: true);
 
-builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen(c =>
-{
-    c.SwaggerDoc("v1", new OpenApiInfo { Title = "My API", Version = "v1" });
-});
+builder.Services.AddOpenApi();
 
 builder.Services.AddCors(options =>
 {
     options.AddPolicy(
         "AllowSpecificOrigin",
         b =>
-            b.WithOrigins("http://localhost:9500")
-                .WithOrigins("https://localhost:9500")
-                .WithOrigins("http://localhost:9501")
-                .WithOrigins("https://localhost:9501")
-                .WithOrigins("http://localhost:9000")
+            b.WithOrigins(
+                    "http://localhost:9500",
+                    "https://localhost:9500",
+                    "http://localhost:9501",
+                    "https://localhost:9501",
+                    "http://localhost:9000",
+                    "http://localhost:7033",
+                    "https://localhost:7033")
                 .AllowAnyHeader()
                 .AllowAnyMethod()
     );
@@ -30,22 +29,19 @@ builder.Services.AddApplicationServices();
 
 var app = builder.Build();
 
+app.UseHttpsRedirection();
+app.UseCors("AllowSpecificOrigin");
+
 app.UseDefaultFiles();
 app.UseStaticFiles();
 await app.Services.InitializeDatabaseAsync();
-app.UseCors("AllowSpecificOrigin");
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
-    app.UseSwagger();
-    app.UseSwaggerUI();
+    app.MapOpenApi();
+    app.MapScalarApiReference();
 }
-
-// app.UseAuthentication();
-// app.UseAuthorization();
-
-app.UseHttpsRedirection();
 
 app.MapKaesseliEndpoints();
 

@@ -23,6 +23,13 @@ Console.WriteLine("Initializing CosmosDB database...");
 await provider.InitializeDatabaseAsync();
 Console.WriteLine("Database initialized successfully.");
 
+if (environment == "Development")
+{
+    Console.WriteLine("Seeding development data...");
+    await provider.SeedDevelopmentDataAsync();
+    Console.WriteLine("Development data seeded successfully.");
+}
+
 internal sealed class DeployDateTimeService : IDateTimeService
 {
     public DateTime Now => DateTime.Now;

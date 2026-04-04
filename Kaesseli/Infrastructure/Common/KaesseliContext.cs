@@ -50,6 +50,7 @@ public class KaesseliContext : DbContext
         {
             entity.ToContainer("Accounts");
             entity.HasPartitionKey(a => a.Id);
+            entity.Property(a => a.Type).HasConversion<string>();
             entity.OwnsOne(a => a.Icon);
         });
 

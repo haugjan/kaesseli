@@ -1,9 +1,0 @@
-<component name="ProjectRunConfigurationManager">
-  <configuration default="false" name="CosmosDB Local" type="docker-compose" factoryName="Docker Compose">
-    <option name="composeFile" value="$PROJECT_DIR$/Kaesseli.Deploy/docker-compose.yml" />
-    <option name="command" value="up" />
-    <option name="services" value="cosmosdb" />
-    <option name="detach" value="true" />
-    <method v="2" />
-  </configuration>
-</component>

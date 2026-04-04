@@ -1,4 +1,4 @@
-﻿using Kaesseli.Domain.Accounts;
+using Kaesseli.Domain.Accounts;
 using Kaesseli.Domain.Budget;
 using Kaesseli.Infrastructure.Common;
 using Microsoft.EntityFrameworkCore;
@@ -11,22 +11,43 @@ public class BudgetRepository(KaesseliContext context) : IBudgetRepository
         Guid accountingPeriodId, Guid? accountId, AccountType? accountType,
         CancellationToken cancellationToken)
     {
-        var entries = context
-                                                                      .BudgetEntries
-                                                                      .Include(budget => budget.Account)
-                                                                      .Include(budget => budget.AccountingPeriod)
-                                                                      .Where(entry => entry.AccountingPeriod.Id == accountingPeriodId);
-        if (accountId != null) entries = entries.Where(entry => entry.Account.Id == accountId);
-        if (accountType is not null) entries = entries.Where(entry => entry.Account.Type == accountType);
-        return await entries.ToListAsync(cancellationToken);
+        var entries = await context.BudgetEntries
+            .Where(e => EF.Property<Guid>(e, "AccountingPeriodId") == accountingPeriodId)
+            .ToListAsync(cancellationToken);
+
+        var accounts = await context.Accounts.ToListAsync(cancellationToken);
+        var accountMap = accounts.ToDictionary(a => a.Id);
+
+        var period = await context.AccountingPeriods
+            .FirstOrDefaultAsync(p => p.Id == accountingPeriodId, cancellationToken);
+
+        foreach (var entry in entries)
+        {
+            var accountFk = context.Entry(entry).Property<Guid>("AccountId").CurrentValue;
+            if (accountMap.TryGetValue(accountFk, out var account))
+                context.Entry(entry).Reference(e => e.Account).CurrentValue = account;
+            if (period != null)
+                context.Entry(entry).Reference(e => e.AccountingPeriod).CurrentValue = period;
+        }
+
+        IEnumerable<BudgetEntry> result = entries;
+        if (accountId != null) result = result.Where(e => e.Account.Id == accountId);
+        if (accountType is not null) result = result.Where(e => e.Account.Type == accountType);
+        return result.ToList();
     }
 
     public async Task<BudgetEntry> SetBudget(BudgetEntry newBudgetEntryEntity, CancellationToken ct)
     {
-        var currentEntry = await context.BudgetEntries
-                                        .Where(budget => budget.Account.Id == newBudgetEntryEntity.Account.Id)
-                                        .Where(budget => budget.AccountingPeriod.Id == newBudgetEntryEntity.AccountingPeriod.Id)
-                                        .FirstOrDefaultAsync(ct);
+        var newAccountId = newBudgetEntryEntity.Account.Id;
+        var newPeriodId = newBudgetEntryEntity.AccountingPeriod.Id;
+
+        var allEntries = await context.BudgetEntries
+            .Where(b => EF.Property<Guid>(b, "AccountingPeriodId") == newPeriodId)
+            .ToListAsync(ct);
+
+        var currentEntry = allEntries
+            .FirstOrDefault(b => context.Entry(b).Property<Guid>("AccountId").CurrentValue == newAccountId);
+
         if (currentEntry is null)
         {
             context.BudgetEntries.Add(newBudgetEntryEntity);

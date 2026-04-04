@@ -2,37 +2,33 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": ".NET Core Launch (web)",
+            "name": "Kaesseli: Dev",
             "type": "coreclr",
             "request": "launch",
             "preLaunchTask": "build",
-            "program": "${workspaceFolder}/Kaesseli.Server/bin/Debug/net8.0/Kaesseli.Server.dll",
+            "program": "${workspaceFolder}/Kaesseli/bin/Debug/net10.0/Kaesseli.dll",
             "args": [],
-            "cwd": "${workspaceFolder}/Kaesseli.Server",
+            "cwd": "${workspaceFolder}/Kaesseli",
             "stopAtEntry": false,
+            "launchSettingsProfile": "Dev",
             "serverReadyAction": {
                 "action": "openExternally",
                 "pattern": "\\bNow listening on:\\s+(https?://\\S+)"
-            },
-            "env": {
-                "ASPNETCORE_ENVIRONMENT": "Development"
-            },
-            "sourceFileMap": {
-                "/Views": "${workspaceFolder}/Views"
             }
         },
         {
-            "name": ".NET Core Attach",
+            "name": "Kaesseli: Prod",
             "type": "coreclr",
-            "request": "attach"
-        },
-        {
-            "name": "Docker .NET Launch",
-            "type": "docker",
             "request": "launch",
-            "preLaunchTask": "docker-run: debug",
-            "netCore": {
-                "appProject": "${workspaceFolder}/Kaesseli.Server/Kaesseli.Server.csproj"
+            "preLaunchTask": "build",
+            "program": "${workspaceFolder}/Kaesseli/bin/Debug/net10.0/Kaesseli.dll",
+            "args": [],
+            "cwd": "${workspaceFolder}/Kaesseli",
+            "stopAtEntry": false,
+            "launchSettingsProfile": "Prod",
+            "serverReadyAction": {
+                "action": "openExternally",
+                "pattern": "\\bNow listening on:\\s+(https?://\\S+)"
             }
         }
     ]

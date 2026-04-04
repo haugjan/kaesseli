@@ -1,4 +1,4 @@
-﻿using Kaesseli.Domain.Automation;
+using Kaesseli.Domain.Automation;
 using Kaesseli.Domain.Integration;
 using Kaesseli.Infrastructure.Common;
 using Microsoft.EntityFrameworkCore;
@@ -13,8 +13,7 @@ internal class AutomationRepository : IAutomationRepository
         _context = context;
 
     public async Task<int> GetNrOfPossibleAutomation(string requestAutomationText, CancellationToken cancellationToken) =>
-        await GetTransactionsQueryable(requestAutomationText)
-            .CountAsync(cancellationToken);
+        (await GetOpenTransactionsMatching(requestAutomationText, cancellationToken)).Count;
 
     public async Task AddAutomation(AutomationEntry automationEntry, CancellationToken cancellationToken)
     {
@@ -23,16 +22,34 @@ internal class AutomationRepository : IAutomationRepository
     }
 
     public async Task<IEnumerable<Transaction>> GetPossibleTransactions(string automationText, CancellationToken cancellationToken) =>
-        await GetTransactionsQueryable(automationText)
-            .ToListAsync(cancellationToken);
+        await GetOpenTransactionsMatching(automationText, cancellationToken);
 
-    public async Task<IEnumerable<AutomationEntry>> GetAutomations(CancellationToken cancellationToken) =>
-        await _context.Automations
-            .Include(auto=> auto.Parts)
-            .ThenInclude(part=> part.Account)
-            .ToListAsync(cancellationToken);
+    public async Task<IEnumerable<AutomationEntry>> GetAutomations(CancellationToken cancellationToken)
+    {
+        var automations = await _context.Automations.ToListAsync(cancellationToken);
+        var parts = await _context.Set<AutomationEntryPart>().ToListAsync(cancellationToken);
+        var accounts = await _context.Accounts.ToListAsync(cancellationToken);
+        var accountMap = accounts.ToDictionary(a => a.Id);
 
-    private IQueryable<Transaction> GetTransactionsQueryable(string automationText)
+        foreach (var part in parts)
+        {
+            var accountFk = _context.Entry(part).Property<Guid>("AccountId").CurrentValue;
+            if (accountMap.TryGetValue(accountFk, out var account))
+                _context.Entry(part).Reference(p => p.Account).CurrentValue = account;
+        }
+
+        foreach (var automation in automations)
+        {
+            var relatedParts = parts
+                .Where(p => _context.Entry(p).Property<Guid>("AutomationEntryId").CurrentValue == automation.Id)
+                .ToList();
+            _context.Entry(automation).Collection(a => a.Parts).CurrentValue = relatedParts;
+        }
+
+        return automations;
+    }
+
+    private async Task<List<Transaction>> GetOpenTransactionsMatching(string automationText, CancellationToken cancellationToken)
     {
         var pattern = "^" + System.Text.RegularExpressions.Regex.Escape(automationText)
                                    .Replace(@"\*", ".*")
@@ -40,10 +57,18 @@ internal class AutomationRepository : IAutomationRepository
         var regex = new System.Text.RegularExpressions.Regex(
             pattern, System.Text.RegularExpressions.RegexOptions.IgnoreCase);
 
-        return _context.Transactions
-                       .Where(tran => tran.JournalEntries!.Any() == false)
-                       .AsEnumerable()
-                       .Where(tran => regex.IsMatch(tran.Description))
-                       .AsQueryable();
+        var allTransactions = await _context.Transactions.ToListAsync(cancellationToken);
+        var journalEntries = await _context.JournalEntries.ToListAsync(cancellationToken);
+
+        var transactionIdsWithJournal = journalEntries
+            .Select(je => _context.Entry(je).Property<Guid?>("TransactionId").CurrentValue)
+            .Where(id => id.HasValue)
+            .Select(id => id!.Value)
+            .ToHashSet();
+
+        return allTransactions
+            .Where(t => !transactionIdsWithJournal.Contains(t.Id))
+            .Where(t => regex.IsMatch(t.Description))
+            .ToList();
     }
 }

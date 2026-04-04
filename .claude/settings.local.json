@@ -28,7 +28,9 @@
       "Bash(docker rm kaesseli-cosmosdb:*)",
       "Bash(dotnet script:*)",
       "Read(//c/Users/Jan.Haug/.nuget/packages/microsoft.entityframeworkcore.cosmos/10.0.5/**)",
-      "Bash(docker exec:*)"
+      "Bash(docker exec:*)",
+      "Bash(dotnet list:*)",
+      "Bash(dotnet clean:*)"
     ]
   }
 }

@@ -1,7 +1,0 @@
-<component name="ProjectRunConfigurationManager">
-  <configuration default="false" name="Kaesseli.Client.Blazor" type="LaunchSettings" factoryName="Launch Settings">
-    <option name="PROJECT_FILE_PATH" value="$PROJECT_DIR$/Kaesseli.Client.Blazor/Kaesseli.Client.Blazor.csproj" />
-    <option name="PROFILE_NAME" value="Kaesseli.Client.Blazor" />
-    <method v="2" />
-  </configuration>
-</component>

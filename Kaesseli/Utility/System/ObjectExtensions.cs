@@ -1,6 +1,7 @@
 ﻿using System.Globalization;
 using YamlDotNet.Core;
 using YamlDotNet.Core.Events;
+using YamlScalar = YamlDotNet.Core.Events.Scalar;
 using YamlDotNet.Serialization;
 
 // ReSharper disable once CheckNamespace
@@ -31,7 +32,7 @@ public static class ObjectExtensions
         {
             if (value is null) return;
             var dateOnly = (DateOnly)value;
-            emitter.Emit(@event: new Scalar(value: dateOnly.ToString(format: "yyyy-MM-dd", CultureInfo.InvariantCulture)));
+            emitter.Emit(@event: new YamlScalar(value: dateOnly.ToString(format: "yyyy-MM-dd", CultureInfo.InvariantCulture)));
         }
         
     }
