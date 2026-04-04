@@ -178,6 +178,104 @@ public static class InfrastructureServiceCollectionExtensions
             }
         );
 
+        // Transaction Summaries & Transactions
+        var bankSummary = new TransactionSummary
+        {
+            Id = Guid.NewGuid(), Account = bankAccount,
+            BalanceBefore = 12000m, BalanceAfter = 8547.20m,
+            ValueDateFrom = new DateOnly(currentYear, 1, 1),
+            ValueDateTo = new DateOnly(currentYear, 3, 31),
+            Reference = "CAMT-2026-Q1",
+            Transactions = [],
+        };
+        context.TransactionSummaries.Add(bankSummary);
+
+        var assignedTransactions = new List<Transaction>();
+        var openTransactions = new List<Transaction>();
+
+        // Zugeordnete Transaktionen (werden mit JournalEntries verknüpft)
+        var txLohnJan = new Transaction
+        {
+            Id = Guid.NewGuid(), Amount = 5500m,
+            ValueDate = new DateOnly(currentYear, 1, 25), BookDate = new DateOnly(currentYear, 1, 25),
+            Description = "Lohn Januar", Reference = "SAL-2026-01",
+            RawText = "LOHN JANUAR 2026 ARBEITGEBER AG", TransactionCode = "TRF",
+            TransactionCodeDetail = "Gehalt", Debtor = "Arbeitgeber AG", Creditor = null,
+            TransactionSummary = bankSummary, JournalEntries = null,
+        };
+        var txMieteJan = new Transaction
+        {
+            Id = Guid.NewGuid(), Amount = -1500m,
+            ValueDate = new DateOnly(currentYear, 1, 28), BookDate = new DateOnly(currentYear, 1, 28),
+            Description = "Miete Januar", Reference = "MIETE-2026-01",
+            RawText = "MIETE JANUAR 2026 VERMIETER IMMOBILIEN", TransactionCode = "TRF",
+            TransactionCodeDetail = "Dauerauftrag", Debtor = null, Creditor = "Vermieter Immobilien AG",
+            TransactionSummary = bankSummary, JournalEntries = null,
+        };
+        var txMigros = new Transaction
+        {
+            Id = Guid.NewGuid(), Amount = -87.50m,
+            ValueDate = new DateOnly(currentYear, 1, 15), BookDate = new DateOnly(currentYear, 1, 15),
+            Description = "Migros Wocheneinkauf", Reference = "POS-20260115-001",
+            RawText = "MIGROS FILIALE BERN MARKTGASSE", TransactionCode = "POS",
+            TransactionCodeDetail = "Einkauf", Debtor = null, Creditor = "Migros",
+            TransactionSummary = bankSummary, JournalEntries = null,
+        };
+        assignedTransactions.AddRange([txLohnJan, txMieteJan, txMigros]);
+
+        // Offene Transaktionen (noch nicht zugeordnet)
+        openTransactions.AddRange(
+        [
+            new Transaction
+            {
+                Id = Guid.NewGuid(), Amount = -45.90m,
+                ValueDate = new DateOnly(currentYear, 3, 18), BookDate = new DateOnly(currentYear, 3, 18),
+                Description = "Coop Pronto Tankstelle", Reference = "POS-20260318-003",
+                RawText = "COOP PRONTO TANKSTELLE BERN", TransactionCode = "POS",
+                TransactionCodeDetail = "Einkauf", Debtor = null, Creditor = "Coop Pronto",
+                TransactionSummary = bankSummary, JournalEntries = null,
+            },
+            new Transaction
+            {
+                Id = Guid.NewGuid(), Amount = -29.00m,
+                ValueDate = new DateOnly(currentYear, 3, 20), BookDate = new DateOnly(currentYear, 3, 20),
+                Description = "Spotify Premium", Reference = "DD-20260320-001",
+                RawText = "SPOTIFY AB STOCKHOLM", TransactionCode = "DD",
+                TransactionCodeDetail = "Lastschrift", Debtor = null, Creditor = "Spotify AB",
+                TransactionSummary = bankSummary, JournalEntries = null,
+            },
+            new Transaction
+            {
+                Id = Guid.NewGuid(), Amount = -156.00m,
+                ValueDate = new DateOnly(currentYear, 3, 22), BookDate = new DateOnly(currentYear, 3, 22),
+                Description = "Swisscom Mobile Abo", Reference = "DD-20260322-002",
+                RawText = "SWISSCOM SCHWEIZ AG MOBILE ABO", TransactionCode = "DD",
+                TransactionCodeDetail = "Lastschrift", Debtor = null, Creditor = "Swisscom (Schweiz) AG",
+                TransactionSummary = bankSummary, JournalEntries = null,
+            },
+            new Transaction
+            {
+                Id = Guid.NewGuid(), Amount = -320.00m,
+                ValueDate = new DateOnly(currentYear, 3, 25), BookDate = new DateOnly(currentYear, 3, 25),
+                Description = "Zahnarzt Dr. Müller", Reference = "TRF-20260325-001",
+                RawText = "ZAHNARZTPRAXIS DR MUELLER BERN", TransactionCode = "TRF",
+                TransactionCodeDetail = "Überweisung", Debtor = null, Creditor = "Dr. med. dent. Müller",
+                TransactionSummary = bankSummary, JournalEntries = null,
+            },
+            new Transaction
+            {
+                Id = Guid.NewGuid(), Amount = -85.50m,
+                ValueDate = new DateOnly(currentYear, 3, 28), BookDate = new DateOnly(currentYear, 3, 28),
+                Description = "Migros Wocheneinkauf", Reference = "POS-20260328-002",
+                RawText = "MIGROS FILIALE BERN WANKDORF", TransactionCode = "POS",
+                TransactionCodeDetail = "Einkauf", Debtor = null, Creditor = "Migros",
+                TransactionSummary = bankSummary, JournalEntries = null,
+            },
+        ]);
+
+        context.Transactions.AddRange(assignedTransactions);
+        context.Transactions.AddRange(openTransactions);
+
         // Journal entries
         context.JournalEntries.AddRange(
             new JournalEntry
@@ -186,7 +284,7 @@ public static class InfrastructureServiceCollectionExtensions
                 ValueDate = new DateOnly(currentYear, 1, 25),
                 Description = "Lohn Januar",
                 Amount = 5500m, DebitAccount = bankAccount, CreditAccount = salary,
-                Transaction = null,
+                Transaction = txLohnJan,
             },
             new JournalEntry
             {
@@ -194,7 +292,7 @@ public static class InfrastructureServiceCollectionExtensions
                 ValueDate = new DateOnly(currentYear, 1, 28),
                 Description = "Miete Januar",
                 Amount = 1500m, DebitAccount = rent, CreditAccount = bankAccount,
-                Transaction = null,
+                Transaction = txMieteJan,
             },
             new JournalEntry
             {
@@ -202,7 +300,7 @@ public static class InfrastructureServiceCollectionExtensions
                 ValueDate = new DateOnly(currentYear, 1, 15),
                 Description = "Migros Wocheneinkauf",
                 Amount = 87.50m, DebitAccount = groceries, CreditAccount = bankAccount,
-                Transaction = null,
+                Transaction = txMigros,
             },
             new JournalEntry
             {
