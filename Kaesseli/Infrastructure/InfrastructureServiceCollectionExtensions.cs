@@ -186,7 +186,7 @@ public static class InfrastructureServiceCollectionExtensions
             ValueDateFrom = new DateOnly(currentYear, 1, 1),
             ValueDateTo = new DateOnly(currentYear, 3, 31),
             Reference = "CAMT-2026-Q1",
-            Transactions = [],
+            Transactions = new List<Transaction>(),
         };
         context.TransactionSummaries.Add(bankSummary);
 
