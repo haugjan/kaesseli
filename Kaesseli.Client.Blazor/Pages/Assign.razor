@@ -74,11 +74,13 @@
     <div class="d-flex flex-wrap gap-2">
         @foreach (var account in FilteredAccounts)
         {
-            <MudChip T="string" Style="@($"background-color: {account.AccountIconColor}; color: white; cursor: pointer;")"
-                     Icon="@GetMudIcon(account.AccountIcon)"
-                     OnClick="@(async () => await OnAccountClick(account))">
-                @account.AccountName
-            </MudChip>
+            var acc = account;
+            <div @onclick="@(async e => await OnAccountClick(acc, e))" @onclick:stopPropagation style="cursor: pointer;">
+                <MudChip T="string" Style="@($"background-color: {acc.AccountIconColor}; color: white;")"
+                         Icon="@GetMudIcon(acc.AccountIcon)">
+                    @acc.AccountName
+                </MudChip>
+            </div>
         }
     </div>
 }
@@ -95,7 +97,6 @@ else
     private int _nrOfPossibleAutomations;
     private bool _isAutomationActive;
     private MudTextField<string>? _filterInput;
-    private bool _ctrlPressed;
 
     private static readonly List<BreadcrumbItem> _breadcrumbs =
     [
@@ -148,9 +149,9 @@ else
         _splittingAccounts.Clear();
     }
 
-    private async Task OnAccountClick(SuggestedAccount account)
+    private async Task OnAccountClick(SuggestedAccount account, MouseEventArgs e)
     {
-        if (_ctrlPressed)
+        if (e.CtrlKey)
         {
             AddToSplitList(account);
         }
@@ -256,13 +257,11 @@ else
 
     private async Task OnFilterKeyDown(KeyboardEventArgs e)
     {
-        _ctrlPressed = e.CtrlKey;
-
         if (e.Key == "Enter")
         {
             var filtered = FilteredAccounts.ToList();
             if (filtered.Count == 1)
-                await OnAccountClick(filtered[0]);
+                await OnAccountClick(filtered[0], new MouseEventArgs { CtrlKey = e.CtrlKey });
         }
     }
 
