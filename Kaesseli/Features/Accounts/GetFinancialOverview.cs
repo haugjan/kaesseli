@@ -1,61 +1,13 @@
 using System.Collections.Immutable;
+using AccountsSummaryResult = Kaesseli.Contracts.Features.Accounts.GetAccountsSummaryContract.Result;
+using Result = Kaesseli.Contracts.Features.Accounts.GetFinancialOverviewContract.Result;
+using AccountTypeSummary = Kaesseli.Contracts.Features.Accounts.GetFinancialOverviewContract.AccountTypeSummary;
 
 namespace Kaesseli.Features.Accounts;
 
 public static class GetFinancialOverview
 {
     public record Query(Guid AccountingPeriodId);
-
-    public record Result(
-        AccountTypeSummary Expense,
-        AccountTypeSummary Revenue,
-        AccountTypeSummary Liability,
-        AccountTypeSummary Asset);
-
-    public class AccountTypeSummary
-    {
-        private readonly decimal? _budget;
-        private decimal? _currentBudget;
-        private readonly decimal? _budgetBalance;
-        private readonly decimal? _budgetPerMonth;
-        private readonly decimal? _budgetPerYear;
-
-        // ReSharper disable UnusedAutoPropertyAccessor.Global
-        // ReSharper disable UnusedMember.Global
-        public required decimal AccountBalance { get; init; }
-
-        public required decimal? Budget
-        {
-            get => _budget;
-            init => _budget = value != 0 ? value : null;
-        }
-
-        public required decimal? BudgetPerMonth
-        {
-            get => _budgetPerYear;
-            init => _budgetPerYear = value != 0 ? value : null;
-        }
-
-        public required decimal? BudgetPerYear
-        {
-            get => _budgetPerMonth;
-            init => _budgetPerMonth = value != 0 ? value : null;
-        }
-
-        public required decimal? CurrentBudget
-        {
-            get => _currentBudget;
-            set => _currentBudget = value != 0 ? value : null;
-        }
-
-        public required decimal? BudgetBalance
-        {
-            get => _budgetBalance;
-            init => _budgetBalance = value != 0 ? value : null;
-        }
-        // ReSharper restore UnusedAutoPropertyAccessor.Global
-        // ReSharper restore UnusedMember.Global
-    }
 
     public interface IHandler
     {
@@ -80,15 +32,17 @@ public static class GetFinancialOverview
                 Asset: GetAccountTypeSummary(summaries: accountSummary[AccountType.Asset]));
         }
 
-        private static AccountTypeSummary GetAccountTypeSummary(ImmutableList<GetAccountsSummary.Result> summaries) =>
-            new()
-            {
-                AccountBalance = summaries.Sum(summary => summary.AccountBalance),
-                Budget = summaries.Sum(summary => summary.Budget),
-                CurrentBudget = summaries.Sum(summary => summary.CurrentBudget),
-                BudgetBalance = summaries.Sum(summary => summary.BudgetBalance),
-                BudgetPerMonth = summaries.Sum(summary => summary.BudgetPerMonth),
-                BudgetPerYear = summaries.Sum(summary => summary.BudgetPerYear)
-            };
+        private static AccountTypeSummary GetAccountTypeSummary(ImmutableList<AccountsSummaryResult> summaries)
+        {
+            static decimal? NullIfZero(decimal? v) => v is 0 ? null : v;
+
+            return new AccountTypeSummary(
+                AccountBalance: summaries.Sum(s => s.AccountBalance),
+                Budget: NullIfZero(summaries.Sum(s => s.Budget)),
+                BudgetPerMonth: NullIfZero(summaries.Sum(s => s.BudgetPerMonth)),
+                BudgetPerYear: NullIfZero(summaries.Sum(s => s.BudgetPerYear)),
+                CurrentBudget: NullIfZero(summaries.Sum(s => s.CurrentBudget)),
+                BudgetBalance: NullIfZero(summaries.Sum(s => s.BudgetBalance)));
+        }
     }
 }

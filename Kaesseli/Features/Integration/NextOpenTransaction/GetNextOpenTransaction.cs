@@ -1,30 +1,13 @@
 using Kaesseli.Features.Accounts;
 using Kaesseli.Features.Integration;
+using Result = Kaesseli.Contracts.Features.Integration.NextOpenTransaction.GetNextOpenTransactionContract.Result;
+using SuggestedAccount = Kaesseli.Contracts.Features.Integration.NextOpenTransaction.GetNextOpenTransactionContract.SuggestedAccount;
 
 namespace Kaesseli.Features.Integration.NextOpenTransaction;
 
 public static class GetNextOpenTransaction
 {
     public record Query(int Skip);
-
-    public record Result(
-        Guid Id,
-        decimal Amount,
-        string Description,
-        DateOnly ValueDate,
-        string AccountName,
-        string AccountType,
-        AccountType AccountTypeId,
-        IEnumerable<SuggestedAccount> SuggestedAccounts);
-
-    public record SuggestedAccount(
-        double Relevance,
-        Guid AccountId,
-        string AccountName,
-        string AccountType,
-        AccountType AccountTypeId,
-        string AccountIcon,
-        string AccountIconColor);
 
     public interface IHandler
     {

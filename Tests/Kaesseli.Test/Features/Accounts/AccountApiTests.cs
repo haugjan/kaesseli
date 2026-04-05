@@ -50,7 +50,7 @@ public class AccountApiTests : IAsyncLifetime
     {
         // Arrange
         var periodId = Guid.NewGuid();
-        var accounts = new SmartFaker<GetAccountsSummary.Result>().Generate(count: 3);
+        var accounts = new SmartFaker<GetAccountsSummaryContract.Result>().Generate(count: 3);
         _getAccountsSummaryMock
             .Setup(m => m.Handle(It.IsAny<GetAccountsSummary.Query>(), default))
             .ReturnsAsync(accounts);
@@ -73,7 +73,7 @@ public class AccountApiTests : IAsyncLifetime
     {
         // Arrange
         var periodId = Guid.NewGuid();
-        var accounts = new SmartFaker<GetAccounts.Result>().Generate(count: 3);
+        var accounts = new SmartFaker<GetAccountsContract.Result>().Generate(count: 3);
         var expectedAccount = accounts[index: 1];
         _getAccountMock
             .Setup(m =>
@@ -81,12 +81,12 @@ public class AccountApiTests : IAsyncLifetime
             )
             .ReturnsAsync(
                 (GetAccount.Query _, CancellationToken _) =>
-                    new GetAccount.Result(
+                    new GetAccountContract.Result(
                         Id: expectedAccount.Id,
                         Name: expectedAccount.Name,
                         Icon: expectedAccount.Icon,
                         IconColor: expectedAccount.IconColor,
-                        Type: expectedAccount.Type,
+                        Type: expectedAccount.TypeId.DisplayName(),
                         TypeId: expectedAccount.TypeId,
                         AccountBalance: 10,
                         Budget: 11,
@@ -94,7 +94,7 @@ public class AccountApiTests : IAsyncLifetime
                         BudgetPerYear: null,
                         CurrentBudget: 13,
                         BudgetBalance: 12,
-                        Entries: Array.Empty<GetAccount.ResultEntry>())
+                        Entries: Array.Empty<GetAccountContract.ResultEntry>())
             );
 
         // Act
@@ -108,7 +108,7 @@ public class AccountApiTests : IAsyncLifetime
 
         // Assert
         response.StatusCode.ShouldBe(HttpStatusCode.OK);
-        var accountResponse = JsonSerializer.Deserialize<GetAccount.Result>(
+        var accountResponse = JsonSerializer.Deserialize<GetAccountContract.Result>(
             json: await response.Content.ReadAsStringAsync(),
             options
         );

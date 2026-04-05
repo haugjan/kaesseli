@@ -67,7 +67,7 @@ public class BudgetApiTests : IAsyncLifetime
     public async Task GetBudgetEntriesEndpoint_ShouldReturnBudgetEntries()
     {
         // Arrange
-        var budgetEntries = new SmartFaker<GetBudgetEntries.Result>().Generate(count: 3);
+        var budgetEntries = new SmartFaker<GetBudgetEntriesContract.Result>().Generate(count: 3);
         _getBudgetEntriesMock
             .Setup(m => m.Handle(It.IsAny<GetBudgetEntries.Query>(), default))
             .ReturnsAsync(budgetEntries);

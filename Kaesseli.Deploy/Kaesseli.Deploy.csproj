@@ -9,6 +9,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Kaesseli\Kaesseli.csproj" />
+    <ProjectReference Include="..\Kaesseli.Contracts\Kaesseli.Contracts.csproj" />
   </ItemGroup>
 
   <ItemGroup>

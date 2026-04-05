@@ -1,45 +1,15 @@
 using System.Collections.Immutable;
 using Kaesseli.Features.Budget;
 using Kaesseli.Features.Journal;
+using Result = Kaesseli.Contracts.Features.Accounts.GetAccountContract.Result;
+using ResultEntry = Kaesseli.Contracts.Features.Accounts.GetAccountContract.ResultEntry;
+using AmountType = Kaesseli.Contracts.Features.Accounts.GetAccountContract.AmountType;
 
 namespace Kaesseli.Features.Accounts;
 
 public static class GetAccount
 {
-    public enum AmountType
-    {
-        Budget = 1,
-        Credit = 2,
-        Debit = 3
-    }
-
     public record Query(Guid AccountId, Guid AccountingPeriodId);
-
-    public record Result(
-        Guid Id,
-        string Name,
-        string Icon,
-        string IconColor,
-        string Type,
-        AccountType TypeId,
-        decimal AccountBalance,
-        decimal? Budget,
-        decimal? BudgetPerMonth,
-        decimal? BudgetPerYear,
-        decimal? CurrentBudget,
-        decimal? BudgetBalance,
-        IEnumerable<ResultEntry> Entries
-    );
-
-    public record ResultEntry(
-        Guid Id,
-        DateOnly ValueDate,
-        string Description,
-        decimal Amount,
-        AmountType AmountType,
-        string? OtherAccount,
-        Guid? OtherAccountId
-    );
 
     public interface IHandler
     {

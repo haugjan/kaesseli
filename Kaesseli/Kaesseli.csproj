@@ -59,4 +59,8 @@
       <DependentUpon>Account.cs</DependentUpon>
     </Compile>
   </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Kaesseli.Contracts\Kaesseli.Contracts.csproj" />
+  </ItemGroup>
 </Project>

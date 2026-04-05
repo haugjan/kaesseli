@@ -1,14 +1,10 @@
+using Result = Kaesseli.Contracts.Features.Accounts.GetAccountsContract.Result;
 
 namespace Kaesseli.Features.Accounts;
 
 public static class GetAccounts
 {
     public record Query(AccountType? AccountType = null);
-
-    public record Result(Guid Id, string Name, AccountType TypeId, string Icon, string IconColor)
-    {
-        public string Type => TypeId.DisplayName();
-    }
 
     public interface IHandler
     {

@@ -1,11 +1,10 @@
 using System.Collections.Immutable;
+using Result = Kaesseli.Contracts.Features.Accounts.GetAccountingPeriodsContract.Result;
 
 namespace Kaesseli.Features.Accounts;
 
 public static class GetAccountingPeriods
 {
-    public record Result(Guid Id, string Description, DateOnly FromInclusive, DateOnly ToInclusive);
-
     public interface IHandler
     {
         Task<IEnumerable<Result>> Handle(CancellationToken cancellationToken);

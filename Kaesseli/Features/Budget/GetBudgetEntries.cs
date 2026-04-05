@@ -1,13 +1,12 @@
 using System.Collections.Immutable;
 using Kaesseli.Features.Accounts;
+using Result = Kaesseli.Contracts.Features.Budget.GetBudgetEntriesContract.Result;
 
 namespace Kaesseli.Features.Budget;
 
 public static class GetBudgetEntries
 {
     public record Query(Guid? AccountId, AccountType? AccountType, Guid AccountingPeriodId);
-
-    public record Result(Guid Id, decimal Amount, string Description, Guid AccountId, Guid AccountingPeriodId);
 
     public interface IHandler
     {

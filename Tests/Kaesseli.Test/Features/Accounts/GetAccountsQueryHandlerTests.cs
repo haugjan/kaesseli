@@ -29,9 +29,7 @@ public class GetAccountsQueryHandlerTests
 
         // Assert
         result.Select(r => r.Id).ToArray().ShouldBeEquivalentTo(accountsList.Select(a => a.Id).ToArray());
-        result.Select(r => r.Type).ToArray().ShouldBeEquivalentTo(
-            accountsList.Select(a => a.Type.DisplayName()).ToArray()
-        );
+        result.Select(r => r.TypeId).ToArray().ShouldBeEquivalentTo(accountsList.Select(a => a.Type).ToArray());
         mockRepository.Verify(repo => repo.GetAccounts(cancellationToken), Times.Once);
     }
 }

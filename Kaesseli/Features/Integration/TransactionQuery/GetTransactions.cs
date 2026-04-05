@@ -1,24 +1,12 @@
 using System.Collections.Immutable;
 using Kaesseli.Features.Integration;
+using Result = Kaesseli.Contracts.Features.Integration.TransactionQuery.GetTransactionsContract.Result;
 
 namespace Kaesseli.Features.Integration.TransactionQuery;
 
 public static class GetTransactions
 {
     public record Query(Guid TransactionSummaryId);
-
-    public record Result(
-        Guid Id,
-        string RawText,
-        decimal Amount,
-        DateOnly ValueDate,
-        DateOnly BookDate,
-        string Description,
-        string Reference,
-        string TransactionCode,
-        string TransactionCodeDetail,
-        string? Debtor,
-        string? Creditor);
 
     public interface IHandler
     {

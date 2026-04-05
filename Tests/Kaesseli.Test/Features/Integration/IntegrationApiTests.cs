@@ -80,7 +80,7 @@ public class IntegrationApiTests : IAsyncLifetime
     public async Task GetTransactionSummariesEndpoint_ShouldReturnTransactionSummaries()
     {
         // Arrange
-        var transactionSummaries = new SmartFaker<GetTransactionSummaries.Result>().Generate(
+        var transactionSummaries = new SmartFaker<GetTransactionSummariesContract.Result>().Generate(
             count: 3
         );
         _getTransactionSummariesMock
@@ -102,7 +102,7 @@ public class IntegrationApiTests : IAsyncLifetime
     public async Task GetNextOpenTransactionEndpoint_ShouldReturnNextOpenTransaction()
     {
         // Arrange
-        var nextOpenTransaction = new SmartFaker<GetNextOpenTransaction.Result>().Generate();
+        var nextOpenTransaction = new SmartFaker<GetNextOpenTransactionContract.Result>().Generate();
         _getNextOpenTransactionMock
             .Setup(m => m.Handle(It.IsAny<GetNextOpenTransaction.Query>(), default))
             .ReturnsAsync(nextOpenTransaction);

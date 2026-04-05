@@ -71,7 +71,7 @@ public class JournalApiTests : IAsyncLifetime
     public async Task GetJournalEntriesEndpoint_ShouldReturnJournalEntries()
     {
         // Arrange
-        var journalEntries = new SmartFaker<GetJournalEntries.Result>().Generate(count: 3);
+        var journalEntries = new SmartFaker<GetJournalEntriesContract.Result>().Generate(count: 3);
         _getJournalEntriesMock
             .Setup(m => m.Handle(It.IsAny<GetJournalEntries.Query>(), default))
             .ReturnsAsync(journalEntries);

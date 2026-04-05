@@ -1,25 +1,12 @@
 using Kaesseli.Features.Budget;
 using Kaesseli.Features.Journal;
+using Result = Kaesseli.Contracts.Features.Accounts.GetAccountsSummaryContract.Result;
 
 namespace Kaesseli.Features.Accounts;
 
 public static class GetAccountsSummary
 {
     public record Query(Guid AccountingPeriodId);
-
-    public record Result(
-        Guid Id,
-        string Name,
-        string Icon,
-        string IconColor,
-        string Type,
-        AccountType TypeId,
-        decimal AccountBalance,
-        decimal? Budget,
-        decimal? BudgetPerMonth,
-        decimal? BudgetPerYear,
-        decimal? BudgetBalance,
-        decimal? CurrentBudget);
 
     public interface IHandler
     {

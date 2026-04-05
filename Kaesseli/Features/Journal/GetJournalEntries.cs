@@ -1,13 +1,12 @@
 using System.Collections.Immutable;
 using Kaesseli.Features.Accounts;
+using Result = Kaesseli.Contracts.Features.Journal.GetJournalEntriesContract.Result;
 
 namespace Kaesseli.Features.Journal;
 
 public static class GetJournalEntries
 {
     public record Query(Guid AccountingPeriodId, Guid? AccountId, AccountType? AccountType);
-
-    public record Result(Guid Id, Guid? DebitAccountId, Guid? CreditAccountId, decimal Amount, string Description, DateOnly ValueDate);
 
     public interface IHandler
     {

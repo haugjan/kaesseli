@@ -1,20 +1,11 @@
 using System.Collections.Immutable;
 using Kaesseli.Features.Integration;
+using Result = Kaesseli.Contracts.Features.Integration.TransactionQuery.GetTransactionSummariesContract.Result;
 
 namespace Kaesseli.Features.Integration.TransactionQuery;
 
 public static class GetTransactionSummaries
 {
-    public record Result(
-        Guid Id,
-        string AccountName,
-        DateOnly ValueDateFrom,
-        DateOnly ValueDateTo,
-        decimal BalanceBefore,
-        decimal BalanceAfter,
-        string Reference,
-        int NrOfTransactions);
-
     public interface IHandler
     {
         Task<IEnumerable<Result>> Handle(CancellationToken cancellationToken);

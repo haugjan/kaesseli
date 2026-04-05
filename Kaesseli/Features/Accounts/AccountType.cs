@@ -1,12 +1,6 @@
-namespace Kaesseli.Features.Accounts;
+using Kaesseli.Contracts.Features.Accounts;
 
-public enum AccountType
-{
-    Asset = 1,
-    Liability = 2,
-    Revenue = 3,
-    Expense = 4
-}
+namespace Kaesseli.Features.Accounts;
 
 public static class AccountTypeExtensions
 {
