@@ -1,5 +1,5 @@
 using System.Collections.Immutable;
-using Result = Kaesseli.Contracts.Features.Accounts.GetAccountingPeriodsContract.Result;
+using Result = Kaesseli.Contracts.Accounts.AccountingPeriod;
 
 namespace Kaesseli.Features.Accounts;
 

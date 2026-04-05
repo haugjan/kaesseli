@@ -1,6 +1,6 @@
 using System.Collections.Immutable;
 using Kaesseli.Features.Integration;
-using Result = Kaesseli.Contracts.Features.Integration.TransactionQuery.GetTransactionsContract.Result;
+using Result = Kaesseli.Contracts.Integration.Transaction;
 
 namespace Kaesseli.Features.Integration.TransactionQuery;
 

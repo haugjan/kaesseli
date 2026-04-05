@@ -1,7 +1,7 @@
 using Kaesseli.Features.Accounts;
 using Kaesseli.Features.Integration;
-using Result = Kaesseli.Contracts.Features.Integration.NextOpenTransaction.GetNextOpenTransactionContract.Result;
-using SuggestedAccount = Kaesseli.Contracts.Features.Integration.NextOpenTransaction.GetNextOpenTransactionContract.SuggestedAccount;
+using Result = Kaesseli.Contracts.Integration.OpenTransaction;
+using SuggestedAccount = Kaesseli.Contracts.Integration.SuggestedAccount;
 
 namespace Kaesseli.Features.Integration.NextOpenTransaction;
 

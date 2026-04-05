@@ -1,6 +1,6 @@
 using System.Collections.Immutable;
 using Kaesseli.Features.Accounts;
-using Result = Kaesseli.Contracts.Features.Budget.GetBudgetEntriesContract.Result;
+using Result = Kaesseli.Contracts.Budget.BudgetEntry;
 
 namespace Kaesseli.Features.Budget;
 

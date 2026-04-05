@@ -1,6 +1,6 @@
 using Kaesseli.Features.Budget;
 using Kaesseli.Features.Journal;
-using Result = Kaesseli.Contracts.Features.Accounts.GetAccountsSummaryContract.Result;
+using Result = Kaesseli.Contracts.Accounts.AccountSummary;
 
 namespace Kaesseli.Features.Accounts;
 

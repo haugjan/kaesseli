@@ -1,9 +1,9 @@
 using System.Collections.Immutable;
 using Kaesseli.Features.Budget;
 using Kaesseli.Features.Journal;
-using Result = Kaesseli.Contracts.Features.Accounts.GetAccountContract.Result;
-using ResultEntry = Kaesseli.Contracts.Features.Accounts.GetAccountContract.ResultEntry;
-using AmountType = Kaesseli.Contracts.Features.Accounts.GetAccountContract.AmountType;
+using Result = Kaesseli.Contracts.Accounts.AccountDetail;
+using ResultEntry = Kaesseli.Contracts.Accounts.AccountEntry;
+using AmountType = Kaesseli.Contracts.Accounts.AmountType;
 
 namespace Kaesseli.Features.Accounts;
 

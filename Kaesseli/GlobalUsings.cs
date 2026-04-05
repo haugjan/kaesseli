@@ -1,1 +1,1 @@
-global using Kaesseli.Contracts.Features.Accounts;
+global using AccountType = Kaesseli.Contracts.Accounts.AccountType;

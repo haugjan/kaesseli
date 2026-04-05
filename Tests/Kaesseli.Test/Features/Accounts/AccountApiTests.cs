@@ -1,6 +1,7 @@
 using System.Net;
 using System.Text;
 using System.Text.Json;
+using Kaesseli.Contracts.Accounts;
 using Kaesseli.Features.Accounts;
 using Kaesseli.Test.Faker;
 using Microsoft.AspNetCore.Builder;
@@ -50,7 +51,7 @@ public class AccountApiTests : IAsyncLifetime
     {
         // Arrange
         var periodId = Guid.NewGuid();
-        var accounts = new SmartFaker<GetAccountsSummaryContract.Result>().Generate(count: 3);
+        var accounts = new SmartFaker<AccountSummary>().Generate(count: 3);
         _getAccountsSummaryMock
             .Setup(m => m.Handle(It.IsAny<GetAccountsSummary.Query>(), default))
             .ReturnsAsync(accounts);
@@ -73,7 +74,7 @@ public class AccountApiTests : IAsyncLifetime
     {
         // Arrange
         var periodId = Guid.NewGuid();
-        var accounts = new SmartFaker<GetAccountsContract.Result>().Generate(count: 3);
+        var accounts = new SmartFaker<AccountListItem>().Generate(count: 3);
         var expectedAccount = accounts[index: 1];
         _getAccountMock
             .Setup(m =>
@@ -81,7 +82,7 @@ public class AccountApiTests : IAsyncLifetime
             )
             .ReturnsAsync(
                 (GetAccount.Query _, CancellationToken _) =>
-                    new GetAccountContract.Result(
+                    new AccountDetail(
                         Id: expectedAccount.Id,
                         Name: expectedAccount.Name,
                         Icon: expectedAccount.Icon,
@@ -94,7 +95,7 @@ public class AccountApiTests : IAsyncLifetime
                         BudgetPerYear: null,
                         CurrentBudget: 13,
                         BudgetBalance: 12,
-                        Entries: Array.Empty<GetAccountContract.ResultEntry>())
+                        Entries: Array.Empty<AccountEntry>())
             );
 
         // Act
@@ -108,7 +109,7 @@ public class AccountApiTests : IAsyncLifetime
 
         // Assert
         response.StatusCode.ShouldBe(HttpStatusCode.OK);
-        var accountResponse = JsonSerializer.Deserialize<GetAccountContract.Result>(
+        var accountResponse = JsonSerializer.Deserialize<AccountDetail>(
             json: await response.Content.ReadAsStringAsync(),
             options
         );

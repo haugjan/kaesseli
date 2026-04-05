@@ -1,6 +1,6 @@
 using System.Collections.Immutable;
 using Kaesseli.Features.Accounts;
-using Result = Kaesseli.Contracts.Features.Journal.GetJournalEntriesContract.Result;
+using Result = Kaesseli.Contracts.Journal.JournalEntry;
 
 namespace Kaesseli.Features.Journal;
 

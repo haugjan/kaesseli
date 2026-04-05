@@ -1,7 +1,7 @@
 using System.Collections.Immutable;
-using AccountsSummaryResult = Kaesseli.Contracts.Features.Accounts.GetAccountsSummaryContract.Result;
-using Result = Kaesseli.Contracts.Features.Accounts.GetFinancialOverviewContract.Result;
-using AccountTypeSummary = Kaesseli.Contracts.Features.Accounts.GetFinancialOverviewContract.AccountTypeSummary;
+using AccountsSummaryResult = Kaesseli.Contracts.Accounts.AccountSummary;
+using Result = Kaesseli.Contracts.Accounts.FinancialOverview;
+using AccountTypeSummary = Kaesseli.Contracts.Accounts.AccountTypeSummary;
 
 namespace Kaesseli.Features.Accounts;
 

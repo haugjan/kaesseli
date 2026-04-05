@@ -1,4 +1,4 @@
-using Kaesseli.Contracts.Features.Accounts;
+using Kaesseli.Contracts.Accounts;
 
 namespace Kaesseli.Features.Accounts;
 

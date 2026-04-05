@@ -1,4 +1,4 @@
-using Result = Kaesseli.Contracts.Features.Accounts.GetAccountsContract.Result;
+using Result = Kaesseli.Contracts.Accounts.AccountListItem;
 
 namespace Kaesseli.Features.Accounts;
 

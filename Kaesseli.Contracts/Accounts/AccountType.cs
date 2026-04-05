@@ -1,4 +1,4 @@
-namespace Kaesseli.Contracts.Features.Accounts;
+namespace Kaesseli.Contracts.Accounts;
 
 public enum AccountType
 {

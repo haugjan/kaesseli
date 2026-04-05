@@ -1,5 +1,6 @@
 using System.Net;
 using System.Net.Http.Headers;
+using Kaesseli.Contracts.Integration;
 using Kaesseli.Features.Integration.FileImport;
 using Kaesseli.Features.Integration.NextOpenTransaction;
 using Kaesseli.Features.Integration.TransactionQuery;
@@ -80,7 +81,7 @@ public class IntegrationApiTests : IAsyncLifetime
     public async Task GetTransactionSummariesEndpoint_ShouldReturnTransactionSummaries()
     {
         // Arrange
-        var transactionSummaries = new SmartFaker<GetTransactionSummariesContract.Result>().Generate(
+        var transactionSummaries = new SmartFaker<Kaesseli.Contracts.Integration.TransactionSummary>().Generate(
             count: 3
         );
         _getTransactionSummariesMock
@@ -102,7 +103,7 @@ public class IntegrationApiTests : IAsyncLifetime
     public async Task GetNextOpenTransactionEndpoint_ShouldReturnNextOpenTransaction()
     {
         // Arrange
-        var nextOpenTransaction = new SmartFaker<GetNextOpenTransactionContract.Result>().Generate();
+        var nextOpenTransaction = new SmartFaker<OpenTransaction>().Generate();
         _getNextOpenTransactionMock
             .Setup(m => m.Handle(It.IsAny<GetNextOpenTransaction.Query>(), default))
             .ReturnsAsync(nextOpenTransaction);
