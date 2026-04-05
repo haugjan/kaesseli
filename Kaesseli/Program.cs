@@ -72,7 +72,11 @@ app.UseCors("AllowSpecificOrigin");
 
 app.UseDefaultFiles();
 app.UseStaticFiles();
-await app.Services.InitializeDatabaseAsync();
+using (var scope = app.Services.CreateScope())
+{
+    var context = scope.ServiceProvider.GetRequiredService<Kaesseli.Infrastructure.KaesseliContext>();
+    await context.Database.EnsureCreatedAsync();
+}
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
