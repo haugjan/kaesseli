@@ -62,7 +62,10 @@ public static class InfrastructureServiceCollectionExtensions
                                 return new HttpClient(handler);
                             });
                         }
-                        : null
+                        : cosmos =>
+                        {
+                            cosmos.Region("Switzerland North");
+                        }
                 );
             });
 

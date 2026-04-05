@@ -15,11 +15,13 @@ public class BudgetRepository(KaesseliContext context) : IBudgetRepository
             .Where(e => EF.Property<Guid>(e, "AccountingPeriodId") == accountingPeriodId)
             .ToListAsync(cancellationToken);
 
-        var accounts = await context.Accounts.ToListAsync(cancellationToken);
+        var accounts = context.Accounts.Local.Any()
+            ? context.Accounts.Local.ToList()
+            : await context.Accounts.ToListAsync(cancellationToken);
         var accountMap = accounts.ToDictionary(a => a.Id);
 
-        var period = await context.AccountingPeriods
-            .FirstOrDefaultAsync(p => p.Id == accountingPeriodId, cancellationToken);
+        var period = context.AccountingPeriods.Local.FirstOrDefault(p => p.Id == accountingPeriodId)
+            ?? await context.AccountingPeriods.FirstOrDefaultAsync(p => p.Id == accountingPeriodId, cancellationToken);
 
         foreach (var entry in entries)
         {

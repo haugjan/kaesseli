@@ -42,13 +42,12 @@ public static class GetAccountsSummary
             var accounts = await accountRepo.GetAccounts(cancellationToken);
             var accountingPeriod = await accountRepo.GetAccountingPeriod(request.AccountingPeriodId, cancellationToken);
 
+            // Accounts and AccountingPeriod are now in the change tracker,
+            // so the repositories below won't re-query them from the database.
             var journalEntries = await journalRepo.GetJournalEntries(
-                                     request.AccountingPeriodId, accountId: null, accountType: null,
-                                     cancellationToken);
-
+                request.AccountingPeriodId, accountId: null, accountType: null, cancellationToken);
             var budgetEntries = await budgetRepo.GetBudgetEntries(
-                                    request.AccountingPeriodId, accountId: null, accountType: null,
-                                    cancellationToken);
+                request.AccountingPeriodId, accountId: null, accountType: null, cancellationToken);
 
             return accounts.Select(account => GetAccountSummary(account, journalEntries, budgetEntries, accountingPeriod));
         }
