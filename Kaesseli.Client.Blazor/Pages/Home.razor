@@ -1,5 +1,4 @@
 @page "/"
-@using Kaesseli.Client.Blazor.Models
 @using Kaesseli.Client.Blazor.Services
 @inject KaesseliApiService Api
 @inject AccountingPeriodState PeriodState
@@ -46,7 +45,7 @@ else
 }
 
 @code {
-    FinancialOverviewDto? _overview;
+    FinancialOverview? _overview;
 
     protected override async Task OnInitializedAsync()
     {

@@ -1,5 +1,4 @@
 @page "/accountTable/{AccountId:guid}"
-@using Kaesseli.Client.Blazor.Models
 @using Kaesseli.Client.Blazor.Services
 @inject KaesseliApiService Api
 @inject AccountingPeriodState PeriodState
@@ -31,7 +30,7 @@ else
                 <MudChip T="string" Color="Color.Primary" Icon="@Icons.Material.Rounded.AccountBalanceWallet">
                     @FormatNumber(_account.AccountBalance)
                 </MudChip>
-                @if (_account.TypeId is 3 or 4)
+                @if (_account.TypeId is AccountType.Revenue or AccountType.Expense)
                 {
                     <MudChip T="string" Style="background-color: #795548; color: white;" Icon="@Icons.Material.Rounded.Savings">
                         Σ @FormatNullable(_account.Budget)
@@ -77,7 +76,7 @@ else
 @code {
     [Parameter] public Guid AccountId { get; set; }
 
-    private AccountDetailDto? _account;
+    private AccountDetail? _account;
 
     private List<BreadcrumbItem> _breadcrumbs =>
     [
@@ -111,12 +110,12 @@ else
 
     private static string FormatNullable(decimal? value) => value.HasValue ? value.Value.ToString("N2") : "";
 
-    private static string RowStyle(AccountEntryDto entry) =>
-        entry.AmountType == 1 ? "font-style: italic;" : "";
+    private static string RowStyle(AccountEntry entry) =>
+        entry.AmountType == AmountType.Budget ? "font-style: italic;" : "";
 
-    private static string AmountStyle(AccountEntryDto entry)
+    private static string AmountStyle(AccountEntry entry)
     {
-        var italic = entry.AmountType == 1 ? "font-style: italic; " : "";
+        var italic = entry.AmountType == AmountType.Budget ? "font-style: italic; " : "";
         var color = entry.Amount >= 0 ? "color: #21BA45;" : "color: #C10015;";
         return $"{italic}text-align: right; font-weight: 700; {color}";
     }

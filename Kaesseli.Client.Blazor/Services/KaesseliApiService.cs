@@ -1,25 +1,25 @@
 using System.Net.Http.Json;
-using Kaesseli.Client.Blazor.Models;
+
 
 namespace Kaesseli.Client.Blazor.Services;
 
 public class KaesseliApiService(HttpClient httpClient)
 {
-    public Task<IEnumerable<AccountingPeriodDto>?> GetAccountingPeriodsAsync(CancellationToken ct = default)
-        => httpClient.GetFromJsonAsync<IEnumerable<AccountingPeriodDto>>("accountingPeriod", ct);
+    public Task<IEnumerable<AccountingPeriod>?> GetAccountingPeriodsAsync(CancellationToken ct = default)
+        => httpClient.GetFromJsonAsync<IEnumerable<AccountingPeriod>>("accountingPeriod", ct);
 
-    public Task<FinancialOverviewDto?> GetOverviewAsync(Guid periodId, CancellationToken ct = default)
-        => httpClient.GetFromJsonAsync<FinancialOverviewDto>($"accountingPeriod/{periodId}/overView", ct);
+    public Task<FinancialOverview?> GetOverviewAsync(Guid periodId, CancellationToken ct = default)
+        => httpClient.GetFromJsonAsync<FinancialOverview>($"accountingPeriod/{periodId}/overView", ct);
 
-    public Task<IEnumerable<AccountSummaryDto>?> GetAccountSummariesAsync(Guid periodId, CancellationToken ct = default)
-        => httpClient.GetFromJsonAsync<IEnumerable<AccountSummaryDto>>($"accountingPeriod/{periodId}/accountSummary", ct);
+    public Task<IEnumerable<AccountSummary>?> GetAccountSummariesAsync(Guid periodId, CancellationToken ct = default)
+        => httpClient.GetFromJsonAsync<IEnumerable<AccountSummary>>($"accountingPeriod/{periodId}/accountSummary", ct);
 
-    public Task<AccountDetailDto?> GetAccountDetailAsync(Guid periodId, Guid accountId, CancellationToken ct = default)
-        => httpClient.GetFromJsonAsync<AccountDetailDto>($"accountingPeriod/{periodId}/account/{accountId}", ct);
+    public Task<AccountDetail?> GetAccountDetailAsync(Guid periodId, Guid accountId, CancellationToken ct = default)
+        => httpClient.GetFromJsonAsync<AccountDetail>($"accountingPeriod/{periodId}/account/{accountId}", ct);
 
-    public Task<IEnumerable<TransactionSummaryDto>?> GetTransactionSummariesAsync(CancellationToken ct = default)
-        => httpClient.GetFromJsonAsync<IEnumerable<TransactionSummaryDto>>("transactionSummary", ct);
+    public Task<IEnumerable<TransactionSummary>?> GetTransactionSummariesAsync(CancellationToken ct = default)
+        => httpClient.GetFromJsonAsync<IEnumerable<TransactionSummary>>("transactionSummary", ct);
 
-    public Task<IEnumerable<TransactionDto>?> GetTransactionsAsync(Guid transactionSummaryId, CancellationToken ct = default)
-        => httpClient.GetFromJsonAsync<IEnumerable<TransactionDto>>($"transaction?transactionSummaryId={transactionSummaryId}", ct);
+    public Task<IEnumerable<Transaction>?> GetTransactionsAsync(Guid transactionSummaryId, CancellationToken ct = default)
+        => httpClient.GetFromJsonAsync<IEnumerable<Transaction>>($"transaction?transactionSummaryId={transactionSummaryId}", ct);
 }

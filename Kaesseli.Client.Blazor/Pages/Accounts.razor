@@ -1,5 +1,4 @@
 @page "/accounts"
-@using Kaesseli.Client.Blazor.Models
 @using Kaesseli.Client.Blazor.Services
 @inject KaesseliApiService Api
 @inject AccountingPeriodState PeriodState
@@ -37,7 +36,7 @@ else
             </MudCardHeader>
             <MudCardContent Class="pa-0">
                 <MudTable Items="typeAccounts" Dense="true" Hover="true" Elevation="0"
-                          OnRowClick="OnRowClick" T="AccountSummaryDto" Style="background: transparent;">
+                          OnRowClick="OnRowClick" T="AccountSummary" Style="background: transparent;">
                     <HeaderContent>
                         <MudTh Style="width: 48px;"></MudTh>
                         <MudTh>Name</MudTh>
@@ -73,7 +72,7 @@ else
 }
 
 @code {
-    private List<AccountSummaryDto>? _accounts;
+    private List<AccountSummary>? _accounts;
 
     private static readonly List<BreadcrumbItem> _breadcrumbs =
     [
@@ -111,7 +110,7 @@ else
         _accounts = result?.ToList() ?? [];
     }
 
-    private void OnRowClick(TableRowClickEventArgs<AccountSummaryDto> args)
+    private void OnRowClick(TableRowClickEventArgs<AccountSummary> args)
     {
         Navigation.NavigateTo($"/accountTable/{args.Item!.Id}");
     }

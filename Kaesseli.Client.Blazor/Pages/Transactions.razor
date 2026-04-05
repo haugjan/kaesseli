@@ -1,5 +1,4 @@
 @page "/transactions"
-@using Kaesseli.Client.Blazor.Models
 @using Kaesseli.Client.Blazor.Services
 @inject KaesseliApiService Api
 
@@ -48,8 +47,8 @@ else
 }
 
 @code {
-    private List<TransactionSummaryDto>? _summaries;
-    private List<TransactionDto>? _transactions;
+    private List<TransactionSummary>? _summaries;
+    private List<Transaction>? _transactions;
     private Guid? _selectedId;
 
     protected override async Task OnInitializedAsync()
