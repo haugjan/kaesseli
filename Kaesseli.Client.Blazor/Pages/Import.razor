@@ -1,0 +1,90 @@
+@page "/import"
+@using Kaesseli.Client.Blazor.Services
+@inject KaesseliApiService Api
+@inject AccountingPeriodState PeriodState
+@inject ISnackbar Snackbar
+
+<PageTitle>Import</PageTitle>
+
+<MudBreadcrumbs Items="_breadcrumbs" Class="pa-0 mb-4" />
+
+<MudCard Elevation="0" Style="border: 1px solid var(--mud-palette-divider); border-radius: 12px; max-width: 600px;">
+    <MudCardContent>
+        <MudFileUpload T="IBrowserFile" @bind-Files="_file" Accept=".camt,.xml,.csv,.zip">
+            <ActivatorContent>
+                <MudButton Variant="Variant.Filled" Color="Color.Primary"
+                           StartIcon="@Icons.Material.Rounded.CloudUpload">
+                    Datei auswählen
+                </MudButton>
+            </ActivatorContent>
+        </MudFileUpload>
+
+        @if (_file is not null)
+        {
+            <MudChip T="string" Class="mt-2" Icon="@Icons.Material.Rounded.InsertDriveFile"
+                     OnClose="@(() => _file = null)">
+                @_file.Name (@(_file.Size / 1024) KB)
+            </MudChip>
+        }
+
+        <MudSelect T="Guid?" @bind-Value="_selectedAccountId" Label="Konto auswählen"
+                   Variant="Variant.Filled" Class="mt-4"
+                   AnchorOrigin="Origin.BottomLeft">
+            @if (_accounts is not null)
+            {
+                @foreach (var account in _accounts)
+                {
+                    <MudSelectItem T="Guid?" Value="@((Guid?)account.Id)">@account.Name</MudSelectItem>
+                }
+            }
+        </MudSelect>
+    </MudCardContent>
+    <MudCardActions>
+        <MudButton Color="Color.Primary" Variant="Variant.Filled"
+                   Disabled="@(_file is null || _selectedAccountId is null || _uploading)"
+                   OnClick="OnUpload"
+                   StartIcon="@(_uploading ? Icons.Material.Rounded.HourglassEmpty : Icons.Material.Rounded.Upload)">
+            @(_uploading ? "Wird hochgeladen..." : "Hochladen")
+        </MudButton>
+    </MudCardActions>
+</MudCard>
+
+@code {
+    private IBrowserFile? _file;
+    private Guid? _selectedAccountId;
+    private List<Contracts.Accounts.Account>? _accounts;
+    private bool _uploading;
+
+    private static readonly List<BreadcrumbItem> _breadcrumbs =
+    [
+        new("Import", "/import", icon: Icons.Material.Rounded.FileUpload)
+    ];
+
+    protected override async Task OnInitializedAsync()
+    {
+        var accounts = await Api.GetAccountsAsync(AccountType.Asset);
+        _accounts = accounts?.ToList() ?? [];
+    }
+
+    private async Task OnUpload()
+    {
+        if (_file is null || _selectedAccountId is null || PeriodState.SelectedPeriodId is null) return;
+
+        _uploading = true;
+        try
+        {
+            await using var stream = _file.OpenReadStream(maxAllowedSize: 10 * 1024 * 1024);
+            await Api.UploadFileAsync(stream, _file.Name, _selectedAccountId.Value, PeriodState.SelectedPeriodId.Value);
+            Snackbar.Add("Datei erfolgreich hochgeladen!", Severity.Success);
+            _file = null;
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add($"Fehler: {ex.Message}", Severity.Error);
+        }
+        finally
+        {
+            _uploading = false;
+        }
+    }
+}

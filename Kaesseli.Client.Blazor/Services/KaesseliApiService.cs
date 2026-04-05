@@ -41,6 +41,21 @@ public class KaesseliApiService(HttpClient httpClient)
         return result?.NrOfPossibleAutomation ?? 0;
     }
 
+    public Task<IEnumerable<Contracts.Accounts.Account>?> GetAccountsAsync(AccountType? accountType = null, CancellationToken ct = default)
+        => httpClient.GetFromJsonAsync<IEnumerable<Contracts.Accounts.Account>>(
+            accountType.HasValue ? $"account?accountType={(int)accountType}" : "account", ct);
+
+    public async Task UploadFileAsync(Stream fileStream, string fileName, Guid accountId, Guid accountingPeriodId, CancellationToken ct = default)
+    {
+        using var content = new MultipartFormDataContent();
+        using var streamContent = new StreamContent(fileStream);
+        content.Add(streamContent, "file", fileName);
+        content.Add(new StringContent(accountId.ToString()), "accountId");
+        content.Add(new StringContent(accountingPeriodId.ToString()), "accountingPeriodId");
+        var response = await httpClient.PostAsync("file/upload", content, ct);
+        response.EnsureSuccessStatusCode();
+    }
+
     public record SplitEntry(Guid OtherAccountId, decimal Amount);
     private record NrOfPossibleAutomationResult(int NrOfPossibleAutomation);
 }
