@@ -22,7 +22,7 @@ public static class AddJournalEntry
             var debitAccount = await accountRepo.GetAccount(request.DebitAccountId, cancellationToken);
             var accountingPeriod = await accountRepo.GetAccountingPeriod(request.AccountingPeriodId, cancellationToken);
 
-            var newJournalEntryEntity = request.ToJournalEntry(valueDate, debitAccount, creditAccount, accountingPeriod);
+            var newJournalEntryEntity = JournalEntry.Create(valueDate, request.Description, request.Amount, debitAccount, creditAccount, accountingPeriod);
 
             var createdEntry = await journalRepository.AddJournalEntry(newJournalEntryEntity, cancellationToken);
             return createdEntry.Id;

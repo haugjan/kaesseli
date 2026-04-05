@@ -26,8 +26,7 @@ public static class SetBudget
             var account = await accountRepository.GetAccount(setBudgetCommand.AccountId, cancellationToken);
             var accountingPeriod = await accountRepository.GetAccountingPeriod(setBudgetCommand.AccountingPeriodId, cancellationToken);
 
-            var newBudgetEntryEntity = setBudgetCommand.ToBudgetEntry(account, accountingPeriod);
-            return newBudgetEntryEntity;
+            return BudgetEntry.Create(setBudgetCommand.Description, setBudgetCommand.Amount, account, accountingPeriod);
         }
     }
 }

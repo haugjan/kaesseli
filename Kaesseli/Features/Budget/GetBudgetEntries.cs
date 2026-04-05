@@ -22,7 +22,12 @@ public static class GetBudgetEntries
             var entries = await repository.GetBudgetEntries(
                               query.AccountingPeriodId, query.AccountId, query.AccountType,
                               cancellationToken);
-            return entries.Select(entry => entry.ToGetBudgetEntriesQueryResult()).ToImmutableList();
+            return entries.Select(entry => new Result(
+                Id: entry.Id,
+                Amount: entry.Amount,
+                Description: entry.Description,
+                AccountId: entry.Account.Id,
+                AccountingPeriodId: entry.AccountingPeriod.Id)).ToImmutableList();
         }
     }
 }

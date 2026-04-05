@@ -18,7 +18,11 @@ public static class GetAccountingPeriods
         public async Task<IEnumerable<Result>> Handle(Query request, CancellationToken cancellationToken)
         {
             var result = await repo.GetAccountingPeriods(cancellationToken);
-            return result.Select(ap => ap.ToGetAccountingPeriodsQueryResult()).ToImmutableList();
+            return result.Select(ap => new Result(
+                Id: ap.Id,
+                Description: ap.Description,
+                FromInclusive: ap.FromInclusive,
+                ToInclusive: ap.ToInclusive)).ToImmutableList();
         }
     }
 }

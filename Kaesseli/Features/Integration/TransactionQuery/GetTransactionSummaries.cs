@@ -28,7 +28,15 @@ public static class GetTransactionSummaries
         public async Task<IEnumerable<Result>> Handle(Query request, CancellationToken cancellationToken)
         {
             var entries = await repository.GetTransactionSummaries(cancellationToken);
-            return entries.Select(entry => entry.ToGetTransactionSummary()).ToImmutableList();
+            return entries.Select(entry => new Result(
+                Id: entry.Id,
+                AccountName: entry.Account.Name,
+                ValueDateFrom: entry.ValueDateFrom,
+                ValueDateTo: entry.ValueDateTo,
+                BalanceBefore: entry.BalanceBefore,
+                BalanceAfter: entry.BalanceAfter,
+                Reference: entry.Reference,
+                NrOfTransactions: entry.Transactions.Count())).ToImmutableList();
         }
     }
 }

@@ -41,7 +41,22 @@ public static class GetNextOpenTransaction
 
             var accounts = await accountRepository.GetAccounts(cancellationToken);
 
-            return transaction.ToGetNextOpenTransactionResult(accounts);
+            return new Result(
+                Id: transaction.Id,
+                Amount: transaction.Amount,
+                ValueDate: transaction.ValueDate,
+                Description: transaction.Description,
+                SuggestedAccounts: accounts.Select(account => new SuggestedAccount(
+                    Relevance: 0,
+                    AccountId: account.Id,
+                    AccountName: account.Name,
+                    AccountType: account.Type.DisplayName(),
+                    AccountTypeId: account.Type,
+                    AccountIcon: account.Icon.Name,
+                    AccountIconColor: account.Icon.Color)),
+                AccountName: transaction.TransactionSummary!.Account.Name,
+                AccountType: transaction.TransactionSummary!.Account.Type.DisplayName(),
+                AccountTypeId: transaction.TransactionSummary!.Account.Type);
         }
     }
 }

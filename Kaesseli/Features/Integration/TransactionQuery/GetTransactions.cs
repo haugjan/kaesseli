@@ -31,7 +31,18 @@ public static class GetTransactions
         public async Task<IEnumerable<Result>> Handle(Query request, CancellationToken cancellationToken)
         {
             var transactions = await repo.GetTransactions(request.TransactionSummaryId, cancellationToken);
-            return transactions.Select(transaction => transaction.ToGetTransactionSummary()).ToImmutableList();
+            return transactions.Select(t => new Result(
+                Id: t.Id,
+                RawText: t.RawText,
+                Amount: t.Amount,
+                ValueDate: t.ValueDate,
+                BookDate: t.BookDate,
+                Description: t.Description,
+                Reference: t.Reference,
+                TransactionCode: t.TransactionCode,
+                TransactionCodeDetail: t.TransactionCodeDetail,
+                Debtor: t.Debtor,
+                Creditor: t.Creditor)).ToImmutableList();
         }
     }
 }
