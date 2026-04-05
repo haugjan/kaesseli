@@ -1,8 +1,8 @@
 using System.Collections.Immutable;
 using Kaesseli.Features.Budget;
 using Kaesseli.Features.Journal;
-using Result = Kaesseli.Contracts.Accounts.AccountDetail;
-using ResultEntry = Kaesseli.Contracts.Accounts.AccountEntry;
+using Result = Kaesseli.Contracts.Accounts.AccountStatement;
+using ResultEntry = Kaesseli.Contracts.Accounts.AccountStatementEntry;
 using AmountType = Kaesseli.Contracts.Accounts.AmountType;
 
 namespace Kaesseli.Features.Accounts;

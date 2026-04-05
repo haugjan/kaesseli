@@ -1,5 +1,5 @@
 using System.Collections.Immutable;
-using AccountsSummaryResult = Kaesseli.Contracts.Accounts.AccountSummary;
+using AccountsSummaryResult = Kaesseli.Contracts.Accounts.AccountOverview;
 using Result = Kaesseli.Contracts.Accounts.FinancialOverview;
 using AccountTypeSummary = Kaesseli.Contracts.Accounts.AccountTypeSummary;
 

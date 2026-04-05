@@ -17,7 +17,7 @@ public class GetAccountsSummaryQueryHandlerTests
     [Theory]
     [InlineData(AccountType.Revenue, 2, -5)] //CreditAmount - DebitAmount
     [InlineData(AccountType.Expense, -2, 9)] //DebitAmount - CreditAmount
-    public async Task Handle_WithBudget_ReturnsAccountSummary(
+    public async Task Handle_WithBudget_ReturnsAccountOverview(
         AccountType accountType,
         decimal accountBalance,
         decimal budgetBalance
@@ -99,7 +99,7 @@ public class GetAccountsSummaryQueryHandlerTests
     [Theory]
     [InlineData(AccountType.Asset, -2)] //DebitAmount - CreditAmount
     [InlineData(AccountType.Liability, 2)] //CreditAmount - DebitAmount
-    public async Task Handle_WithoutBudget_ReturnsAccountSummary(
+    public async Task Handle_WithoutBudget_ReturnsAccountOverview(
         AccountType accountType,
         decimal accountBalance
     )

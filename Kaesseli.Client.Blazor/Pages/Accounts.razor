@@ -36,7 +36,7 @@ else
             </MudCardHeader>
             <MudCardContent Class="pa-0">
                 <MudTable Items="typeAccounts" Dense="true" Hover="true" Elevation="0"
-                          OnRowClick="OnRowClick" T="AccountSummary" Style="background: transparent;">
+                          OnRowClick="OnRowClick" T="AccountOverview" Style="background: transparent;">
                     <HeaderContent>
                         <MudTh Style="width: 48px;"></MudTh>
                         <MudTh>Name</MudTh>
@@ -72,7 +72,7 @@ else
 }
 
 @code {
-    private List<AccountSummary>? _accounts;
+    private List<AccountOverview>? _accounts;
 
     private static readonly List<BreadcrumbItem> _breadcrumbs =
     [
@@ -110,7 +110,7 @@ else
         _accounts = result?.ToList() ?? [];
     }
 
-    private void OnRowClick(TableRowClickEventArgs<AccountSummary> args)
+    private void OnRowClick(TableRowClickEventArgs<AccountOverview> args)
     {
         Navigation.NavigateTo($"/accountTable/{args.Item!.Id}");
     }

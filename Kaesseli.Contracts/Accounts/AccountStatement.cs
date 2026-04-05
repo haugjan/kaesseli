@@ -1,6 +1,6 @@
 namespace Kaesseli.Contracts.Accounts;
 
-public record AccountDetail(
+public record AccountStatement(
     Guid Id,
     string Name,
     string Icon,
@@ -13,9 +13,9 @@ public record AccountDetail(
     decimal? BudgetPerYear,
     decimal? CurrentBudget,
     decimal? BudgetBalance,
-    IEnumerable<AccountEntry> Entries);
+    IEnumerable<AccountStatementEntry> Entries);
 
-public record AccountEntry(
+public record AccountStatementEntry(
     Guid Id,
     DateOnly ValueDate,
     string Description,

@@ -1,6 +1,6 @@
 using Kaesseli.Features.Budget;
 using Kaesseli.Features.Journal;
-using Result = Kaesseli.Contracts.Accounts.AccountSummary;
+using Result = Kaesseli.Contracts.Accounts.AccountOverview;
 
 namespace Kaesseli.Features.Accounts;
 
@@ -33,10 +33,10 @@ public static class GetAccountsSummary
             var budgetEntries = await budgetRepo.GetBudgetEntries(
                 request.AccountingPeriodId, accountId: null, accountType: null, cancellationToken);
 
-            return accounts.Select(account => GetAccountSummary(account, journalEntries, budgetEntries, accountingPeriod));
+            return accounts.Select(account => GetAccountOverview(account, journalEntries, budgetEntries, accountingPeriod));
         }
 
-        private Result GetAccountSummary(
+        private Result GetAccountOverview(
             Account account,
             IEnumerable<JournalEntry> journalEntries,
             IEnumerable<BudgetEntry> budgetEntries,

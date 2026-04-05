@@ -1,6 +1,6 @@
 namespace Kaesseli.Contracts.Accounts;
 
-public record AccountSummary(
+public record AccountOverview(
     Guid Id,
     string Name,
     string Icon,

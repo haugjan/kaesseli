@@ -76,7 +76,7 @@ else
 @code {
     [Parameter] public Guid AccountId { get; set; }
 
-    private AccountDetail? _account;
+    private AccountStatement? _account;
 
     private List<BreadcrumbItem> _breadcrumbs =>
     [
@@ -103,17 +103,17 @@ else
     private async Task LoadAsync()
     {
         if (PeriodState.SelectedPeriodId is null) return;
-        _account = await Api.GetAccountDetailAsync(PeriodState.SelectedPeriodId.Value, AccountId);
+        _account = await Api.GetAccountStatementAsync(PeriodState.SelectedPeriodId.Value, AccountId);
     }
 
     private static string FormatNumber(decimal value) => value.ToString("N2");
 
     private static string FormatNullable(decimal? value) => value.HasValue ? value.Value.ToString("N2") : "";
 
-    private static string RowStyle(AccountEntry entry) =>
+    private static string RowStyle(AccountStatementEntry entry) =>
         entry.AmountType == AmountType.Budget ? "font-style: italic;" : "";
 
-    private static string AmountStyle(AccountEntry entry)
+    private static string AmountStyle(AccountStatementEntry entry)
     {
         var italic = entry.AmountType == AmountType.Budget ? "font-style: italic; " : "";
         var color = entry.Amount >= 0 ? "color: #21BA45;" : "color: #C10015;";
