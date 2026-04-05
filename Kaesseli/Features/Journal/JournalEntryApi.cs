@@ -13,9 +13,9 @@ public static class JournalEntryApi
         {
             app.MapPost(
                 pattern: "/journalEntry",
-                async (AddJournalEntry.IHandler handler, AddJournalEntry.Query command) =>
+                async (AddJournalEntry.IHandler handler, AddJournalEntry.Query command, CancellationToken ct) =>
                 {
-                    var guid = await handler.Handle(command, default);
+                    var guid = await handler.Handle(command, ct);
                     return Results.Created(uri: $"/journalEntry/{guid}", guid);
                 }
             );
@@ -26,12 +26,9 @@ public static class JournalEntryApi
                         GetJournalEntries.IHandler handler,
                         Guid accountingPeriodId,
                         Guid? accountId,
-                        AccountType? accountType) =>
-                    await handler.Handle(
-                        request: new GetJournalEntries.Query(
-                            AccountingPeriodId: accountingPeriodId,
-                            AccountId: accountId,
-                            AccountType: accountType), default)
+                        AccountType? accountType,
+                        CancellationToken ct) =>
+                    await handler.Handle(new GetJournalEntries.Query(accountingPeriodId, accountId, accountType), ct)
             );
 
             return app;

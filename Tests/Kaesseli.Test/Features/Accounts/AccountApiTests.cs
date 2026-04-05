@@ -54,7 +54,7 @@ public class AccountApiTests : IAsyncLifetime
         var periodId = Guid.NewGuid();
         var accounts = new SmartFaker<AccountOverview>().Generate(count: 3);
         _getAccountsSummaryMock
-            .Setup(m => m.Handle(It.IsAny<GetAccountsSummary.Query>(), default))
+            .Setup(m => m.Handle(It.IsAny<GetAccountsSummary.Query>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(accounts);
 
         // Act
@@ -65,7 +65,7 @@ public class AccountApiTests : IAsyncLifetime
         // Assert
         response.StatusCode.ShouldBe(HttpStatusCode.OK);
         _getAccountsSummaryMock.Verify(
-            m => m.Handle(It.IsAny<GetAccountsSummary.Query>(), default),
+            m => m.Handle(It.IsAny<GetAccountsSummary.Query>(), It.IsAny<CancellationToken>()),
             Times.Once
         );
     }
@@ -79,7 +79,7 @@ public class AccountApiTests : IAsyncLifetime
         var expectedAccount = accounts[index: 1];
         _getAccountMock
             .Setup(m =>
-                m.Handle(It.Is<GetAccount.Query>(x => x.AccountId == expectedAccount.Id), default)
+                m.Handle(It.Is<GetAccount.Query>(x => x.AccountId == expectedAccount.Id), It.IsAny<CancellationToken>())
             )
             .ReturnsAsync(
                 (GetAccount.Query _, CancellationToken _) =>
@@ -122,7 +122,7 @@ public class AccountApiTests : IAsyncLifetime
                         query.AccountId == expectedAccount.Id
                         && query.AccountingPeriodId == periodId
                     ),
-                    default
+                    It.IsAny<CancellationToken>()
                 ),
             Times.Once
         );
@@ -134,7 +134,7 @@ public class AccountApiTests : IAsyncLifetime
         // Arrange
         var guid = Guid.NewGuid();
         _addAccountMock
-            .Setup(m => m.Handle(It.IsAny<AddAccount.Query>(), default))
+            .Setup(m => m.Handle(It.IsAny<AddAccount.Query>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(guid);
 
         var addAccountCommand = new SmartFaker<AddAccount.Query>().Generate();
@@ -156,7 +156,7 @@ public class AccountApiTests : IAsyncLifetime
             );
         }
 
-        _addAccountMock.Verify(m => m.Handle(It.IsAny<AddAccount.Query>(), default), Times.Once);
+        _addAccountMock.Verify(m => m.Handle(It.IsAny<AddAccount.Query>(), It.IsAny<CancellationToken>()), Times.Once);
     }
 
     [Fact]
@@ -165,7 +165,7 @@ public class AccountApiTests : IAsyncLifetime
         // Arrange
         var expectedGuid = Guid.NewGuid();
         _addAccountingPeriodMock
-            .Setup(m => m.Handle(It.IsAny<AddAccountingPeriod.Query>(), default))
+            .Setup(m => m.Handle(It.IsAny<AddAccountingPeriod.Query>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(expectedGuid);
 
         var addAccountingPeriodCommand = new SmartFaker<AddAccountingPeriod.Query>().Generate();
@@ -200,7 +200,7 @@ public class AccountApiTests : IAsyncLifetime
 
         currentGuid.ShouldBe(expectedGuid);
         _addAccountingPeriodMock.Verify(
-            m => m.Handle(It.IsAny<AddAccountingPeriod.Query>(), default),
+            m => m.Handle(It.IsAny<AddAccountingPeriod.Query>(), It.IsAny<CancellationToken>()),
             Times.Once
         );
     }

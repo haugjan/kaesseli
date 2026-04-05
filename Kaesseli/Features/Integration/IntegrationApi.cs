@@ -17,36 +17,36 @@ public static class IntegrationApi
         {
             app.MapGet(
                 pattern: "/transactionSummary",
-                async (GetTransactionSummaries.IHandler handler) =>
-                    await handler.Handle(default)
+                async (GetTransactionSummaries.IHandler handler, CancellationToken ct) =>
+                    await handler.Handle(ct)
             );
             app.MapGet(
                 pattern: "/transaction",
-                async (GetTransactions.IHandler handler, [FromQuery] Guid transactionSummaryId) =>
-                    await handler.Handle(new GetTransactions.Query(transactionSummaryId), default)
+                async (GetTransactions.IHandler handler, [FromQuery] Guid transactionSummaryId, CancellationToken ct) =>
+                    await handler.Handle(new GetTransactions.Query(transactionSummaryId), ct)
             );
 
             app.MapGet(
                 pattern: "/transaction/nextOpen",
-                async (GetNextOpenTransaction.IHandler handler, [FromQuery] int? skip) =>
-                    await handler.Handle(new GetNextOpenTransaction.Query(skip.GetValueOrDefault()), default)
+                async (GetNextOpenTransaction.IHandler handler, [FromQuery] int? skip, CancellationToken ct) =>
+                    await handler.Handle(new GetNextOpenTransaction.Query(skip.GetValueOrDefault()), ct)
             );
             app.MapGet(
                 pattern: "/transaction/totalOpen",
-                async (GetTotalOpenTransaction.IHandler handler, [FromQuery] int? skip) =>
-                    await handler.Handle(default)
+                async (GetTotalOpenTransaction.IHandler handler, CancellationToken ct) =>
+                    await handler.Handle(ct)
             );
 
             app.MapPatch(
                 pattern: "/transaction/journalEntry",
-                async (AssignOpenTransaction.IHandler handler, [FromBody] AssignOpenTransaction.Query cmd) =>
-                    await handler.Handle(cmd, default)
+                async (AssignOpenTransaction.IHandler handler, [FromBody] AssignOpenTransaction.Query cmd, CancellationToken ct) =>
+                    await handler.Handle(cmd, ct)
             );
 
             app.MapPatch(
                 pattern: "/transaction/journalEntry/split",
-                async (SplitOpenTransaction.IHandler handler, [FromBody] SplitOpenTransaction.Query cmd) =>
-                    await handler.Handle(cmd, default)
+                async (SplitOpenTransaction.IHandler handler, [FromBody] SplitOpenTransaction.Query cmd, CancellationToken ct) =>
+                    await handler.Handle(cmd, ct)
             );
 
             app.MapPost(
@@ -55,26 +55,16 @@ public static class IntegrationApi
                         ProcessFile.IHandler handler,
                         IFormFile file,
                         [FromForm] Guid accountId,
-                        [FromForm] Guid accountingPeriodId
+                        [FromForm] Guid accountingPeriodId,
+                        CancellationToken ct
                     ) =>
                     {
                         var extension = System.IO.Path.GetExtension(file.FileName);
                         if (extension == ".zip")
-                            return await UploadZippedFiles(
-                                file,
-                                accountId,
-                                accountingPeriodId,
-                                handler
-                            );
+                            return await UploadZippedFiles(file, accountId, accountingPeriodId, handler, ct);
 
                         await using var fileStream = file.OpenReadStream();
-                        return await UploadFile(
-                            fileStream,
-                            extension,
-                            accountId,
-                            accountingPeriodId,
-                            handler
-                        );
+                        return await UploadFile(fileStream, extension, accountId, accountingPeriodId, handler, ct);
                     }
                 )
                 .Accepts<IFormFile>(contentType: "multipart/form-data")
@@ -84,11 +74,8 @@ public static class IntegrationApi
     }
 
     private static async Task<Guid> UploadZippedFiles(
-        IFormFile file,
-        Guid accountId,
-        Guid accountingPeriodId,
-        ProcessFile.IHandler handler
-    )
+        IFormFile file, Guid accountId, Guid accountingPeriodId,
+        ProcessFile.IHandler handler, CancellationToken ct)
     {
         await using var memoryStream = file.OpenReadStream();
         using var archive = new ZipArchive(memoryStream);
@@ -96,19 +83,14 @@ public static class IntegrationApi
         {
             await using var entryStream = entry.Open();
             var extension = System.IO.Path.GetExtension(entry.FullName);
-            var formFile = new FormFile(entryStream, 0, entry.Length, entry.Name, entry.FullName);
-            await UploadFile(entryStream, extension, accountId, accountingPeriodId, handler);
+            await UploadFile(entryStream, extension, accountId, accountingPeriodId, handler, ct);
         }
-        return Guid.Empty; // Return a default value or handle appropriately
+        return Guid.Empty;
     }
 
     private static async Task<Guid> UploadFile(
-        Stream stream,
-        string extension,
-        Guid accountId,
-        Guid accountingPeriodId,
-        ProcessFile.IHandler handler
-    )
+        Stream stream, string extension, Guid accountId, Guid accountingPeriodId,
+        ProcessFile.IHandler handler, CancellationToken ct)
     {
         var fileType = extension switch
         {
@@ -117,11 +99,9 @@ public static class IntegrationApi
             _ => throw new ArgumentOutOfRangeException(),
         };
         var command = new ProcessFile.Query(
-            FileType: fileType,
-            Content: stream,
-            AccountId: accountId,
-            AccountingPeriodId: accountingPeriodId);
+            FileType: fileType, Content: stream,
+            AccountId: accountId, AccountingPeriodId: accountingPeriodId);
 
-        return await handler.Handle(command, default);
+        return await handler.Handle(command, ct);
     }
 }

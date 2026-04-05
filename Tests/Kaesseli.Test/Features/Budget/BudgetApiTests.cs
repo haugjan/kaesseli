@@ -42,7 +42,7 @@ public class BudgetApiTests : IAsyncLifetime
         // Arrange
         var guid = Guid.NewGuid();
         _setBudgetMock
-            .Setup(m => m.Handle(It.IsAny<SetBudget.Query>(), default))
+            .Setup(m => m.Handle(It.IsAny<SetBudget.Query>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(guid);
 
         var setBudgetCommand = new SmartFaker<SetBudget.Query>().Generate();
@@ -60,7 +60,7 @@ public class BudgetApiTests : IAsyncLifetime
         response.Headers.Location.ShouldBe(
             new Uri(uriString: $"/budgetEntry/{guid}", UriKind.Relative)
         );
-        _setBudgetMock.Verify(m => m.Handle(It.IsAny<SetBudget.Query>(), default), Times.Once);
+        _setBudgetMock.Verify(m => m.Handle(It.IsAny<SetBudget.Query>(), It.IsAny<CancellationToken>()), Times.Once);
     }
 
     [Fact]
@@ -69,7 +69,7 @@ public class BudgetApiTests : IAsyncLifetime
         // Arrange
         var budgetEntries = new SmartFaker<Kaesseli.Contracts.Budget.BudgetEntry>().Generate(count: 3);
         _getBudgetEntriesMock
-            .Setup(m => m.Handle(It.IsAny<GetBudgetEntries.Query>(), default))
+            .Setup(m => m.Handle(It.IsAny<GetBudgetEntries.Query>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(budgetEntries);
 
         var accountId = Guid.NewGuid();
@@ -85,7 +85,7 @@ public class BudgetApiTests : IAsyncLifetime
         // Assert
         response.StatusCode.ShouldBe(HttpStatusCode.OK);
         _getBudgetEntriesMock.Verify(
-            m => m.Handle(It.IsAny<GetBudgetEntries.Query>(), default),
+            m => m.Handle(It.IsAny<GetBudgetEntries.Query>(), It.IsAny<CancellationToken>()),
             Times.Once
         );
     }

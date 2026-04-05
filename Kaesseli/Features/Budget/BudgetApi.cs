@@ -13,9 +13,9 @@ public static class BudgetApi
         {
             app.MapPost(
                 pattern: "/budgetEntry",
-                async (SetBudget.IHandler handler, SetBudget.Query command) =>
+                async (SetBudget.IHandler handler, SetBudget.Query command, CancellationToken ct) =>
                 {
-                    var guid = await handler.Handle(command, default);
+                    var guid = await handler.Handle(command, ct);
                     return Results.Created(uri: $"/budgetEntry/{guid}", guid);
                 }
             );
@@ -26,12 +26,10 @@ public static class BudgetApi
                         GetBudgetEntries.IHandler handler,
                         Guid accountingPeriodId,
                         Guid? accountId,
-                        AccountType? accountType
+                        AccountType? accountType,
+                        CancellationToken ct
                         ) =>
-                    await handler.Handle(query: new GetBudgetEntries.Query(
-                        AccountId: accountId,
-                        AccountType: accountType,
-                        AccountingPeriodId: accountingPeriodId), default)
+                    await handler.Handle(new GetBudgetEntries.Query(accountId, accountType, accountingPeriodId), ct)
             );
 
             return app;

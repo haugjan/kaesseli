@@ -43,7 +43,7 @@ public class JournalApiTests : IAsyncLifetime
         // Arrange
         var guid = Guid.NewGuid();
         _addJournalEntryMock
-            .Setup(m => m.Handle(It.IsAny<AddJournalEntry.Query>(), default))
+            .Setup(m => m.Handle(It.IsAny<AddJournalEntry.Query>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(guid);
 
         var addJournalEntryCommand = new SmartFaker<AddJournalEntry.Query>().Generate();
@@ -62,7 +62,7 @@ public class JournalApiTests : IAsyncLifetime
             new Uri(uriString: $"/journalEntry/{guid}", UriKind.Relative)
         );
         _addJournalEntryMock.Verify(
-            m => m.Handle(It.IsAny<AddJournalEntry.Query>(), default),
+            m => m.Handle(It.IsAny<AddJournalEntry.Query>(), It.IsAny<CancellationToken>()),
             Times.Once
         );
     }
@@ -73,7 +73,7 @@ public class JournalApiTests : IAsyncLifetime
         // Arrange
         var journalEntries = new SmartFaker<Kaesseli.Contracts.Journal.JournalEntry>().Generate(count: 3);
         _getJournalEntriesMock
-            .Setup(m => m.Handle(It.IsAny<GetJournalEntries.Query>(), default))
+            .Setup(m => m.Handle(It.IsAny<GetJournalEntries.Query>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(journalEntries);
 
         var accountId = Guid.NewGuid();
@@ -95,7 +95,7 @@ public class JournalApiTests : IAsyncLifetime
                         && query.AccountType == accountType
                         && query.AccountId == accountId
                     ),
-                    default
+                    It.IsAny<CancellationToken>()
                 ),
             Times.Once
         );

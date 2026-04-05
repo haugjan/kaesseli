@@ -11,60 +11,48 @@ public static class AccountApi
         {
             app.MapGet(
                 pattern: "/account",
-                async (GetAccounts.IHandler handler, [FromQuery] AccountType? accountType) =>
-                    await handler.Handle(request: new GetAccounts.Query(accountType), default)
+                async (GetAccounts.IHandler handler, [FromQuery] AccountType? accountType, CancellationToken ct) =>
+                    await handler.Handle(new GetAccounts.Query(accountType), ct)
             );
 
             app.MapGet(
                 pattern: "/accountingPeriod",
-                async (GetAccountingPeriods.IHandler handler) =>
-                    await handler.Handle(default)
+                async (GetAccountingPeriods.IHandler handler, CancellationToken ct) =>
+                    await handler.Handle(ct)
             );
 
             app.MapGet(
                 pattern: "/accountingPeriod/{accountingPeriodId}/account/{accountId}",
-                async (GetAccount.IHandler handler, Guid accountId, Guid accountingPeriodId) =>
-                    await handler.Handle(
-                        request: new GetAccount.Query(
-                            AccountId: accountId,
-                            AccountingPeriodId: accountingPeriodId
-                        ),
-                        default
-                    )
+                async (GetAccount.IHandler handler, Guid accountId, Guid accountingPeriodId, CancellationToken ct) =>
+                    await handler.Handle(new GetAccount.Query(accountId, accountingPeriodId), ct)
             );
 
             app.MapGet(
                 pattern: "/accountingPeriod/{accountingPeriodId}/accountSummary",
-                async (GetAccountsSummary.IHandler handler, Guid accountingPeriodId) =>
-                    await handler.Handle(
-                        request: new GetAccountsSummary.Query(accountingPeriodId),
-                        default
-                    )
+                async (GetAccountsSummary.IHandler handler, Guid accountingPeriodId, CancellationToken ct) =>
+                    await handler.Handle(new GetAccountsSummary.Query(accountingPeriodId), ct)
             );
 
             app.MapGet(
                 pattern: "/accountingPeriod/{accountingPeriodId}/overView",
-                async (GetFinancialOverview.IHandler handler, Guid accountingPeriodId) =>
-                    await handler.Handle(
-                        request: new GetFinancialOverview.Query(accountingPeriodId),
-                        default
-                    )
+                async (GetFinancialOverview.IHandler handler, Guid accountingPeriodId, CancellationToken ct) =>
+                    await handler.Handle(new GetFinancialOverview.Query(accountingPeriodId), ct)
             );
 
             app.MapPost(
                 pattern: "/account",
-                async (AddAccount.IHandler handler, AddAccount.Query command) =>
+                async (AddAccount.IHandler handler, AddAccount.Query command, CancellationToken ct) =>
                 {
-                    var guid = await handler.Handle(command, default);
+                    var guid = await handler.Handle(command, ct);
                     return Results.Created(uri: $"/account/{guid}", guid);
                 }
             );
 
             app.MapPost(
                 pattern: "/accountingPeriod",
-                async (AddAccountingPeriod.IHandler handler, AddAccountingPeriod.Query command) =>
+                async (AddAccountingPeriod.IHandler handler, AddAccountingPeriod.Query command, CancellationToken ct) =>
                 {
-                    var guid = await handler.Handle(command, default);
+                    var guid = await handler.Handle(command, ct);
                     return Results.Created(uri: $"/accountingPeriod/{guid}", guid);
                 }
             );

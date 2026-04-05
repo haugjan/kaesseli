@@ -56,7 +56,7 @@ public class IntegrationApiTests : IAsyncLifetime
         // Arrange
         var guid = Guid.NewGuid();
         _processFileMock
-            .Setup(m => m.Handle(It.IsAny<ProcessFile.Query>(), default))
+            .Setup(m => m.Handle(It.IsAny<ProcessFile.Query>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(guid);
 
         var formContent = new MultipartFormDataContent();
@@ -74,7 +74,7 @@ public class IntegrationApiTests : IAsyncLifetime
 
         // Assert
         response.StatusCode.ShouldBe(HttpStatusCode.OK);
-        _processFileMock.Verify(m => m.Handle(It.IsAny<ProcessFile.Query>(), default), Times.Once);
+        _processFileMock.Verify(m => m.Handle(It.IsAny<ProcessFile.Query>(), It.IsAny<CancellationToken>()), Times.Once);
     }
 
     [Fact]
@@ -85,7 +85,7 @@ public class IntegrationApiTests : IAsyncLifetime
             count: 3
         );
         _getTransactionSummariesMock
-            .Setup(m => m.Handle(default))
+            .Setup(m => m.Handle(It.IsAny<CancellationToken>()))
             .ReturnsAsync(transactionSummaries);
 
         // Act
@@ -94,7 +94,7 @@ public class IntegrationApiTests : IAsyncLifetime
         // Assert
         response.StatusCode.ShouldBe(HttpStatusCode.OK);
         _getTransactionSummariesMock.Verify(
-            m => m.Handle(default),
+            m => m.Handle(It.IsAny<CancellationToken>()),
             Times.Once
         );
     }
@@ -105,7 +105,7 @@ public class IntegrationApiTests : IAsyncLifetime
         // Arrange
         var nextOpenTransaction = new SmartFaker<OpenTransaction>().Generate();
         _getNextOpenTransactionMock
-            .Setup(m => m.Handle(It.IsAny<GetNextOpenTransaction.Query>(), default))
+            .Setup(m => m.Handle(It.IsAny<GetNextOpenTransaction.Query>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(nextOpenTransaction);
 
         // Act
@@ -114,7 +114,7 @@ public class IntegrationApiTests : IAsyncLifetime
         // Assert
         response.StatusCode.ShouldBe(HttpStatusCode.OK);
         _getNextOpenTransactionMock.Verify(
-            m => m.Handle(It.IsAny<GetNextOpenTransaction.Query>(), default),
+            m => m.Handle(It.IsAny<GetNextOpenTransaction.Query>(), It.IsAny<CancellationToken>()),
             Times.Once
         );
     }
