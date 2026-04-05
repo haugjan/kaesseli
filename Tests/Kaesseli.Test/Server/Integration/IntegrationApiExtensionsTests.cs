@@ -94,7 +94,7 @@ public class IntegrationApiExtensionsTests
             count: 3
         );
         _getTransactionSummariesMock
-            .Setup(m => m.Handle(It.IsAny<GetTransactionSummaries.Query>(), default))
+            .Setup(m => m.Handle(default))
             .ReturnsAsync(transactionSummaries);
 
         // Act
@@ -103,7 +103,7 @@ public class IntegrationApiExtensionsTests
         // Assert
         response.StatusCode.ShouldBe(HttpStatusCode.OK);
         _getTransactionSummariesMock.Verify(
-            m => m.Handle(It.IsAny<GetTransactionSummaries.Query>(), default),
+            m => m.Handle(default),
             Times.Once
         );
     }

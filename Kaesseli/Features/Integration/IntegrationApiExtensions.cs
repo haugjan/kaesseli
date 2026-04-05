@@ -18,7 +18,7 @@ public static class IntegrationApiExtensions
             app.MapGet(
                 pattern: "/transactionSummary",
                 async (GetTransactionSummaries.IHandler handler) =>
-                    await handler.Handle(new GetTransactionSummaries.Query(), default)
+                    await handler.Handle(default)
             );
             app.MapGet(
                 pattern: "/transaction",
@@ -34,7 +34,7 @@ public static class IntegrationApiExtensions
             app.MapGet(
                 pattern: "/transaction/totalOpen",
                 async (GetTotalOpenTransaction.IHandler handler, [FromQuery] int? skip) =>
-                    await handler.Handle(new GetTotalOpenTransaction.Query(), default)
+                    await handler.Handle(default)
             );
 
             app.MapPatch(

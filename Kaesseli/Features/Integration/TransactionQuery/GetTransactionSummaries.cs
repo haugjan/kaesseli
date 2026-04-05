@@ -5,8 +5,6 @@ namespace Kaesseli.Features.Integration.TransactionQuery;
 
 public static class GetTransactionSummaries
 {
-    public record Query;
-
     public record Result(
         Guid Id,
         string AccountName,
@@ -19,13 +17,13 @@ public static class GetTransactionSummaries
 
     public interface IHandler
     {
-        Task<IEnumerable<Result>> Handle(Query request, CancellationToken cancellationToken);
+        Task<IEnumerable<Result>> Handle(CancellationToken cancellationToken);
     }
 
     // ReSharper disable once UnusedType.Global
     public class Handler(ITransactionRepository repository) : IHandler
     {
-        public async Task<IEnumerable<Result>> Handle(Query request, CancellationToken cancellationToken)
+        public async Task<IEnumerable<Result>> Handle(CancellationToken cancellationToken)
         {
             var entries = await repository.GetTransactionSummaries(cancellationToken);
             return entries.Select(entry => new Result(

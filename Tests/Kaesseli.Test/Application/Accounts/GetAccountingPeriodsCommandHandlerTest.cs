@@ -13,7 +13,6 @@ public class GetAccountingPeriodsCommandHandlerTest
         //Arrange
         var accountRepoMock = new Mock<IAccountRepository>();
         var handler = new GetAccountingPeriods.Handler(accountRepoMock.Object);
-        var command = new GetAccountingPeriods.Query();
         var cancellationToken = new CancellationToken();
         var expectedPeriods = new SmartFaker<AccountingPeriod>().Generate(count: 3);
         accountRepoMock
@@ -21,7 +20,7 @@ public class GetAccountingPeriodsCommandHandlerTest
             .ReturnsAsync(expectedPeriods);
 
         //Act
-        var result = await handler.Handle(command, cancellationToken);
+        var result = await handler.Handle(cancellationToken);
 
         //Assert
         Assert.Equivalent(expectedPeriods, result);

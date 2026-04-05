@@ -18,7 +18,7 @@ public static class AccountApiExtensions
             app.MapGet(
                 pattern: "/accountingPeriod",
                 async (GetAccountingPeriods.IHandler handler) =>
-                    await handler.Handle(request: new GetAccountingPeriods.Query(), default)
+                    await handler.Handle(default)
             );
 
             app.MapGet(
