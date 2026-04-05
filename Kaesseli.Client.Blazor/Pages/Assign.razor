@@ -1,0 +1,290 @@
+@page "/assign"
+@using Kaesseli.Client.Blazor.Services
+@inject KaesseliApiService Api
+@inject AccountingPeriodState PeriodState
+@inject ISnackbar Snackbar
+@implements IDisposable
+
+<PageTitle>Zuweisen</PageTitle>
+
+<MudBreadcrumbs Items="_breadcrumbs" Class="pa-0 mb-4" />
+
+@if (_transaction is not null)
+{
+    <MudCard Elevation="0" Class="mb-4" Style="border: 1px solid var(--mud-palette-divider); border-radius: 12px;">
+        <MudCardContent>
+            <MudText Typo="Typo.h6">
+                @_transaction.ValueDate.ToString("dddd, dd. MMMM yyyy")
+            </MudText>
+            <MudChip T="string"
+                     Style="@(_transaction.Amount >= 0 ? "background-color: #21BA45; color: white;" : "background-color: #C10015; color: white;")"
+                     Icon="@(_transaction.Amount >= 0 ? Icons.Material.Rounded.AttachMoney : Icons.Material.Rounded.MoneyOff)">
+                @_transaction.Amount.ToString("N2")
+            </MudChip>
+            <MudText Typo="Typo.subtitle1" Class="mt-2">@_transaction.AccountName</MudText>
+            <MudDivider Class="my-2" />
+            <MudText>@_transaction.Description</MudText>
+        </MudCardContent>
+    </MudCard>
+
+    <MudExpansionPanels Class="mb-4" Elevation="0">
+        <MudExpansionPanel @bind-Expanded="_isAutomationActive" Text="Automatisieren"
+                           Style="border: 1px solid var(--mud-palette-divider); border-radius: 12px;">
+            <div class="d-flex align-end gap-4">
+                <MudTextField T="string" @bind-Value="_automateInput" Label="Automatisieren"
+                              Immediate="true" TextChanged="OnAutomationInputChanged"
+                              Style="max-width: 500px;" />
+                <MudChip T="string" Color="Color.Error">@_nrOfPossibleAutomations Treffer</MudChip>
+            </div>
+        </MudExpansionPanel>
+    </MudExpansionPanels>
+
+    <MudTextField T="string" @bind-Value="_filterText" Label="Filter" Variant="Variant.Filled"
+                  Immediate="true" Class="mb-4" Style="max-width: 400px;"
+                  @ref="_filterInput" @onkeydown="OnFilterKeyDown"
+                  Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Rounded.Search" />
+
+    @if (_splittingAccounts.Count > 0)
+    {
+        <MudCard Elevation="0" Class="mb-4" Style="border: 1px solid var(--mud-palette-divider); border-radius: 12px; background-color: var(--mud-palette-background-grey);">
+            <MudCardContent>
+                <MudGrid>
+                    @foreach (var split in _splittingAccounts)
+                    {
+                        <MudItem xs="12" sm="6" md="4">
+                            <div class="d-flex align-center gap-2">
+                                <MudChip T="string" Style="@($"background-color: {split.Account.AccountIconColor}; color: white;")"
+                                         Icon="@GetMudIcon(split.Account.AccountIcon)">
+                                    @split.Account.AccountName
+                                </MudChip>
+                                <MudNumericField T="decimal" @bind-Value="split.Amount" Label="Betrag"
+                                                 Format="N2" Variant="Variant.Outlined" Margin="Margin.Dense"
+                                                 TextChanged="@(() => OnSplitAmountChanged(split))" />
+                            </div>
+                        </MudItem>
+                    }
+                </MudGrid>
+            </MudCardContent>
+            <MudCardActions>
+                <MudButton Color="Color.Primary" OnClick="OnAssignMultipleClick">Betrag aufteilen</MudButton>
+            </MudCardActions>
+        </MudCard>
+    }
+
+    <div class="d-flex flex-wrap gap-2">
+        @foreach (var account in FilteredAccounts)
+        {
+            <MudChip T="string" Style="@($"background-color: {account.AccountIconColor}; color: white; cursor: pointer;")"
+                     Icon="@GetMudIcon(account.AccountIcon)"
+                     OnClick="@(async () => await OnAccountClick(account))">
+                @account.AccountName
+            </MudChip>
+        }
+    </div>
+}
+else
+{
+    <MudAlert Severity="Severity.Info">Keine offenen Transaktionen vorhanden.</MudAlert>
+}
+
+@code {
+    private OpenTransaction? _transaction;
+    private string _filterText = "";
+    private readonly List<SplitAccount> _splittingAccounts = [];
+    private string _automateInput = "";
+    private int _nrOfPossibleAutomations;
+    private bool _isAutomationActive;
+    private MudTextField<string>? _filterInput;
+    private bool _ctrlPressed;
+
+    private static readonly List<BreadcrumbItem> _breadcrumbs =
+    [
+        new("Zuweisen", "/assign", icon: Icons.Material.Rounded.AssignmentTurnedIn)
+    ];
+
+    private IEnumerable<SuggestedAccount> FilteredAccounts
+    {
+        get
+        {
+            if (_transaction is null) return [];
+
+            var splittingIds = _splittingAccounts.Select(s => s.Account.AccountId).ToHashSet();
+            var searchWords = _filterText.ToLower().Split(' ', StringSplitOptions.RemoveEmptyEntries);
+
+            return _transaction.SuggestedAccounts
+                .Where(a => !splittingIds.Contains(a.AccountId))
+                .Where(a => searchWords.Length == 0 || searchWords.All(word =>
+                    a.AccountName.ToLower().Split(' ').Any(w => w.StartsWith(word))));
+        }
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        PeriodState.OnChange += OnPeriodChanged;
+        await LoadAsync();
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender && _filterInput is not null)
+            await _filterInput.FocusAsync();
+    }
+
+    private void OnPeriodChanged()
+    {
+        _ = InvokeAsync(async () =>
+        {
+            await LoadAsync();
+            StateHasChanged();
+        });
+    }
+
+    private async Task LoadAsync()
+    {
+        _transaction = await Api.GetNextOpenTransactionAsync();
+        _automateInput = _transaction?.Description ?? "";
+        _filterText = "";
+        _splittingAccounts.Clear();
+    }
+
+    private async Task OnAccountClick(SuggestedAccount account)
+    {
+        if (_ctrlPressed)
+        {
+            AddToSplitList(account);
+        }
+        else
+        {
+            await AssignSingleAccount(account);
+        }
+    }
+
+    private void AddToSplitList(SuggestedAccount account)
+    {
+        if (_transaction is null) return;
+
+        _splittingAccounts.Add(new SplitAccount(account, 0));
+        RecalculateSplitAmounts();
+    }
+
+    private void RecalculateSplitAmounts()
+    {
+        if (_transaction is null || _splittingAccounts.Count == 0) return;
+
+        var equalShare = Math.Round(_transaction.Amount / _splittingAccounts.Count, 2);
+        decimal sum = 0;
+        for (var i = 0; i < _splittingAccounts.Count; i++)
+        {
+            _splittingAccounts[i].Amount = equalShare;
+            sum += equalShare;
+        }
+        _splittingAccounts[^1].Amount += _transaction.Amount - sum;
+    }
+
+    private async Task AssignSingleAccount(SuggestedAccount account)
+    {
+        if (_transaction is null || PeriodState.SelectedPeriodId is null) return;
+
+        try
+        {
+            await Api.AssignTransactionAsync(
+                PeriodState.SelectedPeriodId.Value,
+                _transaction.Id,
+                account.AccountId);
+
+            if (_isAutomationActive)
+            {
+                await Api.AddAutomationAsync(
+                    _automateInput,
+                    PeriodState.SelectedPeriodId.Value,
+                    [new KaesseliApiService.SplitEntry(account.AccountId, _transaction.Amount)]);
+            }
+
+            await LoadAsync();
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add($"Fehler: {ex.Message}", Severity.Error);
+        }
+    }
+
+    private async Task OnAssignMultipleClick()
+    {
+        if (_transaction is null || PeriodState.SelectedPeriodId is null) return;
+
+        try
+        {
+            var entries = _splittingAccounts
+                .Select(s => new KaesseliApiService.SplitEntry(s.Account.AccountId, s.Amount))
+                .ToList();
+
+            await Api.SplitTransactionAsync(
+                PeriodState.SelectedPeriodId.Value,
+                _transaction.Id,
+                entries);
+
+            if (_isAutomationActive)
+            {
+                await Api.AddAutomationAsync(
+                    _automateInput,
+                    PeriodState.SelectedPeriodId.Value,
+                    entries);
+            }
+
+            await LoadAsync();
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add($"Fehler: {ex.Message}", Severity.Error);
+        }
+    }
+
+    private void OnSplitAmountChanged(SplitAccount changed)
+    {
+        if (_transaction is null || _splittingAccounts.Count != 2) return;
+
+        var other = _splittingAccounts.First(s => s != changed);
+        other.Amount = Math.Round(_transaction.Amount - changed.Amount, 2);
+    }
+
+    private async Task OnAutomationInputChanged(string text)
+    {
+        if (string.IsNullOrWhiteSpace(text)) return;
+        _nrOfPossibleAutomations = await Api.GetNrOfPossibleAutomationsAsync(text);
+    }
+
+    private async Task OnFilterKeyDown(KeyboardEventArgs e)
+    {
+        _ctrlPressed = e.CtrlKey;
+
+        if (e.Key == "Enter")
+        {
+            var filtered = FilteredAccounts.ToList();
+            if (filtered.Count == 1)
+                await OnAccountClick(filtered[0]);
+        }
+    }
+
+    public void Dispose() => PeriodState.OnChange -= OnPeriodChanged;
+
+    private static string GetMudIcon(string iconName) => iconName switch
+    {
+        "AccountBalance" => Icons.Material.Rounded.AccountBalance,
+        "Wallet" => Icons.Material.Rounded.Wallet,
+        "CreditCard" => Icons.Material.Rounded.CreditCard,
+        "Work" => Icons.Material.Rounded.Work,
+        "ShoppingCart" => Icons.Material.Rounded.ShoppingCart,
+        "Home" => Icons.Material.Rounded.Home,
+        "Train" => Icons.Material.Rounded.Train,
+        "SportsEsports" => Icons.Material.Rounded.SportsEsports,
+        "AttachMoney" => Icons.Material.Rounded.AttachMoney,
+        "MoneyOff" => Icons.Material.Rounded.MoneyOff,
+        _ => Icons.Material.Rounded.Circle,
+    };
+
+    private class SplitAccount(SuggestedAccount account, decimal amount)
+    {
+        public SuggestedAccount Account { get; } = account;
+        public decimal Amount { get; set; } = amount;
+    }
+}
