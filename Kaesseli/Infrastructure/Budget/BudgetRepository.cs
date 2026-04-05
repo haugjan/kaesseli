@@ -15,7 +15,11 @@ public class BudgetRepository(KaesseliContext context) : IBudgetRepository
             .Where(e => EF.Property<Guid>(e, "AccountingPeriodId") == accountingPeriodId)
             .ToListAsync(cancellationToken);
 
-        var accounts = context.Accounts.Local.Any()
+        var neededAccountIds = entries
+            .Select(e => context.Entry(e).Property<Guid>("AccountId").CurrentValue)
+            .ToHashSet();
+        var allCached = neededAccountIds.All(id => context.Accounts.Local.Any(a => a.Id == id));
+        var accounts = allCached
             ? context.Accounts.Local.ToList()
             : await context.Accounts.ToListAsync(cancellationToken);
         var accountMap = accounts.ToDictionary(a => a.Id);

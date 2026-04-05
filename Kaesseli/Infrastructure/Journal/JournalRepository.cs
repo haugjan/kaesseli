@@ -23,7 +23,15 @@ public class JournalRepository(KaesseliContext context) : IJournalRepository
             .Where(e => EF.Property<Guid>(e, "AccountingPeriodId") == accountingPeriodId)
             .ToListAsync(cancellationToken);
 
-        var accounts = context.Accounts.Local.Any()
+        var neededAccountIds = entries
+            .SelectMany(e => new[]
+            {
+                context.Entry(e).Property<Guid>("DebitAccountId").CurrentValue,
+                context.Entry(e).Property<Guid>("CreditAccountId").CurrentValue,
+            })
+            .ToHashSet();
+        var allCached = neededAccountIds.All(id => context.Accounts.Local.Any(a => a.Id == id));
+        var accounts = allCached
             ? context.Accounts.Local.ToList()
             : await context.Accounts.ToListAsync(cancellationToken);
         var accountMap = accounts.ToDictionary(a => a.Id);
