@@ -9,21 +9,21 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <None Remove="Infrastructure\Integration\ExampleData\Example.camt" />
-    <None Remove="Infrastructure\Integration\ExampleData\RawText1.yaml" />
-    <None Remove="Infrastructure\Integration\ExampleData\RawText2.yaml" />
+    <None Remove="Features\Integration\ExampleData\Example.camt" />
+    <None Remove="Features\Integration\ExampleData\RawText1.yaml" />
+    <None Remove="Features\Integration\ExampleData\RawText2.yaml" />
   </ItemGroup>
 
   <ItemGroup>
-    <EmbeddedResource Include="Infrastructure\Integration\ExampleData\Example.camt">
-      <LogicalName>Kaesseli.Test.Infrastructure.Integration.ExampleData.Example.camt</LogicalName>
+    <EmbeddedResource Include="Features\Integration\ExampleData\Example.camt">
+      <LogicalName>Kaesseli.Test.Features.Integration.ExampleData.Example.camt</LogicalName>
       <CopyToOutputDirectory>Never</CopyToOutputDirectory>
     </EmbeddedResource>
-    <EmbeddedResource Include="Infrastructure\Integration\ExampleData\RawText1.yaml">
-      <LogicalName>Kaesseli.Test.Infrastructure.Integration.ExampleData.RawText1.yaml</LogicalName>
+    <EmbeddedResource Include="Features\Integration\ExampleData\RawText1.yaml">
+      <LogicalName>Kaesseli.Test.Features.Integration.ExampleData.RawText1.yaml</LogicalName>
     </EmbeddedResource>
-    <EmbeddedResource Include="Infrastructure\Integration\ExampleData\RawText2.yaml">
-      <LogicalName>Kaesseli.Test.Infrastructure.Integration.ExampleData.RawText2.yaml</LogicalName>
+    <EmbeddedResource Include="Features\Integration\ExampleData\RawText2.yaml">
+      <LogicalName>Kaesseli.Test.Features.Integration.ExampleData.RawText2.yaml</LogicalName>
     </EmbeddedResource>
   </ItemGroup>
 

@@ -36,7 +36,9 @@
       "Read(//c/development/kaesseli/**)",
       "Bash(tasklist)",
       "Bash(wmic process:*)",
-      "Bash(grep:*)"
+      "Bash(grep:*)",
+      "Bash(mkdir:*)",
+      "Bash(sed:*)"
     ]
   }
 }
