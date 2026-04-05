@@ -112,6 +112,7 @@ else
             var searchWords = _filterText.ToLower().Split(' ', StringSplitOptions.RemoveEmptyEntries);
 
             return _transaction.SuggestedAccounts
+                .Where(a => a.AccountId != _transaction.AccountId)
                 .Where(a => !splittingIds.Contains(a.AccountId))
                 .Where(a => searchWords.Length == 0 || searchWords.All(word =>
                     a.AccountName.ToLower().Split(' ').Any(w => w.StartsWith(word))));

@@ -7,6 +7,7 @@ public record OpenTransaction(
     decimal Amount,
     string Description,
     DateOnly ValueDate,
+    Guid AccountId,
     string AccountName,
     string AccountType,
     AccountType AccountTypeId,

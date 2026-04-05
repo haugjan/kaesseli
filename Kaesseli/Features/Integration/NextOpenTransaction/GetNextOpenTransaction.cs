@@ -27,6 +27,7 @@ public static class GetNextOpenTransaction
                 Amount: transaction.Amount,
                 ValueDate: transaction.ValueDate,
                 Description: transaction.Description,
+                AccountId: transaction.TransactionSummary!.Account.Id,
                 SuggestedAccounts: accounts.Select(account => new Contracts.Integration.SuggestedAccount(
                     Relevance: 0,
                     AccountId: account.Id,
