@@ -1,6 +1,5 @@
 using System.Collections.Immutable;
 using Kaesseli.Features.Accounts;
-using Result = Kaesseli.Contracts.Journal.JournalEntry;
 
 namespace Kaesseli.Features.Journal;
 
@@ -10,19 +9,19 @@ public static class GetJournalEntries
 
     public interface IHandler
     {
-        Task<IEnumerable<Result>> Handle(Query request, CancellationToken cancellationToken);
+        Task<IEnumerable<Contracts.Journal.JournalEntry>> Handle(Query request, CancellationToken cancellationToken);
     }
 
     // ReSharper disable once UnusedType.Global
     public class Handler(IJournalRepository repository) : IHandler
     {
-        public async Task<IEnumerable<Result>> Handle(Query request, CancellationToken cancellationToken)
+        public async Task<IEnumerable<Contracts.Journal.JournalEntry>> Handle(Query request, CancellationToken cancellationToken)
         {
             var entries = await repository.GetJournalEntries(
                               request.AccountingPeriodId, accountId: null, request.AccountType,
                               cancellationToken);
             return entries.Select(
-                              entry => new Result(
+                              entry => new Contracts.Journal.JournalEntry(
                                   Id: entry.Id,
                                   Amount: entry.Amount,
                                   Description: entry.Description,

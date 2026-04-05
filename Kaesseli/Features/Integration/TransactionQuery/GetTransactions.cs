@@ -1,6 +1,5 @@
 using System.Collections.Immutable;
 using Kaesseli.Features.Integration;
-using Result = Kaesseli.Contracts.Integration.Transaction;
 
 namespace Kaesseli.Features.Integration.TransactionQuery;
 
@@ -10,16 +9,16 @@ public static class GetTransactions
 
     public interface IHandler
     {
-        Task<IEnumerable<Result>> Handle(Query request, CancellationToken cancellationToken);
+        Task<IEnumerable<Contracts.Integration.Transaction>> Handle(Query request, CancellationToken cancellationToken);
     }
 
     // ReSharper disable once UnusedType.Global
     public class Handler(ITransactionRepository repo) : IHandler
     {
-        public async Task<IEnumerable<Result>> Handle(Query request, CancellationToken cancellationToken)
+        public async Task<IEnumerable<Contracts.Integration.Transaction>> Handle(Query request, CancellationToken cancellationToken)
         {
             var transactions = await repo.GetTransactions(request.TransactionSummaryId, cancellationToken);
-            return transactions.Select(t => new Result(
+            return transactions.Select(t => new Contracts.Integration.Transaction(
                 Id: t.Id,
                 RawText: t.RawText,
                 Amount: t.Amount,

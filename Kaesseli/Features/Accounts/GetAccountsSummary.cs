@@ -1,6 +1,5 @@
 using Kaesseli.Features.Budget;
 using Kaesseli.Features.Journal;
-using Result = Kaesseli.Contracts.Accounts.AccountOverview;
 
 namespace Kaesseli.Features.Accounts;
 
@@ -10,7 +9,7 @@ public static class GetAccountsSummary
 
     public interface IHandler
     {
-        Task<IEnumerable<Result>> Handle(Query request, CancellationToken cancellationToken);
+        Task<IEnumerable<Contracts.Accounts.AccountOverview>> Handle(Query request, CancellationToken cancellationToken);
     }
 
     // ReSharper disable once UnusedType.Global
@@ -21,13 +20,11 @@ public static class GetAccountsSummary
         TimeProvider timeProvider) : IHandler
     {
 
-        public async Task<IEnumerable<Result>> Handle(Query request, CancellationToken cancellationToken)
+        public async Task<IEnumerable<Contracts.Accounts.AccountOverview>> Handle(Query request, CancellationToken cancellationToken)
         {
             var accounts = await accountRepo.GetAccounts(cancellationToken);
             var accountingPeriod = await accountRepo.GetAccountingPeriod(request.AccountingPeriodId, cancellationToken);
 
-            // Accounts and AccountingPeriod are now in the change tracker,
-            // so the repositories below won't re-query them from the database.
             var journalEntries = await journalRepo.GetJournalEntries(
                 request.AccountingPeriodId, accountId: null, accountType: null, cancellationToken);
             var budgetEntries = await budgetRepo.GetBudgetEntries(
@@ -36,7 +33,7 @@ public static class GetAccountsSummary
             return accounts.Select(account => GetAccountOverview(account, journalEntries, budgetEntries, accountingPeriod));
         }
 
-        private Result GetAccountOverview(
+        private Contracts.Accounts.AccountOverview GetAccountOverview(
             Account account,
             IEnumerable<JournalEntry> journalEntries,
             IEnumerable<BudgetEntry> budgetEntries,
@@ -51,7 +48,7 @@ public static class GetAccountsSummary
             var currentBudget = AccountBalanceCalculator.GetCurrentBudget(account, budgetEntries, accountingPeriod, today);
             var budgetBalance = AccountBalanceCalculator.GetBudgetBalance(account.Type, currentBudget, accountBalance);
 
-            return new Result(
+            return new Contracts.Accounts.AccountOverview(
                 Id: account.Id,
                 Name: account.Name,
                 Icon: account.Icon.Name,

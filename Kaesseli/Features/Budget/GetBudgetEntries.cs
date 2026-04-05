@@ -1,6 +1,5 @@
 using System.Collections.Immutable;
 using Kaesseli.Features.Accounts;
-using Result = Kaesseli.Contracts.Budget.BudgetEntry;
 
 namespace Kaesseli.Features.Budget;
 
@@ -10,18 +9,18 @@ public static class GetBudgetEntries
 
     public interface IHandler
     {
-        Task<IEnumerable<Result>> Handle(Query query, CancellationToken cancellationToken);
+        Task<IEnumerable<Contracts.Budget.BudgetEntry>> Handle(Query query, CancellationToken cancellationToken);
     }
 
     // ReSharper disable once UnusedType.Global
     public class Handler(IBudgetRepository repository) : IHandler
     {
-        public async Task<IEnumerable<Result>> Handle(Query query, CancellationToken cancellationToken)
+        public async Task<IEnumerable<Contracts.Budget.BudgetEntry>> Handle(Query query, CancellationToken cancellationToken)
         {
             var entries = await repository.GetBudgetEntries(
                               query.AccountingPeriodId, query.AccountId, query.AccountType,
                               cancellationToken);
-            return entries.Select(entry => new Result(
+            return entries.Select(entry => new Contracts.Budget.BudgetEntry(
                 Id: entry.Id,
                 Amount: entry.Amount,
                 Description: entry.Description,

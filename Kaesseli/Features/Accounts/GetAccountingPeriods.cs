@@ -1,5 +1,4 @@
 using System.Collections.Immutable;
-using Result = Kaesseli.Contracts.Accounts.AccountingPeriod;
 
 namespace Kaesseli.Features.Accounts;
 
@@ -7,15 +6,15 @@ public static class GetAccountingPeriods
 {
     public interface IHandler
     {
-        Task<IEnumerable<Result>> Handle(CancellationToken cancellationToken);
+        Task<IEnumerable<Contracts.Accounts.AccountingPeriod>> Handle(CancellationToken cancellationToken);
     }
 
     public class Handler(IAccountRepository repo) : IHandler
     {
-        public async Task<IEnumerable<Result>> Handle(CancellationToken cancellationToken)
+        public async Task<IEnumerable<Contracts.Accounts.AccountingPeriod>> Handle(CancellationToken cancellationToken)
         {
             var result = await repo.GetAccountingPeriods(cancellationToken);
-            return result.Select(ap => new Result(
+            return result.Select(ap => new Contracts.Accounts.AccountingPeriod(
                 Id: ap.Id,
                 Description: ap.Description,
                 FromInclusive: ap.FromInclusive,

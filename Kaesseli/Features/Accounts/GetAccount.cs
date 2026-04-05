@@ -1,9 +1,6 @@
 using System.Collections.Immutable;
 using Kaesseli.Features.Budget;
 using Kaesseli.Features.Journal;
-using Result = Kaesseli.Contracts.Accounts.AccountStatement;
-using ResultEntry = Kaesseli.Contracts.Accounts.AccountStatementEntry;
-using AmountType = Kaesseli.Contracts.Accounts.AmountType;
 
 namespace Kaesseli.Features.Accounts;
 
@@ -13,7 +10,7 @@ public static class GetAccount
 
     public interface IHandler
     {
-        Task<Result> Handle(Query request, CancellationToken cancellationToken);
+        Task<Contracts.Accounts.AccountStatement> Handle(Query request, CancellationToken cancellationToken);
     }
 
     // ReSharper disable once UnusedType.Global
@@ -24,7 +21,7 @@ public static class GetAccount
         TimeProvider timeProvider
     ) : IHandler
     {
-        public async Task<Result> Handle(Query request, CancellationToken cancellationToken)
+        public async Task<Contracts.Accounts.AccountStatement> Handle(Query request, CancellationToken cancellationToken)
         {
             var account = await accountRepo.GetAccount(request.AccountId, cancellationToken);
             var period = await accountRepo.GetAccountingPeriod(
@@ -48,26 +45,17 @@ public static class GetAccount
                 )
             ).ToArray();
 
-            var accountBalance = AccountBalanceCalculator.GetAccountBalance(
-                account,
-                journalEntries
-            );
+            var accountBalance = AccountBalanceCalculator.GetAccountBalance(account, journalEntries);
             var budget = AccountBalanceCalculator.GetBudget(account, budgetEntries, period);
             var budgetPerMonth = AccountBalanceCalculator.GetBudgetPerMonth(account, budgetEntries);
             var budgetPerYear = AccountBalanceCalculator.GetBudgetPerYear(account, budgetEntries);
             var currentBudget = AccountBalanceCalculator.GetCurrentBudget(
-                account,
-                budgetEntries,
-                period,
-                DateOnly.FromDateTime(timeProvider.GetLocalNow().DateTime)
-            );
+                account, budgetEntries, period,
+                DateOnly.FromDateTime(timeProvider.GetLocalNow().DateTime));
             var budgetBalance = AccountBalanceCalculator.GetBudgetBalance(
-                account.Type,
-                currentBudget,
-                accountBalance
-            );
+                account.Type, currentBudget, accountBalance);
 
-            return new Result(
+            return new Contracts.Accounts.AccountStatement(
                 Id: account.Id,
                 Name: account.Name,
                 Icon: account.Icon.Name,
@@ -80,19 +68,15 @@ public static class GetAccount
                 BudgetPerYear: budgetPerYear,
                 CurrentBudget: currentBudget,
                 BudgetBalance: budgetBalance,
-                Entries: GetEntries(account.Id, journalEntries, budgetEntries)
-            );
+                Entries: GetEntries(account.Id, journalEntries, budgetEntries));
         }
 
-        private static IEnumerable<ResultEntry> GetEntries(
+        private static IEnumerable<Contracts.Accounts.AccountStatementEntry> GetEntries(
             Guid accountId,
             IEnumerable<JournalEntry> journalEntries,
-            IEnumerable<BudgetEntry> budgetEntries
-        )
+            IEnumerable<BudgetEntry> budgetEntries)
         {
-            var journalResults = journalEntries.Select(entry =>
-                CreateResultEntry(accountId, entry)
-            );
+            var journalResults = journalEntries.Select(entry => CreateResultEntry(accountId, entry));
             var budgetResults = budgetEntries.Select(CreateResultEntry);
 
             return journalResults
@@ -103,35 +87,31 @@ public static class GetAccount
                 .ToImmutableList();
         }
 
-        private static ResultEntry CreateResultEntry(BudgetEntry entry) =>
+        private static Contracts.Accounts.AccountStatementEntry CreateResultEntry(BudgetEntry entry) =>
             new(
                 Id: entry.Id,
                 ValueDate: entry.AccountingPeriod.FromInclusive,
                 Description: entry.Description,
                 Amount: entry.Amount,
-                AmountType: AmountType.Budget,
+                AmountType: Contracts.Accounts.AmountType.Budget,
                 OtherAccount: null,
-                OtherAccountId: null
-            );
+                OtherAccountId: null);
 
-        private static ResultEntry CreateResultEntry(Guid accountId, JournalEntry entry)
+        private static Contracts.Accounts.AccountStatementEntry CreateResultEntry(Guid accountId, JournalEntry entry)
         {
-            var account =
-                entry.CreditAccount.Id == accountId ? entry.CreditAccount : entry.DebitAccount;
-            var otherAccount =
-                entry.CreditAccount.Id == accountId ? entry.DebitAccount : entry.CreditAccount;
+            var account = entry.CreditAccount.Id == accountId ? entry.CreditAccount : entry.DebitAccount;
+            var otherAccount = entry.CreditAccount.Id == accountId ? entry.DebitAccount : entry.CreditAccount;
             var isDebit = entry.DebitAccount.Id == accountId;
             var amount = AccountBalanceCalculator.GetSignedAmount(account, entry);
 
-            return new ResultEntry(
+            return new Contracts.Accounts.AccountStatementEntry(
                 Id: entry.Id,
                 ValueDate: entry.ValueDate,
                 Description: entry.Description,
                 Amount: amount,
-                AmountType: isDebit ? AmountType.Debit : AmountType.Credit,
+                AmountType: isDebit ? Contracts.Accounts.AmountType.Debit : Contracts.Accounts.AmountType.Credit,
                 OtherAccount: otherAccount.Name,
-                OtherAccountId: otherAccount.Id
-            );
+                OtherAccountId: otherAccount.Id);
         }
     }
 }

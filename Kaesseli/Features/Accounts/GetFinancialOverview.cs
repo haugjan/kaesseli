@@ -1,7 +1,4 @@
 using System.Collections.Immutable;
-using AccountsSummaryResult = Kaesseli.Contracts.Accounts.AccountOverview;
-using Result = Kaesseli.Contracts.Accounts.FinancialOverview;
-using AccountTypeSummary = Kaesseli.Contracts.Accounts.AccountTypeSummary;
 
 namespace Kaesseli.Features.Accounts;
 
@@ -11,13 +8,13 @@ public static class GetFinancialOverview
 
     public interface IHandler
     {
-        Task<Result> Handle(Query request, CancellationToken cancellationToken);
+        Task<Contracts.Accounts.FinancialOverview> Handle(Query request, CancellationToken cancellationToken);
     }
 
     // ReSharper disable once UnusedType.Global
     public class Handler(GetAccountsSummary.IHandler accountsSummaryHandler) : IHandler
     {
-        public async Task<Result> Handle(Query request, CancellationToken cancellationToken)
+        public async Task<Contracts.Accounts.FinancialOverview> Handle(Query request, CancellationToken cancellationToken)
         {
             var accountSummary = (await accountsSummaryHandler.Handle(
                                       request: new GetAccountsSummary.Query(request.AccountingPeriodId),
@@ -25,18 +22,19 @@ public static class GetFinancialOverview
                                  .GroupBy(account => account.TypeId)
                                  .ToDictionary(account => account.Key, account => account.ToImmutableList());
 
-            return new Result(
+            return new Contracts.Accounts.FinancialOverview(
                 Expense: GetAccountTypeSummary(summaries: accountSummary[AccountType.Expense]),
                 Revenue: GetAccountTypeSummary(summaries: accountSummary[AccountType.Revenue]),
                 Liability: GetAccountTypeSummary(summaries: accountSummary[AccountType.Liability]),
                 Asset: GetAccountTypeSummary(summaries: accountSummary[AccountType.Asset]));
         }
 
-        private static AccountTypeSummary GetAccountTypeSummary(ImmutableList<AccountsSummaryResult> summaries)
+        private static Contracts.Accounts.AccountTypeSummary GetAccountTypeSummary(
+            ImmutableList<Contracts.Accounts.AccountOverview> summaries)
         {
             static decimal? NullIfZero(decimal? v) => v is 0 ? null : v;
 
-            return new AccountTypeSummary(
+            return new Contracts.Accounts.AccountTypeSummary(
                 AccountBalance: summaries.Sum(s => s.AccountBalance),
                 Budget: NullIfZero(summaries.Sum(s => s.Budget)),
                 BudgetPerMonth: NullIfZero(summaries.Sum(s => s.BudgetPerMonth)),
