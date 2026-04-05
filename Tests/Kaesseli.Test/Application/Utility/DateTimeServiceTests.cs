@@ -1,4 +1,4 @@
-using Kaesseli.Application.Utility;
+using Kaesseli.Infrastructure;
 using Shouldly;
 using Xunit;
 

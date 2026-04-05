@@ -1,5 +1,5 @@
-using Kaesseli.Application.Journal;
-using Kaesseli.Domain.Accounts;
+using Kaesseli.Features.Journal;
+using Kaesseli.Features.Accounts;
 using Kaesseli.Test.Faker;
 using Shouldly;
 using Xunit;

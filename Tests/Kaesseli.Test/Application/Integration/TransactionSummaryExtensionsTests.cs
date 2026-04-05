@@ -1,6 +1,6 @@
-using Kaesseli.Application.Integration.TransactionQuery;
-using Kaesseli.Domain.Accounts;
-using Kaesseli.Domain.Integration;
+using Kaesseli.Features.Integration.TransactionQuery;
+using Kaesseli.Features.Accounts;
+using Kaesseli.Features.Integration;
 using Kaesseli.Test.Faker;
 using Shouldly;
 using Xunit;

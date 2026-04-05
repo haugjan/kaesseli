@@ -1,4 +1,4 @@
-using Kaesseli.Domain.Accounts;
+using Kaesseli.Features.Accounts;
 using Shouldly;
 using Xunit;
 

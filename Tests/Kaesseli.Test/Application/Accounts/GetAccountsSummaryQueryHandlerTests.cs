@@ -1,8 +1,7 @@
-using Kaesseli.Application.Accounts;
-using Kaesseli.Application.Utility;
-using Kaesseli.Domain.Accounts;
-using Kaesseli.Domain.Budget;
-using Kaesseli.Domain.Journal;
+using Kaesseli.Features.Accounts;
+using Kaesseli.Infrastructure;
+using Kaesseli.Features.Budget;
+using Kaesseli.Features.Journal;
 using Moq;
 using Shouldly;
 using Xunit;

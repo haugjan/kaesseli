@@ -1,5 +1,5 @@
-using Kaesseli.Application.Integration.FileImport;
-using Kaesseli.Domain.Accounts;
+using Kaesseli.Features.Integration.FileImport;
+using Kaesseli.Features.Accounts;
 using Kaesseli.Test.Faker;
 using Xunit;
 

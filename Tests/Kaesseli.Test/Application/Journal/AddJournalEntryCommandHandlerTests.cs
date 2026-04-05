@@ -1,7 +1,6 @@
-using Kaesseli.Application.Journal;
-using Kaesseli.Application.Utility;
-using Kaesseli.Domain.Accounts;
-using Kaesseli.Domain.Journal;
+using Kaesseli.Features.Journal;
+using Kaesseli.Infrastructure;
+using Kaesseli.Features.Accounts;
 using Kaesseli.Test.Faker;
 using Moq;
 using Xunit;

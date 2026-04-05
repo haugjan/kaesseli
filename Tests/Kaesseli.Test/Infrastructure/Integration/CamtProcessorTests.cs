@@ -1,5 +1,4 @@
-using Kaesseli.Application.Integration.FileImport;
-using Kaesseli.Infrastructure.Integration;
+using Kaesseli.Features.Integration.FileImport;
 using Shouldly;
 using Xunit;
 

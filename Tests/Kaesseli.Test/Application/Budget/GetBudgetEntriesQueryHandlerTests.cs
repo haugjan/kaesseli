@@ -1,6 +1,5 @@
-using Kaesseli.Application.Budget;
-using Kaesseli.Domain.Accounts;
-using Kaesseli.Domain.Budget;
+using Kaesseli.Features.Budget;
+using Kaesseli.Features.Accounts;
 using Moq;
 using Shouldly;
 using Xunit;

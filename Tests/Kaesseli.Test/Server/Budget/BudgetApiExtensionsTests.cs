@@ -1,7 +1,7 @@
 using System.Net;
 using System.Text;
 using System.Text.Json;
-using Kaesseli.Application.Budget;
+using Kaesseli.Features.Budget;
 using Kaesseli.Test.Faker;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;

@@ -1,8 +1,8 @@
 using System.Net;
 using System.Text;
 using System.Text.Json;
-using Kaesseli.Application.Journal;
-using Kaesseli.Domain.Accounts;
+using Kaesseli.Features.Journal;
+using Kaesseli.Features.Accounts;
 using Kaesseli.Test.Faker;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;

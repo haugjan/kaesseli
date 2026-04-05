@@ -1,4 +1,4 @@
-using Kaesseli.Application.Utility;
+using Kaesseli.Infrastructure;
 using Microsoft.Extensions.DependencyInjection;
 using Shouldly;
 using Xunit;

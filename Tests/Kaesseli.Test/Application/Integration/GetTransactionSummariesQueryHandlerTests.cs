@@ -1,5 +1,5 @@
-using Kaesseli.Application.Integration.TransactionQuery;
-using Kaesseli.Domain.Integration;
+using Kaesseli.Features.Integration.TransactionQuery;
+using Kaesseli.Features.Integration;
 using Kaesseli.Test.Faker;
 using Moq;
 using Shouldly;

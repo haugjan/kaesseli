@@ -1,5 +1,5 @@
-using Kaesseli.Domain.Accounts;
-using Kaesseli.Domain.Budget;
+using Kaesseli.Features.Accounts;
+using Kaesseli.Features.Budget;
 using Shouldly;
 using Xunit;
 

@@ -1,11 +1,11 @@
-using Kaesseli.Application.Accounts;
-using Kaesseli.Application.Automation;
-using Kaesseli.Application.Budget;
-using Kaesseli.Application.Integration.FileImport;
-using Kaesseli.Application.Integration.NextOpenTransaction;
-using Kaesseli.Application.Integration.TransactionQuery;
-using Kaesseli.Application.Journal;
-using Kaesseli.Application.Utility;
+using Kaesseli.Features.Accounts;
+using Kaesseli.Features.Automation;
+using Kaesseli.Features.Budget;
+using Kaesseli.Features.Integration.FileImport;
+using Kaesseli.Features.Integration.NextOpenTransaction;
+using Kaesseli.Features.Integration.TransactionQuery;
+using Kaesseli.Features.Journal;
+using Kaesseli.Infrastructure;
 
 // ReSharper disable once CheckNamespace
 namespace Microsoft.Extensions.DependencyInjection;

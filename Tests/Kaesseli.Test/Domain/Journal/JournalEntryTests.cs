@@ -1,5 +1,5 @@
-using Kaesseli.Domain.Accounts;
-using Kaesseli.Domain.Journal;
+using Kaesseli.Features.Accounts;
+using Kaesseli.Features.Journal;
 using Xunit;
 
 namespace Kaesseli.Test.Domain.Journal;

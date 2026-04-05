@@ -1,8 +1,8 @@
 using System.Net;
 using System.Net.Http.Headers;
-using Kaesseli.Application.Integration.FileImport;
-using Kaesseli.Application.Integration.NextOpenTransaction;
-using Kaesseli.Application.Integration.TransactionQuery;
+using Kaesseli.Features.Integration.FileImport;
+using Kaesseli.Features.Integration.NextOpenTransaction;
+using Kaesseli.Features.Integration.TransactionQuery;
 using Kaesseli.Test.Faker;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;

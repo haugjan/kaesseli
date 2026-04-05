@@ -1,8 +1,6 @@
-using Kaesseli.Application.Utility;
-using Kaesseli.Domain.Accounts;
-using Kaesseli.Domain.Journal;
-using Kaesseli.Infrastructure.Common;
-using Kaesseli.Infrastructure.Journal;
+using Kaesseli.Infrastructure;
+using Kaesseli.Features.Accounts;
+using Kaesseli.Features.Journal;
 using Kaesseli.Test.Faker;
 using Microsoft.EntityFrameworkCore;
 using Moq;

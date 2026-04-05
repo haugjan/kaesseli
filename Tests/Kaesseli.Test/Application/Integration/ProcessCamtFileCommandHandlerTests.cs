@@ -1,7 +1,7 @@
-using Kaesseli.Application.Integration.FileImport;
-using Kaesseli.Application.Integration.NextOpenTransaction;
-using Kaesseli.Domain.Accounts;
-using Kaesseli.Domain.Integration;
+using Kaesseli.Features.Integration.FileImport;
+using Kaesseli.Features.Integration.NextOpenTransaction;
+using Kaesseli.Features.Accounts;
+using Kaesseli.Features.Integration;
 using Kaesseli.Test.Faker;
 using Moq;
 using Shouldly;

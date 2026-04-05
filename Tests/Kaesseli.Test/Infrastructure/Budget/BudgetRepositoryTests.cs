@@ -1,8 +1,6 @@
-using Kaesseli.Application.Utility;
-using Kaesseli.Domain.Accounts;
-using Kaesseli.Domain.Budget;
-using Kaesseli.Infrastructure.Budget;
-using Kaesseli.Infrastructure.Common;
+using Kaesseli.Infrastructure;
+using Kaesseli.Features.Accounts;
+using Kaesseli.Features.Budget;
 using Microsoft.EntityFrameworkCore;
 using Moq;
 using Shouldly;

@@ -1,0 +1,24 @@
+using Kaesseli.Features.Accounts;
+
+namespace Kaesseli.Features.Journal;
+
+internal static class JournalEntryExtensions
+{
+    internal static JournalEntry ToJournalEntry(
+        this AddJournalEntry.Query request,
+        DateOnly valueDate,
+        Account debitAccount,
+        Account creditAccount,
+        AccountingPeriod accountingPeriod) =>
+        new()
+        {
+            Id = Guid.NewGuid(),
+            ValueDate = valueDate,
+            Amount = request.Amount,
+            Description = request.Description,
+            CreditAccount = creditAccount,
+            DebitAccount = debitAccount,
+            Transaction = null,
+            AccountingPeriod = accountingPeriod
+        };
+}
