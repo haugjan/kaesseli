@@ -1,5 +1,7 @@
+using System.Globalization;
 using Microsoft.AspNetCore.Components.Web;
 using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
+using Microsoft.JSInterop;
 using Kaesseli.Client.Blazor;
 using Kaesseli.Client.Blazor.Services;
 using MudBlazor.Services;
@@ -16,4 +18,12 @@ builder.Services.AddScoped<KaesseliApiService>();
 builder.Services.AddSingleton<AccountingPeriodState>();
 builder.Services.AddMudServices();
 
-await builder.Build().RunAsync();
+var host = builder.Build();
+
+var js = host.Services.GetRequiredService<IJSRuntime>();
+var browserLang = await js.InvokeAsync<string>("eval", "navigator.language");
+var culture = new CultureInfo(browserLang);
+CultureInfo.DefaultThreadCurrentCulture = culture;
+CultureInfo.DefaultThreadCurrentUICulture = culture;
+
+await host.RunAsync();

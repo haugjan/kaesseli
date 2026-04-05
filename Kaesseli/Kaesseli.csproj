@@ -11,11 +11,13 @@
       <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <CopyToPublishDirectory>Never</CopyToPublishDirectory>
+      <DependentUpon>appsettings.json</DependentUpon>
     </Content>
     <Content Update="appsettings.Development.json">
       <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+      <DependentUpon>appsettings.json</DependentUpon>
     </Content>
     <Content Update="appsettings.json">
       <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
