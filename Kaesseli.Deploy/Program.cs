@@ -32,7 +32,8 @@ using (var scope = provider.CreateScope())
     var context = scope.ServiceProvider.GetRequiredService<KaesseliContext>();
     await context.Database.EnsureCreatedAsync();
 }
-Console.WriteLine("Database initialized successfully.");
+Console.WriteLine("Database initialized successfully. Waiting for collections to become available...");
+await Task.Delay(TimeSpan.FromSeconds(5));
 
 if (environment == "Development")
 {
