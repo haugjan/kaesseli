@@ -46,7 +46,6 @@ public class KaesseliContext : DbContext
 
         modelBuilder.Entity<Account>(entity =>
         {
-            entity.ToContainer("Accounts");
             entity.HasPartitionKey(a => a.Id);
             entity.Property(a => a.Type).HasConversion<string>();
             entity.OwnsOne(a => a.Icon);
@@ -54,26 +53,22 @@ public class KaesseliContext : DbContext
 
         modelBuilder.Entity<AccountingPeriod>(entity =>
         {
-            entity.ToContainer("AccountingPeriods");
             entity.HasPartitionKey(a => a.Id);
         });
 
         modelBuilder.Entity<AutomationEntry>(entity =>
         {
-            entity.ToContainer("Automations");
             entity.HasPartitionKey(a => a.Id);
             entity.HasMany(ae => ae.Parts).WithOne().IsRequired();
         });
 
         modelBuilder.Entity<AutomationEntryPart>(entity =>
         {
-            entity.ToContainer("AutomationEntryParts");
             entity.HasPartitionKey(a => a.Id);
         });
 
         modelBuilder.Entity<BudgetEntry>(entity =>
         {
-            entity.ToContainer("BudgetEntries");
             entity.HasPartitionKey(b => b.Id);
             entity.HasOne(be => be.Account).WithMany().IsRequired();
             entity.HasOne(be => be.AccountingPeriod).WithMany().IsRequired();
@@ -81,7 +76,6 @@ public class KaesseliContext : DbContext
 
         modelBuilder.Entity<JournalEntry>(entity =>
         {
-            entity.ToContainer("JournalEntries");
             entity.HasPartitionKey(j => j.Id);
             entity.HasOne(je => je.DebitAccount).WithMany().IsRequired();
             entity.HasOne(je => je.CreditAccount).WithMany().IsRequired();
@@ -90,7 +84,6 @@ public class KaesseliContext : DbContext
 
         modelBuilder.Entity<TransactionSummary>(entity =>
         {
-            entity.ToContainer("TransactionSummaries");
             entity.HasPartitionKey(ts => ts.Id);
             entity.HasOne(ts => ts.Account).WithMany().IsRequired();
             entity.HasMany(ts => ts.Transactions).WithOne(t => t.TransactionSummary);
@@ -98,13 +91,11 @@ public class KaesseliContext : DbContext
 
         modelBuilder.Entity<Transaction>(entity =>
         {
-            entity.ToContainer("Transactions");
             entity.HasPartitionKey(t => t.Id);
         });
 
         modelBuilder.Entity<TransactionStatistic>(entity =>
         {
-            entity.ToContainer("TransactionStatistics");
             entity.HasPartitionKey(ts => ts.Id);
         });
 
