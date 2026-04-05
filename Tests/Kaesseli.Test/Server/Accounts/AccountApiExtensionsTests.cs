@@ -4,7 +4,6 @@ using System.Text.Json;
 using Kaesseli.Features.Accounts;
 using Kaesseli.Test.Faker;
 using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.TestHost;
 using Microsoft.Extensions.DependencyInjection;
 using Moq;
@@ -13,9 +12,9 @@ using Xunit;
 
 namespace Kaesseli.Test.Server.Accounts;
 
-public class AccountApiExtensionsTests
+public class AccountApiExtensionsTests : IAsyncLifetime
 {
-    private readonly HttpClient _client;
+    private HttpClient _client = null!;
     private readonly Mock<GetAccounts.IHandler> _getAccountsMock = new();
     private readonly Mock<GetAccountingPeriods.IHandler> _getAccountingPeriodsMock = new();
     private readonly Mock<GetAccount.IHandler> _getAccountMock = new();
@@ -24,33 +23,27 @@ public class AccountApiExtensionsTests
     private readonly Mock<AddAccount.IHandler> _addAccountMock = new();
     private readonly Mock<AddAccountingPeriod.IHandler> _addAccountingPeriodMock = new();
 
-    public AccountApiExtensionsTests()
+    public async Task InitializeAsync()
     {
-        var server = new TestServer(
-            builder: new WebHostBuilder()
-                .ConfigureServices(services =>
-                {
-                    services.AddRouting();
-                    services.AddSingleton(_getAccountsMock.Object);
-                    services.AddSingleton(_getAccountingPeriodsMock.Object);
-                    services.AddSingleton(_getAccountMock.Object);
-                    services.AddSingleton(_getAccountsSummaryMock.Object);
-                    services.AddSingleton(_getFinancialOverviewMock.Object);
-                    services.AddSingleton(_addAccountMock.Object);
-                    services.AddSingleton(_addAccountingPeriodMock.Object);
-                })
-                .Configure(app =>
-                {
-                    app.UseRouting();
-                    app.UseEndpoints(endpoints =>
-                    {
-                        endpoints.MapAccountEndpoints();
-                    });
-                })
-        );
+        var builder = WebApplication.CreateBuilder();
+        builder.WebHost.UseTestServer();
+        builder.Services.AddRouting();
+        builder.Services.AddSingleton(_getAccountsMock.Object);
+        builder.Services.AddSingleton(_getAccountingPeriodsMock.Object);
+        builder.Services.AddSingleton(_getAccountMock.Object);
+        builder.Services.AddSingleton(_getAccountsSummaryMock.Object);
+        builder.Services.AddSingleton(_getFinancialOverviewMock.Object);
+        builder.Services.AddSingleton(_addAccountMock.Object);
+        builder.Services.AddSingleton(_addAccountingPeriodMock.Object);
 
-        _client = server.CreateClient();
+        var app = builder.Build();
+        app.MapAccountEndpoints();
+
+        await app.StartAsync();
+        _client = app.GetTestClient();
     }
+
+    public Task DisposeAsync() => Task.CompletedTask;
 
     [Fact]
     public async Task GetAccountsEndpoint_ShouldReturnAccounts()

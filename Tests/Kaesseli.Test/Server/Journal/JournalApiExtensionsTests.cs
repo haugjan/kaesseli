@@ -5,7 +5,6 @@ using Kaesseli.Features.Journal;
 using Kaesseli.Features.Accounts;
 using Kaesseli.Test.Faker;
 using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Routing;
 using Microsoft.AspNetCore.TestHost;
 using Microsoft.Extensions.DependencyInjection;
@@ -15,34 +14,28 @@ using Xunit;
 
 namespace Kaesseli.Test.Server.Journal;
 
-public class JournalApiExtensionsTests
+public class JournalApiExtensionsTests : IAsyncLifetime
 {
-    private readonly HttpClient _client;
+    private HttpClient _client = null!;
     private readonly Mock<AddJournalEntry.IHandler> _addJournalEntryMock = new();
     private readonly Mock<GetJournalEntries.IHandler> _getJournalEntriesMock = new();
 
-    public JournalApiExtensionsTests()
+    public async Task InitializeAsync()
     {
-        var server = new TestServer(
-            builder: new WebHostBuilder()
-                .ConfigureServices(services =>
-                {
-                    services.AddRouting();
-                    services.AddSingleton(_addJournalEntryMock.Object);
-                    services.AddSingleton(_getJournalEntriesMock.Object);
-                })
-                .Configure(app =>
-                {
-                    app.UseRouting();
-                    app.UseEndpoints(endpoints =>
-                    {
-                        endpoints.MapJournalEndpoints();
-                    });
-                })
-        );
+        var builder = WebApplication.CreateBuilder();
+        builder.WebHost.UseTestServer();
+        builder.Services.AddRouting();
+        builder.Services.AddSingleton(_addJournalEntryMock.Object);
+        builder.Services.AddSingleton(_getJournalEntriesMock.Object);
 
-        _client = server.CreateClient();
+        var app = builder.Build();
+        app.MapJournalEndpoints();
+
+        await app.StartAsync();
+        _client = app.GetTestClient();
     }
+
+    public Task DisposeAsync() => Task.CompletedTask;
 
     [Fact]
     public async Task AddJournalEntryEndpoint_ShouldReturnCreatedResult()

@@ -4,7 +4,6 @@ using System.Text.Json;
 using Kaesseli.Features.Budget;
 using Kaesseli.Test.Faker;
 using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Routing;
 using Microsoft.AspNetCore.TestHost;
 using Microsoft.Extensions.DependencyInjection;
@@ -14,34 +13,28 @@ using Xunit;
 
 namespace Kaesseli.Test.Server.Budget;
 
-public class BudgetApiExtensionsTests
+public class BudgetApiExtensionsTests : IAsyncLifetime
 {
-    private readonly HttpClient _client;
+    private HttpClient _client = null!;
     private readonly Mock<SetBudget.IHandler> _setBudgetMock = new();
     private readonly Mock<GetBudgetEntries.IHandler> _getBudgetEntriesMock = new();
 
-    public BudgetApiExtensionsTests()
+    public async Task InitializeAsync()
     {
-        var server = new TestServer(
-            builder: new WebHostBuilder()
-                .ConfigureServices(services =>
-                {
-                    services.AddRouting();
-                    services.AddSingleton(_setBudgetMock.Object);
-                    services.AddSingleton(_getBudgetEntriesMock.Object);
-                })
-                .Configure(app =>
-                {
-                    app.UseRouting();
-                    app.UseEndpoints(endpoints =>
-                    {
-                        endpoints.MapBudgetEndpoints();
-                    });
-                })
-        );
+        var builder = WebApplication.CreateBuilder();
+        builder.WebHost.UseTestServer();
+        builder.Services.AddRouting();
+        builder.Services.AddSingleton(_setBudgetMock.Object);
+        builder.Services.AddSingleton(_getBudgetEntriesMock.Object);
 
-        _client = server.CreateClient();
+        var app = builder.Build();
+        app.MapBudgetEndpoints();
+
+        await app.StartAsync();
+        _client = app.GetTestClient();
     }
+
+    public Task DisposeAsync() => Task.CompletedTask;
 
     [Fact]
     public async Task SetBudgetCommandEndpoint_ShouldReturnCreatedResult()
