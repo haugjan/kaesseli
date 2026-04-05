@@ -6,26 +6,32 @@ namespace Kaesseli.Features.Integration.FileImport;
 
 internal static class CamtEntryExtensions
 {
-    public static TransactionSummary ToTransactionSummary(this FinancialDocument financialDocument, Account account) =>
-        TransactionSummary.Create(
-            account,
-            financialDocument.BalanceBefore,
-            financialDocument.BalanceAfter,
-            financialDocument.ValueDateFrom,
-            financialDocument.ValueDateTo,
-            financialDocument.Reference,
-            financialDocument.Entries.Select(ToTransaction).ToList());
+    extension(FinancialDocument financialDocument)
+    {
+        public TransactionSummary ToTransactionSummary(Account account) =>
+            TransactionSummary.Create(
+                account,
+                financialDocument.BalanceBefore,
+                financialDocument.BalanceAfter,
+                financialDocument.ValueDateFrom,
+                financialDocument.ValueDateTo,
+                financialDocument.Reference,
+                financialDocument.Entries.Select(entry => entry.ToTransaction()).ToList());
+    }
 
-    public static Transaction ToTransaction(this FinancialDocumentEntry entry) =>
-        Transaction.Create(
-            rawText: entry.RawText,
-            amount: entry.Amount,
-            valueDate: entry.ValueDate,
-            description: entry.Description,
-            reference: entry.Reference,
-            bookDate: entry.BookDate,
-            transactionCode: entry.TransactionCode,
-            transactionCodeDetail: entry.TransactionCodeDetail,
-            debtor: entry.Debtor,
-            creditor: entry.Creditor);
+    extension(FinancialDocumentEntry entry)
+    {
+        public Transaction ToTransaction() =>
+            Transaction.Create(
+                rawText: entry.RawText,
+                amount: entry.Amount,
+                valueDate: entry.ValueDate,
+                description: entry.Description,
+                reference: entry.Reference,
+                bookDate: entry.BookDate,
+                transactionCode: entry.TransactionCode,
+                transactionCodeDetail: entry.TransactionCodeDetail,
+                debtor: entry.Debtor,
+                creditor: entry.Creditor);
+    }
 }

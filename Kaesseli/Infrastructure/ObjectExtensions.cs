@@ -1,4 +1,4 @@
-﻿using System.Globalization;
+using System.Globalization;
 using YamlDotNet.Core;
 using YamlDotNet.Core.Events;
 using YamlScalar = YamlDotNet.Core.Events.Scalar;
@@ -9,12 +9,15 @@ namespace System;
 
 public static class ObjectExtensions
 {
-    public static string ToYaml(this object obj)
+    extension(object obj)
     {
-        var serializer = new SerializerBuilder()
-                         .WithTypeConverter(typeConverter: new DateOnlyYamlConverter())
-                         .Build();
-        return serializer.Serialize(obj).Replace("\r\n", "\n");
+        public string ToYaml()
+        {
+            var serializer = new SerializerBuilder()
+                             .WithTypeConverter(typeConverter: new DateOnlyYamlConverter())
+                             .Build();
+            return serializer.Serialize(obj).Replace("\r\n", "\n");
+        }
     }
 
     private class DateOnlyYamlConverter : IYamlTypeConverter
@@ -34,6 +37,6 @@ public static class ObjectExtensions
             var dateOnly = (DateOnly)value;
             emitter.Emit(@event: new YamlScalar(value: dateOnly.ToString(format: "yyyy-MM-dd", CultureInfo.InvariantCulture)));
         }
-        
+
     }
 }
