@@ -15,7 +15,14 @@ public class AddJournalEntryCommandHandlerTests
         // Arrange
         var mockJournalRepo = new Mock<IJournalRepository>();
         var mockAccountRepo = new Mock<IAccountRepository>();
-        var command = new SmartFaker<AddJournalEntry.Query>().Generate();
+        var debitAccount = Account.Create("Debit", AccountType.Expense, new AccountIcon("favorite", "blue"));
+        var creditAccount = Account.Create("Credit", AccountType.Revenue, new AccountIcon("favorite", "blue"));
+        var accountingPeriod = AccountingPeriod.Create("Test Period", default, default);
+        var command = new SmartFaker<AddJournalEntry.Query>()
+            .RuleFor(c => c.DebitAccountId, debitAccount.Id)
+            .RuleFor(c => c.CreditAccountId, creditAccount.Id)
+            .RuleFor(c => c.AccountingPeriodId, accountingPeriod.Id)
+            .Generate();
         var cancellationToken = new CancellationToken();
 
         mockJournalRepo
@@ -28,6 +35,15 @@ public class AddJournalEntryCommandHandlerTests
                 )
             )
             .ReturnsAsync((JournalEntry newJournalEntry, CancellationToken _) => newJournalEntry);
+        mockAccountRepo
+            .Setup(repo => repo.GetAccount(debitAccount.Id, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(debitAccount);
+        mockAccountRepo
+            .Setup(repo => repo.GetAccount(creditAccount.Id, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(creditAccount);
+        mockAccountRepo
+            .Setup(repo => repo.GetAccountingPeriod(accountingPeriod.Id, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(accountingPeriod);
 
         var handler = new AddJournalEntry.Handler(
             mockJournalRepo.Object,
@@ -60,8 +76,14 @@ public class AddJournalEntryCommandHandlerTests
         var mockAccountRepo = new Mock<IAccountRepository>();
         var currentDay = new DateOnly(year: 1982, month: 11, day: 3);
         var fakeTimeProvider = new FakeTimeProvider(new DateTimeOffset(currentDay.ToDateTime(TimeOnly.MinValue)));
+        var debitAccount = Account.Create("Debit", AccountType.Expense, new AccountIcon("favorite", "blue"));
+        var creditAccount = Account.Create("Credit", AccountType.Revenue, new AccountIcon("favorite", "blue"));
+        var accountingPeriod = AccountingPeriod.Create("Test Period", default, default);
         var command = new SmartFaker<AddJournalEntry.Query>()
             .RuleFor(c => c.ValueDate, _ => null)
+            .RuleFor(c => c.DebitAccountId, debitAccount.Id)
+            .RuleFor(c => c.CreditAccountId, creditAccount.Id)
+            .RuleFor(c => c.AccountingPeriodId, accountingPeriod.Id)
             .Generate();
         var cancellationToken = new CancellationToken();
 
@@ -75,6 +97,16 @@ public class AddJournalEntryCommandHandlerTests
                 )
             )
             .ReturnsAsync((JournalEntry newJournalEntry, CancellationToken _) => newJournalEntry);
+        mockAccountRepo
+            .Setup(repo => repo.GetAccount(debitAccount.Id, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(debitAccount);
+        mockAccountRepo
+            .Setup(repo => repo.GetAccount(creditAccount.Id, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(creditAccount);
+        mockAccountRepo
+            .Setup(repo => repo.GetAccountingPeriod(accountingPeriod.Id, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(accountingPeriod);
+
         var handler = new AddJournalEntry.Handler(
             mockJournalRepo.Object,
             mockAccountRepo.Object,

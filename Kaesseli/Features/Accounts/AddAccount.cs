@@ -17,13 +17,7 @@ public static class AddAccount
         public async Task<Guid> Handle(Query request, CancellationToken cancellationToken)
         {
             var account = await repo.AddAccount(
-                              account: new Account
-                              {
-                                  Type = request.Type,
-                                  Name = request.Name,
-                                  Icon = new AccountIcon(request.Icon, request.IconColor),
-                                  Id = Guid.NewGuid()
-                              },
+                              Account.Create(request.Name, request.Type, new AccountIcon(request.Icon, request.IconColor)),
                               cancellationToken);
             return account.Id;
         }

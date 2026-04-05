@@ -23,16 +23,11 @@ public static class AddAutomation
             var sumOfAllEntries = request.Entries.Sum(entry => entry.Amount);
             foreach (var entry in request.Entries)
             {
-                parts.Add(
-                    item: new AutomationEntryPart
-                    {
-                        Id = Guid.NewGuid(),
-                        Account = await GetAccount(entry.OtherAccountId, cancellationToken),
-                        AmountProportion = entry.Amount / sumOfAllEntries
-                    });
+                var account = await GetAccount(entry.OtherAccountId, cancellationToken);
+                parts.Add(AutomationEntryPart.Create(account, entry.Amount / sumOfAllEntries));
             }
 
-            var automationEntry = new AutomationEntry { Id = Guid.NewGuid(), AutomationText = request.AutomationText, Parts = parts };
+            var automationEntry = AutomationEntry.Create(request.AutomationText, parts);
 
             await automateRepository.AddAutomation(automationEntry, cancellationToken);
 

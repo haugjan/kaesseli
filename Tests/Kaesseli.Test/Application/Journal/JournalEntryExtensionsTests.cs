@@ -22,13 +22,7 @@ public class JournalEntryExtensionsTests
             CreditAccountId: creditAccount.Id,
             AccountingPeriodId: Guid.NewGuid());
         var valueDate = new DateOnly(year: 1982, month: 12, day: 13);
-        var accountIngPeriod = new AccountingPeriod
-        {
-            Id = Guid.NewGuid(),
-            Description = string.Empty,
-            FromInclusive = default,
-            ToInclusive = default,
-        };
+        var accountIngPeriod = AccountingPeriod.Create("Test Period", default, default);
 
         //Act
         var journalEntry = command.ToJournalEntry(

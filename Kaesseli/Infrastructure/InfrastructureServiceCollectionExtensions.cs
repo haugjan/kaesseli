@@ -94,182 +94,100 @@ public static class InfrastructureServiceCollectionExtensions
         var currentYear = DateTime.UtcNow.Year;
 
         // Accounting Period
-        var period = new AccountingPeriod
-        {
-            Id = Guid.NewGuid(),
-            Description = $"Geschäftsjahr {currentYear}",
-            FromInclusive = new DateOnly(currentYear, 1, 1),
-            ToInclusive = new DateOnly(currentYear, 12, 31),
-        };
+        var period = AccountingPeriod.Create(
+            $"Geschäftsjahr {currentYear}",
+            new DateOnly(currentYear, 1, 1),
+            new DateOnly(currentYear, 12, 31)
+        );
         context.AccountingPeriods.Add(period);
 
         // Accounts
-        var bankAccount = new Account
-        {
-            Id = Guid.NewGuid(), Name = "Bankkonto", Type = AccountType.Asset,
-            Icon = new AccountIcon("AccountBalance", "#1976D2"),
-        };
-        var cash = new Account
-        {
-            Id = Guid.NewGuid(), Name = "Bargeld", Type = AccountType.Asset,
-            Icon = new AccountIcon("Wallet", "#4CAF50"),
-        };
-        var creditCard = new Account
-        {
-            Id = Guid.NewGuid(), Name = "Kreditkarte", Type = AccountType.Liability,
-            Icon = new AccountIcon("CreditCard", "#F44336"),
-        };
-        var salary = new Account
-        {
-            Id = Guid.NewGuid(), Name = "Lohn", Type = AccountType.Revenue,
-            Icon = new AccountIcon("Work", "#8BC34A"),
-        };
-        var groceries = new Account
-        {
-            Id = Guid.NewGuid(), Name = "Lebensmittel", Type = AccountType.Expense,
-            Icon = new AccountIcon("ShoppingCart", "#FF9800"),
-        };
-        var rent = new Account
-        {
-            Id = Guid.NewGuid(), Name = "Miete", Type = AccountType.Expense,
-            Icon = new AccountIcon("Home", "#9C27B0"),
-        };
-        var transport = new Account
-        {
-            Id = Guid.NewGuid(), Name = "ÖV / Transport", Type = AccountType.Expense,
-            Icon = new AccountIcon("Train", "#00BCD4"),
-        };
-        var leisure = new Account
-        {
-            Id = Guid.NewGuid(), Name = "Freizeit", Type = AccountType.Expense,
-            Icon = new AccountIcon("SportsEsports", "#E91E63"),
-        };
+        var bankAccount = Account.Create("Bankkonto", AccountType.Asset, new AccountIcon("AccountBalance", "#1976D2"));
+        var cash = Account.Create("Bargeld", AccountType.Asset, new AccountIcon("Wallet", "#4CAF50"));
+        var creditCard = Account.Create("Kreditkarte", AccountType.Liability, new AccountIcon("CreditCard", "#F44336"));
+        var salary = Account.Create("Lohn", AccountType.Revenue, new AccountIcon("Work", "#8BC34A"));
+        var groceries = Account.Create("Lebensmittel", AccountType.Expense, new AccountIcon("ShoppingCart", "#FF9800"));
+        var rent = Account.Create("Miete", AccountType.Expense, new AccountIcon("Home", "#9C27B0"));
+        var transport = Account.Create("ÖV / Transport", AccountType.Expense, new AccountIcon("Train", "#00BCD4"));
+        var leisure = Account.Create("Freizeit", AccountType.Expense, new AccountIcon("SportsEsports", "#E91E63"));
 
         context.Accounts.AddRange(bankAccount, cash, creditCard, salary, groceries, rent, transport, leisure);
         await context.SaveChangesAsync();
 
         // Budget entries (only Revenue/Expense accounts allowed)
         context.BudgetEntries.AddRange(
-            new BudgetEntry
-            {
-                Id = Guid.NewGuid(), Description = "Monatslohn",
-                Amount = 5500m, Account = salary, AccountingPeriod = period,
-            },
-            new BudgetEntry
-            {
-                Id = Guid.NewGuid(), Description = "Lebensmittel Budget",
-                Amount = 600m, Account = groceries, AccountingPeriod = period,
-            },
-            new BudgetEntry
-            {
-                Id = Guid.NewGuid(), Description = "Monatsmiete",
-                Amount = 1500m, Account = rent, AccountingPeriod = period,
-            },
-            new BudgetEntry
-            {
-                Id = Guid.NewGuid(), Description = "GA / Halbtax",
-                Amount = 200m, Account = transport, AccountingPeriod = period,
-            },
-            new BudgetEntry
-            {
-                Id = Guid.NewGuid(), Description = "Freizeit Budget",
-                Amount = 300m, Account = leisure, AccountingPeriod = period,
-            }
+            BudgetEntry.Create("Monatslohn", 5500m, salary, period),
+            BudgetEntry.Create("Lebensmittel Budget", 600m, groceries, period),
+            BudgetEntry.Create("Monatsmiete", 1500m, rent, period),
+            BudgetEntry.Create("GA / Halbtax", 200m, transport, period),
+            BudgetEntry.Create("Freizeit Budget", 300m, leisure, period)
         );
 
         // Transaction Summaries & Transactions
-        var bankSummary = new TransactionSummary
-        {
-            Id = Guid.NewGuid(), Account = bankAccount,
-            BalanceBefore = 12000m, BalanceAfter = 8547.20m,
-            ValueDateFrom = new DateOnly(currentYear, 1, 1),
-            ValueDateTo = new DateOnly(currentYear, 3, 31),
-            Reference = "CAMT-2026-Q1",
-            Transactions = new List<Transaction>(),
-        };
+        var bankSummary = TransactionSummary.Create(
+            bankAccount, 12000m, 8547.20m,
+            new DateOnly(currentYear, 1, 1), new DateOnly(currentYear, 3, 31),
+            "CAMT-2026-Q1", new List<Transaction>()
+        );
         context.TransactionSummaries.Add(bankSummary);
 
         var assignedTransactions = new List<Transaction>();
         var openTransactions = new List<Transaction>();
 
         // Zugeordnete Transaktionen (werden mit JournalEntries verknüpft)
-        var txLohnJan = new Transaction
-        {
-            Id = Guid.NewGuid(), Amount = 5500m,
-            ValueDate = new DateOnly(currentYear, 1, 25), BookDate = new DateOnly(currentYear, 1, 25),
-            Description = "Lohn Januar", Reference = "SAL-2026-01",
-            RawText = "LOHN JANUAR 2026 ARBEITGEBER AG", TransactionCode = "TRF",
-            TransactionCodeDetail = "Gehalt", Debtor = "Arbeitgeber AG", Creditor = null,
-            TransactionSummary = bankSummary, JournalEntries = null,
-        };
-        var txMieteJan = new Transaction
-        {
-            Id = Guid.NewGuid(), Amount = -1500m,
-            ValueDate = new DateOnly(currentYear, 1, 28), BookDate = new DateOnly(currentYear, 1, 28),
-            Description = "Miete Januar", Reference = "MIETE-2026-01",
-            RawText = "MIETE JANUAR 2026 VERMIETER IMMOBILIEN", TransactionCode = "TRF",
-            TransactionCodeDetail = "Dauerauftrag", Debtor = null, Creditor = "Vermieter Immobilien AG",
-            TransactionSummary = bankSummary, JournalEntries = null,
-        };
-        var txMigros = new Transaction
-        {
-            Id = Guid.NewGuid(), Amount = -87.50m,
-            ValueDate = new DateOnly(currentYear, 1, 15), BookDate = new DateOnly(currentYear, 1, 15),
-            Description = "Migros Wocheneinkauf", Reference = "POS-20260115-001",
-            RawText = "MIGROS FILIALE BERN MARKTGASSE", TransactionCode = "POS",
-            TransactionCodeDetail = "Einkauf", Debtor = null, Creditor = "Migros",
-            TransactionSummary = bankSummary, JournalEntries = null,
-        };
+        var txLohnJan = Transaction.Create(
+            "LOHN JANUAR 2026 ARBEITGEBER AG", 5500m,
+            new DateOnly(currentYear, 1, 25), "Lohn Januar", "SAL-2026-01",
+            new DateOnly(currentYear, 1, 25), "TRF", "Gehalt",
+            "Arbeitgeber AG", null, bankSummary
+        );
+        var txMieteJan = Transaction.Create(
+            "MIETE JANUAR 2026 VERMIETER IMMOBILIEN", -1500m,
+            new DateOnly(currentYear, 1, 28), "Miete Januar", "MIETE-2026-01",
+            new DateOnly(currentYear, 1, 28), "TRF", "Dauerauftrag",
+            null, "Vermieter Immobilien AG", bankSummary
+        );
+        var txMigros = Transaction.Create(
+            "MIGROS FILIALE BERN MARKTGASSE", -87.50m,
+            new DateOnly(currentYear, 1, 15), "Migros Wocheneinkauf", "POS-20260115-001",
+            new DateOnly(currentYear, 1, 15), "POS", "Einkauf",
+            null, "Migros", bankSummary
+        );
         assignedTransactions.AddRange([txLohnJan, txMieteJan, txMigros]);
 
         // Offene Transaktionen (noch nicht zugeordnet)
         openTransactions.AddRange(
         [
-            new Transaction
-            {
-                Id = Guid.NewGuid(), Amount = -45.90m,
-                ValueDate = new DateOnly(currentYear, 3, 18), BookDate = new DateOnly(currentYear, 3, 18),
-                Description = "Coop Pronto Tankstelle", Reference = "POS-20260318-003",
-                RawText = "COOP PRONTO TANKSTELLE BERN", TransactionCode = "POS",
-                TransactionCodeDetail = "Einkauf", Debtor = null, Creditor = "Coop Pronto",
-                TransactionSummary = bankSummary, JournalEntries = null,
-            },
-            new Transaction
-            {
-                Id = Guid.NewGuid(), Amount = -29.00m,
-                ValueDate = new DateOnly(currentYear, 3, 20), BookDate = new DateOnly(currentYear, 3, 20),
-                Description = "Spotify Premium", Reference = "DD-20260320-001",
-                RawText = "SPOTIFY AB STOCKHOLM", TransactionCode = "DD",
-                TransactionCodeDetail = "Lastschrift", Debtor = null, Creditor = "Spotify AB",
-                TransactionSummary = bankSummary, JournalEntries = null,
-            },
-            new Transaction
-            {
-                Id = Guid.NewGuid(), Amount = -156.00m,
-                ValueDate = new DateOnly(currentYear, 3, 22), BookDate = new DateOnly(currentYear, 3, 22),
-                Description = "Swisscom Mobile Abo", Reference = "DD-20260322-002",
-                RawText = "SWISSCOM SCHWEIZ AG MOBILE ABO", TransactionCode = "DD",
-                TransactionCodeDetail = "Lastschrift", Debtor = null, Creditor = "Swisscom (Schweiz) AG",
-                TransactionSummary = bankSummary, JournalEntries = null,
-            },
-            new Transaction
-            {
-                Id = Guid.NewGuid(), Amount = -320.00m,
-                ValueDate = new DateOnly(currentYear, 3, 25), BookDate = new DateOnly(currentYear, 3, 25),
-                Description = "Zahnarzt Dr. Müller", Reference = "TRF-20260325-001",
-                RawText = "ZAHNARZTPRAXIS DR MUELLER BERN", TransactionCode = "TRF",
-                TransactionCodeDetail = "Überweisung", Debtor = null, Creditor = "Dr. med. dent. Müller",
-                TransactionSummary = bankSummary, JournalEntries = null,
-            },
-            new Transaction
-            {
-                Id = Guid.NewGuid(), Amount = -85.50m,
-                ValueDate = new DateOnly(currentYear, 3, 28), BookDate = new DateOnly(currentYear, 3, 28),
-                Description = "Migros Wocheneinkauf", Reference = "POS-20260328-002",
-                RawText = "MIGROS FILIALE BERN WANKDORF", TransactionCode = "POS",
-                TransactionCodeDetail = "Einkauf", Debtor = null, Creditor = "Migros",
-                TransactionSummary = bankSummary, JournalEntries = null,
-            },
+            Transaction.Create(
+                "COOP PRONTO TANKSTELLE BERN", -45.90m,
+                new DateOnly(currentYear, 3, 18), "Coop Pronto Tankstelle", "POS-20260318-003",
+                new DateOnly(currentYear, 3, 18), "POS", "Einkauf",
+                null, "Coop Pronto", bankSummary
+            ),
+            Transaction.Create(
+                "SPOTIFY AB STOCKHOLM", -29.00m,
+                new DateOnly(currentYear, 3, 20), "Spotify Premium", "DD-20260320-001",
+                new DateOnly(currentYear, 3, 20), "DD", "Lastschrift",
+                null, "Spotify AB", bankSummary
+            ),
+            Transaction.Create(
+                "SWISSCOM SCHWEIZ AG MOBILE ABO", -156.00m,
+                new DateOnly(currentYear, 3, 22), "Swisscom Mobile Abo", "DD-20260322-002",
+                new DateOnly(currentYear, 3, 22), "DD", "Lastschrift",
+                null, "Swisscom (Schweiz) AG", bankSummary
+            ),
+            Transaction.Create(
+                "ZAHNARZTPRAXIS DR MUELLER BERN", -320.00m,
+                new DateOnly(currentYear, 3, 25), "Zahnarzt Dr. Müller", "TRF-20260325-001",
+                new DateOnly(currentYear, 3, 25), "TRF", "Überweisung",
+                null, "Dr. med. dent. Müller", bankSummary
+            ),
+            Transaction.Create(
+                "MIGROS FILIALE BERN WANKDORF", -85.50m,
+                new DateOnly(currentYear, 3, 28), "Migros Wocheneinkauf", "POS-20260328-002",
+                new DateOnly(currentYear, 3, 28), "POS", "Einkauf",
+                null, "Migros", bankSummary
+            ),
         ]);
 
         await context.SaveChangesAsync();
@@ -280,86 +198,46 @@ public static class InfrastructureServiceCollectionExtensions
 
         // Journal entries
         context.JournalEntries.AddRange(
-            new JournalEntry
-            {
-                Id = Guid.NewGuid(), AccountingPeriod = period,
-                ValueDate = new DateOnly(currentYear, 1, 25),
-                Description = "Lohn Januar",
-                Amount = 5500m, DebitAccount = bankAccount, CreditAccount = salary,
-                Transaction = txLohnJan,
-            },
-            new JournalEntry
-            {
-                Id = Guid.NewGuid(), AccountingPeriod = period,
-                ValueDate = new DateOnly(currentYear, 1, 28),
-                Description = "Miete Januar",
-                Amount = 1500m, DebitAccount = rent, CreditAccount = bankAccount,
-                Transaction = txMieteJan,
-            },
-            new JournalEntry
-            {
-                Id = Guid.NewGuid(), AccountingPeriod = period,
-                ValueDate = new DateOnly(currentYear, 1, 15),
-                Description = "Migros Wocheneinkauf",
-                Amount = 87.50m, DebitAccount = groceries, CreditAccount = bankAccount,
-                Transaction = txMigros,
-            },
-            new JournalEntry
-            {
-                Id = Guid.NewGuid(), AccountingPeriod = period,
-                ValueDate = new DateOnly(currentYear, 2, 3),
-                Description = "SBB GA Monatsrate",
-                Amount = 195m, DebitAccount = transport, CreditAccount = bankAccount,
-                Transaction = null,
-            },
-            new JournalEntry
-            {
-                Id = Guid.NewGuid(), AccountingPeriod = period,
-                ValueDate = new DateOnly(currentYear, 2, 10),
-                Description = "Kino & Abendessen",
-                Amount = 65m, DebitAccount = leisure, CreditAccount = creditCard,
-                Transaction = null,
-            },
-            new JournalEntry
-            {
-                Id = Guid.NewGuid(), AccountingPeriod = period,
-                ValueDate = new DateOnly(currentYear, 2, 25),
-                Description = "Lohn Februar",
-                Amount = 5500m, DebitAccount = bankAccount, CreditAccount = salary,
-                Transaction = null,
-            },
-            new JournalEntry
-            {
-                Id = Guid.NewGuid(), AccountingPeriod = period,
-                ValueDate = new DateOnly(currentYear, 2, 28),
-                Description = "Miete Februar",
-                Amount = 1500m, DebitAccount = rent, CreditAccount = bankAccount,
-                Transaction = null,
-            },
-            new JournalEntry
-            {
-                Id = Guid.NewGuid(), AccountingPeriod = period,
-                ValueDate = new DateOnly(currentYear, 3, 5),
-                Description = "Coop Grosseinkauf",
-                Amount = 124.30m, DebitAccount = groceries, CreditAccount = bankAccount,
-                Transaction = null,
-            },
-            new JournalEntry
-            {
-                Id = Guid.NewGuid(), AccountingPeriod = period,
-                ValueDate = new DateOnly(currentYear, 3, 12),
-                Description = "Bargeldbezug",
-                Amount = 200m, DebitAccount = cash, CreditAccount = bankAccount,
-                Transaction = null,
-            },
-            new JournalEntry
-            {
-                Id = Guid.NewGuid(), AccountingPeriod = period,
-                ValueDate = new DateOnly(currentYear, 3, 15),
-                Description = "Kreditkarte Abrechnung",
-                Amount = 65m, DebitAccount = creditCard, CreditAccount = bankAccount,
-                Transaction = null,
-            }
+            JournalEntry.Create(
+                new DateOnly(currentYear, 1, 25), "Lohn Januar",
+                5500m, bankAccount, salary, period, txLohnJan
+            ),
+            JournalEntry.Create(
+                new DateOnly(currentYear, 1, 28), "Miete Januar",
+                1500m, rent, bankAccount, period, txMieteJan
+            ),
+            JournalEntry.Create(
+                new DateOnly(currentYear, 1, 15), "Migros Wocheneinkauf",
+                87.50m, groceries, bankAccount, period, txMigros
+            ),
+            JournalEntry.Create(
+                new DateOnly(currentYear, 2, 3), "SBB GA Monatsrate",
+                195m, transport, bankAccount, period
+            ),
+            JournalEntry.Create(
+                new DateOnly(currentYear, 2, 10), "Kino & Abendessen",
+                65m, leisure, creditCard, period
+            ),
+            JournalEntry.Create(
+                new DateOnly(currentYear, 2, 25), "Lohn Februar",
+                5500m, bankAccount, salary, period
+            ),
+            JournalEntry.Create(
+                new DateOnly(currentYear, 2, 28), "Miete Februar",
+                1500m, rent, bankAccount, period
+            ),
+            JournalEntry.Create(
+                new DateOnly(currentYear, 3, 5), "Coop Grosseinkauf",
+                124.30m, groceries, bankAccount, period
+            ),
+            JournalEntry.Create(
+                new DateOnly(currentYear, 3, 12), "Bargeldbezug",
+                200m, cash, bankAccount, period
+            ),
+            JournalEntry.Create(
+                new DateOnly(currentYear, 3, 15), "Kreditkarte Abrechnung",
+                65m, creditCard, bankAccount, period
+            )
         );
 
         await context.SaveChangesAsync();

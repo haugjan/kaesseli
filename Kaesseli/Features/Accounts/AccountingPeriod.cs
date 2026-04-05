@@ -1,12 +1,25 @@
-﻿namespace Kaesseli.Features.Accounts;
+namespace Kaesseli.Features.Accounts;
 
 public class AccountingPeriod
 {
-    // ReSharper disable UnusedAutoPropertyAccessor.Global
-    public required Guid Id { get; init; }
-    public required string Description { get; init; }
+    private AccountingPeriod() { }
 
-    public required DateOnly FromInclusive { get; init; }
-    public required DateOnly ToInclusive { get; init; }
-    // ReSharper restore UnusedAutoPropertyAccessor.Global
+    public Guid Id { get; private init; }
+    public string Description { get; private init; } = null!;
+    public DateOnly FromInclusive { get; private init; }
+    public DateOnly ToInclusive { get; private init; }
+
+    public static AccountingPeriod Create(string description, DateOnly fromInclusive, DateOnly toInclusive)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(description);
+        ArgumentOutOfRangeException.ThrowIfGreaterThan(fromInclusive, toInclusive);
+
+        return new AccountingPeriod
+        {
+            Id = Guid.NewGuid(),
+            Description = description,
+            FromInclusive = fromInclusive,
+            ToInclusive = toInclusive,
+        };
+    }
 }

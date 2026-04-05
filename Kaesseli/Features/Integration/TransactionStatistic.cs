@@ -2,6 +2,22 @@ namespace Kaesseli.Features.Integration;
 
 public class TransactionStatistic
 {
-    public required Guid Id { get;init; }
-    public required int TotalOpenTransaction { get; set; }
+    private TransactionStatistic() { }
+
+    public Guid Id { get; private init; }
+    public int TotalOpenTransaction { get; private set; }
+
+    public static TransactionStatistic Create(int totalOpenTransaction)
+    {
+        return new TransactionStatistic
+        {
+            Id = Guid.NewGuid(),
+            TotalOpenTransaction = totalOpenTransaction,
+        };
+    }
+
+    public void ChangeTotalBy(int amount)
+    {
+        TotalOpenTransaction += amount;
+    }
 }

@@ -8,8 +8,15 @@ public sealed class SmartFaker<T> : Faker<T>
 {
     public SmartFaker()
     {
-        var constructors = typeof(T).GetConstructors();
-        if (!constructors.Any(c => c.GetParameters().Length == 0))
+        var constructors = typeof(T).GetConstructors(
+            BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
+        var parameterlessCtor = constructors.FirstOrDefault(c => c.GetParameters().Length == 0);
+        if (parameterlessCtor != null && !parameterlessCtor.IsPublic)
+        {
+            // Private/protected parameterless constructor - use reflection to invoke it
+            CustomInstantiator(_ => (T)parameterlessCtor.Invoke(null));
+        }
+        else if (parameterlessCtor == null)
         {
             var ctor = constructors[0];
             CustomInstantiator(f =>
@@ -32,7 +39,7 @@ public sealed class SmartFaker<T> : Faker<T>
 
     private static void SetPropertyIfCanWrite(PropertyInfo prop, Bogus.Faker faker, T obj)
     {
-        if (!prop.CanWrite)
+        if (prop.SetMethod == null)
             return;
 
         var value = GetValueByType(prop.PropertyType, faker);
@@ -83,20 +90,24 @@ public sealed class SmartFaker<T> : Faker<T>
                     )
                 )
                 .ToDictionary(kvp => kvp.Key, kvp => kvp.Value),
-            { IsPrimitive: false } t
+            { IsPrimitive: false, IsAbstract: false } t
                 when t != typeof(string)
                     && !t.IsEnum
-                    && t.GetConstructor(Type.EmptyTypes) != null => Activator.CreateInstance(
-                t
+                    && t.GetConstructor(
+                        BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance,
+                        null, Type.EmptyTypes, null) != null => Activator.CreateInstance(
+                t, nonPublic: true
             ) switch
             {
                 null => null,
                 var instance => PopulateComplexType(instance, faker),
             },
-            { IsPrimitive: false } t
+            { IsPrimitive: false, IsAbstract: false } t
                 when t != typeof(string)
                     && !t.IsEnum
-                    && t.GetConstructor(Type.EmptyTypes) == null => TryInvokeFirstConstructor(t, faker),
+                    && t.GetConstructor(
+                        BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance,
+                        null, Type.EmptyTypes, null) == null => TryInvokeFirstConstructor(t, faker),
             _ => null,
         };
         return value;
@@ -106,7 +117,7 @@ public sealed class SmartFaker<T> : Faker<T>
     {
         foreach (var prop in instance.GetType().GetProperties())
         {
-            if (prop.SetMethod != null && (!prop.CanWrite || prop.SetMethod.IsPublic == false))
+            if (prop.SetMethod == null)
                 continue;
 
             var propValue = GetValueByType(prop.PropertyType, faker);
@@ -119,7 +130,8 @@ public sealed class SmartFaker<T> : Faker<T>
 
     private static object? TryInvokeFirstConstructor(Type type, Bogus.Faker faker)
     {
-        var ctor = type.GetConstructors().FirstOrDefault(c => c.IsPublic);
+        var ctor = type.GetConstructors(
+            BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance).FirstOrDefault();
         if (ctor == null) return null;
         var parameters = ctor.GetParameters()
             .Select(p => GetValueByType(p.ParameterType, faker))

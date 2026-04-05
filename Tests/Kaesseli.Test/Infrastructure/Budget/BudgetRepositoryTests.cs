@@ -10,7 +10,12 @@ namespace Kaesseli.Test.Infrastructure.Budget;
 
 public class BudgetRepositoryTests
 {
-    private static readonly Guid ExpectedAccountPeriodId = Guid.NewGuid();
+    private static readonly AccountingPeriod ExpectedAccountPeriod =
+        AccountingPeriod.Create(
+            "Test Period",
+            new DateOnly(year: 2000, month: 1, day: 1),
+            new DateOnly(year: 2000, month: 12, day: 31)
+        );
 
     private static KaesseliContext CreateContext(DbContextOptions<KaesseliContext> options)
     {
@@ -37,7 +42,7 @@ public class BudgetRepositoryTests
         // Act
         var entries = (
             await repository.GetBudgetEntries(
-                ExpectedAccountPeriodId,
+                ExpectedAccountPeriod.Id,
                 accountId: null,
                 accountType: null,
                 CancellationToken.None
@@ -46,51 +51,27 @@ public class BudgetRepositoryTests
 
         // Assert
         entries.Length.ShouldBe(1);
-        entries.All(e => e.AccountingPeriod.Id == ExpectedAccountPeriodId).ShouldBeTrue();
+        entries.All(e => e.AccountingPeriod.Id == ExpectedAccountPeriod.Id).ShouldBeTrue();
     }
 
     private static List<BudgetEntry> CreateBudgetEntries() =>
         [
-            new()
-            {
-                Id = Guid.NewGuid(),
-                Description = "Description 1",
-                Amount = 42.42m,
-                Account = new Account
-                {
-                    Id = Guid.NewGuid(),
-                    Name = "Account 1",
-                    Type = AccountType.Revenue,
-                    Icon = new AccountIcon("favorite", "blue"),
-                },
-                AccountingPeriod = new AccountingPeriod
-                {
-                    Id = ExpectedAccountPeriodId,
-                    FromInclusive = new DateOnly(year: 2000, month: 1, day: 1),
-                    ToInclusive = new DateOnly(year: 2000, month: 12, day: 31),
-                    Description = string.Empty,
-                },
-            },
-            new()
-            {
-                Id = Guid.NewGuid(),
-                Description = "Description 2",
-                Amount = 24.24m,
-                Account = new Account
-                {
-                    Id = Guid.NewGuid(),
-                    Name = "Account 2",
-                    Type = AccountType.Expense,
-                    Icon = new AccountIcon("favorite", "blue"),
-                },
-                AccountingPeriod = new AccountingPeriod
-                {
-                    Id = Guid.NewGuid(),
-                    FromInclusive = new DateOnly(year: 2001, month: 1, day: 1),
-                    ToInclusive = new DateOnly(year: 2001, month: 12, day: 31),
-                    Description = string.Empty,
-                },
-            },
+            BudgetEntry.Create(
+                description: "Description 1",
+                amount: 42.42m,
+                account: Account.Create("Account 1", AccountType.Revenue, new AccountIcon("favorite", "blue")),
+                accountingPeriod: ExpectedAccountPeriod
+            ),
+            BudgetEntry.Create(
+                description: "Description 2",
+                amount: 24.24m,
+                account: Account.Create("Account 2", AccountType.Expense, new AccountIcon("favorite", "blue")),
+                accountingPeriod: AccountingPeriod.Create(
+                    "Test Period 2",
+                    new DateOnly(year: 2001, month: 1, day: 1),
+                    new DateOnly(year: 2001, month: 12, day: 31)
+                )
+            ),
         ];
 
     [Fact]
@@ -101,26 +82,12 @@ public class BudgetRepositoryTests
             .UseInMemoryDatabase(databaseName: "SetBudgetDb")
             .Options;
 
-        var newEntry = new BudgetEntry
-        {
-            Id = Guid.NewGuid(),
-            Account = new Account
-            {
-                Id = Guid.NewGuid(),
-                Name = "Account",
-                Type = AccountType.Expense,
-                Icon = new AccountIcon("favorite", "blue"),
-            },
-            Description = "Description",
-            Amount = 11.11m,
-            AccountingPeriod = new AccountingPeriod
-            {
-                Id = Guid.NewGuid(),
-                FromInclusive = default,
-                ToInclusive = default,
-                Description = string.Empty,
-            },
-        };
+        var newEntry = BudgetEntry.Create(
+            description: "Description",
+            amount: 11.11m,
+            account: Account.Create("Account", AccountType.Expense, new AccountIcon("favorite", "blue")),
+            accountingPeriod: AccountingPeriod.Create("Test Period", default, default)
+        );
 
         await using var context = CreateContext(options);
         var repository = new BudgetRepository(context);

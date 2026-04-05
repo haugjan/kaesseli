@@ -96,7 +96,7 @@ internal class TransactionRepository : ITransactionRepository
 
         var totalOpen = allTransactions.Count(t => !transactionIdsWithJournal.Contains(t.Id));
 
-        statistic = new TransactionStatistic { Id = Guid.NewGuid(), TotalOpenTransaction = totalOpen };
+        statistic = TransactionStatistic.Create(totalOpen);
         _context.TransactionStatistics.Add(statistic);
         await _context.SaveChangesAsync(cancellationToken);
 
@@ -111,7 +111,7 @@ internal class TransactionRepository : ITransactionRepository
     {
         var statistic = await _context.TransactionStatistics.FirstOrDefaultAsync(cancellationToken);
         statistic = AddStatisticEntryIfNull(statistic);
-        statistic.TotalOpenTransaction += notificationAmount;
+        statistic.ChangeTotalBy(notificationAmount);
         await _context.SaveChangesAsync(cancellationToken);
     }
 
@@ -119,7 +119,7 @@ internal class TransactionRepository : ITransactionRepository
     {
         if (statistic is not null) return statistic;
 
-        statistic = new TransactionStatistic { Id = Guid.NewGuid(), TotalOpenTransaction = 0 };
+        statistic = TransactionStatistic.Create(0);
         _context.TransactionStatistics.Add(statistic);
 
         return statistic;

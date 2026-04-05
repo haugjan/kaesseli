@@ -1,11 +1,10 @@
-
 namespace Kaesseli.Features.Accounts;
 
 public static class AddAccountingPeriod
 {
-    // ReSharper disable once ClassNeverInstantiated.Global
     public record Query(DateOnly FromInclusive, DateOnly ToInclusive, string? Description);
 
+    // ReSharper disable once UnusedType.Global
     public interface IHandler
     {
         Task<Guid> Handle(Query request, CancellationToken cancellationToken);
@@ -16,17 +15,13 @@ public static class AddAccountingPeriod
     {
         public async Task<Guid> Handle(Query request, CancellationToken cancellationToken)
         {
+            var description = string.IsNullOrWhiteSpace(request.Description)
+                ? $"{request.FromInclusive:d} - {request.ToInclusive:d}"
+                : request.Description;
             var accountingPeriod = await accountRepository.AddAccountingPeriod(
-                                       accountingPeriod: new AccountingPeriod
-                                       {
-                                           Id = Guid.NewGuid(),
-                                           Description = string.IsNullOrWhiteSpace(request.Description)
-                                                             ? $"{request.FromInclusive:d} - {request.ToInclusive:d}"
-                                                             : request.Description,
-                                           FromInclusive = request.FromInclusive,
-                                           ToInclusive = request.ToInclusive
-                                       },
-                                       cancellationToken);
+                AccountingPeriod.Create(description, request.FromInclusive, request.ToInclusive),
+                cancellationToken
+            );
             return accountingPeriod.Id;
         }
     }

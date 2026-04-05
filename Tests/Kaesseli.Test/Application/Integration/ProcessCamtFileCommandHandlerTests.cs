@@ -40,14 +40,8 @@ public class ProcessCamtFileCommandHandlerTests
         _accountRepoMock
             .Setup(repo => repo.GetAccount(fakeCommand.AccountId, cancellationToken))
             .ReturnsAsync(
-                (Guid accountId, CancellationToken _) =>
-                    new Account
-                    {
-                        Id = accountId,
-                        Name = "Account",
-                        Type = AccountType.Expense,
-                        Icon = new AccountIcon("favorite", "blue"),
-                    }
+                (Guid _, CancellationToken _) =>
+                    Account.Create("Account", AccountType.Expense, new AccountIcon("favorite", "blue"))
             );
         _camtProcessorMock
             .Setup(x => x.ReadCamtFile(fakeCommand.Content, It.IsAny<CancellationToken>()))

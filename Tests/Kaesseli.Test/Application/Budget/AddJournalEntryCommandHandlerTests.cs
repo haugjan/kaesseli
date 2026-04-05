@@ -16,6 +16,8 @@ public class AddJournalEntryCommandHandlerTests
         var accountRepo = new Mock<IAccountRepository>();
         var command = new SmartFaker<SetBudget.Query>().Generate();
         var cancellationToken = new CancellationToken();
+        var account = Account.Create("Account", AccountType.Expense, new AccountIcon("favorite", "blue"));
+        var accountingPeriod = AccountingPeriod.Create("Test Period", default, default);
 
         mockRepo
             .Setup(repo =>
@@ -29,27 +31,10 @@ public class AddJournalEntryCommandHandlerTests
             .ReturnsAsync((BudgetEntry newBudgetEntry, CancellationToken _) => newBudgetEntry);
         accountRepo
             .Setup(repo => repo.GetAccount(It.IsAny<Guid>(), cancellationToken))
-            .ReturnsAsync(() =>
-                new Account
-                {
-                    Id = Guid.NewGuid(),
-                    Name = "Account",
-                    Type = AccountType.Expense,
-                    Icon = new AccountIcon("favorite", "blue"),
-                }
-            );
+            .ReturnsAsync(account);
         accountRepo
             .Setup(repo => repo.GetAccountingPeriod(It.IsAny<Guid>(), cancellationToken))
-            .ReturnsAsync(
-                (Guid accountingPeriodId, CancellationToken _) =>
-                    new AccountingPeriod
-                    {
-                        Id = accountingPeriodId,
-                        FromInclusive = default,
-                        ToInclusive = default,
-                        Description = string.Empty,
-                    }
-            );
+            .ReturnsAsync(accountingPeriod);
 
         var handler = new SetBudget.Handler(mockRepo.Object, accountRepo.Object);
 
@@ -62,7 +47,7 @@ public class AddJournalEntryCommandHandlerTests
                 It.Is<BudgetEntry>(entry =>
                     entry.Amount == command.Amount
                     && entry.Description == command.Description
-                    && entry.AccountingPeriod.Id == command.AccountingPeriodId
+                    && entry.AccountingPeriod.Id == accountingPeriod.Id
                     && entry.Id == result
                 ),
                 cancellationToken
@@ -78,6 +63,8 @@ public class AddJournalEntryCommandHandlerTests
         var accountRepo = new Mock<IAccountRepository>();
         var command = new SmartFaker<SetBudget.Query>().Generate();
         var cancellationToken = new CancellationToken();
+        var account = Account.Create("Account", AccountType.Expense, new AccountIcon("favorite", "blue"));
+        var accountingPeriod = AccountingPeriod.Create("Test Period", default, default);
 
         mockRepo
             .Setup(repo =>
@@ -91,27 +78,10 @@ public class AddJournalEntryCommandHandlerTests
             .ReturnsAsync((BudgetEntry newBudgetEntry, CancellationToken _) => newBudgetEntry);
         accountRepo
             .Setup(repo => repo.GetAccount(It.IsAny<Guid>(), cancellationToken))
-            .ReturnsAsync(() =>
-                new Account
-                {
-                    Id = Guid.NewGuid(),
-                    Name = "Account",
-                    Type = AccountType.Expense,
-                    Icon = new AccountIcon("favorite", "blue"),
-                }
-            );
+            .ReturnsAsync(account);
         accountRepo
             .Setup(repo => repo.GetAccountingPeriod(It.IsAny<Guid>(), cancellationToken))
-            .ReturnsAsync(
-                (Guid accountingPeriodId, CancellationToken _) =>
-                    new AccountingPeriod
-                    {
-                        Id = accountingPeriodId,
-                        FromInclusive = default,
-                        ToInclusive = default,
-                        Description = string.Empty,
-                    }
-            );
+            .ReturnsAsync(accountingPeriod);
 
         var handler = new SetBudget.Handler(mockRepo.Object, accountRepo.Object);
 
@@ -125,7 +95,7 @@ public class AddJournalEntryCommandHandlerTests
                     entry.Amount == command.Amount
                     && entry.Description == command.Description
                     && entry.Id == result
-                    && entry.AccountingPeriod.Id == command.AccountingPeriodId
+                    && entry.AccountingPeriod.Id == accountingPeriod.Id
                 ),
                 cancellationToken
             )

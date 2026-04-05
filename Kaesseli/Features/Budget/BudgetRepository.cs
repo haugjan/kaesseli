@@ -60,8 +60,7 @@ public class BudgetRepository(KaesseliContext context) : IBudgetRepository
             return newBudgetEntryEntity;
         }
 
-        currentEntry.Amount = newBudgetEntryEntity.Amount;
-        currentEntry.Description = newBudgetEntryEntity.Description;
+        currentEntry.UpdateBudget(newBudgetEntryEntity.Amount, newBudgetEntryEntity.Description);
         await context.SaveChangesAsync(ct);
         return currentEntry;
     }

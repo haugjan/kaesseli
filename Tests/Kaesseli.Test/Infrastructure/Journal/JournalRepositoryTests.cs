@@ -21,7 +21,7 @@ public class JournalRepositoryTests
     public async Task GetJournalEntries_ShouldReturnFilteredEntries()
     {
         // Arrange
-        var expectedPeriodId = Guid.NewGuid();
+        var expectedPeriod = AccountingPeriod.Create("Test Period", default, default);
 
         var options = new DbContextOptionsBuilder<KaesseliContext>()
             .UseInMemoryDatabase(databaseName: "GetJournalEntriesDb")
@@ -30,13 +30,7 @@ public class JournalRepositoryTests
         var firstEntry = new SmartFaker<JournalEntry>()
             .RuleFor(
                 be => be.AccountingPeriod,
-                value: new AccountingPeriod
-                {
-                    Id = expectedPeriodId,
-                    Description = string.Empty,
-                    FromInclusive = default,
-                    ToInclusive = default,
-                }
+                value: expectedPeriod
             )
             .Generate();
         var secondEntry = new SmartFaker<JournalEntry>().Generate();
@@ -50,7 +44,7 @@ public class JournalRepositoryTests
         // Act
         var entries = (
             await repository.GetJournalEntries(
-                expectedPeriodId,
+                expectedPeriod.Id,
                 accountId: null,
                 accountType: null,
                 CancellationToken.None
@@ -59,7 +53,7 @@ public class JournalRepositoryTests
 
         // Assert
         entries.Length.ShouldBe(1);
-        entries.All(e => e.AccountingPeriod.Id == expectedPeriodId).ShouldBeTrue();
+        entries.All(e => e.AccountingPeriod.Id == expectedPeriod.Id).ShouldBeTrue();
     }
 
     [Fact]
@@ -70,35 +64,16 @@ public class JournalRepositoryTests
             .UseInMemoryDatabase(databaseName: "AddJournalEntryDb")
             .Options;
 
-        var newEntry = new JournalEntry
-        {
-            Id = Guid.NewGuid(),
-            CreditAccount = new Account
-            {
-                Id = Guid.NewGuid(),
-                Name = "CreditAccount",
-                Type = AccountType.Asset,
-                Icon = new AccountIcon("favorite", "blue"),
-            },
-            DebitAccount = new Account
-            {
-                Id = Guid.NewGuid(),
-                Name = "DebitAccount",
-                Type = AccountType.Asset,
-                Icon = new AccountIcon("favorite", "blue"),
-            },
-            ValueDate = DateOnly.FromDateTime(DateTime.Now),
-            Description = "Description",
-            Amount = 11.11m,
-            Transaction = null,
-            AccountingPeriod = new AccountingPeriod
-            {
-                Id = Guid.NewGuid(),
-                FromInclusive = default,
-                ToInclusive = default,
-                Description = string.Empty,
-            },
-        };
+        var creditAccount = Account.Create("CreditAccount", AccountType.Asset, new AccountIcon("favorite", "blue"));
+        var debitAccount = Account.Create("DebitAccount", AccountType.Asset, new AccountIcon("favorite", "blue"));
+        var newEntry = JournalEntry.Create(
+            valueDate: DateOnly.FromDateTime(DateTime.Now),
+            description: "Description",
+            amount: 11.11m,
+            debitAccount: debitAccount,
+            creditAccount: creditAccount,
+            accountingPeriod: AccountingPeriod.Create("Test Period", default, default)
+        );
 
         await using var context = CreateContext(options);
         var repository = new JournalRepository(context);

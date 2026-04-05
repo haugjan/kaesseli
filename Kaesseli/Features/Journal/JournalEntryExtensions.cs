@@ -10,15 +10,5 @@ internal static class JournalEntryExtensions
         Account debitAccount,
         Account creditAccount,
         AccountingPeriod accountingPeriod) =>
-        new()
-        {
-            Id = Guid.NewGuid(),
-            ValueDate = valueDate,
-            Amount = request.Amount,
-            Description = request.Description,
-            CreditAccount = creditAccount,
-            DebitAccount = debitAccount,
-            Transaction = null,
-            AccountingPeriod = accountingPeriod
-        };
+        JournalEntry.Create(valueDate, request.Description, request.Amount, debitAccount, creditAccount, accountingPeriod);
 }

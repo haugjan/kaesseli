@@ -11,21 +11,9 @@ public class SetBudgetCommandExtensionsTests
     public void ToBudgetEntry_ReturnBudgetEntry()
     {
         //Arrange
-        var account = new Account
-        {
-            Id = Guid.NewGuid(),
-            Name = "Account",
-            Type = AccountType.Expense,
-            Icon = new AccountIcon("favorite", "blue"),
-        };
+        var account = Account.Create("Account", AccountType.Expense, new AccountIcon("favorite", "blue"));
         var budgetEntryCommand = new SetBudget.Query(Amount: 42, Description: "Description", AccountId: Guid.NewGuid(), AccountingPeriodId: Guid.NewGuid());
-        var accountingPeriod = new AccountingPeriod
-        {
-            Id = Guid.NewGuid(),
-            Description = string.Empty,
-            FromInclusive = default,
-            ToInclusive = default,
-        };
+        var accountingPeriod = AccountingPeriod.Create("Test Period", default, default);
 
         //Act
         var budgetEntry = budgetEntryCommand.ToBudgetEntry(account, accountingPeriod);

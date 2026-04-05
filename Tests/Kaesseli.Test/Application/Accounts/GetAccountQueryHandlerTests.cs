@@ -28,15 +28,14 @@ public class GetAccountQueryHandlerTests
                 repo.GetAccount(It.Is<Guid>(guid => guid == expectedAccount.Id), cancellationToken)
             )
             .ReturnsAsync(expectedAccount);
+        var accountingPeriod = AccountingPeriod.Create(
+            "Test Period",
+            new DateOnly(year: 2023, month: 1, day: 1),
+            new DateOnly(year: 2024, month: 1, day: 1)
+        );
         mockAccountRepo
             .Setup(repo => repo.GetAccountingPeriod(periodId, cancellationToken))
-            .ReturnsAsync(new AccountingPeriod
-            {
-                Id = periodId,
-                Description = string.Empty,
-                FromInclusive = new DateOnly(year: 2023, month: 1, day: 1),
-                ToInclusive = new DateOnly(year: 2024, month: 1, day: 1),
-            });
+            .ReturnsAsync(accountingPeriod);
         mockJournalRepo
             .Setup(repo => repo.GetJournalEntries(
                 periodId, expectedAccount.Id, null, cancellationToken))

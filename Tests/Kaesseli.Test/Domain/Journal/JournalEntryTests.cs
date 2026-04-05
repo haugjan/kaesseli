@@ -10,72 +10,36 @@ public class JournalEntryTests
     public void CreatingJournalEntry_WithDifferentDebitAndCreditAccount_ShouldSucceed()
     {
         // Arrange
-        var debitAccount = new Account
-        {
-            Id = Guid.NewGuid(),
-            Name = "A",
-            Type = AccountType.Expense,
-            Icon = new AccountIcon("favorite", "blue"),
-        };
-        var creditAccount = new Account
-        {
-            Id = Guid.NewGuid(),
-            Name = "B",
-            Type = AccountType.Expense,
-            Icon = new AccountIcon("favorite", "blue"),
-        };
+        var debitAccount = Account.Create("A", AccountType.Expense, new AccountIcon("favorite", "blue"));
+        var creditAccount = Account.Create("B", AccountType.Expense, new AccountIcon("favorite", "blue"));
 
         // Act & Assert
-        _ = new JournalEntry
-        {
-            Id = Guid.NewGuid(),
-            ValueDate = DateOnly.FromDateTime(DateTime.Now),
-            Description = "Test Description",
-            Amount = 100m,
-            DebitAccount = debitAccount,
-            CreditAccount = creditAccount,
-            Transaction = null,
-            AccountingPeriod = new AccountingPeriod
-            {
-                Id = Guid.NewGuid(),
-                FromInclusive = default,
-                ToInclusive = default,
-                Description = string.Empty,
-            },
-        };
+        _ = JournalEntry.Create(
+            valueDate: DateOnly.FromDateTime(DateTime.Now),
+            description: "Test Description",
+            amount: 100m,
+            debitAccount: debitAccount,
+            creditAccount: creditAccount,
+            accountingPeriod: AccountingPeriod.Create("Test Period", default, default)
+        );
     }
 
     [Fact]
     public void CreatingJournalEntry_WithIdenticalDebitAndCreditAccount_ShouldThrowException()
     {
         // Arrange
-        var account = new Account
-        {
-            Id = Guid.NewGuid(),
-            Name = "A",
-            Type = AccountType.Expense,
-            Icon = new AccountIcon("favorite", "blue"),
-        };
+        var account = Account.Create("A", AccountType.Expense, new AccountIcon("favorite", "blue"));
 
         // Act & Assert
         Assert.Throws<AccountsMustNotBeSameException>(() =>
-            new JournalEntry
-            {
-                Id = Guid.NewGuid(),
-                ValueDate = DateOnly.FromDateTime(DateTime.Now),
-                Description = "Test Description",
-                Amount = 100m,
-                DebitAccount = account,
-                CreditAccount = account,
-                Transaction = null,
-                AccountingPeriod = new AccountingPeriod
-                {
-                    Id = Guid.NewGuid(),
-                    FromInclusive = default,
-                    ToInclusive = default,
-                    Description = string.Empty,
-                },
-            }
+            JournalEntry.Create(
+                valueDate: DateOnly.FromDateTime(DateTime.Now),
+                description: "Test Description",
+                amount: 100m,
+                debitAccount: account,
+                creditAccount: account,
+                accountingPeriod: AccountingPeriod.Create("Test Period", default, default)
+            )
         );
     }
 }

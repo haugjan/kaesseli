@@ -64,7 +64,19 @@ public static class GetAccountsSummary
             var currentBudget = AccountBalanceCalculator.GetCurrentBudget(account, budgetEntries, accountingPeriod, today);
             var budgetBalance = AccountBalanceCalculator.GetBudgetBalance(account.Type, currentBudget, accountBalance);
 
-            return account.ToAccountSummary(accountBalance, budget, budgetPerMonth, budgetPerYear, currentBudget, budgetBalance);
+            return new Result(
+                Id: account.Id,
+                Name: account.Name,
+                Icon: account.Icon.Name,
+                IconColor: account.Icon.Color,
+                Type: account.Type.DisplayName(),
+                TypeId: account.Type,
+                AccountBalance: accountBalance,
+                Budget: budget,
+                BudgetPerMonth: budgetPerMonth,
+                BudgetPerYear: budgetPerYear,
+                BudgetBalance: budgetBalance,
+                CurrentBudget: currentBudget);
         }
     }
 }

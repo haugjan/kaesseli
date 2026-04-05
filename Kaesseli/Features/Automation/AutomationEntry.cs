@@ -1,15 +1,23 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+namespace Kaesseli.Features.Automation;
 
-namespace Kaesseli.Features.Automation
+public class AutomationEntry
 {
-    public class AutomationEntry
+    private AutomationEntry() { }
+
+    public Guid Id { get; private init; }
+    public string AutomationText { get; private init; } = null!;
+    public IEnumerable<AutomationEntryPart> Parts { get; private init; } = null!;
+
+    public static AutomationEntry Create(string automationText, IEnumerable<AutomationEntryPart> parts)
     {
-        public required Guid Id { get; init; }
-        public required string AutomationText { get; init; }
-        public required IEnumerable<AutomationEntryPart> Parts { get; init; }
+        ArgumentException.ThrowIfNullOrWhiteSpace(automationText);
+        ArgumentNullException.ThrowIfNull(parts);
+
+        return new AutomationEntry
+        {
+            Id = Guid.NewGuid(),
+            AutomationText = automationText,
+            Parts = parts,
+        };
     }
 }

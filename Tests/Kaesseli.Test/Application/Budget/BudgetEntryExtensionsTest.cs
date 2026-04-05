@@ -11,26 +11,14 @@ public class BudgetEntryExtensionsTest
     public void ToGetBudgetEntriesQueryResult_ReturnsCorrectQueryResult()
     {
         //Arrange
-        var budgetEntry = new BudgetEntry
-        {
-            Id = Guid.NewGuid(),
-            Description = "Description",
-            Amount = 42,
-            Account = new Account
-            {
-                Id = Guid.NewGuid(),
-                Name = "Name",
-                Type = AccountType.Expense,
-                Icon = new AccountIcon("favorite", "blue"),
-            },
-            AccountingPeriod = new AccountingPeriod
-            {
-                Id = Guid.NewGuid(),
-                FromInclusive = default,
-                ToInclusive = default,
-                Description = string.Empty,
-            },
-        };
+        var account = Account.Create("Name", AccountType.Expense, new AccountIcon("favorite", "blue"));
+        var accountingPeriod = AccountingPeriod.Create("Test Period", default, default);
+        var budgetEntry = BudgetEntry.Create(
+            description: "Description",
+            amount: 42,
+            account: account,
+            accountingPeriod: accountingPeriod
+        );
 
         //Act
         var queryResult = budgetEntry.ToGetBudgetEntriesQueryResult();

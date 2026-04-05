@@ -8,12 +8,5 @@ internal static class SetBudgetCommandExtensions
         this SetBudget.Query budgetCommand,
         Account account,
         AccountingPeriod accountingPeriod) =>
-        new()
-        {
-            Id = Guid.NewGuid(),
-            Amount = budgetCommand.Amount,
-            Description = budgetCommand.Description,
-            Account = account,
-            AccountingPeriod = accountingPeriod
-        };
+        BudgetEntry.Create(budgetCommand.Description, budgetCommand.Amount, account, accountingPeriod);
 }

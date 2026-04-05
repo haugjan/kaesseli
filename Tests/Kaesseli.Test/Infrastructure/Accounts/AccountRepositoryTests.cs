@@ -24,13 +24,7 @@ public class AccountRepositoryTests
             .UseInMemoryDatabase(databaseName: "AddAccountDb")
             .Options;
 
-        var account = new Account
-        {
-            Id = Guid.NewGuid(),
-            Name = "Test Account",
-            Type = AccountType.Asset,
-            Icon = new AccountIcon("favorite", "blue"),
-        };
+        var account = Account.Create("Test Account", AccountType.Asset, new AccountIcon("favorite", "blue"));
 
         await using var context = CreateContext(options);
         var repository = new AccountRepository(context);
@@ -57,22 +51,10 @@ public class AccountRepositoryTests
 
         await using var setupContext = CreateContext(options);
         setupContext.Accounts.Add(
-            entity: new Account
-            {
-                Id = Guid.NewGuid(),
-                Name = "Account 1",
-                Type = AccountType.Expense,
-                Icon = new AccountIcon("favorite", "blue"),
-            }
+            entity: Account.Create("Account 1", AccountType.Expense, new AccountIcon("favorite", "blue"))
         );
         setupContext.Accounts.Add(
-            entity: new Account
-            {
-                Id = Guid.NewGuid(),
-                Name = "Account 2",
-                Type = AccountType.Expense,
-                Icon = new AccountIcon("favorite", "blue"),
-            }
+            entity: Account.Create("Account 2", AccountType.Expense, new AccountIcon("favorite", "blue"))
         );
         await setupContext.SaveChangesAsync(cancellationToken);
 
@@ -97,27 +79,9 @@ public class AccountRepositoryTests
         await using var setupContext = CreateContext(options);
         var accounts = new List<Account>
         {
-            new()
-            {
-                Id = Guid.NewGuid(),
-                Name = "Account 1",
-                Type = AccountType.Asset,
-                Icon = new AccountIcon("favorite", "blue"),
-            },
-            new()
-            {
-                Id = Guid.NewGuid(),
-                Name = "Account 2",
-                Type = AccountType.Expense,
-                Icon = new AccountIcon("favorite", "blue"),
-            },
-            new()
-            {
-                Id = Guid.NewGuid(),
-                Name = "Account 3",
-                Type = AccountType.Asset,
-                Icon = new AccountIcon("favorite", "blue"),
-            },
+            Account.Create("Account 1", AccountType.Asset, new AccountIcon("favorite", "blue")),
+            Account.Create("Account 2", AccountType.Expense, new AccountIcon("favorite", "blue")),
+            Account.Create("Account 3", AccountType.Asset, new AccountIcon("favorite", "blue")),
         };
         setupContext.Accounts.AddRange(accounts);
         await setupContext.SaveChangesAsync(cancellationToken);
@@ -142,13 +106,7 @@ public class AccountRepositoryTests
             .UseInMemoryDatabase(databaseName: "GetAccountDb")
             .Options;
 
-        var account = new Account
-        {
-            Id = Guid.NewGuid(),
-            Name = "Existing Account",
-            Type = AccountType.Liability,
-            Icon = new AccountIcon("favorite", "blue"),
-        };
+        var account = Account.Create("Existing Account", AccountType.Liability, new AccountIcon("favorite", "blue"));
 
         await using var setupContext = CreateContext(options);
         setupContext.Accounts.Add(account);

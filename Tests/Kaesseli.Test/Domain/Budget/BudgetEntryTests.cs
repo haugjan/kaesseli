@@ -14,26 +14,12 @@ public class BudgetEntryTests
     {
         //Arrange & Act
         var makeNewBudgetEntry = () =>
-            new BudgetEntry
-            {
-                Id = Guid.NewGuid(),
-                Description = "Budget entry",
-                Amount = 42.42m,
-                Account = new Account
-                {
-                    Id = Guid.NewGuid(),
-                    Name = "Account",
-                    Type = accountType,
-                    Icon = new AccountIcon("favorite", "blue"),
-                },
-                AccountingPeriod = new AccountingPeriod
-                {
-                    Id = Guid.NewGuid(),
-                    FromInclusive = default,
-                    ToInclusive = default,
-                    Description = string.Empty,
-                },
-            };
+            BudgetEntry.Create(
+                description: "Budget entry",
+                amount: 42.42m,
+                account: Account.Create("Account", accountType, new AccountIcon("favorite", "blue")),
+                accountingPeriod: AccountingPeriod.Create("Test Period", default, default)
+            );
 
         //Assert
         Should.Throw<BudgetNotAllowedException>(makeNewBudgetEntry);
@@ -46,26 +32,12 @@ public class BudgetEntryTests
     {
         //Arrange & Act
         var makeNewBudgetEntry = () =>
-            new BudgetEntry
-            {
-                Id = Guid.NewGuid(),
-                Description = "Budget entry",
-                Amount = 42.42m,
-                Account = new Account
-                {
-                    Id = Guid.NewGuid(),
-                    Name = "Account",
-                    Type = accountType,
-                    Icon = new AccountIcon("favorite", "blue"),
-                },
-                AccountingPeriod = new AccountingPeriod
-                {
-                    Id = Guid.NewGuid(),
-                    FromInclusive = default,
-                    ToInclusive = default,
-                    Description = string.Empty,
-                },
-            };
+            BudgetEntry.Create(
+                description: "Budget entry",
+                amount: 42.42m,
+                account: Account.Create("Account", accountType, new AccountIcon("favorite", "blue")),
+                accountingPeriod: AccountingPeriod.Create("Test Period", default, default)
+            );
 
         //Assert
         Should.NotThrow(makeNewBudgetEntry);

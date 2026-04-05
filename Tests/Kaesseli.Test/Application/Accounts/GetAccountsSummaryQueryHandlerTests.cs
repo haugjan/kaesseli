@@ -37,20 +37,8 @@ public class GetAccountsSummaryQueryHandlerTests
         var cancellationToken = new CancellationToken();
         var periodId = Guid.NewGuid();
 
-        var accountToTest = new Account
-        {
-            Id = Guid.NewGuid(),
-            Name = "Current Account",
-            Type = accountType,
-            Icon = new AccountIcon("favorite", "blue"),
-        };
-        var otherAccount = new Account
-        {
-            Id = Guid.NewGuid(),
-            Name = "Other Account",
-            Type = AccountType.Expense,
-            Icon = new AccountIcon("favorite", "blue"),
-        };
+        var accountToTest = Account.Create("Current Account", accountType, new AccountIcon("favorite", "blue"));
+        var otherAccount = Account.Create("Other Account", AccountType.Expense, new AccountIcon("favorite", "blue"));
 
         var journalEntries = CreateTestJournalEntries(accountToTest, otherAccount);
         var budgetEntries = CreateTestBudgetEntries(accountToTest);
@@ -62,13 +50,11 @@ public class GetAccountsSummaryQueryHandlerTests
             .Setup(repo => repo.GetAccountingPeriod(periodId, cancellationToken))
             .ReturnsAsync(
                 (Guid _, CancellationToken _) =>
-                    new AccountingPeriod
-                    {
-                        Id = periodId,
-                        Description = periodId.ToString(),
-                        FromInclusive = new DateOnly(year: 2023, month: 1, day: 1),
-                        ToInclusive = new DateOnly(year: 2024, month: 1, day: 1),
-                    }
+                    AccountingPeriod.Create(
+                        periodId.ToString(),
+                        new DateOnly(year: 2023, month: 1, day: 1),
+                        new DateOnly(year: 2024, month: 1, day: 1)
+                    )
             );
         journalRepo
             .Setup(repo =>
@@ -131,20 +117,8 @@ public class GetAccountsSummaryQueryHandlerTests
         var cancellationToken = new CancellationToken();
         var periodId = Guid.NewGuid();
 
-        var otherAccount = new Account
-        {
-            Id = Guid.NewGuid(),
-            Name = "Other Account",
-            Type = AccountType.Expense,
-            Icon = new AccountIcon("favorite", "blue"),
-        };
-        var accountToTest = new Account
-        {
-            Id = Guid.NewGuid(),
-            Name = "Current Account",
-            Type = accountType,
-            Icon = new AccountIcon("favorite", "blue"),
-        };
+        var otherAccount = Account.Create("Other Account", AccountType.Expense, new AccountIcon("favorite", "blue"));
+        var accountToTest = Account.Create("Current Account", accountType, new AccountIcon("favorite", "blue"));
 
         var journalEntries = CreateTestJournalEntries(accountToTest, otherAccount);
 
@@ -155,13 +129,7 @@ public class GetAccountsSummaryQueryHandlerTests
             .Setup(repo => repo.GetAccountingPeriod(periodId, cancellationToken))
             .ReturnsAsync(
                 (Guid _, CancellationToken _) =>
-                    new AccountingPeriod
-                    {
-                        Id = periodId,
-                        Description = periodId.ToString(),
-                        FromInclusive = default,
-                        ToInclusive = default,
-                    }
+                    AccountingPeriod.Create(periodId.ToString(), default, default)
             );
 
         journalRepo
@@ -206,20 +174,12 @@ public class GetAccountsSummaryQueryHandlerTests
 
     private static IEnumerable<BudgetEntry> CreateTestBudgetEntries(Account accountToTest) =>
         [
-            new()
-            {
-                Id = default,
-                Description = "Budget 1",
-                Amount = BudgetAmount,
-                Account = accountToTest,
-                AccountingPeriod = new AccountingPeriod
-                {
-                    Id = Guid.NewGuid(),
-                    FromInclusive = default,
-                    ToInclusive = default,
-                    Description = string.Empty,
-                },
-            },
+            BudgetEntry.Create(
+                description: "Budget 1",
+                amount: BudgetAmount,
+                account: accountToTest,
+                accountingPeriod: AccountingPeriod.Create("Test Period", default, default)
+            ),
         ];
 
     private static IEnumerable<JournalEntry> CreateTestJournalEntries(
@@ -227,39 +187,21 @@ public class GetAccountsSummaryQueryHandlerTests
         Account otherAccount
     ) =>
         [
-            new()
-            {
-                Id = Guid.NewGuid(),
-                ValueDate = default,
-                Description = "Test 1",
-                Amount = DebitAmount,
-                DebitAccount = accountToTest,
-                CreditAccount = otherAccount,
-                Transaction = null,
-                AccountingPeriod = new AccountingPeriod
-                {
-                    Id = Guid.NewGuid(),
-                    FromInclusive = default,
-                    ToInclusive = default,
-                    Description = string.Empty,
-                },
-            },
-            new()
-            {
-                Id = Guid.NewGuid(),
-                ValueDate = default,
-                Description = "Test 2",
-                Amount = CreditAmount,
-                DebitAccount = otherAccount,
-                CreditAccount = accountToTest,
-                Transaction = null,
-                AccountingPeriod = new AccountingPeriod
-                {
-                    Id = Guid.NewGuid(),
-                    FromInclusive = default,
-                    ToInclusive = default,
-                    Description = string.Empty,
-                },
-            },
+            JournalEntry.Create(
+                valueDate: default,
+                description: "Test 1",
+                amount: DebitAmount,
+                debitAccount: accountToTest,
+                creditAccount: otherAccount,
+                accountingPeriod: AccountingPeriod.Create("Test Period", default, default)
+            ),
+            JournalEntry.Create(
+                valueDate: default,
+                description: "Test 2",
+                amount: CreditAmount,
+                debitAccount: otherAccount,
+                creditAccount: accountToTest,
+                accountingPeriod: AccountingPeriod.Create("Test Period", default, default)
+            ),
         ];
 }

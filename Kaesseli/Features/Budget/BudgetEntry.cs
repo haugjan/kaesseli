@@ -1,32 +1,41 @@
-﻿using System.Diagnostics.CodeAnalysis;
 using Kaesseli.Features.Accounts;
 
 namespace Kaesseli.Features.Budget;
 
 public class BudgetEntry
 {
-    public required AccountingPeriod AccountingPeriod { get; init; }
-    private readonly Account _account;
-    public required Guid Id { get; init; }
-    public required string Description { get; set; }
-    public required decimal Amount { get; set; }
+    private BudgetEntry() { }
 
-    public required Account Account
+    public Guid Id { get; private init; }
+    public string Description { get; private set; } = null!;
+    public decimal Amount { get; private set; }
+    public Account Account { get; private init; } = null!;
+    public AccountingPeriod AccountingPeriod { get; private init; } = null!;
+
+    public static BudgetEntry Create(string description, decimal amount, Account account, AccountingPeriod accountingPeriod)
     {
-        get => _account;
-        [MemberNotNull(member: nameof(_account))]
-        init
+        ArgumentException.ThrowIfNullOrWhiteSpace(description);
+        ArgumentNullException.ThrowIfNull(account);
+        ArgumentNullException.ThrowIfNull(accountingPeriod);
+
+        if (account.Type is AccountType.Asset or AccountType.Liability)
+            throw new BudgetNotAllowedException(account.Type);
+
+        return new BudgetEntry
         {
-            ThrowIfWrongAccountType(value);
-            _account = value;
-        }
+            Id = Guid.NewGuid(),
+            Description = description,
+            Amount = amount,
+            Account = account,
+            AccountingPeriod = accountingPeriod,
+        };
     }
 
-    private static void ThrowIfWrongAccountType(Account value)
+    public void UpdateBudget(decimal amount, string description)
     {
-        if (value.Type is AccountType.Asset 
-            or AccountType.Liability) 
-            throw new BudgetNotAllowedException(value.Type);
+        ArgumentException.ThrowIfNullOrWhiteSpace(description);
+        Amount = amount;
+        Description = description;
     }
 
     public override string ToString() =>

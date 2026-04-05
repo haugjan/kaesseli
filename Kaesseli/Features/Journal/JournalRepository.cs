@@ -105,17 +105,14 @@ public class JournalRepository(KaesseliContext context) : IJournalRepository
     {
         var otherAccount = await context.Accounts.FirstOrDefaultAsync(a => a.Id == otherAccountId, cancellationToken)
                         ?? throw new EntityNotFoundException(typeof(Account), otherAccountId);
-        var newJournalEntry = new JournalEntry
-        {
-            Id = Guid.NewGuid(),
-            ValueDate = transaction.ValueDate,
-            Description = transaction.Description,
-            Amount = amount,
-            DebitAccount = transaction.TransactionSummary!.Account,
-            CreditAccount = otherAccount,
-            Transaction = transaction,
-            AccountingPeriod = accountingPeriod
-        };
+        var newJournalEntry = JournalEntry.Create(
+            transaction.ValueDate,
+            transaction.Description,
+            amount,
+            transaction.TransactionSummary!.Account,
+            otherAccount,
+            accountingPeriod,
+            transaction);
 
         context.JournalEntries.Add(newJournalEntry);
     }

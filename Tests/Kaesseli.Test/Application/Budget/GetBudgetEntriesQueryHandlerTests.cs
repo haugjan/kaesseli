@@ -8,7 +8,8 @@ namespace Kaesseli.Test.Application.Budget;
 
 public class GetBudgetEntriesQueryHandlerTests
 {
-    private static readonly Guid ExpectedAccountingPeriodId = Guid.NewGuid();
+    private static readonly AccountingPeriod ExpectedAccountingPeriod =
+        AccountingPeriod.Create("Test Period", default, default);
 
     [Fact]
     public async Task Handle_ReturnsCorrectBudgetEntries()
@@ -22,7 +23,7 @@ public class GetBudgetEntriesQueryHandlerTests
         mockRepository
             .Setup(repo =>
                 repo.GetBudgetEntries(
-                    It.Is<Guid>(id => id == ExpectedAccountingPeriodId),
+                    It.Is<Guid>(id => id == ExpectedAccountingPeriod.Id),
                     It.Is<Guid?>(id => id == accountId),
                     It.IsAny<AccountType?>(),
                     It.IsAny<CancellationToken>()
@@ -31,7 +32,7 @@ public class GetBudgetEntriesQueryHandlerTests
             .ReturnsAsync(entriesList);
 
         var handler = new GetBudgetEntries.Handler(mockRepository.Object);
-        var query = new GetBudgetEntries.Query(AccountId: accountId, AccountType: null, AccountingPeriodId: ExpectedAccountingPeriodId);
+        var query = new GetBudgetEntries.Query(AccountId: accountId, AccountType: null, AccountingPeriodId: ExpectedAccountingPeriod.Id);
 
         // Act
         var result = (await handler.Handle(query, CancellationToken.None)).ToArray();
@@ -44,7 +45,7 @@ public class GetBudgetEntriesQueryHandlerTests
         mockRepository.Verify(
             repo =>
                 repo.GetBudgetEntries(
-                    It.Is<Guid>(id => id == ExpectedAccountingPeriodId),
+                    It.Is<Guid>(id => id == ExpectedAccountingPeriod.Id),
                     It.Is<Guid?>(id => id == accountId),
                     It.IsAny<AccountType?>(),
                     It.IsAny<CancellationToken>()
@@ -55,45 +56,17 @@ public class GetBudgetEntriesQueryHandlerTests
 
     private static List<BudgetEntry> CreateBudgetEntries() =>
         [
-            new()
-            {
-                Id = Guid.NewGuid(),
-                Description = "Description 1",
-                Amount = 42.42m,
-                Account = new Account
-                {
-                    Id = Guid.NewGuid(),
-                    Name = "Account 1",
-                    Type = AccountType.Expense,
-                    Icon = new AccountIcon("favorite", "blue"),
-                },
-                AccountingPeriod = new AccountingPeriod
-                {
-                    Id = ExpectedAccountingPeriodId,
-                    FromInclusive = default,
-                    ToInclusive = default,
-                    Description = string.Empty,
-                },
-            },
-            new()
-            {
-                Id = Guid.NewGuid(),
-                Description = "Description 2",
-                Amount = 24.24m,
-                Account = new Account
-                {
-                    Id = Guid.NewGuid(),
-                    Name = "Account 2",
-                    Type = AccountType.Revenue,
-                    Icon = new AccountIcon("favorite", "blue"),
-                },
-                AccountingPeriod = new AccountingPeriod
-                {
-                    Id = Guid.NewGuid(),
-                    FromInclusive = default,
-                    ToInclusive = default,
-                    Description = string.Empty,
-                },
-            },
+            BudgetEntry.Create(
+                description: "Description 1",
+                amount: 42.42m,
+                account: Account.Create("Account 1", AccountType.Expense, new AccountIcon("favorite", "blue")),
+                accountingPeriod: ExpectedAccountingPeriod
+            ),
+            BudgetEntry.Create(
+                description: "Description 2",
+                amount: 24.24m,
+                account: Account.Create("Account 2", AccountType.Revenue, new AccountIcon("favorite", "blue")),
+                accountingPeriod: AccountingPeriod.Create("Test Period", default, default)
+            ),
         ];
 }

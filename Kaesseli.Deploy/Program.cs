@@ -6,7 +6,10 @@ var environment = Environment.GetEnvironmentVariable("DOTNET_ENVIRONMENT") ?? "P
 
 var configuration = new ConfigurationBuilder()
     .AddJsonFile(Path.Combine(AppContext.BaseDirectory, "appsettings.json"), optional: true)
-    .AddJsonFile(Path.Combine(AppContext.BaseDirectory, $"appsettings.{environment}.json"), optional: true)
+    .AddJsonFile(
+        Path.Combine(AppContext.BaseDirectory, $"appsettings.{environment}.json"),
+        optional: true
+    )
     .AddJsonFile(Path.Combine(AppContext.BaseDirectory, "appsettings.user.json"), optional: true)
     .Build();
 

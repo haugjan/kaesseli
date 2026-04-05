@@ -1,4 +1,3 @@
-﻿using System.Diagnostics.CodeAnalysis;
 using Kaesseli.Features.Accounts;
 using Kaesseli.Features.Integration;
 
@@ -6,44 +5,43 @@ namespace Kaesseli.Features.Journal;
 
 public class JournalEntry
 {
-    private readonly Account _debitAccount;
-    private readonly Account _creditAccount;
-    public required Guid Id { get; init; }
-    public required AccountingPeriod AccountingPeriod { get; init; }
-    public required DateOnly ValueDate { get; init; }
-    public required string Description { get; init; }
-    public required decimal Amount { get; init; }
-    public required Account DebitAccount
+    private JournalEntry() { }
+
+    public Guid Id { get; private init; }
+    public AccountingPeriod AccountingPeriod { get; private init; } = null!;
+    public DateOnly ValueDate { get; private init; }
+    public string Description { get; private init; } = null!;
+    public decimal Amount { get; private init; }
+    public Account DebitAccount { get; private init; } = null!;
+    public Account CreditAccount { get; private init; } = null!;
+    public Transaction? Transaction { get; private init; }
+
+    public static JournalEntry Create(
+        DateOnly valueDate,
+        string description,
+        decimal amount,
+        Account debitAccount,
+        Account creditAccount,
+        AccountingPeriod accountingPeriod,
+        Transaction? transaction = null)
     {
-        get => _debitAccount;
-        [MemberNotNull(member: nameof(_debitAccount))]
-        init
+        ArgumentNullException.ThrowIfNull(debitAccount);
+        ArgumentNullException.ThrowIfNull(creditAccount);
+
+        if (debitAccount.Id == creditAccount.Id)
+            throw new AccountsMustNotBeSameException();
+
+        return new JournalEntry
         {
-            ThrowIfAccountsAreSame(CreditAccount, value);
-            _debitAccount = value;
-        }
-    }
-
-    public required Account CreditAccount
-    {
-        get => _creditAccount;
-        [MemberNotNull(member: nameof(_creditAccount))]
-        init
-        {
-            ThrowIfAccountsAreSame(DebitAccount, value);
-            _creditAccount = value;
-        }
-    }
-
-    public required Transaction? Transaction { get; init; }
-
-    private static void ThrowIfAccountsAreSame(Account? firstAccount, Account? secondAccount)
-    {
-        if (firstAccount is null) return;
-        if (secondAccount is null) return;
-        if (firstAccount.Id != secondAccount.Id) return;
-
-        throw new AccountsMustNotBeSameException();
+            Id = Guid.NewGuid(),
+            ValueDate = valueDate,
+            Description = description,
+            Amount = amount,
+            DebitAccount = debitAccount,
+            CreditAccount = creditAccount,
+            AccountingPeriod = accountingPeriod,
+            Transaction = transaction,
+        };
     }
 
     public override string ToString() =>
