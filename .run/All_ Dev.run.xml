@@ -1,0 +1,7 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="All: Dev" type="CompoundRunConfigurationType">
+    <toRun name="Kaesseli.Client.Blazor" type="LaunchSettings" />
+    <toRun name="Kaesseli: Dev" type="LaunchSettings" />
+    <method v="2" />
+  </configuration>
+</component>

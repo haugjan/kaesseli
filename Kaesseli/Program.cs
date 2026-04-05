@@ -1,3 +1,8 @@
+using System.Diagnostics;
+using OpenTelemetry.Logs;
+using OpenTelemetry.Metrics;
+using OpenTelemetry.Resources;
+using OpenTelemetry.Trace;
 using Scalar.AspNetCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -5,6 +10,39 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Configuration.AddJsonFile("appsettings.user.json", optional: true, reloadOnChange: true);
 
 builder.Services.AddOpenApi();
+
+// OpenTelemetry
+AppContext.SetSwitch("System.Net.Http.SocketsHttpHandler.Http2UnencryptedSupport", true);
+var otlpEndpoint = builder.Configuration["Otlp:Endpoint"] ?? "http://localhost:4317";
+Console.WriteLine($"[OTEL] Exporting to {otlpEndpoint}");
+
+var otlpApiKey = builder.Configuration["Otlp:ApiKey"] ?? "kaesseli-dev";
+
+void ConfigureOtlp(OpenTelemetry.Exporter.OtlpExporterOptions o)
+{
+    o.Endpoint = new Uri(otlpEndpoint);
+    o.Protocol = OpenTelemetry.Exporter.OtlpExportProtocol.Grpc;
+    o.Headers = $"x-otlp-api-key={otlpApiKey}";
+}
+
+builder.Services.AddOpenTelemetry()
+    .ConfigureResource(resource => resource.AddService("Kaesseli"))
+    .WithTracing(tracing => tracing
+        .AddAspNetCoreInstrumentation()
+        .AddHttpClientInstrumentation()
+        .AddSource("Microsoft.EntityFrameworkCore")
+        .AddOtlpExporter(ConfigureOtlp))
+    .WithMetrics(metrics => metrics
+        .AddAspNetCoreInstrumentation()
+        .AddHttpClientInstrumentation()
+        .AddOtlpExporter(ConfigureOtlp));
+
+builder.Logging.AddOpenTelemetry(logging =>
+{
+    logging.IncludeScopes = true;
+    logging.IncludeFormattedMessage = true;
+    logging.AddOtlpExporter(ConfigureOtlp);
+});
 
 builder.Services.AddCors(options =>
 {
@@ -41,6 +79,21 @@ if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();
     app.MapScalarApiReference();
+
+    _ = Task.Run(async () =>
+    {
+        await Task.Delay(1000);
+        try
+        {
+            using var client = new HttpClient();
+            await client.GetAsync("http://localhost:18888");
+            Process.Start(new ProcessStartInfo("http://localhost:18888") { UseShellExecute = true });
+        }
+        catch
+        {
+            // Aspire Dashboard not running, skip
+        }
+    });
 }
 
 app.MapKaesseliEndpoints();

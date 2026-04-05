@@ -30,7 +30,13 @@
       "Read(//c/Users/Jan.Haug/.nuget/packages/microsoft.entityframeworkcore.cosmos/10.0.5/**)",
       "Bash(docker exec:*)",
       "Bash(dotnet list:*)",
-      "Bash(dotnet clean:*)"
+      "Bash(dotnet clean:*)",
+      "Bash(docker compose:*)",
+      "Bash(curl:*)",
+      "Read(//c/development/kaesseli/**)",
+      "Bash(tasklist)",
+      "Bash(wmic process:*)",
+      "Bash(grep:*)"
     ]
   }
 }

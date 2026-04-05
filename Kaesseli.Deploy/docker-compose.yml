@@ -1,22 +1,13 @@
 services:
-  cosmosdb:
-    image: mcr.microsoft.com/cosmosdb/linux/azure-cosmos-emulator:latest
-    container_name: kaesseli-cosmosdb
+  aspire-dashboard:
+    image: mcr.microsoft.com/dotnet/aspire-dashboard:9.2
+    container_name: kaesseli-aspire
     restart: unless-stopped
     ports:
-      - "8081:8081"
+      - "18888:18888"
+      - "4317:18889"
+      - "4318:18890"
     environment:
-      AZURE_COSMOS_EMULATOR_PARTITION_COUNT: 5
-      AZURE_COSMOS_EMULATOR_ENABLE_DATA_PERSISTENCE: true
-      AZURE_COSMOS_EMULATOR_IP_ADDRESS_OVERRIDE: 127.0.0.1
-    volumes:
-      - cosmosdb-data:/tmp/cosmos/appdata
-    healthcheck:
-      test: ["CMD", "curl", "-f", "-k", "https://localhost:8081/_explorer/emulator.pem"]
-      interval: 30s
-      timeout: 10s
-      retries: 5
-      start_period: 60s
-
-volumes:
-  cosmosdb-data:
+      DASHBOARD__FRONTEND__AUTHMODE: Unsecured
+      DASHBOARD__OTLP__AUTHMODE: ApiKey
+      DASHBOARD__OTLP__PRIMARYAPIKEY: kaesseli-dev

@@ -13,7 +13,8 @@
             "launchSettingsProfile": "Dev",
             "serverReadyAction": {
                 "action": "openExternally",
-                "pattern": "\\bNow listening on:\\s+(https?://\\S+)"
+                "pattern": "\\bNow listening on:\\s+(https?://\\S+)",
+                "uriFormat": "%s/scalar/v1"
             }
         },
         {
@@ -28,8 +29,33 @@
             "launchSettingsProfile": "Prod",
             "serverReadyAction": {
                 "action": "openExternally",
-                "pattern": "\\bNow listening on:\\s+(https?://\\S+)"
+                "pattern": "\\bNow listening on:\\s+(https?://\\S+)",
+                "uriFormat": "%s/scalar/v1"
             }
+        },
+        {
+            "name": "Kaesseli: Dev + Aspire",
+            "type": "coreclr",
+            "request": "launch",
+            "preLaunchTask": "open-aspire-dashboard",
+            "program": "${workspaceFolder}/Kaesseli/bin/Debug/net10.0/Kaesseli.dll",
+            "args": [],
+            "cwd": "${workspaceFolder}/Kaesseli",
+            "stopAtEntry": false,
+            "launchSettingsProfile": "Dev",
+            "serverReadyAction": {
+                "action": "openExternally",
+                "pattern": "\\bNow listening on:\\s+(https?://\\S+)",
+                "uriFormat": "%s/scalar/v1"
+            }
+        }
+    ],
+    "compounds": [
+        {
+            "name": "All (Dev + Aspire)",
+            "configurations": [
+                "Kaesseli: Dev + Aspire"
+            ]
         }
     ]
 }
