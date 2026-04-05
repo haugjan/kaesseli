@@ -14,7 +14,6 @@ var services = new ServiceCollection();
 services.AddLogging();
 services.AddSingleton<IConfiguration>(configuration);
 services.AddSingleton(TimeProvider.System);
-services.AddSingleton<IEnvironmentService, DeployEnvironmentService>();
 services.AddInfrastructureServices(configuration);
 
 await using var provider = services.BuildServiceProvider();
@@ -28,9 +27,4 @@ if (environment == "Development")
     Console.WriteLine("Seeding development data...");
     await provider.SeedDevelopmentDataAsync();
     Console.WriteLine("Development data seeded successfully.");
-}
-
-internal sealed class DeployEnvironmentService : IEnvironmentService
-{
-    public string CurrentUser => "deploy";
 }

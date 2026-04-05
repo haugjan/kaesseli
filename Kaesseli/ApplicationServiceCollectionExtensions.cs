@@ -5,7 +5,6 @@ using Kaesseli.Features.Integration.FileImport;
 using Kaesseli.Features.Integration.NextOpenTransaction;
 using Kaesseli.Features.Integration.TransactionQuery;
 using Kaesseli.Features.Journal;
-using Kaesseli.Infrastructure;
 
 // ReSharper disable once CheckNamespace
 namespace Microsoft.Extensions.DependencyInjection;
@@ -16,7 +15,6 @@ public static class ApplicationServiceCollectionExtensions
     public static IServiceCollection AddApplicationServices(this IServiceCollection services) =>
         services
             .AddSingleton(TimeProvider.System)
-            .AddTransient<IEnvironmentService, EnvironmentService>()
             // Accounts
             .AddTransient<AddAccount.IHandler, AddAccount.Handler>()
             .AddTransient<AddAccountingPeriod.IHandler, AddAccountingPeriod.Handler>()

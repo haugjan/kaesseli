@@ -14,8 +14,7 @@ public class JournalRepositoryTests
     private static KaesseliContext CreateContext(DbContextOptions<KaesseliContext> options)
     {
         var timeProvider = TimeProvider.System;
-        var envService = new Mock<IEnvironmentService>().Object;
-        return new(options, timeProvider, envService);
+        return new(options, timeProvider);
     }
 
     [Fact]
