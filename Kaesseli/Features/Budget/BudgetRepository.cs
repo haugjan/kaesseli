@@ -4,6 +4,15 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Kaesseli.Features.Budget;
 
+public interface IBudgetRepository
+{
+    Task<BudgetEntry> SetBudget(BudgetEntry newBudgetEntryEntity, CancellationToken ct);
+
+    Task<IEnumerable<BudgetEntry>> GetBudgetEntries(
+        Guid accountingPeriodId, Guid? accountId, AccountType? accountType,
+        CancellationToken cancellationToken);
+}
+
 public class BudgetRepository(KaesseliContext context) : IBudgetRepository
 {
     public async Task<IEnumerable<BudgetEntry>> GetBudgetEntries(
