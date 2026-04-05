@@ -75,7 +75,7 @@ internal class AutomationRepository : IAutomationRepository
 
         return allTransactions
             .Where(t => !transactionIdsWithJournal.Contains(t.Id))
-            .Where(t => regex.IsMatch(t.Description))
+            .Where(t => t.Description is not null && regex.IsMatch(t.Description))
             .ToList();
     }
 }
