@@ -1,4 +1,3 @@
-using Kaesseli.Infrastructure;
 using Kaesseli.Features.Accounts;
 
 namespace Kaesseli.Features.Journal;
@@ -13,12 +12,12 @@ public static class AddJournalEntry
         Task<Guid> Handle(Query request, CancellationToken cancellationToken);
     }
 
-    public class Handler(IJournalRepository journalRepository, IAccountRepository accountRepo, IDateTimeService dateTime)
+    public class Handler(IJournalRepository journalRepository, IAccountRepository accountRepo, TimeProvider timeProvider)
         : IHandler
     {
         public async Task<Guid> Handle(Query request, CancellationToken cancellationToken)
         {
-            var valueDate = request.ValueDate ?? dateTime.ToDay;
+            var valueDate = request.ValueDate ?? DateOnly.FromDateTime(timeProvider.GetLocalNow().DateTime);
             var creditAccount = await accountRepo.GetAccount(request.CreditAccountId, cancellationToken);
             var debitAccount = await accountRepo.GetAccount(request.DebitAccountId, cancellationToken);
             var accountingPeriod = await accountRepo.GetAccountingPeriod(request.AccountingPeriodId, cancellationToken);

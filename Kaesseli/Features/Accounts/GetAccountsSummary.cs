@@ -1,4 +1,3 @@
-using Kaesseli.Infrastructure;
 using Kaesseli.Features.Budget;
 using Kaesseli.Features.Journal;
 
@@ -32,9 +31,8 @@ public static class GetAccountsSummary
         IAccountRepository accountRepo,
         IJournalRepository journalRepo,
         IBudgetRepository budgetRepo,
-        IDateTimeService dateTimeService) : IHandler
+        TimeProvider timeProvider) : IHandler
     {
-        private readonly IDateTimeService _dateTimeService = dateTimeService;
 
         public async Task<IEnumerable<Result>> Handle(Query request, CancellationToken cancellationToken)
         {
@@ -57,7 +55,7 @@ public static class GetAccountsSummary
             IEnumerable<BudgetEntry> budgetEntries,
             AccountingPeriod accountingPeriod)
         {
-            var today = _dateTimeService.ToDay;
+            var today = DateOnly.FromDateTime(timeProvider.GetLocalNow().DateTime);
             budgetEntries = budgetEntries.ToArray();
             var accountBalance = AccountBalanceCalculator.GetAccountBalance(account, journalEntries);
             var budgetPerYear = AccountBalanceCalculator.GetBudgetPerYear(account, budgetEntries);

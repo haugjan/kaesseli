@@ -13,7 +13,7 @@ var configuration = new ConfigurationBuilder()
 var services = new ServiceCollection();
 services.AddLogging();
 services.AddSingleton<IConfiguration>(configuration);
-services.AddSingleton<IDateTimeService, DeployDateTimeService>();
+services.AddSingleton(TimeProvider.System);
 services.AddSingleton<IEnvironmentService, DeployEnvironmentService>();
 services.AddInfrastructureServices(configuration);
 
@@ -28,14 +28,6 @@ if (environment == "Development")
     Console.WriteLine("Seeding development data...");
     await provider.SeedDevelopmentDataAsync();
     Console.WriteLine("Development data seeded successfully.");
-}
-
-internal sealed class DeployDateTimeService : IDateTimeService
-{
-    public DateTime Now => DateTime.Now;
-    public DateTimeOffset UtcNow => DateTimeOffset.UtcNow;
-    public DateOnly ToDay => DateOnly.FromDateTime(DateTime.Today);
-    public TimeOnly TimeOfDay => TimeOnly.FromDateTime(DateTime.Now);
 }
 
 internal sealed class DeployEnvironmentService : IEnvironmentService

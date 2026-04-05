@@ -1,5 +1,4 @@
 using System.Collections.Immutable;
-using Kaesseli.Infrastructure;
 using Kaesseli.Features.Budget;
 using Kaesseli.Features.Journal;
 
@@ -40,10 +39,9 @@ public static class GetAccount
 
     // ReSharper disable once UnusedType.Global
     public class Handler(IAccountRepository accountRepo, IJournalRepository journalRepo, IBudgetRepository budgetRepo,
-                        IDateTimeService dateTimeService)
+                        TimeProvider timeProvider)
         : IHandler
     {
-        private readonly IDateTimeService _dateTimeService = dateTimeService;
 
         public async Task<Result> Handle(Query request, CancellationToken cancellationToken)
         {
@@ -60,7 +58,7 @@ public static class GetAccount
             var budget = AccountBalanceCalculator.GetBudget(account, budgetEntries, period);
             var budgetPerMonth = AccountBalanceCalculator.GetBudgetPerMonth(account, budgetEntries);
             var budgetPerYear = AccountBalanceCalculator.GetBudgetPerYear(account, budgetEntries);
-            var currentBudget = AccountBalanceCalculator.GetCurrentBudget(account, budgetEntries, period, _dateTimeService.ToDay);
+            var currentBudget = AccountBalanceCalculator.GetCurrentBudget(account, budgetEntries, period, DateOnly.FromDateTime(timeProvider.GetLocalNow().DateTime));
             var budgetBalance = AccountBalanceCalculator.GetBudgetBalance(account.Type, currentBudget, accountBalance);
 
             return new Result(

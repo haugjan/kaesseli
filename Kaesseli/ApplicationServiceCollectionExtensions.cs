@@ -15,7 +15,7 @@ public static class ApplicationServiceCollectionExtensions
     // ReSharper disable once UnusedMethodReturnValue.Global
     public static IServiceCollection AddApplicationServices(this IServiceCollection services) =>
         services
-            .AddTransient<IDateTimeService, DateTimeService>()
+            .AddSingleton(TimeProvider.System)
             .AddTransient<IEnvironmentService, EnvironmentService>()
             // Accounts
             .AddTransient<AddAccount.IHandler, AddAccount.Handler>()

@@ -1,4 +1,3 @@
-using Kaesseli.Infrastructure;
 using Microsoft.Extensions.DependencyInjection;
 using Shouldly;
 using Xunit;
@@ -16,9 +15,9 @@ public class ApplicationServiceCollectionExtensionsTests
         //Act
         serviceCollection.AddApplicationServices();
         var serviceProvider = serviceCollection.BuildServiceProvider();
-        var dateTimeService = serviceProvider.GetService<IDateTimeService>();
+        var timeProvider = serviceProvider.GetService<TimeProvider>();
 
         //Assert
-        dateTimeService.ShouldNotBeNull();
+        timeProvider.ShouldNotBeNull();
     }
 }

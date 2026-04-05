@@ -13,20 +13,20 @@ public class KaesseliContext : DbContext
     private const string EditDateColumnName = "EditDate";
     private const string InsertUserColumnName = "InsertUser";
     private const string EditUserColumnName = "EditUser";
-    private readonly IDateTimeService _dateTime;
+    private readonly TimeProvider _timeProvider;
     private readonly IEnvironmentService _environmentService;
 
     [Obsolete(message: "Should only be used by Unit-Tests")]
     public KaesseliContext()
     {
         _environmentService = null!;
-        _dateTime = null!;
+        _timeProvider = null!;
     }
 
-    public KaesseliContext(DbContextOptions<KaesseliContext> options, IDateTimeService dateTime, IEnvironmentService environmentService)
+    public KaesseliContext(DbContextOptions<KaesseliContext> options, TimeProvider timeProvider, IEnvironmentService environmentService)
         : base(options)
     {
-        _dateTime = dateTime;
+        _timeProvider = timeProvider;
         _environmentService = environmentService;
     }
 
@@ -131,13 +131,13 @@ public class KaesseliContext : DbContext
 
             if (entry.Metadata.FindProperty(InsertDateColumnName) != null && entry.State == EntityState.Added)
             {
-                entry.Property(InsertDateColumnName).CurrentValue = _dateTime.UtcNow;
+                entry.Property(InsertDateColumnName).CurrentValue = _timeProvider.GetUtcNow();
                 entry.Property(InsertUserColumnName).CurrentValue = _environmentService.CurrentUser;
             }
 
             if (entry.Metadata.FindProperty(EditDateColumnName) == null) continue;
 
-            entry.Property(EditDateColumnName).CurrentValue = _dateTime.UtcNow;
+            entry.Property(EditDateColumnName).CurrentValue = _timeProvider.GetUtcNow();
             entry.Property(EditUserColumnName).CurrentValue = _environmentService.CurrentUser;
         }
     }

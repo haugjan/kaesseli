@@ -1,7 +1,7 @@
 using Kaesseli.Features.Accounts;
-using Kaesseli.Infrastructure;
 using Kaesseli.Features.Budget;
 using Kaesseli.Features.Journal;
+using Microsoft.Extensions.Time.Testing;
 using Moq;
 using Shouldly;
 using Xunit;
@@ -27,12 +27,12 @@ public class GetAccountsSummaryQueryHandlerTests
         var accountRepo = new Mock<IAccountRepository>();
         var journalRepo = new Mock<IJournalRepository>();
         var budgetRepo = new Mock<IBudgetRepository>();
-        var dateTimeService = new Mock<IDateTimeService>();
+        var fakeTimeProvider = new FakeTimeProvider(new DateTimeOffset(2025, 1, 1, 0, 0, 0, TimeSpan.Zero));
         var handler = new GetAccountsSummary.Handler(
             accountRepo.Object,
             journalRepo.Object,
             budgetRepo.Object,
-            dateTimeService.Object
+            fakeTimeProvider
         );
         var cancellationToken = new CancellationToken();
         var periodId = Guid.NewGuid();
@@ -70,7 +70,6 @@ public class GetAccountsSummaryQueryHandlerTests
                         ToInclusive = new DateOnly(year: 2024, month: 1, day: 1),
                     }
             );
-        dateTimeService.Setup(d => d.ToDay).Returns(new DateOnly(year: 2025, month: 1, day: 1));
         journalRepo
             .Setup(repo =>
                 repo.GetJournalEntries(
@@ -123,12 +122,11 @@ public class GetAccountsSummaryQueryHandlerTests
         var accountRepo = new Mock<IAccountRepository>();
         var journalRepo = new Mock<IJournalRepository>();
         var budgetRepo = new Mock<IBudgetRepository>();
-        var dateTime = new Mock<IDateTimeService>();
         var handler = new GetAccountsSummary.Handler(
             accountRepo.Object,
             journalRepo.Object,
             budgetRepo.Object,
-            dateTime.Object
+            TimeProvider.System
         );
         var cancellationToken = new CancellationToken();
         var periodId = Guid.NewGuid();

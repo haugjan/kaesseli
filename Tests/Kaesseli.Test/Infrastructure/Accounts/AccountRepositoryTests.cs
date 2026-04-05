@@ -12,9 +12,9 @@ public class AccountRepositoryTests
 {
     private static KaesseliContext CreateContext(DbContextOptions<KaesseliContext> options)
     {
-        var dateTimeService = new Mock<IDateTimeService>().Object;
+        var timeProvider = TimeProvider.System;
         var envService = new Mock<IEnvironmentService>().Object;
-        return new(options, dateTimeService, envService);
+        return new(options, timeProvider, envService);
     }
 
     [Fact]

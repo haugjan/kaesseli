@@ -1,5 +1,4 @@
 using Kaesseli.Features.Accounts;
-using Kaesseli.Infrastructure;
 using Kaesseli.Features.Budget;
 using Kaesseli.Features.Journal;
 using Kaesseli.Test.Faker;
@@ -18,7 +17,6 @@ public class GetAccountQueryHandlerTests
         var mockAccountRepo = new Mock<IAccountRepository>();
         var mockJournalRepo = new Mock<IJournalRepository>();
         var mockBudgetRepo = new Mock<IBudgetRepository>();
-        var mockDateTimeService = new Mock<IDateTimeService>();
 
         var faker = new SmartFaker<Account>().RuleFor(a => a.Type, _ => AccountType.Asset);
         var cancellationToken = new CancellationToken();
@@ -52,7 +50,7 @@ public class GetAccountQueryHandlerTests
             mockAccountRepo.Object,
             mockJournalRepo.Object,
             mockBudgetRepo.Object,
-            mockDateTimeService.Object
+            TimeProvider.System
         );
         var query = new GetAccount.Query(AccountId: expectedAccount.Id, AccountingPeriodId: periodId);
 
