@@ -92,8 +92,9 @@ public class JournalRepository(KaesseliContext context) : IJournalRepository
             if (summary != null)
             {
                 context.Entry(transaction).Reference(t => t.TransactionSummary!).CurrentValue = summary;
+                var accountId = context.Entry(summary).Property<Guid>("AccountId").CurrentValue;
                 var account = await context.Accounts
-                    .FirstOrDefaultAsync(a => a.Id == EF.Property<Guid>(summary, "AccountId"), cancellationToken);
+                    .FirstOrDefaultAsync(a => a.Id == accountId, cancellationToken);
                 if (account != null)
                     context.Entry(summary).Reference(s => s.Account).CurrentValue = account;
             }
