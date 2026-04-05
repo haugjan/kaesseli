@@ -12,7 +12,7 @@ using Xunit;
 
 namespace Kaesseli.Test.Server.Accounts;
 
-public class AccountApiExtensionsTests : IAsyncLifetime
+public class AccountApiTests : IAsyncLifetime
 {
     private HttpClient _client = null!;
     private readonly Mock<GetAccounts.IHandler> _getAccountsMock = new();

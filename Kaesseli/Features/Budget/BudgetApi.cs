@@ -4,7 +4,7 @@ using Kaesseli.Features.Accounts;
 // ReSharper disable once CheckNamespace
 namespace Microsoft.AspNetCore.Routing;
 
-public static class BudgetApiExtensions
+public static class BudgetApi
 {
     extension(IEndpointRouteBuilder app)
     {

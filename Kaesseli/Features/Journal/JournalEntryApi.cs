@@ -4,7 +4,7 @@ using Kaesseli.Features.Accounts;
 // ReSharper disable once CheckNamespace
 namespace Microsoft.AspNetCore.Routing;
 
-public static class JournalEntryApiExtensions
+public static class JournalEntryApi
 {
     extension(IEndpointRouteBuilder app)
     {

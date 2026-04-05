@@ -2,7 +2,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace Kaesseli.Features.Accounts;
 
-public static class AccountApiExtensions
+public static class AccountApi
 {
     extension(IEndpointRouteBuilder app)
     {

@@ -14,7 +14,7 @@ using Xunit;
 
 namespace Kaesseli.Test.Server.Integration;
 
-public class IntegrationApiExtensionsTests : IAsyncLifetime
+public class IntegrationApiTests : IAsyncLifetime
 {
     private HttpClient _client = null!;
     private readonly Mock<ProcessFile.IHandler> _processFileMock = new();

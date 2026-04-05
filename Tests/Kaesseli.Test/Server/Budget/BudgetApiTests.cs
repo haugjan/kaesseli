@@ -13,7 +13,7 @@ using Xunit;
 
 namespace Kaesseli.Test.Server.Budget;
 
-public class BudgetApiExtensionsTests : IAsyncLifetime
+public class BudgetApiTests : IAsyncLifetime
 {
     private HttpClient _client = null!;
     private readonly Mock<SetBudget.IHandler> _setBudgetMock = new();

@@ -14,7 +14,7 @@ using Xunit;
 
 namespace Kaesseli.Test.Server.Journal;
 
-public class JournalApiExtensionsTests : IAsyncLifetime
+public class JournalApiTests : IAsyncLifetime
 {
     private HttpClient _client = null!;
     private readonly Mock<AddJournalEntry.IHandler> _addJournalEntryMock = new();

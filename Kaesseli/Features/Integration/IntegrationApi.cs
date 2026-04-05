@@ -8,7 +8,7 @@ using Microsoft.AspNetCore.Mvc;
 // ReSharper disable once CheckNamespace
 namespace Microsoft.AspNetCore.Routing;
 
-public static class IntegrationApiExtensions
+public static class IntegrationApi
 {
     extension(IEndpointRouteBuilder app)
     {

@@ -4,7 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 // ReSharper disable once CheckNamespace
 namespace Microsoft.AspNetCore.Routing;
 
-public static class AutomationApiExtensions
+public static class AutomationApi
 {
     extension(IEndpointRouteBuilder app)
     {
