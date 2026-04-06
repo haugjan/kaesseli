@@ -53,7 +53,7 @@
                 <RowTemplate>
                     <MudTd DataLabel="Icon">
                         <MudAvatar Style="@($"background-color: {context.IconColor}; color: white;")" Size="Size.Small">
-                            @context.Icon
+                            <MudIcon Icon="@AccountDialog.ResolveIcon(context.Icon)" Size="Size.Small" />
                         </MudAvatar>
                     </MudTd>
                     <MudTd DataLabel="Name">@context.Name</MudTd>

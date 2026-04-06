@@ -129,18 +129,8 @@ else
         return $"{baseStyle}text-align: right; font-weight: 700; {color}";
     }
 
-    private static string GetMudIcon(string iconName) => iconName switch
-    {
-        "AccountBalance" => Icons.Material.Rounded.AccountBalance,
-        "Wallet" => Icons.Material.Rounded.Wallet,
-        "CreditCard" => Icons.Material.Rounded.CreditCard,
-        "Work" => Icons.Material.Rounded.Work,
-        "ShoppingCart" => Icons.Material.Rounded.ShoppingCart,
-        "Home" => Icons.Material.Rounded.Home,
-        "Train" => Icons.Material.Rounded.Train,
-        "SportsEsports" => Icons.Material.Rounded.SportsEsports,
-        _ => Icons.Material.Rounded.Circle,
-    };
+    private static string GetMudIcon(string iconName) =>
+        Components.AccountDialog.ResolveIcon(iconName);
 
     public void Dispose() => PeriodState.OnChange -= OnPeriodChanged;
 }

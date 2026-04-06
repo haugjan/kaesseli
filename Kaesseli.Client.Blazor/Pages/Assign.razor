@@ -269,17 +269,7 @@ else
 
     private static string GetMudIcon(string iconName) => iconName switch
     {
-        "AccountBalance" => Icons.Material.Rounded.AccountBalance,
-        "Wallet" => Icons.Material.Rounded.Wallet,
-        "CreditCard" => Icons.Material.Rounded.CreditCard,
-        "Work" => Icons.Material.Rounded.Work,
-        "ShoppingCart" => Icons.Material.Rounded.ShoppingCart,
-        "Home" => Icons.Material.Rounded.Home,
-        "Train" => Icons.Material.Rounded.Train,
-        "SportsEsports" => Icons.Material.Rounded.SportsEsports,
-        "AttachMoney" => Icons.Material.Rounded.AttachMoney,
-        "MoneyOff" => Icons.Material.Rounded.MoneyOff,
-        _ => Icons.Material.Rounded.Circle,
+        _ => Components.AccountDialog.ResolveIcon(iconName),
     };
 
     private class SplitAccount(SuggestedAccount account, decimal amount)
