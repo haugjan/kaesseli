@@ -47,6 +47,7 @@ public class DependencyInjectionTests
             typeof(SetBudget.IHandler),
             typeof(GetBudgetEntries.IHandler),
             typeof(AddJournalEntry.IHandler),
+            typeof(AddOpeningBalance.IHandler),
             typeof(GetJournalEntries.IHandler),
             typeof(ProcessFile.IHandler),
             typeof(ProcessCamtFile.IHandler),

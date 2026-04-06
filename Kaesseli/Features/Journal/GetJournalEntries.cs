@@ -27,7 +27,8 @@ public static class GetJournalEntries
                                   Description: entry.Description,
                                   DebitAccountId: entry.DebitAccount.Id,
                                   CreditAccountId: entry.CreditAccount.Id,
-                                  ValueDate: entry.ValueDate)).ToImmutableList();
+                                  ValueDate: entry.ValueDate,
+                                  IsOpeningBalance: entry.IsOpeningBalance)).ToImmutableList();
         }
     }
 }

@@ -104,12 +104,16 @@ public static class GetAccount
             var isDebit = entry.DebitAccount.Id == accountId;
             var amount = AccountBalanceCalculator.GetSignedAmount(account, entry);
 
+            var amountType = entry.IsOpeningBalance
+                ? Contracts.Accounts.AmountType.OpeningBalance
+                : isDebit ? Contracts.Accounts.AmountType.Debit : Contracts.Accounts.AmountType.Credit;
+
             return new Contracts.Accounts.AccountStatementEntry(
                 Id: entry.Id,
                 ValueDate: entry.ValueDate,
                 Description: entry.Description,
                 Amount: amount,
-                AmountType: isDebit ? Contracts.Accounts.AmountType.Debit : Contracts.Accounts.AmountType.Credit,
+                AmountType: amountType,
                 OtherAccount: otherAccount.Name,
                 OtherAccountId: otherAccount.Id);
         }

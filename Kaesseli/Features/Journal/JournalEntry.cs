@@ -15,6 +15,7 @@ public class JournalEntry
     public Account DebitAccount { get; private init; }
     public Account CreditAccount { get; private init; } = null!;
     public Transaction? Transaction { get; private init; }
+    public bool IsOpeningBalance { get; private init; }
 
     public static JournalEntry Create(
         DateOnly valueDate,
@@ -42,6 +43,32 @@ public class JournalEntry
             CreditAccount = creditAccount,
             AccountingPeriod = accountingPeriod,
             Transaction = transaction,
+        };
+    }
+
+    public static JournalEntry CreateOpeningBalance(
+        string description,
+        decimal amount,
+        Account debitAccount,
+        Account creditAccount,
+        AccountingPeriod accountingPeriod)
+    {
+        ArgumentNullException.ThrowIfNull(debitAccount);
+        ArgumentNullException.ThrowIfNull(creditAccount);
+
+        if (debitAccount.Id == creditAccount.Id)
+            throw new AccountsMustNotBeSameException();
+
+        return new JournalEntry
+        {
+            Id = Guid.NewGuid(),
+            ValueDate = accountingPeriod.FromInclusive,
+            Description = description,
+            Amount = amount,
+            DebitAccount = debitAccount,
+            CreditAccount = creditAccount,
+            AccountingPeriod = accountingPeriod,
+            IsOpeningBalance = true,
         };
     }
 

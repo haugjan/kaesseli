@@ -18,6 +18,7 @@ public class JournalApiTests : IAsyncLifetime
 {
     private HttpClient _client = null!;
     private readonly Mock<AddJournalEntry.IHandler> _addJournalEntryMock = new();
+    private readonly Mock<AddOpeningBalance.IHandler> _addOpeningBalanceMock = new();
     private readonly Mock<GetJournalEntries.IHandler> _getJournalEntriesMock = new();
 
     public async Task InitializeAsync()
@@ -26,6 +27,7 @@ public class JournalApiTests : IAsyncLifetime
         builder.WebHost.UseTestServer();
         builder.Services.AddRouting();
         builder.Services.AddSingleton(_addJournalEntryMock.Object);
+        builder.Services.AddSingleton(_addOpeningBalanceMock.Object);
         builder.Services.AddSingleton(_getJournalEntriesMock.Object);
 
         var app = builder.Build();

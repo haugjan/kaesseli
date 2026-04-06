@@ -20,6 +20,15 @@ public static class JournalEntryApi
                 }
             );
 
+            app.MapPost(
+                pattern: "/journalEntry/openingBalance",
+                async (AddOpeningBalance.IHandler handler, AddOpeningBalance.Query command) =>
+                {
+                    var guid = await handler.Handle(command, default);
+                    return Results.Created(uri: $"/journalEntry/{guid}", guid);
+                }
+            );
+
             app.MapGet(
                 pattern: "/journalEntry",
                 async (
