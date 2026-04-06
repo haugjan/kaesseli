@@ -92,6 +92,7 @@ app.Use(async (context, next) =>
     await next();
 });
 
+app.UseBlazorFrameworkFiles();
 app.UseDefaultFiles();
 app.UseStaticFiles();
 using (var scope = app.Services.CreateScope())

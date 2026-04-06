@@ -1,7 +1,7 @@
 <component name="ProjectRunConfigurationManager">
-  <configuration default="false" name="All: Dev" type="CompoundRunConfigurationType">
-    <toRun name="Kaesseli.Client.Blazor" type="LaunchSettings" />
-    <toRun name="Kaesseli: Dev" type="LaunchSettings" />
+  <configuration default="false" name="All: Dev" type="LaunchSettings" factoryName="Launch Settings">
+    <option name="LAUNCH_PROFILE_PROJECT_FILE_PATH" value="$PROJECT_DIR$/Kaesseli/Kaesseli.csproj" />
+    <option name="LAUNCH_PROFILE_NAME" value="Dev" />
     <method v="2" />
   </configuration>
 </component>
