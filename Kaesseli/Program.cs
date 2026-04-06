@@ -70,15 +70,12 @@ builder.Services.AddCors(options =>
     );
 });
 
-if (!builder.Environment.IsDevelopment())
-{
-    builder.Services.AddAuthentication("Basic")
-        .AddScheme<AuthenticationSchemeOptions, Kaesseli.BasicAuthHandler>("Basic", null);
-    builder.Services.AddAuthorizationBuilder()
-        .SetFallbackPolicy(new Microsoft.AspNetCore.Authorization.AuthorizationPolicyBuilder()
-            .RequireAuthenticatedUser()
-            .Build());
-}
+builder.Services.AddAuthentication("Basic")
+    .AddScheme<AuthenticationSchemeOptions, Kaesseli.BasicAuthHandler>("Basic", null);
+builder.Services.AddAuthorizationBuilder()
+    .SetFallbackPolicy(new Microsoft.AspNetCore.Authorization.AuthorizationPolicyBuilder()
+        .RequireAuthenticatedUser()
+        .Build());
 
 builder.Services.AddInfrastructureServices(builder.Configuration);
 builder.Services.AddApplicationServices();
@@ -88,11 +85,8 @@ var app = builder.Build();
 app.UseHttpsRedirection();
 app.UseCors("AllowSpecificOrigin");
 
-if (!app.Environment.IsDevelopment())
-{
-    app.UseAuthentication();
-    app.UseAuthorization();
-}
+app.UseAuthentication();
+app.UseAuthorization();
 
 app.UseDefaultFiles();
 app.UseStaticFiles();
@@ -105,8 +99,8 @@ using (var scope = app.Services.CreateScope())
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
-    app.MapOpenApi();
-    app.MapScalarApiReference();
+    app.MapOpenApi().AllowAnonymous();
+    app.MapScalarApiReference().AllowAnonymous();
 
     _ = Task.Run(async () =>
     {
