@@ -12,6 +12,7 @@ public interface ITransactionRepository
     Task<int> GetTotalOpenTransaction(CancellationToken cancellationToken);
     Task<Transaction> GetTransaction(Guid requestTransactionId, CancellationToken cancellationToken);
     Task ChangeTotalOpenTransaction(int notificationAmount, CancellationToken cancellationToken);
+    Task<HashSet<string>> GetExistingTransactionReferences(CancellationToken cancellationToken);
 }
 
 internal class TransactionRepository : ITransactionRepository
@@ -124,6 +125,15 @@ internal class TransactionRepository : ITransactionRepository
         statistic = AddStatisticEntryIfNull(statistic);
         statistic.ChangeTotalBy(notificationAmount);
         await _context.SaveChangesAsync(cancellationToken);
+    }
+
+    public async Task<HashSet<string>> GetExistingTransactionReferences(CancellationToken cancellationToken)
+    {
+        var transactions = await _context.Transactions.ToListAsync(cancellationToken);
+        return transactions
+            .Where(t => t.Reference is not null)
+            .Select(t => t.Reference)
+            .ToHashSet();
     }
 
     private TransactionStatistic AddStatisticEntryIfNull(TransactionStatistic? statistic)

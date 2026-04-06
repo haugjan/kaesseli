@@ -48,6 +48,9 @@ public class ProcessCamtFileCommandHandlerTests
             .ReturnsAsync(financialDocument);
 
         _transactionRepoMock
+            .Setup(x => x.GetExistingTransactionReferences(It.IsAny<CancellationToken>()))
+            .ReturnsAsync(new HashSet<string>());
+        _transactionRepoMock
             .Setup(x => x.AddTransactionSummary(It.IsAny<TransactionSummary>(), cancellationToken))
             .ReturnsAsync(
                 (TransactionSummary transactionSummary, CancellationToken _) => transactionSummary

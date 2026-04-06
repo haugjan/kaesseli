@@ -24,15 +24,11 @@ public static class ProcessCamtFile
         {
             var financialDocument = await camtProcessor.ReadCamtFile(request.Content, cancellationToken);
             var account = await accountRepo.GetAccount(request.AccountId, cancellationToken);
+            var existingReferences = await transactionRepository.GetExistingTransactionReferences(cancellationToken);
 
-            var transactionSummary = TransactionSummary.Create(
-                account,
-                financialDocument.BalanceBefore,
-                financialDocument.BalanceAfter,
-                financialDocument.ValueDateFrom,
-                financialDocument.ValueDateTo,
-                financialDocument.Reference,
-                financialDocument.Entries.Select(entry => Transaction.Create(
+            var newTransactions = financialDocument.Entries
+                .Where(entry => !existingReferences.Contains(entry.Reference))
+                .Select(entry => Transaction.Create(
                     rawText: entry.RawText,
                     amount: entry.Amount,
                     valueDate: entry.ValueDate,
@@ -42,10 +38,22 @@ public static class ProcessCamtFile
                     transactionCode: entry.TransactionCode,
                     transactionCodeDetail: entry.TransactionCodeDetail,
                     debtor: entry.Debtor,
-                    creditor: entry.Creditor)).ToList());
+                    creditor: entry.Creditor)).ToList();
+
+            if (newTransactions.Count == 0)
+                return Guid.Empty;
+
+            var transactionSummary = TransactionSummary.Create(
+                account,
+                financialDocument.BalanceBefore,
+                financialDocument.BalanceAfter,
+                financialDocument.ValueDateFrom,
+                financialDocument.ValueDateTo,
+                financialDocument.Reference,
+                newTransactions);
             await transactionRepository.AddTransactionSummary(transactionSummary, cancellationToken);
             await eventHandler.Handle(
-                notification: new OpenTransactionAmountChanged.Event(transactionSummary.Transactions.Count()),
+                notification: new OpenTransactionAmountChanged.Event(newTransactions.Count),
                 cancellationToken);
             return transactionSummary.Id;
         }
