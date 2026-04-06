@@ -43,10 +43,22 @@ az role assignment create `
   --scope $KeyVaultId `
   -o none
 
-Write-Host "==> Seeding key vault secrets..."
-az keyvault secret set --vault-name $KeyVaultName --name "CosmosDb--Key" --value "REPLACE_WITH_COSMOS_KEY" -o none
-az keyvault secret set --vault-name $KeyVaultName --name "AzureAdB2C--TenantId" --value "d8448c66-e344-4009-8169-8083b06994b4" -o none
-az keyvault secret set --vault-name $KeyVaultName --name "AzureAdB2C--ClientId" --value "c5190367-84f5-4ea7-8fc4-086d0c1abe24" -o none
+Write-Host "==> Seeding key vault secrets (only if they don't exist yet)..."
+$SecretsToSeed = @{
+    "CosmosDb--Key"       = "REPLACE_WITH_COSMOS_KEY"
+    "AzureAdB2C--TenantId" = "d8448c66-e344-4009-8169-8083b06994b4"
+    "AzureAdB2C--ClientId" = "c5190367-84f5-4ea7-8fc4-086d0c1abe24"
+}
+
+foreach ($SecretName in $SecretsToSeed.Keys) {
+    $Existing = az keyvault secret show --vault-name $KeyVaultName --name $SecretName --query value -o tsv 2>$null
+    if ($Existing) {
+        Write-Host "    Secret '$SecretName' already exists, skipping"
+    } else {
+        Write-Host "    Setting secret '$SecretName'..."
+        az keyvault secret set --vault-name $KeyVaultName --name $SecretName --value $SecretsToSeed[$SecretName] -o none
+    }
+}
 
 # ─── Log Analytics Workspace ───────────────────────────────────
 Write-Host "==> Creating log analytics workspace..."
@@ -117,9 +129,22 @@ foreach ($EnvName in @("dev", "prod")) {
 }
 
 # ─── GitHub Actions: Service Principal with Federated Credentials ─
-Write-Host "==> Creating service principal for GitHub Actions..."
-$SpAppId = az ad app create --display-name "kaesseli-github-deploy" --query appId -o tsv
-$SpObjectId = az ad sp create --id $SpAppId --query id -o tsv
+Write-Host "==> Setting up service principal for GitHub Actions..."
+$SpAppId = az ad app list --display-name "kaesseli-github-deploy" --query "[0].appId" -o tsv
+if (-not $SpAppId) {
+    Write-Host "    Creating app registration..."
+    $SpAppId = az ad app create --display-name "kaesseli-github-deploy" --query appId -o tsv
+} else {
+    Write-Host "    App registration already exists ($SpAppId)"
+}
+
+$SpObjectId = az ad sp show --id $SpAppId --query id -o tsv 2>$null
+if (-not $SpObjectId) {
+    Write-Host "    Creating service principal..."
+    $SpObjectId = az ad sp create --id $SpAppId --query id -o tsv
+} else {
+    Write-Host "    Service principal already exists ($SpObjectId)"
+}
 
 $SubscriptionId = az account show --query id -o tsv
 $TenantId = az account show --query tenantId -o tsv
@@ -128,14 +153,14 @@ az role assignment create `
   --role "Contributor" `
   --assignee $SpObjectId `
   --scope "/subscriptions/${SubscriptionId}/resourceGroups/${ResourceGroup}" `
-  -o none
+  -o none 2>$null
 
 $AcrId = az acr show --name $RegistryName --query id -o tsv
 az role assignment create `
   --role "AcrPush" `
   --assignee $SpObjectId `
   --scope $AcrId `
-  -o none
+  -o none 2>$null
 
 # Federated credentials for GitHub Actions
 $SpAppObjectId = az ad app show --id $SpAppId --query id -o tsv
@@ -146,7 +171,14 @@ $Subjects = @(
     "repo:${GitHubRepo}:environment:prod"
 )
 
+$ExistingCreds = az ad app federated-credential list --id $SpAppObjectId --query "[].subject" -o tsv 2>$null
+
 foreach ($Subject in $Subjects) {
+    if ($ExistingCreds -contains $Subject) {
+        Write-Host "    Federated credential already exists: $Subject"
+        continue
+    }
+
     $FedName = ($Subject -replace '[^a-zA-Z0-9]', '-')
     if ($FedName.Length -gt 64) { $FedName = $FedName.Substring($FedName.Length - 64) }
 
@@ -157,7 +189,8 @@ foreach ($Subject in $Subjects) {
         audiences = @("api://AzureADTokenExchange")
     } | ConvertTo-Json -Compress
 
-    az ad app federated-credential create --id $SpAppObjectId --parameters $Params -o none 2>$null
+    Write-Host "    Creating federated credential: $Subject"
+    az ad app federated-credential create --id $SpAppObjectId --parameters $Params -o none
 }
 
 # ─── Summary ───────────────────────────────────────────────────
