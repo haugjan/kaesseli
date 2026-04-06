@@ -182,15 +182,10 @@ foreach ($Subject in $Subjects) {
     $FedName = ($Subject -replace '[^a-zA-Z0-9]', '-')
     if ($FedName.Length -gt 64) { $FedName = $FedName.Substring($FedName.Length - 64) }
 
-    $Params = @{
-        name      = $FedName
-        issuer    = "https://token.actions.githubusercontent.com"
-        subject   = $Subject
-        audiences = @("api://AzureADTokenExchange")
-    } | ConvertTo-Json -Compress
+    $ParamsJson = '{"name":"' + $FedName + '","issuer":"https://token.actions.githubusercontent.com","subject":"' + $Subject + '","audiences":["api://AzureADTokenExchange"]}'
 
     Write-Host "    Creating federated credential: $Subject"
-    az ad app federated-credential create --id $SpAppObjectId --parameters $Params -o none
+    az ad app federated-credential create --id $SpAppObjectId --parameters $ParamsJson -o none
 }
 
 # ─── Summary ───────────────────────────────────────────────────
