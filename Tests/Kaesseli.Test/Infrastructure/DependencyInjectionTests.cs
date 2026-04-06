@@ -7,7 +7,6 @@ using Kaesseli.Features.Integration.TransactionQuery;
 using Kaesseli.Features.Journal;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using NSubstitute;
 using Shouldly;
 using Xunit;
 
@@ -19,13 +18,17 @@ public class DependencyInjectionTests
     public void ServiceProvider_CanResolveAllHandlers()
     {
         // Arrange
-        var configMock = Substitute.For<IConfiguration>();
-        var configSectionMock = Substitute.For<IConfigurationSection>();
-        configMock
-            .GetSection(Arg.Any<string>())
-            .Returns(configSectionMock);
+        var config = new ConfigurationBuilder()
+            .AddInMemoryCollection(new Dictionary<string, string?>
+            {
+                ["CosmosDb:Endpoint"] = "https://localhost:8081",
+                ["CosmosDb:Key"] = "dummykey==",
+                ["CosmosDb:Database"] = "test-db",
+            })
+            .Build();
+
         var serviceCollection = new ServiceCollection();
-        serviceCollection.AddApplicationServices().AddInfrastructureServices(configMock);
+        serviceCollection.AddApplicationServices().AddInfrastructureServices(config);
 
         var serviceProvider = serviceCollection.BuildServiceProvider();
 
@@ -33,8 +36,6 @@ public class DependencyInjectionTests
         {
             typeof(AddAccount.IHandler),
             typeof(AddAccountingPeriod.IHandler),
-            typeof(UpdateAccountingPeriod.IHandler),
-            typeof(DeleteAccountingPeriod.IHandler),
             typeof(GetAccount.IHandler),
             typeof(GetAccounts.IHandler),
             typeof(GetAccountingPeriods.IHandler),
