@@ -31,6 +31,7 @@
         <MudIconButton Icon="@(_isDarkMode ? Icons.Material.Rounded.LightMode : Icons.Material.Rounded.DarkMode)"
                        Color="Color.Dark"
                        OnClick="@(_ => _isDarkMode = !_isDarkMode)" />
+        <LoginDisplay />
     </MudAppBar>
 
     <MudDrawer @bind-Open="_drawerOpen" Elevation="0" Variant="DrawerVariant.Responsive" ClipMode="DrawerClipMode.Never">
