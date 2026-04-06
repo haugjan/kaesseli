@@ -51,7 +51,11 @@
       "Bash(npx --yes sharp-cli -- -i \"C:/development/kaesseli/Kaesseli.Client.Blazor/wwwroot/favicon.svg\" -o \"C:/development/kaesseli/Kaesseli.Client.Blazor/wwwroot/favicon.png\" --width 32 --height 32)",
       "Bash(node -e ':*)",
       "Bash(npm install:*)",
-      "Bash(node:*)"
+      "Bash(node:*)",
+      "Bash(git worktree:*)",
+      "Bash(git checkout:*)",
+      "Bash(git merge:*)",
+      "Bash(git check-ignore:*)"
     ]
   }
 }
