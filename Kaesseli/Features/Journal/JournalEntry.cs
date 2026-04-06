@@ -12,7 +12,7 @@ public class JournalEntry
     public DateOnly ValueDate { get; private init; }
     public string Description { get; private init; } = null!;
     public decimal Amount { get; private init; }
-    public Account DebitAccount { get; private init; }
+    public Account DebitAccount { get; private init; } = null!;
     public Account CreditAccount { get; private init; } = null!;
     public Transaction? Transaction { get; private init; }
     public bool IsOpeningBalance { get; private init; }
