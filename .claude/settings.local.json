@@ -38,7 +38,20 @@
       "Bash(wmic process:*)",
       "Bash(grep:*)",
       "Bash(mkdir:*)",
-      "Bash(sed:*)"
+      "Bash(sed:*)",
+      "Bash(dotnet restore:*)",
+      "Bash(cp \"C:\\\\development\\\\kaesseli\\\\.claude\\\\worktrees\\\\agent-a76a2a19\\\\Tests\\\\Kaesseli.Test\\\\Features\\\\Journal\\\\JournalApiTests.cs\" \"C:\\\\development\\\\kaesseli\\\\Tests\\\\Kaesseli.Test\\\\Features\\\\Journal\\\\JournalApiTests.cs\")",
+      "Bash(cp \"C:\\\\development\\\\kaesseli\\\\.claude\\\\worktrees\\\\agent-a76a2a19\\\\Tests\\\\Kaesseli.Test\\\\Infrastructure\\\\DependencyInjectionTests.cs\" \"C:\\\\development\\\\kaesseli\\\\Tests\\\\Kaesseli.Test\\\\Infrastructure\\\\DependencyInjectionTests.cs\")",
+      "Bash(magick --version)",
+      "Bash(pip show:*)",
+      "Bash(python -c \"from PIL import Image; print\\('Pillow OK'\\)\")",
+      "Bash(python -c \"import cairosvg; print\\('cairosvg OK'\\)\")",
+      "Bash(pip install:*)",
+      "Bash(npx --version)",
+      "Bash(npx --yes sharp-cli -- -i \"C:/development/kaesseli/Kaesseli.Client.Blazor/wwwroot/favicon.svg\" -o \"C:/development/kaesseli/Kaesseli.Client.Blazor/wwwroot/favicon.png\" --width 32 --height 32)",
+      "Bash(node -e ':*)",
+      "Bash(npm install:*)",
+      "Bash(node:*)"
     ]
   }
 }
