@@ -12,7 +12,7 @@ public class SetBudgetHandlerTests
     [Fact]
     public async Task Handle_CreatesAndSavesBudgetEntry()
     {
-        var account = new SmartFaker<Account>().Generate();
+        var account = new SmartFaker<Account>().RuleFor(a => a.Type, _ => AccountType.Expense).Generate();
         var period = new SmartFaker<AccountingPeriod>().Generate();
         var query = new SetBudget.Query(500m, "Monatsbudget", account.Id, period.Id);
 
