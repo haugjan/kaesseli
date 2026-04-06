@@ -87,14 +87,14 @@ var app = builder.Build();
 app.UseHttpsRedirection();
 app.UseCors("AllowSpecificOrigin");
 
+app.UseDefaultFiles();
+app.UseStaticFiles();
+
 if (!app.Environment.IsDevelopment())
 {
     app.UseAuthentication();
     app.UseAuthorization();
 }
-
-app.UseDefaultFiles();
-app.UseStaticFiles();
 using (var scope = app.Services.CreateScope())
 {
     var context = scope.ServiceProvider.GetRequiredService<Kaesseli.Infrastructure.KaesseliContext>();
