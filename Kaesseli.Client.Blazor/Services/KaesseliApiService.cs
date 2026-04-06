@@ -73,6 +73,28 @@ public class KaesseliApiService(HttpClient httpClient)
         response.EnsureSuccessStatusCode();
     }
 
+    public Task<IEnumerable<Contracts.Budget.BudgetEntry>?> GetBudgetEntriesAsync(Guid accountingPeriodId, CancellationToken ct = default)
+        => httpClient.GetFromJsonAsync<IEnumerable<Contracts.Budget.BudgetEntry>>($"budgetEntry?accountingPeriodId={accountingPeriodId}", ct);
+
+    public async Task SetBudgetAsync(decimal amount, string description, Guid accountId, Guid accountingPeriodId, CancellationToken ct = default)
+    {
+        var response = await httpClient.PostAsJsonAsync("budgetEntry", new { amount, description, accountId, accountingPeriodId }, ct);
+        response.EnsureSuccessStatusCode();
+    }
+
+    public Task<IEnumerable<Contracts.Journal.JournalEntry>?> GetJournalEntriesAsync(Guid accountingPeriodId, AccountType? accountType = null, CancellationToken ct = default)
+    {
+        var url = $"journalEntry?accountingPeriodId={accountingPeriodId}";
+        if (accountType.HasValue) url += $"&accountType={accountType}";
+        return httpClient.GetFromJsonAsync<IEnumerable<Contracts.Journal.JournalEntry>>(url, ct);
+    }
+
+    public async Task AddOpeningBalanceAsync(decimal amount, string description, Guid debitAccountId, Guid creditAccountId, Guid accountingPeriodId, CancellationToken ct = default)
+    {
+        var response = await httpClient.PostAsJsonAsync("journalEntry/openingBalance", new { amount, description, debitAccountId, creditAccountId, accountingPeriodId }, ct);
+        response.EnsureSuccessStatusCode();
+    }
+
     public record SplitEntry(Guid OtherAccountId, decimal Amount);
     private record NrOfPossibleAutomationResult(int NrOfPossibleAutomation);
 }

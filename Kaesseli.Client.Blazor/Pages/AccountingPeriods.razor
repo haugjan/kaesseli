@@ -5,6 +5,7 @@
 @inject AccountingPeriodState PeriodState
 @inject IDialogService DialogService
 @inject ISnackbar Snackbar
+@inject NavigationManager Nav
 
 <PageTitle>Buchungsperioden</PageTitle>
 
@@ -50,6 +51,8 @@
                     <MudTd DataLabel="Von">@context.FromInclusive.ToString("dd.MM.yyyy")</MudTd>
                     <MudTd DataLabel="Bis">@context.ToInclusive.ToString("dd.MM.yyyy")</MudTd>
                     <MudTd DataLabel="Aktionen" Style="text-align: right;">
+                        <MudIconButton Icon="@Icons.Material.Rounded.OpenInNew" Size="Size.Small" Color="Color.Primary"
+                                       OnClick="@(() => Nav.NavigateTo($"/accountingPeriods/{context.Id}"))" />
                         <MudIconButton Icon="@Icons.Material.Rounded.Edit" Size="Size.Small"
                                        OnClick="() => OnEditClicked(context)" />
                         <MudIconButton Icon="@Icons.Material.Rounded.Delete" Size="Size.Small" Color="Color.Error"
