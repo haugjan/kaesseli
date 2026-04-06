@@ -56,7 +56,17 @@
       "Bash(git checkout:*)",
       "Bash(git merge:*)",
       "Bash(git check-ignore:*)",
-      "Bash(git push:*)"
+      "Bash(git push:*)",
+      "Bash(dotnet:*)",
+      "Bash(git config:*)",
+      "Bash(gh api:*)",
+      "Bash(gh repo:*)",
+      "Bash(xargs cat:*)",
+      "Bash(gh pr:*)",
+      "Bash(git pull:*)",
+      "Bash(az keyvault secret set:*)",
+      "Bash(az keyvault secret list:*)",
+      "Bash(az keyvault:*)"
     ]
   }
 }
