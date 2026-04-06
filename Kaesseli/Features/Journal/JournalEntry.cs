@@ -1,4 +1,4 @@
-using Kaesseli.Features.Accounts;
+﻿using Kaesseli.Features.Accounts;
 using Kaesseli.Features.Integration;
 
 namespace Kaesseli.Features.Journal;
@@ -12,7 +12,7 @@ public class JournalEntry
     public DateOnly ValueDate { get; private init; }
     public string Description { get; private init; } = null!;
     public decimal Amount { get; private init; }
-    public Account DebitAccount { get; private init; } = null!;
+    public Account DebitAccount { get; private init; }
     public Account CreditAccount { get; private init; } = null!;
     public Transaction? Transaction { get; private init; }
 
@@ -23,7 +23,8 @@ public class JournalEntry
         Account debitAccount,
         Account creditAccount,
         AccountingPeriod accountingPeriod,
-        Transaction? transaction = null)
+        Transaction? transaction = null
+    )
     {
         ArgumentNullException.ThrowIfNull(debitAccount);
         ArgumentNullException.ThrowIfNull(creditAccount);
@@ -44,6 +45,5 @@ public class JournalEntry
         };
     }
 
-    public override string ToString() =>
-        $"{DebitAccount.Name} - {CreditAccount.Name}: {Amount:C}";
+    public override string ToString() => $"{DebitAccount.Name} - {CreditAccount.Name}: {Amount:C}";
 }
