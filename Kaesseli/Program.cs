@@ -1,4 +1,5 @@
 using System.Diagnostics;
+using Microsoft.Identity.Web;
 using OpenTelemetry.Logs;
 using OpenTelemetry.Metrics;
 using OpenTelemetry.Resources;
@@ -62,6 +63,12 @@ builder.Services.AddCors(options =>
     );
 });
 
+builder.Services.AddMicrosoftIdentityWebApiAuthentication(builder.Configuration, "AzureAdB2C");
+builder.Services.AddAuthorizationBuilder()
+    .SetFallbackPolicy(new Microsoft.AspNetCore.Authorization.AuthorizationPolicyBuilder()
+        .RequireAuthenticatedUser()
+        .Build());
+
 builder.Services.AddInfrastructureServices(builder.Configuration);
 builder.Services.AddApplicationServices();
 
@@ -69,6 +76,9 @@ var app = builder.Build();
 
 app.UseHttpsRedirection();
 app.UseCors("AllowSpecificOrigin");
+
+app.UseAuthentication();
+app.UseAuthorization();
 
 app.UseDefaultFiles();
 app.UseStaticFiles();
