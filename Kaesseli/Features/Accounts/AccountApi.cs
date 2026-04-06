@@ -75,6 +75,24 @@ public static class AccountApi
                 }
             );
 
+            app.MapPut(
+                pattern: "/account/{id}",
+                async (UpdateAccount.IHandler handler, Guid id, UpdateAccount.Query command) =>
+                {
+                    await handler.Handle(command with { Id = id }, default);
+                    return Results.NoContent();
+                }
+            );
+
+            app.MapDelete(
+                pattern: "/account/{id}",
+                async (DeleteAccount.IHandler handler, Guid id) =>
+                {
+                    await handler.Handle(new DeleteAccount.Query(id), default);
+                    return Results.NoContent();
+                }
+            );
+
             return app;
         }
     }

@@ -1,4 +1,4 @@
-@page "/accountingPeriods/{PeriodId:guid}"
+@page "/settings/periods/{PeriodId:guid}"
 @using Kaesseli.Client.Blazor.Services
 @inject KaesseliApiService Api
 @inject ISnackbar Snackbar
@@ -133,7 +133,7 @@ else
 
     private List<BreadcrumbItem> _breadcrumbs =>
     [
-        new("Buchungsperioden", "/accountingPeriods", icon: Icons.Material.Rounded.CalendarMonth),
+        new("Buchungsperioden", "/settings/periods", icon: Icons.Material.Rounded.CalendarMonth),
         new(_period?.Description ?? "...", null, disabled: true),
     ];
 

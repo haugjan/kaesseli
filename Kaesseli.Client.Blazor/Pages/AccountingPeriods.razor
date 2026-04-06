@@ -1,4 +1,4 @@
-@page "/accountingPeriods"
+@page "/settings/periods"
 @using Kaesseli.Client.Blazor.Services
 @using Kaesseli.Client.Blazor.Components
 @inject KaesseliApiService Api
@@ -52,7 +52,7 @@
                     <MudTd DataLabel="Bis">@context.ToInclusive.ToString("dd.MM.yyyy")</MudTd>
                     <MudTd DataLabel="Aktionen" Style="text-align: right;">
                         <MudIconButton Icon="@Icons.Material.Rounded.OpenInNew" Size="Size.Small" Color="Color.Primary"
-                                       OnClick="@(() => Nav.NavigateTo($"/accountingPeriods/{context.Id}"))" />
+                                       OnClick="@(() => Nav.NavigateTo($"/settings/periods/{context.Id}"))" />
                         <MudIconButton Icon="@Icons.Material.Rounded.Edit" Size="Size.Small"
                                        OnClick="() => OnEditClicked(context)" />
                         <MudIconButton Icon="@Icons.Material.Rounded.Delete" Size="Size.Small" Color="Color.Error"
@@ -70,6 +70,7 @@
     private readonly List<BreadcrumbItem> _breadcrumbs =
     [
         new("Home", "/", icon: Icons.Material.Rounded.Home),
+        new("Einstellungen", null, disabled: true, icon: Icons.Material.Rounded.Settings),
         new("Buchungsperioden", null, disabled: true),
     ];
 

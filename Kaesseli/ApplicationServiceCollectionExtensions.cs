@@ -19,6 +19,8 @@ public static class ApplicationServiceCollectionExtensions
                 .AddSingleton(TimeProvider.System)
                 // Accounts
                 .AddTransient<AddAccount.IHandler, AddAccount.Handler>()
+                .AddTransient<UpdateAccount.IHandler, UpdateAccount.Handler>()
+                .AddTransient<DeleteAccount.IHandler, DeleteAccount.Handler>()
                 .AddTransient<AddAccountingPeriod.IHandler, AddAccountingPeriod.Handler>()
                 .AddTransient<UpdateAccountingPeriod.IHandler, UpdateAccountingPeriod.Handler>()
                 .AddTransient<DeleteAccountingPeriod.IHandler, DeleteAccountingPeriod.Handler>()

@@ -14,6 +14,8 @@ public interface IAccountRepository
     Task<IEnumerable<AccountingPeriod>> GetAccountingPeriods(CancellationToken cancellationToken);
     Task UpdateAccountingPeriod(AccountingPeriod accountingPeriod, CancellationToken cancellationToken);
     Task DeleteAccountingPeriod(Guid accountingPeriodId, CancellationToken cancellationToken);
+    Task UpdateAccount(Account account, CancellationToken cancellationToken);
+    Task DeleteAccount(Guid accountId, CancellationToken cancellationToken);
 }
 
 internal class AccountRepository(KaesseliContext context) : IAccountRepository
@@ -71,6 +73,21 @@ internal class AccountRepository(KaesseliContext context) : IAccountRepository
         context.BudgetEntries.RemoveRange(budgetEntries);
 
         context.AccountingPeriods.Remove(period);
+        await context.SaveChangesAsync(cancellationToken);
+    }
+
+    public async Task UpdateAccount(Account account, CancellationToken cancellationToken)
+    {
+        context.Accounts.Update(account);
+        await context.SaveChangesAsync(cancellationToken);
+    }
+
+    public async Task DeleteAccount(Guid accountId, CancellationToken cancellationToken)
+    {
+        var account = await context.Accounts.SingleOrDefaultAsync(a => a.Id == accountId, cancellationToken)
+            ?? throw new EntityNotFoundException(typeof(Account), accountId);
+
+        context.Accounts.Remove(account);
         await context.SaveChangesAsync(cancellationToken);
     }
 }

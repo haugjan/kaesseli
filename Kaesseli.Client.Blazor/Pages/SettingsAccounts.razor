@@ -1,0 +1,183 @@
+@page "/settings/accounts"
+@using Kaesseli.Client.Blazor.Services
+@using Kaesseli.Client.Blazor.Components
+@inject KaesseliApiService Api
+@inject IDialogService DialogService
+@inject ISnackbar Snackbar
+
+<PageTitle>Konten verwalten</PageTitle>
+
+<MudBreadcrumbs Items="_breadcrumbs" Class="pa-0 mb-4" />
+
+<MudCard Elevation="0" Style="border: 1px solid var(--mud-palette-divider); border-radius: 12px;">
+    <MudCardHeader>
+        <CardHeaderAvatar>
+            <MudAvatar Style="background-color: #1E88E5; color: white;" Size="Size.Medium">
+                <MudIcon Icon="@Icons.Material.Rounded.AccountBalance" />
+            </MudAvatar>
+        </CardHeaderAvatar>
+        <CardHeaderContent>
+            <MudText Typo="Typo.h6">Konten verwalten</MudText>
+        </CardHeaderContent>
+        <CardHeaderActions>
+            <MudButton Color="Color.Primary" Variant="Variant.Filled" StartIcon="@Icons.Material.Rounded.Add"
+                       OnClick="OnAddClicked">
+                Neues Konto
+            </MudButton>
+        </CardHeaderActions>
+    </MudCardHeader>
+    <MudCardContent Class="pa-0">
+        @if (_accounts is null)
+        {
+            <MudSkeleton SkeletonType="SkeletonType.Rectangle" Height="200px" />
+        }
+        else if (!_accounts.Any())
+        {
+            <MudAlert Severity="Severity.Info" Class="ma-4">Keine Konten vorhanden.</MudAlert>
+        }
+        else
+        {
+            <MudTable Items="_accounts" Dense="true" Hover="true" Elevation="0" Style="background: transparent;"
+                      GroupBy="_groupDefinition">
+                <HeaderContent>
+                    <MudTh>Icon</MudTh>
+                    <MudTh>Name</MudTh>
+                    <MudTh>Typ</MudTh>
+                    <MudTh Style="text-align: right;">Aktionen</MudTh>
+                </HeaderContent>
+                <GroupHeaderTemplate>
+                    <MudTh colspan="4" Class="pa-3">
+                        <MudText Typo="Typo.subtitle1"><b>@context.Key</b></MudText>
+                    </MudTh>
+                </GroupHeaderTemplate>
+                <RowTemplate>
+                    <MudTd DataLabel="Icon">
+                        <MudAvatar Style="@($"background-color: {context.IconColor}; color: white;")" Size="Size.Small">
+                            @context.Icon
+                        </MudAvatar>
+                    </MudTd>
+                    <MudTd DataLabel="Name">@context.Name</MudTd>
+                    <MudTd DataLabel="Typ">@GetTypeName(context.TypeId)</MudTd>
+                    <MudTd DataLabel="Aktionen" Style="text-align: right;">
+                        <MudIconButton Icon="@Icons.Material.Rounded.Edit" Size="Size.Small"
+                                       OnClick="() => OnEditClicked(context)" />
+                        <MudIconButton Icon="@Icons.Material.Rounded.Delete" Size="Size.Small" Color="Color.Error"
+                                       OnClick="() => OnDeleteClicked(context)" />
+                    </MudTd>
+                </RowTemplate>
+            </MudTable>
+        }
+    </MudCardContent>
+</MudCard>
+
+@code {
+    private List<Account>? _accounts;
+
+    private readonly List<BreadcrumbItem> _breadcrumbs =
+    [
+        new("Home", "/", icon: Icons.Material.Rounded.Home),
+        new("Einstellungen", null, disabled: true, icon: Icons.Material.Rounded.Settings),
+        new("Konten", null, disabled: true),
+    ];
+
+    private readonly TableGroupDefinition<Account> _groupDefinition = new()
+    {
+        GroupName = "Typ",
+        Selector = a => GetTypeName(a.TypeId),
+    };
+
+    protected override async Task OnInitializedAsync() => await LoadAsync();
+
+    private async Task LoadAsync()
+    {
+        var accounts = await Api.GetAccountsAsync();
+        _accounts = accounts?.OrderBy(a => a.TypeId).ThenBy(a => a.Name).ToList() ?? [];
+    }
+
+    private async Task OnAddClicked()
+    {
+        var parameters = new DialogParameters<AccountDialog>();
+        var options = new DialogOptions { MaxWidth = MaxWidth.Small, FullWidth = true };
+        var dialog = await DialogService.ShowAsync<AccountDialog>("Neues Konto", parameters, options);
+        var result = await dialog.Result;
+
+        if (result is { Canceled: false, Data: AccountDialog.FormModel model })
+        {
+            try
+            {
+                await Api.AddAccountAsync(model.Name!, model.Type, model.Icon, model.IconColor);
+                Snackbar.Add("Konto erstellt.", Severity.Success);
+                await LoadAsync();
+            }
+            catch
+            {
+                Snackbar.Add("Fehler beim Erstellen.", Severity.Error);
+            }
+        }
+    }
+
+    private async Task OnEditClicked(Account account)
+    {
+        var parameters = new DialogParameters<AccountDialog>
+        {
+            { x => x.Model, new AccountDialog.FormModel
+            {
+                Name = account.Name,
+                Type = account.TypeId,
+                Icon = account.Icon,
+                IconColor = account.IconColor,
+            }},
+        };
+        var options = new DialogOptions { MaxWidth = MaxWidth.Small, FullWidth = true };
+        var dialog = await DialogService.ShowAsync<AccountDialog>("Konto bearbeiten", parameters, options);
+        var result = await dialog.Result;
+
+        if (result is { Canceled: false, Data: AccountDialog.FormModel model })
+        {
+            try
+            {
+                await Api.UpdateAccountAsync(account.Id, model.Name!, model.Type, model.Icon, model.IconColor);
+                Snackbar.Add("Konto aktualisiert.", Severity.Success);
+                await LoadAsync();
+            }
+            catch
+            {
+                Snackbar.Add("Fehler beim Aktualisieren.", Severity.Error);
+            }
+        }
+    }
+
+    private async Task OnDeleteClicked(Account account)
+    {
+        var parameters = new DialogParameters<DeleteConfirmationDialog>
+        {
+            { x => x.EntityDescription, $"Konto \"{account.Name}\"" },
+        };
+        var options = new DialogOptions { MaxWidth = MaxWidth.Small, FullWidth = true };
+        var dialog = await DialogService.ShowAsync<DeleteConfirmationDialog>("Konto löschen", parameters, options);
+        var result = await dialog.Result;
+
+        if (result is { Canceled: false })
+        {
+            try
+            {
+                await Api.DeleteAccountAsync(account.Id);
+                Snackbar.Add("Konto gelöscht.", Severity.Success);
+                await LoadAsync();
+            }
+            catch
+            {
+                Snackbar.Add("Fehler beim Löschen.", Severity.Error);
+            }
+        }
+    }
+
+    private static string GetTypeName(AccountType type) => type switch
+    {
+        AccountType.Asset => "Aktiv",
+        AccountType.Liability => "Passiv",
+        AccountType.Revenue => "Einkommen",
+        AccountType.Expense => "Ausgaben",
+        _ => type.ToString(),
+    };
+}

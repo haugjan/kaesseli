@@ -26,6 +26,8 @@ public class AccountApiTests : IAsyncLifetime
     private readonly AddAccountingPeriod.IHandler _addAccountingPeriodMock = Substitute.For<AddAccountingPeriod.IHandler>();
     private readonly UpdateAccountingPeriod.IHandler _updateAccountingPeriodMock = Substitute.For<UpdateAccountingPeriod.IHandler>();
     private readonly DeleteAccountingPeriod.IHandler _deleteAccountingPeriodMock = Substitute.For<DeleteAccountingPeriod.IHandler>();
+    private readonly UpdateAccount.IHandler _updateAccountMock = Substitute.For<UpdateAccount.IHandler>();
+    private readonly DeleteAccount.IHandler _deleteAccountMock = Substitute.For<DeleteAccount.IHandler>();
 
     public async Task InitializeAsync()
     {
@@ -41,6 +43,8 @@ public class AccountApiTests : IAsyncLifetime
         builder.Services.AddSingleton(_addAccountingPeriodMock);
         builder.Services.AddSingleton(_updateAccountingPeriodMock);
         builder.Services.AddSingleton(_deleteAccountingPeriodMock);
+        builder.Services.AddSingleton(_updateAccountMock);
+        builder.Services.AddSingleton(_deleteAccountMock);
 
         var app = builder.Build();
         app.MapAccountEndpoints();

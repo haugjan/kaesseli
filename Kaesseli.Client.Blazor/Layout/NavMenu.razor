@@ -14,7 +14,12 @@
     <MudNavLink Href="transactions" Match="NavLinkMatch.All" Icon="@Icons.Material.Rounded.Receipt">
         Kontoauszüge
     </MudNavLink>
-    <MudNavLink Href="accountingPeriods" Match="NavLinkMatch.All" Icon="@Icons.Material.Rounded.CalendarMonth">
-        Perioden
-    </MudNavLink>
+    <MudNavGroup Title="Einstellungen" Icon="@Icons.Material.Rounded.Settings" Expanded="false">
+        <MudNavLink Href="settings/periods" Match="NavLinkMatch.All" Icon="@Icons.Material.Rounded.CalendarMonth">
+            Perioden
+        </MudNavLink>
+        <MudNavLink Href="settings/accounts" Match="NavLinkMatch.All" Icon="@Icons.Material.Rounded.AccountBalance">
+            Konten
+        </MudNavLink>
+    </MudNavGroup>
 </MudNavMenu>

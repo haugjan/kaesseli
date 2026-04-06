@@ -1,0 +1,104 @@
+@using Kaesseli.Contracts.Accounts
+@using MudBlazor.Utilities
+
+<MudDialog>
+    <DialogContent>
+        <MudForm @ref="_form">
+            <MudTextField @bind-Value="Model.Name" Label="Name" Required="true" RequiredError="Name ist erforderlich."
+                          Class="mb-3" />
+
+            <MudSelect @bind-Value="Model.Type" Label="Typ" Required="true" RequiredError="Typ ist erforderlich."
+                       Class="mb-3">
+                <MudSelectItem Value="AccountType.Asset">Aktiv</MudSelectItem>
+                <MudSelectItem Value="AccountType.Liability">Passiv</MudSelectItem>
+                <MudSelectItem Value="AccountType.Revenue">Einkommen</MudSelectItem>
+                <MudSelectItem Value="AccountType.Expense">Ausgaben</MudSelectItem>
+            </MudSelect>
+
+            <MudText Typo="Typo.subtitle2" Class="mb-2">Icon</MudText>
+            <MudTabs Elevation="0" Rounded="true" ApplyEffectsToContainer="true" Class="mb-3">
+                <MudTabPanel Text="Auswählen">
+                    <div class="d-flex flex-wrap gap-1 pa-2" style="max-height: 280px; overflow-y: auto;">
+                        @foreach (var icon in IconPalette)
+                        {
+                            var isSelected = Model.Icon == icon;
+                            <MudButton Variant="@(isSelected ? Variant.Filled : Variant.Outlined)"
+                                       Color="@(isSelected ? Color.Primary : Color.Default)"
+                                       Style="min-width: 48px; height: 48px; font-size: 20px; padding: 0;"
+                                       OnClick="() => Model.Icon = icon">
+                                @icon
+                            </MudButton>
+                        }
+                    </div>
+                </MudTabPanel>
+                <MudTabPanel Text="Eigenes Zeichen">
+                    <div class="pa-2">
+                        <MudTextField @bind-Value="Model.Icon" Label="Einzelnes Zeichen eingeben"
+                                      MaxLength="2" Immediate="true" />
+                    </div>
+                </MudTabPanel>
+            </MudTabs>
+
+            <div class="d-flex align-center gap-3 mb-3">
+                <MudText Typo="Typo.subtitle2">Vorschau:</MudText>
+                <MudAvatar Style="@($"background-color: {Model.IconColor}; color: white;")" Size="Size.Medium">
+                    @Model.Icon
+                </MudAvatar>
+            </div>
+
+            <MudColorPicker @bind-Value="_color" Label="Iconfarbe"
+                            ColorPickerMode="ColorPickerMode.HEX"
+                            PickerVariant="PickerVariant.Inline"
+                            Style="width: 100%;" />
+        </MudForm>
+    </DialogContent>
+    <DialogActions>
+        <MudButton OnClick="Cancel">Abbrechen</MudButton>
+        <MudButton Color="Color.Primary" Variant="Variant.Filled" OnClick="Submit">Speichern</MudButton>
+    </DialogActions>
+</MudDialog>
+
+@code {
+    private MudForm _form = null!;
+    private MudColor _color = new("#1E88E5");
+
+    [CascadingParameter] private IMudDialogInstance MudDialog { get; set; } = null!;
+
+    [Parameter] public FormModel Model { get; set; } = new();
+
+    public static readonly string[] IconPalette =
+    [
+        "💰", "💵", "💶", "💷", "💴", "💳", "🏦", "🏧",
+        "📈", "📉", "💹", "📊", "🪙", "💎", "🏠", "🏢",
+        "🚗", "🚌", "✈️", "🚂", "⛽", "🔌", "💡", "📱",
+        "💻", "🖥️", "📺", "🎮", "🛒", "🛍️", "🍔", "☕",
+        "🍕", "🍷", "🎓", "📚", "🏥", "💊", "🏋️", "⚽",
+        "🎬", "🎵", "🐾", "👶", "👔", "🔧", "🏗️", "📦",
+        "🎁", "❤️", "🌍", "♻️", "📝", "📋",
+    ];
+
+    protected override void OnParametersSet()
+    {
+        if (!string.IsNullOrEmpty(Model.IconColor))
+            _color = new MudColor(Model.IconColor);
+    }
+
+    private async Task Submit()
+    {
+        await _form.ValidateAsync();
+        if (!_form.IsValid) return;
+
+        Model.IconColor = _color.ToString(MudColorOutputFormats.Hex);
+        MudDialog.Close(DialogResult.Ok(Model));
+    }
+
+    private void Cancel() => MudDialog.Cancel();
+
+    public class FormModel
+    {
+        public string? Name { get; set; }
+        public AccountType Type { get; set; } = AccountType.Expense;
+        public string Icon { get; set; } = "💰";
+        public string IconColor { get; set; } = "#1E88E5";
+    }
+}

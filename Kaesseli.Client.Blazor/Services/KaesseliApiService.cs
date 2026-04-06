@@ -95,6 +95,24 @@ public class KaesseliApiService(HttpClient httpClient)
         response.EnsureSuccessStatusCode();
     }
 
+    public async Task AddAccountAsync(string name, AccountType type, string icon, string iconColor, CancellationToken ct = default)
+    {
+        var response = await httpClient.PostAsJsonAsync("account", new { name, type, icon, iconColor }, ct);
+        response.EnsureSuccessStatusCode();
+    }
+
+    public async Task UpdateAccountAsync(Guid id, string name, AccountType type, string icon, string iconColor, CancellationToken ct = default)
+    {
+        var response = await httpClient.PutAsJsonAsync($"account/{id}", new { id, name, type, icon, iconColor }, ct);
+        response.EnsureSuccessStatusCode();
+    }
+
+    public async Task DeleteAccountAsync(Guid id, CancellationToken ct = default)
+    {
+        var response = await httpClient.DeleteAsync($"account/{id}", ct);
+        response.EnsureSuccessStatusCode();
+    }
+
     public record SplitEntry(Guid OtherAccountId, decimal Amount);
     private record NrOfPossibleAutomationResult(int NrOfPossibleAutomation);
 }
