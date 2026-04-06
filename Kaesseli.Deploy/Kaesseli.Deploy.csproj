@@ -19,7 +19,7 @@
     <Content Include="..\Kaesseli\appsettings.Development.json" Link="appsettings.Development.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="..\Kaesseli\appsettings.user.json" Link="appsettings.user.json">
+    <Content Include="..\Kaesseli\appsettings.user.json" Link="appsettings.user.json" Condition="Exists('..\Kaesseli\appsettings.user.json')">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
   </ItemGroup>
