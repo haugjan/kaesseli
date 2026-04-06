@@ -7,7 +7,7 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Routing;
 using Microsoft.AspNetCore.TestHost;
 using Microsoft.Extensions.DependencyInjection;
-using Moq;
+using NSubstitute;
 using Shouldly;
 using Xunit;
 
@@ -16,16 +16,16 @@ namespace Kaesseli.Test.Features.Budget;
 public class BudgetApiTests : IAsyncLifetime
 {
     private HttpClient _client = null!;
-    private readonly Mock<SetBudget.IHandler> _setBudgetMock = new();
-    private readonly Mock<GetBudgetEntries.IHandler> _getBudgetEntriesMock = new();
+    private readonly SetBudget.IHandler _setBudgetMock = Substitute.For<SetBudget.IHandler>();
+    private readonly GetBudgetEntries.IHandler _getBudgetEntriesMock = Substitute.For<GetBudgetEntries.IHandler>();
 
     public async Task InitializeAsync()
     {
         var builder = WebApplication.CreateBuilder();
         builder.WebHost.UseTestServer();
         builder.Services.AddRouting();
-        builder.Services.AddSingleton(_setBudgetMock.Object);
-        builder.Services.AddSingleton(_getBudgetEntriesMock.Object);
+        builder.Services.AddSingleton(_setBudgetMock);
+        builder.Services.AddSingleton(_getBudgetEntriesMock);
 
         var app = builder.Build();
         app.MapBudgetEndpoints();
@@ -42,8 +42,8 @@ public class BudgetApiTests : IAsyncLifetime
         // Arrange
         var guid = Guid.NewGuid();
         _setBudgetMock
-            .Setup(m => m.Handle(It.IsAny<SetBudget.Query>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync(guid);
+            .Handle(Arg.Any<SetBudget.Query>(), Arg.Any<CancellationToken>())
+            .Returns(guid);
 
         var setBudgetCommand = new SmartFaker<SetBudget.Query>().Generate();
         var content = new StringContent(
@@ -60,7 +60,7 @@ public class BudgetApiTests : IAsyncLifetime
         response.Headers.Location.ShouldBe(
             new Uri(uriString: $"/budgetEntry/{guid}", UriKind.Relative)
         );
-        _setBudgetMock.Verify(m => m.Handle(It.IsAny<SetBudget.Query>(), It.IsAny<CancellationToken>()), Times.Once);
+        await _setBudgetMock.Received(1).Handle(Arg.Any<SetBudget.Query>(), Arg.Any<CancellationToken>());
     }
 
     [Fact]
@@ -69,8 +69,8 @@ public class BudgetApiTests : IAsyncLifetime
         // Arrange
         var budgetEntries = new SmartFaker<Kaesseli.Contracts.Budget.BudgetEntry>().Generate(count: 3);
         _getBudgetEntriesMock
-            .Setup(m => m.Handle(It.IsAny<GetBudgetEntries.Query>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync(budgetEntries);
+            .Handle(Arg.Any<GetBudgetEntries.Query>(), Arg.Any<CancellationToken>())
+            .Returns(budgetEntries);
 
         var accountId = Guid.NewGuid();
         var periodId = Guid.NewGuid();
@@ -84,9 +84,7 @@ public class BudgetApiTests : IAsyncLifetime
 
         // Assert
         response.StatusCode.ShouldBe(HttpStatusCode.OK);
-        _getBudgetEntriesMock.Verify(
-            m => m.Handle(It.IsAny<GetBudgetEntries.Query>(), It.IsAny<CancellationToken>()),
-            Times.Once
-        );
+        await _getBudgetEntriesMock.Received(1)
+            .Handle(Arg.Any<GetBudgetEntries.Query>(), Arg.Any<CancellationToken>());
     }
 }

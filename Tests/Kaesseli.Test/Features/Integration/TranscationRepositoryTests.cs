@@ -3,7 +3,7 @@ using Kaesseli.Features.Integration;
 using Kaesseli.Features.Journal;
 using Kaesseli.Test.Faker;
 using Microsoft.EntityFrameworkCore;
-using Moq;
+
 using Shouldly;
 using Xunit;
 

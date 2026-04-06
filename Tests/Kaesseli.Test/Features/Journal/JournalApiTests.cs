@@ -8,7 +8,7 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Routing;
 using Microsoft.AspNetCore.TestHost;
 using Microsoft.Extensions.DependencyInjection;
-using Moq;
+using NSubstitute;
 using Shouldly;
 using Xunit;
 
@@ -17,18 +17,18 @@ namespace Kaesseli.Test.Features.Journal;
 public class JournalApiTests : IAsyncLifetime
 {
     private HttpClient _client = null!;
-    private readonly Mock<AddJournalEntry.IHandler> _addJournalEntryMock = new();
-    private readonly Mock<AddOpeningBalance.IHandler> _addOpeningBalanceMock = new();
-    private readonly Mock<GetJournalEntries.IHandler> _getJournalEntriesMock = new();
+    private readonly AddJournalEntry.IHandler _addJournalEntryMock = Substitute.For<AddJournalEntry.IHandler>();
+    private readonly AddOpeningBalance.IHandler _addOpeningBalanceMock = Substitute.For<AddOpeningBalance.IHandler>();
+    private readonly GetJournalEntries.IHandler _getJournalEntriesMock = Substitute.For<GetJournalEntries.IHandler>();
 
     public async Task InitializeAsync()
     {
         var builder = WebApplication.CreateBuilder();
         builder.WebHost.UseTestServer();
         builder.Services.AddRouting();
-        builder.Services.AddSingleton(_addJournalEntryMock.Object);
-        builder.Services.AddSingleton(_addOpeningBalanceMock.Object);
-        builder.Services.AddSingleton(_getJournalEntriesMock.Object);
+        builder.Services.AddSingleton(_addJournalEntryMock);
+        builder.Services.AddSingleton(_addOpeningBalanceMock);
+        builder.Services.AddSingleton(_getJournalEntriesMock);
 
         var app = builder.Build();
         app.MapJournalEndpoints();
@@ -45,8 +45,8 @@ public class JournalApiTests : IAsyncLifetime
         // Arrange
         var guid = Guid.NewGuid();
         _addJournalEntryMock
-            .Setup(m => m.Handle(It.IsAny<AddJournalEntry.Query>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync(guid);
+            .Handle(Arg.Any<AddJournalEntry.Query>(), Arg.Any<CancellationToken>())
+            .Returns(guid);
 
         var addJournalEntryCommand = new SmartFaker<AddJournalEntry.Query>().Generate();
         var content = new StringContent(
@@ -63,10 +63,8 @@ public class JournalApiTests : IAsyncLifetime
         response.Headers.Location.ShouldBe(
             new Uri(uriString: $"/journalEntry/{guid}", UriKind.Relative)
         );
-        _addJournalEntryMock.Verify(
-            m => m.Handle(It.IsAny<AddJournalEntry.Query>(), It.IsAny<CancellationToken>()),
-            Times.Once
-        );
+        await _addJournalEntryMock.Received(1)
+            .Handle(Arg.Any<AddJournalEntry.Query>(), Arg.Any<CancellationToken>());
     }
 
     [Fact]
@@ -75,8 +73,8 @@ public class JournalApiTests : IAsyncLifetime
         // Arrange
         var journalEntries = new SmartFaker<Kaesseli.Contracts.Journal.JournalEntry>().Generate(count: 3);
         _getJournalEntriesMock
-            .Setup(m => m.Handle(It.IsAny<GetJournalEntries.Query>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync(journalEntries);
+            .Handle(Arg.Any<GetJournalEntries.Query>(), Arg.Any<CancellationToken>())
+            .Returns(journalEntries);
 
         var accountId = Guid.NewGuid();
         var periodId = Guid.NewGuid();
@@ -89,17 +87,14 @@ public class JournalApiTests : IAsyncLifetime
 
         // Assert
         response.StatusCode.ShouldBe(HttpStatusCode.OK);
-        _getJournalEntriesMock.Verify(
-            m =>
-                m.Handle(
-                    It.Is<GetJournalEntries.Query>(query =>
-                        query.AccountingPeriodId == periodId
-                        && query.AccountType == accountType
-                        && query.AccountId == accountId
-                    ),
-                    It.IsAny<CancellationToken>()
+        await _getJournalEntriesMock.Received(1)
+            .Handle(
+                Arg.Is<GetJournalEntries.Query>(query =>
+                    query.AccountingPeriodId == periodId
+                    && query.AccountType == accountType
+                    && query.AccountId == accountId
                 ),
-            Times.Once
-        );
+                Arg.Any<CancellationToken>()
+            );
     }
 }

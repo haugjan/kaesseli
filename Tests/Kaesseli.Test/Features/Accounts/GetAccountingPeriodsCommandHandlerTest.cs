@@ -1,6 +1,6 @@
 using Kaesseli.Features.Accounts;
 using Kaesseli.Test.Faker;
-using Moq;
+using NSubstitute;
 using Xunit;
 
 namespace Kaesseli.Test.Features.Accounts;
@@ -11,13 +11,13 @@ public class GetAccountingPeriodsCommandHandlerTest
     public async Task Handle_ReturnsAllAccountingPeriods()
     {
         //Arrange
-        var accountRepoMock = new Mock<IAccountRepository>();
-        var handler = new GetAccountingPeriods.Handler(accountRepoMock.Object);
+        var accountRepoMock = Substitute.For<IAccountRepository>();
+        var handler = new GetAccountingPeriods.Handler(accountRepoMock);
         var cancellationToken = new CancellationToken();
         var expectedPeriods = new SmartFaker<AccountingPeriod>().Generate(count: 3);
         accountRepoMock
-            .Setup(repo => repo.GetAccountingPeriods(cancellationToken))
-            .ReturnsAsync(expectedPeriods);
+            .GetAccountingPeriods(cancellationToken)
+            .Returns(expectedPeriods);
 
         //Act
         var result = await handler.Handle(cancellationToken);

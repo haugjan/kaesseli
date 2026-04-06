@@ -1,6 +1,6 @@
 using Kaesseli.Contracts.Accounts;
 using Kaesseli.Features.Accounts;
-using Moq;
+using NSubstitute;
 using Shouldly;
 using Xunit;
 
@@ -20,11 +20,11 @@ public class GetFinancialOverviewTests
             new(Guid.NewGuid(), "Kreditkarte", "CreditCard", "#F44336", "Passiv", AccountType.Liability, 65m, null, null, null, null, null),
         };
 
-        var mockHandler = new Mock<GetAccountsSummary.IHandler>();
-        mockHandler.Setup(x => x.Handle(It.IsAny<GetAccountsSummary.Query>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync(summaries);
+        var mockHandler = Substitute.For<GetAccountsSummary.IHandler>();
+        mockHandler.Handle(Arg.Any<GetAccountsSummary.Query>(), Arg.Any<CancellationToken>())
+            .Returns(summaries);
 
-        var handler = new GetFinancialOverview.Handler(mockHandler.Object);
+        var handler = new GetFinancialOverview.Handler(mockHandler);
         var result = await handler.Handle(new GetFinancialOverview.Query(Guid.NewGuid()), CancellationToken.None);
 
         result.Revenue.AccountBalance.ShouldBe(5500m);
@@ -46,11 +46,11 @@ public class GetFinancialOverviewTests
             new(Guid.NewGuid(), "KK", "CreditCard", "#F44336", "Passiv", AccountType.Liability, 0m, null, null, null, null, null),
         };
 
-        var mockHandler = new Mock<GetAccountsSummary.IHandler>();
-        mockHandler.Setup(x => x.Handle(It.IsAny<GetAccountsSummary.Query>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync(summaries);
+        var mockHandler = Substitute.For<GetAccountsSummary.IHandler>();
+        mockHandler.Handle(Arg.Any<GetAccountsSummary.Query>(), Arg.Any<CancellationToken>())
+            .Returns(summaries);
 
-        var handler = new GetFinancialOverview.Handler(mockHandler.Object);
+        var handler = new GetFinancialOverview.Handler(mockHandler);
         var result = await handler.Handle(new GetFinancialOverview.Query(Guid.NewGuid()), CancellationToken.None);
 
         result.Revenue.Budget.ShouldBeNull();

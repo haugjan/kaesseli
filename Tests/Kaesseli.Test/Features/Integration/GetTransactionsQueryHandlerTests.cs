@@ -1,7 +1,7 @@
 using Kaesseli.Features.Integration.TransactionQuery;
 using Kaesseli.Features.Integration;
 using Kaesseli.Test.Faker;
-using Moq;
+using NSubstitute;
 using Shouldly;
 using Xunit;
 
@@ -13,7 +13,7 @@ public class GetTransactionsQueryHandlerTests
     public async Task Handle_ReturnsCorrectTransactions()
     {
         // Arrange
-        var mockRepository = new Mock<ITransactionRepository>();
+        var mockRepository = Substitute.For<ITransactionRepository>();
         var transactionSummaryGuid = Guid.NewGuid();
         var transactions1 = new SmartFaker<Transaction>()
             .RuleFor(
@@ -26,15 +26,16 @@ public class GetTransactionsQueryHandlerTests
         var transactions2 = new SmartFaker<Transaction>().Generate(count: 3);
 
         mockRepository
-            .Setup(repo => repo.GetTransactions(It.IsAny<Guid>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync(
-                (Guid transactionSummaryId, CancellationToken _) =>
-                    transactions1
-                        .Concat(transactions2)
-                        .Where(tran => tran.TransactionSummary!.Id == transactionSummaryId)
-            );
+            .GetTransactions(Arg.Any<Guid>(), Arg.Any<CancellationToken>())
+            .Returns(callInfo =>
+            {
+                var transactionSummaryId = callInfo.ArgAt<Guid>(0);
+                return transactions1
+                    .Concat(transactions2)
+                    .Where(tran => tran.TransactionSummary!.Id == transactionSummaryId);
+            });
 
-        var handler = new GetTransactions.Handler(mockRepository.Object);
+        var handler = new GetTransactions.Handler(mockRepository);
         var query = new GetTransactions.Query(transactionSummaryGuid);
 
         // Act
@@ -45,9 +46,7 @@ public class GetTransactionsQueryHandlerTests
         result.Length.ShouldBe(transactions1.Count);
         result.Select(r => r.Id).ToArray().ShouldBeEquivalentTo(transactions1.Select(t => t.Id).ToArray());
 
-        mockRepository.Verify(
-            repo => repo.GetTransactions(transactionSummaryGuid, It.IsAny<CancellationToken>()),
-            Times.Once
-        );
+        await mockRepository.Received(1)
+            .GetTransactions(transactionSummaryGuid, Arg.Any<CancellationToken>());
     }
 }

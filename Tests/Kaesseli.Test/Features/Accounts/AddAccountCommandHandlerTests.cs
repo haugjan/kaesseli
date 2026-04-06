@@ -1,5 +1,5 @@
 using Kaesseli.Features.Accounts;
-using Moq;
+using NSubstitute;
 using Xunit;
 
 namespace Kaesseli.Test.Features.Accounts;
@@ -10,26 +10,25 @@ public class AddAccountCommandHandlerTests
     public async Task Handle_ShouldAddAccountSuccessfully()
     {
         // Arrange
-        var mockRepo = new Mock<IAccountRepository>();
+        var mockRepo = Substitute.For<IAccountRepository>();
         const string name = "MyAccount";
         var command = new AddAccount.Query(Name: name, Type: AccountType.Expense, Icon: "favorite", IconColor: "blue");
         var cancellationToken = new CancellationToken();
 
         mockRepo
-            .Setup(repo => repo.AddAccount(It.IsAny<Account>(), cancellationToken))
-            .ReturnsAsync((Account newAccount, CancellationToken _) => newAccount);
+            .AddAccount(Arg.Any<Account>(), cancellationToken)
+            .Returns(callInfo => callInfo.ArgAt<Account>(0));
 
-        var handler = new AddAccount.Handler(mockRepo.Object);
+        var handler = new AddAccount.Handler(mockRepo);
 
         // Act
         var result = await handler.Handle(command, CancellationToken.None);
 
         // Assert
-        mockRepo.Verify(repo =>
-            repo.AddAccount(
-                It.Is<Account>(acc => acc.Name == name && acc.Id == result),
+        await mockRepo.Received()
+            .AddAccount(
+                Arg.Is<Account>(acc => acc.Name == name && acc.Id == result),
                 cancellationToken
-            )
-        );
+            );
     }
 }

@@ -1,7 +1,7 @@
 using Kaesseli.Features.Integration.TransactionQuery;
 using Kaesseli.Features.Integration;
 using Kaesseli.Test.Faker;
-using Moq;
+using NSubstitute;
 using Shouldly;
 using Xunit;
 
@@ -13,16 +13,16 @@ public class GetTransactionSummariesQueryHandlerTests
     public async Task Handle_ReturnsCorrectTransactionSummaries()
     {
         // Arrange
-        var mockRepository = new Mock<ITransactionRepository>();
+        var mockRepository = Substitute.For<ITransactionRepository>();
         var transactionSummaries = new SmartFaker<TransactionSummary>()
             .RuleFor(ts => ts.Transactions, value: new SmartFaker<Transaction>().Generate(count: 5))
             .Generate(count: 5);
 
         mockRepository
-            .Setup(repo => repo.GetTransactionSummaries(It.IsAny<CancellationToken>()))
-            .ReturnsAsync(transactionSummaries);
+            .GetTransactionSummaries(Arg.Any<CancellationToken>())
+            .Returns(transactionSummaries);
 
-        var handler = new GetTransactionSummaries.Handler(mockRepository.Object);
+        var handler = new GetTransactionSummaries.Handler(mockRepository);
 
         // Act
         var result = (await handler.Handle(CancellationToken.None)).ToArray();
@@ -32,9 +32,7 @@ public class GetTransactionSummariesQueryHandlerTests
         result.Length.ShouldBe(transactionSummaries.Count);
         result.Select(r => r.Id).ToArray().ShouldBeEquivalentTo(transactionSummaries.Select(ts => ts.Id).ToArray());
 
-        mockRepository.Verify(
-            repo => repo.GetTransactionSummaries(It.IsAny<CancellationToken>()),
-            Times.Once
-        );
+        await mockRepository.Received(1)
+            .GetTransactionSummaries(Arg.Any<CancellationToken>());
     }
 }

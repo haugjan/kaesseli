@@ -1,6 +1,6 @@
 using Kaesseli.Features.Integration;
 using Kaesseli.Features.Integration.NextOpenTransaction;
-using Moq;
+using NSubstitute;
 using Xunit;
 
 namespace Kaesseli.Test.Features.Integration;
@@ -10,11 +10,11 @@ public class OpenTransactionAmountChangedTests
     [Fact]
     public async Task Handle_DelegatesToRepository()
     {
-        var repoMock = new Mock<ITransactionRepository>();
-        var handler = new OpenTransactionAmountChanged.Handler(repoMock.Object);
+        var repoMock = Substitute.For<ITransactionRepository>();
+        var handler = new OpenTransactionAmountChanged.Handler(repoMock);
 
         await handler.Handle(new OpenTransactionAmountChanged.Event(3), CancellationToken.None);
 
-        repoMock.Verify(x => x.ChangeTotalOpenTransaction(3, It.IsAny<CancellationToken>()), Times.Once);
+        await repoMock.Received(1).ChangeTotalOpenTransaction(3, Arg.Any<CancellationToken>());
     }
 }

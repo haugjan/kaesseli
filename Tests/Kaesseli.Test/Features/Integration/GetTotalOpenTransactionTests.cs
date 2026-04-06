@@ -1,6 +1,6 @@
 using Kaesseli.Features.Integration;
 using Kaesseli.Features.Integration.NextOpenTransaction;
-using Moq;
+using NSubstitute;
 using Shouldly;
 using Xunit;
 
@@ -11,10 +11,10 @@ public class GetTotalOpenTransactionTests
     [Fact]
     public async Task Handle_ReturnsCountFromRepository()
     {
-        var repoMock = new Mock<ITransactionRepository>();
-        repoMock.Setup(x => x.GetTotalOpenTransaction(It.IsAny<CancellationToken>())).ReturnsAsync(42);
+        var repoMock = Substitute.For<ITransactionRepository>();
+        repoMock.GetTotalOpenTransaction(Arg.Any<CancellationToken>()).Returns(42);
 
-        var handler = new GetTotalOpenTransaction.Handler(repoMock.Object);
+        var handler = new GetTotalOpenTransaction.Handler(repoMock);
         var result = await handler.Handle(CancellationToken.None);
 
         result.ShouldBe(42);

@@ -1,6 +1,6 @@
 using Kaesseli.Features.Budget;
 using Kaesseli.Features.Accounts;
-using Moq;
+using NSubstitute;
 using Shouldly;
 using Xunit;
 
@@ -15,23 +15,21 @@ public class GetBudgetEntriesQueryHandlerTests
     public async Task Handle_ReturnsCorrectBudgetEntries()
     {
         // Arrange
-        var mockRepository = new Mock<IBudgetRepository>();
+        var mockRepository = Substitute.For<IBudgetRepository>();
         var accountId = Guid.NewGuid();
 
         var entriesList = CreateBudgetEntries();
 
         mockRepository
-            .Setup(repo =>
-                repo.GetBudgetEntries(
-                    It.Is<Guid>(id => id == ExpectedAccountingPeriod.Id),
-                    It.Is<Guid?>(id => id == accountId),
-                    It.IsAny<AccountType?>(),
-                    It.IsAny<CancellationToken>()
-                )
+            .GetBudgetEntries(
+                Arg.Is<Guid>(id => id == ExpectedAccountingPeriod.Id),
+                Arg.Is<Guid?>(id => id == accountId),
+                Arg.Any<AccountType?>(),
+                Arg.Any<CancellationToken>()
             )
-            .ReturnsAsync(entriesList);
+            .Returns(entriesList);
 
-        var handler = new GetBudgetEntries.Handler(mockRepository.Object);
+        var handler = new GetBudgetEntries.Handler(mockRepository);
         var query = new GetBudgetEntries.Query(AccountId: accountId, AccountType: null, AccountingPeriodId: ExpectedAccountingPeriod.Id);
 
         // Act
@@ -42,16 +40,13 @@ public class GetBudgetEntriesQueryHandlerTests
         result.Length.ShouldBe(entriesList.Count);
         result.Select(r => r.Id).ToArray().ShouldBeEquivalentTo(entriesList.Select(e => e.Id).ToArray());
 
-        mockRepository.Verify(
-            repo =>
-                repo.GetBudgetEntries(
-                    It.Is<Guid>(id => id == ExpectedAccountingPeriod.Id),
-                    It.Is<Guid?>(id => id == accountId),
-                    It.IsAny<AccountType?>(),
-                    It.IsAny<CancellationToken>()
-                ),
-            Times.Once
-        );
+        await mockRepository.Received(1)
+            .GetBudgetEntries(
+                Arg.Is<Guid>(id => id == ExpectedAccountingPeriod.Id),
+                Arg.Is<Guid?>(id => id == accountId),
+                Arg.Any<AccountType?>(),
+                Arg.Any<CancellationToken>()
+            );
     }
 
     private static List<BudgetEntry> CreateBudgetEntries() =>

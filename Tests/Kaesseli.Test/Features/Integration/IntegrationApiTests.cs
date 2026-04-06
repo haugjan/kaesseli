@@ -9,7 +9,7 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Routing;
 using Microsoft.AspNetCore.TestHost;
 using Microsoft.Extensions.DependencyInjection;
-using Moq;
+using NSubstitute;
 using Shouldly;
 using Xunit;
 
@@ -18,26 +18,26 @@ namespace Kaesseli.Test.Features.Integration;
 public class IntegrationApiTests : IAsyncLifetime
 {
     private HttpClient _client = null!;
-    private readonly Mock<ProcessFile.IHandler> _processFileMock = new();
-    private readonly Mock<GetTransactionSummaries.IHandler> _getTransactionSummariesMock = new();
-    private readonly Mock<GetTransactions.IHandler> _getTransactionsMock = new();
-    private readonly Mock<GetNextOpenTransaction.IHandler> _getNextOpenTransactionMock = new();
-    private readonly Mock<GetTotalOpenTransaction.IHandler> _getTotalOpenTransactionMock = new();
-    private readonly Mock<AssignOpenTransaction.IHandler> _assignOpenTransactionMock = new();
-    private readonly Mock<SplitOpenTransaction.IHandler> _splitOpenTransactionMock = new();
+    private readonly ProcessFile.IHandler _processFileMock = Substitute.For<ProcessFile.IHandler>();
+    private readonly GetTransactionSummaries.IHandler _getTransactionSummariesMock = Substitute.For<GetTransactionSummaries.IHandler>();
+    private readonly GetTransactions.IHandler _getTransactionsMock = Substitute.For<GetTransactions.IHandler>();
+    private readonly GetNextOpenTransaction.IHandler _getNextOpenTransactionMock = Substitute.For<GetNextOpenTransaction.IHandler>();
+    private readonly GetTotalOpenTransaction.IHandler _getTotalOpenTransactionMock = Substitute.For<GetTotalOpenTransaction.IHandler>();
+    private readonly AssignOpenTransaction.IHandler _assignOpenTransactionMock = Substitute.For<AssignOpenTransaction.IHandler>();
+    private readonly SplitOpenTransaction.IHandler _splitOpenTransactionMock = Substitute.For<SplitOpenTransaction.IHandler>();
 
     public async Task InitializeAsync()
     {
         var builder = WebApplication.CreateBuilder();
         builder.WebHost.UseTestServer();
         builder.Services.AddRouting();
-        builder.Services.AddSingleton(_processFileMock.Object);
-        builder.Services.AddSingleton(_getTransactionSummariesMock.Object);
-        builder.Services.AddSingleton(_getTransactionsMock.Object);
-        builder.Services.AddSingleton(_getNextOpenTransactionMock.Object);
-        builder.Services.AddSingleton(_getTotalOpenTransactionMock.Object);
-        builder.Services.AddSingleton(_assignOpenTransactionMock.Object);
-        builder.Services.AddSingleton(_splitOpenTransactionMock.Object);
+        builder.Services.AddSingleton(_processFileMock);
+        builder.Services.AddSingleton(_getTransactionSummariesMock);
+        builder.Services.AddSingleton(_getTransactionsMock);
+        builder.Services.AddSingleton(_getNextOpenTransactionMock);
+        builder.Services.AddSingleton(_getTotalOpenTransactionMock);
+        builder.Services.AddSingleton(_assignOpenTransactionMock);
+        builder.Services.AddSingleton(_splitOpenTransactionMock);
         builder.Services.AddAntiforgery();
 
         var app = builder.Build();
@@ -56,8 +56,8 @@ public class IntegrationApiTests : IAsyncLifetime
         // Arrange
         var guid = Guid.NewGuid();
         _processFileMock
-            .Setup(m => m.Handle(It.IsAny<ProcessFile.Query>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync(guid);
+            .Handle(Arg.Any<ProcessFile.Query>(), Arg.Any<CancellationToken>())
+            .Returns(guid);
 
         var formContent = new MultipartFormDataContent();
         var accountId = Guid.NewGuid();
@@ -74,7 +74,7 @@ public class IntegrationApiTests : IAsyncLifetime
 
         // Assert
         response.StatusCode.ShouldBe(HttpStatusCode.OK);
-        _processFileMock.Verify(m => m.Handle(It.IsAny<ProcessFile.Query>(), It.IsAny<CancellationToken>()), Times.Once);
+        await _processFileMock.Received(1).Handle(Arg.Any<ProcessFile.Query>(), Arg.Any<CancellationToken>());
     }
 
     [Fact]
@@ -85,18 +85,16 @@ public class IntegrationApiTests : IAsyncLifetime
             count: 3
         );
         _getTransactionSummariesMock
-            .Setup(m => m.Handle(It.IsAny<CancellationToken>()))
-            .ReturnsAsync(transactionSummaries);
+            .Handle(Arg.Any<CancellationToken>())
+            .Returns(transactionSummaries);
 
         // Act
         var response = await _client.GetAsync(requestUri: "/transactionSummary");
 
         // Assert
         response.StatusCode.ShouldBe(HttpStatusCode.OK);
-        _getTransactionSummariesMock.Verify(
-            m => m.Handle(It.IsAny<CancellationToken>()),
-            Times.Once
-        );
+        await _getTransactionSummariesMock.Received(1)
+            .Handle(Arg.Any<CancellationToken>());
     }
 
     [Fact]
@@ -105,17 +103,15 @@ public class IntegrationApiTests : IAsyncLifetime
         // Arrange
         var nextOpenTransaction = new SmartFaker<OpenTransaction>().Generate();
         _getNextOpenTransactionMock
-            .Setup(m => m.Handle(It.IsAny<GetNextOpenTransaction.Query>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync(nextOpenTransaction);
+            .Handle(Arg.Any<GetNextOpenTransaction.Query>(), Arg.Any<CancellationToken>())
+            .Returns(nextOpenTransaction);
 
         // Act
         var response = await _client.GetAsync(requestUri: "/transaction/nextOpen");
 
         // Assert
         response.StatusCode.ShouldBe(HttpStatusCode.OK);
-        _getNextOpenTransactionMock.Verify(
-            m => m.Handle(It.IsAny<GetNextOpenTransaction.Query>(), It.IsAny<CancellationToken>()),
-            Times.Once
-        );
+        await _getNextOpenTransactionMock.Received(1)
+            .Handle(Arg.Any<GetNextOpenTransaction.Query>(), Arg.Any<CancellationToken>());
     }
 }

@@ -2,7 +2,7 @@ using Kaesseli.Features.Journal;
 using Kaesseli.Features.Accounts;
 using Kaesseli.Test.Faker;
 using Microsoft.Extensions.Time.Testing;
-using Moq;
+using NSubstitute;
 using Xunit;
 
 namespace Kaesseli.Test.Features.Journal;
@@ -13,8 +13,8 @@ public class AddJournalEntryCommandHandlerTests
     public async Task Handle_ShouldAddAccountSuccessfully()
     {
         // Arrange
-        var mockJournalRepo = new Mock<IJournalRepository>();
-        var mockAccountRepo = new Mock<IAccountRepository>();
+        var mockJournalRepo = Substitute.For<IJournalRepository>();
+        var mockAccountRepo = Substitute.For<IAccountRepository>();
         var debitAccount = Account.Create("Debit", AccountType.Expense, new AccountIcon("favorite", "blue"));
         var creditAccount = Account.Create("Credit", AccountType.Revenue, new AccountIcon("favorite", "blue"));
         var accountingPeriod = AccountingPeriod.Create("Test Period", default, default);
@@ -26,28 +26,26 @@ public class AddJournalEntryCommandHandlerTests
         var cancellationToken = new CancellationToken();
 
         mockJournalRepo
-            .Setup(repo =>
-                repo.AddJournalEntry(
-                    It.Is<JournalEntry>(a =>
-                        a.Amount == command.Amount && a.Description == command.Description
-                    ),
-                    cancellationToken
-                )
+            .AddJournalEntry(
+                Arg.Is<JournalEntry>(a =>
+                    a.Amount == command.Amount && a.Description == command.Description
+                ),
+                cancellationToken
             )
-            .ReturnsAsync((JournalEntry newJournalEntry, CancellationToken _) => newJournalEntry);
+            .Returns(callInfo => callInfo.ArgAt<JournalEntry>(0));
         mockAccountRepo
-            .Setup(repo => repo.GetAccount(debitAccount.Id, It.IsAny<CancellationToken>()))
-            .ReturnsAsync(debitAccount);
+            .GetAccount(debitAccount.Id, Arg.Any<CancellationToken>())
+            .Returns(debitAccount);
         mockAccountRepo
-            .Setup(repo => repo.GetAccount(creditAccount.Id, It.IsAny<CancellationToken>()))
-            .ReturnsAsync(creditAccount);
+            .GetAccount(creditAccount.Id, Arg.Any<CancellationToken>())
+            .Returns(creditAccount);
         mockAccountRepo
-            .Setup(repo => repo.GetAccountingPeriod(accountingPeriod.Id, It.IsAny<CancellationToken>()))
-            .ReturnsAsync(accountingPeriod);
+            .GetAccountingPeriod(accountingPeriod.Id, Arg.Any<CancellationToken>())
+            .Returns(accountingPeriod);
 
         var handler = new AddJournalEntry.Handler(
-            mockJournalRepo.Object,
-            mockAccountRepo.Object,
+            mockJournalRepo,
+            mockAccountRepo,
             TimeProvider.System
         );
 
@@ -55,25 +53,24 @@ public class AddJournalEntryCommandHandlerTests
         var result = await handler.Handle(command, CancellationToken.None);
 
         // Assert
-        mockJournalRepo.Verify(repo =>
-            repo.AddJournalEntry(
-                It.Is<JournalEntry>(entry =>
+        await mockJournalRepo.Received()
+            .AddJournalEntry(
+                Arg.Is<JournalEntry>(entry =>
                     entry.Amount == command.Amount
                     && entry.Description == command.Description
                     && entry.ValueDate == command.ValueDate
                     && entry.Id == result
                 ),
                 cancellationToken
-            )
-        );
+            );
     }
 
     [Fact]
     public async Task Handle_EmptyValueDate_ShouldAddAccountWithCurrentDate()
     {
         // Arrange
-        var mockJournalRepo = new Mock<IJournalRepository>();
-        var mockAccountRepo = new Mock<IAccountRepository>();
+        var mockJournalRepo = Substitute.For<IJournalRepository>();
+        var mockAccountRepo = Substitute.For<IAccountRepository>();
         var currentDay = new DateOnly(year: 1982, month: 11, day: 3);
         var fakeTimeProvider = new FakeTimeProvider(new DateTimeOffset(currentDay.ToDateTime(TimeOnly.MinValue)));
         var debitAccount = Account.Create("Debit", AccountType.Expense, new AccountIcon("favorite", "blue"));
@@ -88,28 +85,26 @@ public class AddJournalEntryCommandHandlerTests
         var cancellationToken = new CancellationToken();
 
         mockJournalRepo
-            .Setup(repo =>
-                repo.AddJournalEntry(
-                    It.Is<JournalEntry>(a =>
-                        a.Amount == command.Amount && a.Description == command.Description
-                    ),
-                    cancellationToken
-                )
+            .AddJournalEntry(
+                Arg.Is<JournalEntry>(a =>
+                    a.Amount == command.Amount && a.Description == command.Description
+                ),
+                cancellationToken
             )
-            .ReturnsAsync((JournalEntry newJournalEntry, CancellationToken _) => newJournalEntry);
+            .Returns(callInfo => callInfo.ArgAt<JournalEntry>(0));
         mockAccountRepo
-            .Setup(repo => repo.GetAccount(debitAccount.Id, It.IsAny<CancellationToken>()))
-            .ReturnsAsync(debitAccount);
+            .GetAccount(debitAccount.Id, Arg.Any<CancellationToken>())
+            .Returns(debitAccount);
         mockAccountRepo
-            .Setup(repo => repo.GetAccount(creditAccount.Id, It.IsAny<CancellationToken>()))
-            .ReturnsAsync(creditAccount);
+            .GetAccount(creditAccount.Id, Arg.Any<CancellationToken>())
+            .Returns(creditAccount);
         mockAccountRepo
-            .Setup(repo => repo.GetAccountingPeriod(accountingPeriod.Id, It.IsAny<CancellationToken>()))
-            .ReturnsAsync(accountingPeriod);
+            .GetAccountingPeriod(accountingPeriod.Id, Arg.Any<CancellationToken>())
+            .Returns(accountingPeriod);
 
         var handler = new AddJournalEntry.Handler(
-            mockJournalRepo.Object,
-            mockAccountRepo.Object,
+            mockJournalRepo,
+            mockAccountRepo,
             fakeTimeProvider
         );
 
@@ -117,16 +112,15 @@ public class AddJournalEntryCommandHandlerTests
         var result = await handler.Handle(command, CancellationToken.None);
 
         // Assert
-        mockJournalRepo.Verify(repo =>
-            repo.AddJournalEntry(
-                It.Is<JournalEntry>(entry =>
+        await mockJournalRepo.Received()
+            .AddJournalEntry(
+                Arg.Is<JournalEntry>(entry =>
                     entry.Amount == command.Amount
                     && entry.Description == command.Description
                     && entry.ValueDate == currentDay
                     && entry.Id == result
                 ),
                 cancellationToken
-            )
-        );
+            );
     }
 }

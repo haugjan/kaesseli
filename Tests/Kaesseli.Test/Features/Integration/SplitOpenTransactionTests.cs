@@ -1,18 +1,18 @@
 using Kaesseli.Features.Integration.NextOpenTransaction;
 using Kaesseli.Features.Journal;
-using Moq;
+using NSubstitute;
 using Xunit;
 
 namespace Kaesseli.Test.Features.Integration;
 
 public class SplitOpenTransactionTests
 {
-    private readonly Mock<IJournalRepository> _journalRepoMock = new();
-    private readonly Mock<OpenTransactionAmountChanged.IHandler> _eventHandlerMock = new();
+    private readonly IJournalRepository _journalRepoMock = Substitute.For<IJournalRepository>();
+    private readonly OpenTransactionAmountChanged.IHandler _eventHandlerMock = Substitute.For<OpenTransactionAmountChanged.IHandler>();
     private readonly SplitOpenTransaction.Handler _handler;
 
     public SplitOpenTransactionTests() =>
-        _handler = new SplitOpenTransaction.Handler(_journalRepoMock.Object, _eventHandlerMock.Object);
+        _handler = new SplitOpenTransaction.Handler(_journalRepoMock, _eventHandlerMock);
 
     [Fact]
     public async Task Handle_SplitsTransactionAndFiresEvent()
@@ -26,13 +26,13 @@ public class SplitOpenTransactionTests
 
         await _handler.Handle(query, CancellationToken.None);
 
-        _journalRepoMock.Verify(x => x.AssignOpenTransaction(
+        await _journalRepoMock.Received(1).AssignOpenTransaction(
             query.AccountingPeriodId,
             query.TransactionId,
-            It.Is<IEnumerable<(Guid, decimal)>>(e => e.Count() == 2),
-            It.IsAny<CancellationToken>()), Times.Once);
-        _eventHandlerMock.Verify(x => x.Handle(
-            It.Is<OpenTransactionAmountChanged.Event>(e => e.Amount == -1),
-            It.IsAny<CancellationToken>()), Times.Once);
+            Arg.Is<IEnumerable<(Guid, decimal)>>(e => e.Count() == 2),
+            Arg.Any<CancellationToken>());
+        await _eventHandlerMock.Received(1).Handle(
+            Arg.Is<OpenTransactionAmountChanged.Event>(e => e.Amount == -1),
+            Arg.Any<CancellationToken>());
     }
 }

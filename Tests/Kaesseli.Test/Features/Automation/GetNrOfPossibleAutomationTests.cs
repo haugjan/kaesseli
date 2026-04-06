@@ -1,5 +1,5 @@
 using Kaesseli.Features.Automation;
-using Moq;
+using NSubstitute;
 using Shouldly;
 using Xunit;
 
@@ -10,11 +10,11 @@ public class GetNrOfPossibleAutomationTests
     [Fact]
     public async Task Handle_ReturnCountFromRepository()
     {
-        var repoMock = new Mock<IAutomationRepository>();
-        repoMock.Setup(x => x.GetNrOfPossibleAutomation("MIGROS*", It.IsAny<CancellationToken>()))
-            .ReturnsAsync(5);
+        var repoMock = Substitute.For<IAutomationRepository>();
+        repoMock.GetNrOfPossibleAutomation("MIGROS*", Arg.Any<CancellationToken>())
+            .Returns(5);
 
-        var handler = new GetNrOfPossibleAutomation.Handler(repoMock.Object);
+        var handler = new GetNrOfPossibleAutomation.Handler(repoMock);
         var result = await handler.Handle(new GetNrOfPossibleAutomation.Query("MIGROS*"), CancellationToken.None);
 
         result.NrOfPossibleAutomation.ShouldBe(5);

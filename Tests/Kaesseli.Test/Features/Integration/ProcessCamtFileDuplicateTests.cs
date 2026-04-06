@@ -3,7 +3,7 @@ using Kaesseli.Features.Integration.NextOpenTransaction;
 using Kaesseli.Features.Accounts;
 using Kaesseli.Features.Integration;
 using Kaesseli.Test.Faker;
-using Moq;
+using NSubstitute;
 using Shouldly;
 using Xunit;
 
@@ -11,18 +11,18 @@ namespace Kaesseli.Test.Features.Integration;
 
 public class ProcessCamtFileDuplicateTests
 {
-    private readonly Mock<ICamtProcessor> _camtProcessorMock = new();
-    private readonly Mock<ITransactionRepository> _transactionRepoMock = new();
-    private readonly Mock<IAccountRepository> _accountRepoMock = new();
-    private readonly Mock<OpenTransactionAmountChanged.IHandler> _eventHandlerMock = new();
+    private readonly ICamtProcessor _camtProcessorMock = Substitute.For<ICamtProcessor>();
+    private readonly ITransactionRepository _transactionRepoMock = Substitute.For<ITransactionRepository>();
+    private readonly IAccountRepository _accountRepoMock = Substitute.For<IAccountRepository>();
+    private readonly OpenTransactionAmountChanged.IHandler _eventHandlerMock = Substitute.For<OpenTransactionAmountChanged.IHandler>();
     private readonly ProcessCamtFile.Handler _handler;
 
     public ProcessCamtFileDuplicateTests() =>
         _handler = new ProcessCamtFile.Handler(
-            _camtProcessorMock.Object,
-            _transactionRepoMock.Object,
-            _accountRepoMock.Object,
-            _eventHandlerMock.Object);
+            _camtProcessorMock,
+            _transactionRepoMock,
+            _accountRepoMock,
+            _eventHandlerMock);
 
     [Fact]
     public async Task Handle_AllDuplicates_ReturnsEmptyGuidAndSkipsSave()
@@ -33,18 +33,18 @@ public class ProcessCamtFileDuplicateTests
             .RuleFor(d => d.Entries, _ => entries)
             .Generate();
 
-        _camtProcessorMock.Setup(x => x.ReadCamtFile(command.Content, It.IsAny<CancellationToken>()))
-            .ReturnsAsync(document);
-        _accountRepoMock.Setup(x => x.GetAccount(command.AccountId, It.IsAny<CancellationToken>()))
-            .ReturnsAsync(Account.Create("Test", AccountType.Asset, new AccountIcon("icon", "blue")));
-        _transactionRepoMock.Setup(x => x.GetExistingTransactionReferences(It.IsAny<CancellationToken>()))
-            .ReturnsAsync(entries.Select(e => e.Reference).ToHashSet());
+        _camtProcessorMock.ReadCamtFile(command.Content, Arg.Any<CancellationToken>())
+            .Returns(document);
+        _accountRepoMock.GetAccount(command.AccountId, Arg.Any<CancellationToken>())
+            .Returns(Account.Create("Test", AccountType.Asset, new AccountIcon("icon", "blue")));
+        _transactionRepoMock.GetExistingTransactionReferences(Arg.Any<CancellationToken>())
+            .Returns(entries.Select(e => e.Reference).ToHashSet());
 
         var result = await _handler.Handle(command, CancellationToken.None);
 
         result.ShouldBe(Guid.Empty);
-        _transactionRepoMock.Verify(x => x.AddTransactionSummary(It.IsAny<TransactionSummary>(), It.IsAny<CancellationToken>()), Times.Never);
-        _eventHandlerMock.Verify(x => x.Handle(It.IsAny<OpenTransactionAmountChanged.Event>(), It.IsAny<CancellationToken>()), Times.Never);
+        await _transactionRepoMock.DidNotReceive().AddTransactionSummary(Arg.Any<TransactionSummary>(), Arg.Any<CancellationToken>());
+        await _eventHandlerMock.DidNotReceive().Handle(Arg.Any<OpenTransactionAmountChanged.Event>(), Arg.Any<CancellationToken>());
     }
 
     [Fact]
@@ -56,23 +56,23 @@ public class ProcessCamtFileDuplicateTests
             .RuleFor(d => d.Entries, _ => entries)
             .Generate();
 
-        _camtProcessorMock.Setup(x => x.ReadCamtFile(command.Content, It.IsAny<CancellationToken>()))
-            .ReturnsAsync(document);
-        _accountRepoMock.Setup(x => x.GetAccount(command.AccountId, It.IsAny<CancellationToken>()))
-            .ReturnsAsync(Account.Create("Test", AccountType.Asset, new AccountIcon("icon", "blue")));
-        _transactionRepoMock.Setup(x => x.GetExistingTransactionReferences(It.IsAny<CancellationToken>()))
-            .ReturnsAsync(new HashSet<string> { entries[0].Reference });
-        _transactionRepoMock.Setup(x => x.AddTransactionSummary(It.IsAny<TransactionSummary>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync((TransactionSummary ts, CancellationToken _) => ts);
+        _camtProcessorMock.ReadCamtFile(command.Content, Arg.Any<CancellationToken>())
+            .Returns(document);
+        _accountRepoMock.GetAccount(command.AccountId, Arg.Any<CancellationToken>())
+            .Returns(Account.Create("Test", AccountType.Asset, new AccountIcon("icon", "blue")));
+        _transactionRepoMock.GetExistingTransactionReferences(Arg.Any<CancellationToken>())
+            .Returns(new HashSet<string> { entries[0].Reference });
+        _transactionRepoMock.AddTransactionSummary(Arg.Any<TransactionSummary>(), Arg.Any<CancellationToken>())
+            .Returns(callInfo => callInfo.ArgAt<TransactionSummary>(0));
 
         var result = await _handler.Handle(command, CancellationToken.None);
 
         result.ShouldNotBe(Guid.Empty);
-        _transactionRepoMock.Verify(x => x.AddTransactionSummary(
-            It.Is<TransactionSummary>(ts => ts.Transactions.Count() == 2),
-            It.IsAny<CancellationToken>()), Times.Once);
-        _eventHandlerMock.Verify(x => x.Handle(
-            It.Is<OpenTransactionAmountChanged.Event>(e => e.Amount == 2),
-            It.IsAny<CancellationToken>()), Times.Once);
+        await _transactionRepoMock.Received(1).AddTransactionSummary(
+            Arg.Is<TransactionSummary>(ts => ts.Transactions.Count() == 2),
+            Arg.Any<CancellationToken>());
+        await _eventHandlerMock.Received(1).Handle(
+            Arg.Is<OpenTransactionAmountChanged.Event>(e => e.Amount == 2),
+            Arg.Any<CancellationToken>());
     }
 }

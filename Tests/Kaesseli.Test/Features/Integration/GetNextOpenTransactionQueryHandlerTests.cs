@@ -2,7 +2,7 @@ using Kaesseli.Features.Integration.NextOpenTransaction;
 using Kaesseli.Features.Accounts;
 using Kaesseli.Features.Integration;
 using Kaesseli.Test.Faker;
-using Moq;
+using NSubstitute;
 using Shouldly;
 using Xunit;
 
@@ -14,11 +14,11 @@ public class GetNextOpenTransactionQueryHandlerTests
     public async Task Handle_ReturnsCorrectResult_WhenTransactionExists()
     {
         // Arrange
-        var mockTransactionRepository = new Mock<ITransactionRepository>();
-        var mockAccountRepository = new Mock<IAccountRepository>();
+        var mockTransactionRepository = Substitute.For<ITransactionRepository>();
+        var mockAccountRepository = Substitute.For<IAccountRepository>();
         var handler = new GetNextOpenTransaction.Handler(
-            mockTransactionRepository.Object,
-            mockAccountRepository.Object
+            mockTransactionRepository,
+            mockAccountRepository
         );
 
         var expectedTransaction = new SmartFaker<Transaction>().Generate();
@@ -26,11 +26,11 @@ public class GetNextOpenTransactionQueryHandlerTests
         var accounts = new SmartFaker<Account>().Generate(count: 5);
 
         mockTransactionRepository
-            .Setup(r => r.GetNextOpenTransaction(It.IsAny<int>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync(expectedTransaction);
+            .GetNextOpenTransaction(Arg.Any<int>(), Arg.Any<CancellationToken>())
+            .Returns(expectedTransaction);
         mockAccountRepository
-            .Setup(r => r.GetAccounts(It.IsAny<CancellationToken>()))
-            .ReturnsAsync(accounts);
+            .GetAccounts(Arg.Any<CancellationToken>())
+            .Returns(accounts);
 
         var request = new GetNextOpenTransaction.Query(1);
 
@@ -52,16 +52,16 @@ public class GetNextOpenTransactionQueryHandlerTests
     public async Task Handle_ReturnsNull_WhenTransactionDoesNotExist()
     {
         // Arrange
-        var mockTransactionRepository = new Mock<ITransactionRepository>();
-        var mockAccountRepository = new Mock<IAccountRepository>();
+        var mockTransactionRepository = Substitute.For<ITransactionRepository>();
+        var mockAccountRepository = Substitute.For<IAccountRepository>();
         var handler = new GetNextOpenTransaction.Handler(
-            mockTransactionRepository.Object,
-            mockAccountRepository.Object
+            mockTransactionRepository,
+            mockAccountRepository
         );
 
         mockTransactionRepository
-            .Setup(r => r.GetNextOpenTransaction(It.IsAny<int>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync(value: null);
+            .GetNextOpenTransaction(Arg.Any<int>(), Arg.Any<CancellationToken>())
+            .Returns((Transaction?)null);
 
         var request = new GetNextOpenTransaction.Query(1);
 

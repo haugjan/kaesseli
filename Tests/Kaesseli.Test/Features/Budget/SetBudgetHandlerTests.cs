@@ -1,7 +1,7 @@
 using Kaesseli.Features.Accounts;
 using Kaesseli.Features.Budget;
 using Kaesseli.Test.Faker;
-using Moq;
+using NSubstitute;
 using Shouldly;
 using Xunit;
 
@@ -16,20 +16,20 @@ public class SetBudgetHandlerTests
         var period = new SmartFaker<AccountingPeriod>().Generate();
         var query = new SetBudget.Query(500m, "Monatsbudget", account.Id, period.Id);
 
-        var accountRepoMock = new Mock<IAccountRepository>();
-        accountRepoMock.Setup(x => x.GetAccount(account.Id, It.IsAny<CancellationToken>())).ReturnsAsync(account);
-        accountRepoMock.Setup(x => x.GetAccountingPeriod(period.Id, It.IsAny<CancellationToken>())).ReturnsAsync(period);
+        var accountRepoMock = Substitute.For<IAccountRepository>();
+        accountRepoMock.GetAccount(account.Id, Arg.Any<CancellationToken>()).Returns(account);
+        accountRepoMock.GetAccountingPeriod(period.Id, Arg.Any<CancellationToken>()).Returns(period);
 
-        var budgetRepoMock = new Mock<IBudgetRepository>();
-        budgetRepoMock.Setup(x => x.SetBudget(It.IsAny<BudgetEntry>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync((BudgetEntry b, CancellationToken _) => b);
+        var budgetRepoMock = Substitute.For<IBudgetRepository>();
+        budgetRepoMock.SetBudget(Arg.Any<BudgetEntry>(), Arg.Any<CancellationToken>())
+            .Returns(callInfo => callInfo.ArgAt<BudgetEntry>(0));
 
-        var handler = new SetBudget.Handler(budgetRepoMock.Object, accountRepoMock.Object);
+        var handler = new SetBudget.Handler(budgetRepoMock, accountRepoMock);
         var result = await handler.Handle(query, CancellationToken.None);
 
         result.ShouldNotBe(Guid.Empty);
-        budgetRepoMock.Verify(x => x.SetBudget(
-            It.Is<BudgetEntry>(b => b.Amount == 500m && b.Description == "Monatsbudget"),
-            It.IsAny<CancellationToken>()), Times.Once);
+        await budgetRepoMock.Received(1).SetBudget(
+            Arg.Is<BudgetEntry>(b => b.Amount == 500m && b.Description == "Monatsbudget"),
+            Arg.Any<CancellationToken>());
     }
 }

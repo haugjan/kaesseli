@@ -1,6 +1,6 @@
 using Kaesseli.Features.Automation;
 using Kaesseli.Features.Integration.FileImport;
-using Moq;
+using NSubstitute;
 using Shouldly;
 using Xunit;
 
@@ -8,43 +8,43 @@ namespace Kaesseli.Test.Features.Integration;
 
 public class ProcessFileTests
 {
-    private readonly Mock<ProcessCamtFile.IHandler> _camtMock = new();
-    private readonly Mock<ProcessPostFinanceCsv.IHandler> _csvMock = new();
-    private readonly Mock<ApplyAllAutomations.IHandler> _automationMock = new();
+    private readonly ProcessCamtFile.IHandler _camtMock = Substitute.For<ProcessCamtFile.IHandler>();
+    private readonly ProcessPostFinanceCsv.IHandler _csvMock = Substitute.For<ProcessPostFinanceCsv.IHandler>();
+    private readonly ApplyAllAutomations.IHandler _automationMock = Substitute.For<ApplyAllAutomations.IHandler>();
     private readonly ProcessFile.Handler _handler;
 
     public ProcessFileTests() =>
-        _handler = new ProcessFile.Handler(_camtMock.Object, _csvMock.Object, _automationMock.Object);
+        _handler = new ProcessFile.Handler(_camtMock, _csvMock, _automationMock);
 
     [Fact]
     public async Task Handle_CamtFile_DelegatesToCamtHandler()
     {
         var expectedGuid = Guid.NewGuid();
-        _camtMock.Setup(x => x.Handle(It.IsAny<ProcessCamtFile.Query>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync(expectedGuid);
+        _camtMock.Handle(Arg.Any<ProcessCamtFile.Query>(), Arg.Any<CancellationToken>())
+            .Returns(expectedGuid);
 
         var query = new ProcessFile.Query(FileType.Camt, Stream.Null, Guid.NewGuid(), Guid.NewGuid());
         var result = await _handler.Handle(query, CancellationToken.None);
 
         result.ShouldBe(expectedGuid);
-        _camtMock.Verify(x => x.Handle(It.IsAny<ProcessCamtFile.Query>(), It.IsAny<CancellationToken>()), Times.Once);
-        _csvMock.Verify(x => x.Handle(It.IsAny<ProcessPostFinanceCsv.Query>(), It.IsAny<CancellationToken>()), Times.Never);
-        _automationMock.Verify(x => x.Handle(It.IsAny<ApplyAllAutomations.Query>(), It.IsAny<CancellationToken>()), Times.Once);
+        await _camtMock.Received(1).Handle(Arg.Any<ProcessCamtFile.Query>(), Arg.Any<CancellationToken>());
+        await _csvMock.DidNotReceive().Handle(Arg.Any<ProcessPostFinanceCsv.Query>(), Arg.Any<CancellationToken>());
+        await _automationMock.Received(1).Handle(Arg.Any<ApplyAllAutomations.Query>(), Arg.Any<CancellationToken>());
     }
 
     [Fact]
     public async Task Handle_CsvFile_DelegatesToCsvHandler()
     {
         var expectedGuid = Guid.NewGuid();
-        _csvMock.Setup(x => x.Handle(It.IsAny<ProcessPostFinanceCsv.Query>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync(expectedGuid);
+        _csvMock.Handle(Arg.Any<ProcessPostFinanceCsv.Query>(), Arg.Any<CancellationToken>())
+            .Returns(expectedGuid);
 
         var query = new ProcessFile.Query(FileType.PostFinanceCsv, Stream.Null, Guid.NewGuid(), Guid.NewGuid());
         var result = await _handler.Handle(query, CancellationToken.None);
 
         result.ShouldBe(expectedGuid);
-        _csvMock.Verify(x => x.Handle(It.IsAny<ProcessPostFinanceCsv.Query>(), It.IsAny<CancellationToken>()), Times.Once);
-        _camtMock.Verify(x => x.Handle(It.IsAny<ProcessCamtFile.Query>(), It.IsAny<CancellationToken>()), Times.Never);
+        await _csvMock.Received(1).Handle(Arg.Any<ProcessPostFinanceCsv.Query>(), Arg.Any<CancellationToken>());
+        await _camtMock.DidNotReceive().Handle(Arg.Any<ProcessCamtFile.Query>(), Arg.Any<CancellationToken>());
     }
 
     [Fact]

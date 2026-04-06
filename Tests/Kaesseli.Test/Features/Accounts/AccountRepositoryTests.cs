@@ -2,7 +2,7 @@ using Kaesseli.Infrastructure;
 using Kaesseli.Features.Accounts;
 using Kaesseli.Test.Faker;
 using Microsoft.EntityFrameworkCore;
-using Moq;
+
 using Shouldly;
 using Xunit;
 
