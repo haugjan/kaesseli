@@ -59,6 +59,17 @@ internal class AccountRepository(KaesseliContext context) : IAccountRepository
     {
         var period = await context.AccountingPeriods.FirstOrDefaultAsync(ap => ap.Id == accountingPeriodId, cancellationToken)
             ?? throw new EntityNotFoundException(typeof(AccountingPeriod), accountingPeriodId);
+
+        var journalEntries = await context.JournalEntries
+            .Where(e => EF.Property<Guid>(e, "AccountingPeriodId") == accountingPeriodId)
+            .ToListAsync(cancellationToken);
+        context.JournalEntries.RemoveRange(journalEntries);
+
+        var budgetEntries = await context.BudgetEntries
+            .Where(e => EF.Property<Guid>(e, "AccountingPeriodId") == accountingPeriodId)
+            .ToListAsync(cancellationToken);
+        context.BudgetEntries.RemoveRange(budgetEntries);
+
         context.AccountingPeriods.Remove(period);
         await context.SaveChangesAsync(cancellationToken);
     }
