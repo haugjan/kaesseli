@@ -1,0 +1,165 @@
+@page "/accountingPeriods"
+@using Kaesseli.Client.Blazor.Services
+@using Kaesseli.Client.Blazor.Components
+@inject KaesseliApiService Api
+@inject AccountingPeriodState PeriodState
+@inject IDialogService DialogService
+@inject ISnackbar Snackbar
+
+<PageTitle>Buchungsperioden</PageTitle>
+
+<MudBreadcrumbs Items="_breadcrumbs" Class="pa-0 mb-4" />
+
+<MudCard Elevation="0" Style="border: 1px solid var(--mud-palette-divider); border-radius: 12px;">
+    <MudCardHeader>
+        <CardHeaderAvatar>
+            <MudAvatar Style="background-color: #1E88E5; color: white;" Size="Size.Medium">
+                <MudIcon Icon="@Icons.Material.Rounded.CalendarMonth" />
+            </MudAvatar>
+        </CardHeaderAvatar>
+        <CardHeaderContent>
+            <MudText Typo="Typo.h6">Buchungsperioden</MudText>
+        </CardHeaderContent>
+        <CardHeaderActions>
+            <MudButton Color="Color.Primary" Variant="Variant.Filled" StartIcon="@Icons.Material.Rounded.Add"
+                       OnClick="OnAddClicked">
+                Neue Periode
+            </MudButton>
+        </CardHeaderActions>
+    </MudCardHeader>
+    <MudCardContent Class="pa-0">
+        @if (_periods is null)
+        {
+            <MudSkeleton SkeletonType="SkeletonType.Rectangle" Height="200px" />
+        }
+        else if (!_periods.Any())
+        {
+            <MudAlert Severity="Severity.Info" Class="ma-4">Keine Buchungsperioden vorhanden.</MudAlert>
+        }
+        else
+        {
+            <MudTable Items="_periods" Dense="true" Hover="true" Elevation="0" Style="background: transparent;">
+                <HeaderContent>
+                    <MudTh>Bezeichnung</MudTh>
+                    <MudTh>Von</MudTh>
+                    <MudTh>Bis</MudTh>
+                    <MudTh Style="text-align: right;">Aktionen</MudTh>
+                </HeaderContent>
+                <RowTemplate>
+                    <MudTd DataLabel="Bezeichnung">@context.Description</MudTd>
+                    <MudTd DataLabel="Von">@context.FromInclusive.ToString("dd.MM.yyyy")</MudTd>
+                    <MudTd DataLabel="Bis">@context.ToInclusive.ToString("dd.MM.yyyy")</MudTd>
+                    <MudTd DataLabel="Aktionen" Style="text-align: right;">
+                        <MudIconButton Icon="@Icons.Material.Rounded.Edit" Size="Size.Small"
+                                       OnClick="() => OnEditClicked(context)" />
+                        <MudIconButton Icon="@Icons.Material.Rounded.Delete" Size="Size.Small" Color="Color.Error"
+                                       OnClick="() => OnDeleteClicked(context)" />
+                    </MudTd>
+                </RowTemplate>
+            </MudTable>
+        }
+    </MudCardContent>
+</MudCard>
+
+@code {
+    private List<AccountingPeriod>? _periods;
+
+    private readonly List<BreadcrumbItem> _breadcrumbs =
+    [
+        new("Home", "/", icon: Icons.Material.Rounded.Home),
+        new("Buchungsperioden", null, disabled: true),
+    ];
+
+    protected override async Task OnInitializedAsync() => await LoadAsync();
+
+    private async Task LoadAsync()
+    {
+        var periods = await Api.GetAccountingPeriodsAsync();
+        _periods = periods?.OrderByDescending(p => p.FromInclusive).ToList() ?? [];
+    }
+
+    private async Task OnAddClicked()
+    {
+        var parameters = new DialogParameters<AccountingPeriodDialog>();
+        var options = new DialogOptions { MaxWidth = MaxWidth.Small, FullWidth = true };
+        var dialog = await DialogService.ShowAsync<AccountingPeriodDialog>("Neue Buchungsperiode", parameters, options);
+        var result = await dialog.Result;
+
+        if (result is { Canceled: false, Data: AccountingPeriodDialog.FormModel model })
+        {
+            try
+            {
+                await Api.AddAccountingPeriodAsync(model.Description!, model.From!.Value, model.To!.Value);
+                Snackbar.Add("Buchungsperiode erstellt.", Severity.Success);
+                await ReloadAll();
+            }
+            catch
+            {
+                Snackbar.Add("Fehler beim Erstellen.", Severity.Error);
+            }
+        }
+    }
+
+    private async Task OnEditClicked(AccountingPeriod period)
+    {
+        var parameters = new DialogParameters<AccountingPeriodDialog>
+        {
+            { x => x.Model, new AccountingPeriodDialog.FormModel
+            {
+                Description = period.Description,
+                From = period.FromInclusive,
+                To = period.ToInclusive,
+            }},
+        };
+        var options = new DialogOptions { MaxWidth = MaxWidth.Small, FullWidth = true };
+        var dialog = await DialogService.ShowAsync<AccountingPeriodDialog>("Buchungsperiode bearbeiten", parameters, options);
+        var result = await dialog.Result;
+
+        if (result is { Canceled: false, Data: AccountingPeriodDialog.FormModel model })
+        {
+            try
+            {
+                await Api.UpdateAccountingPeriodAsync(period.Id, model.Description!, model.From!.Value, model.To!.Value);
+                Snackbar.Add("Buchungsperiode aktualisiert.", Severity.Success);
+                await ReloadAll();
+            }
+            catch
+            {
+                Snackbar.Add("Fehler beim Aktualisieren.", Severity.Error);
+            }
+        }
+    }
+
+    private async Task OnDeleteClicked(AccountingPeriod period)
+    {
+        var parameters = new DialogParameters<DeleteConfirmationDialog>
+        {
+            { x => x.EntityDescription, $"Buchungsperiode \"{period.Description}\"" },
+        };
+        var options = new DialogOptions { MaxWidth = MaxWidth.Small, FullWidth = true };
+        var dialog = await DialogService.ShowAsync<DeleteConfirmationDialog>("Buchungsperiode löschen", parameters, options);
+        var result = await dialog.Result;
+
+        if (result is { Canceled: false })
+        {
+            try
+            {
+                await Api.DeleteAccountingPeriodAsync(period.Id);
+                Snackbar.Add("Buchungsperiode gelöscht.", Severity.Success);
+                await ReloadAll();
+            }
+            catch
+            {
+                Snackbar.Add("Fehler beim Löschen.", Severity.Error);
+            }
+        }
+    }
+
+    private async Task ReloadAll()
+    {
+        await LoadAsync();
+        var periods = _periods?.AsReadOnly() ?? new List<AccountingPeriod>().AsReadOnly();
+        PeriodState.Initialize(periods, PeriodState.SelectedPeriodId);
+        StateHasChanged();
+    }
+}

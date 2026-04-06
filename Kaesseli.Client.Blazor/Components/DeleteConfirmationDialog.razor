@@ -1,0 +1,43 @@
+<MudDialog>
+    <DialogContent>
+        <MudAlert Severity="Severity.Warning" Class="mb-4">
+            <b>@EntityDescription</b> wird unwiderruflich gelöscht.
+        </MudAlert>
+        <MudText Class="mb-2">
+            Zur Bestätigung bitte <b>@_confirmWord</b> eingeben:
+        </MudText>
+        <MudTextField @bind-Value="_input" Label="Bestätigungswort" Immediate="true" />
+    </DialogContent>
+    <DialogActions>
+        <MudButton OnClick="Cancel">Abbrechen</MudButton>
+        <MudButton Color="Color.Error" Variant="Variant.Filled" Disabled="@(!IsMatch)" OnClick="Submit">
+            Löschen
+        </MudButton>
+    </DialogActions>
+</MudDialog>
+
+@code {
+    private static readonly string[] ConfirmWords =
+        ["Löschen", "Entfernen", "Bestätigen", "Unwiderruflich", "Endgültig", "Papierkorb", "Radiergummi", "Bereinigen"];
+
+    [CascadingParameter] private IMudDialogInstance MudDialog { get; set; } = null!;
+
+    [Parameter, EditorRequired] public string EntityDescription { get; set; } = "";
+
+    private string _confirmWord = "";
+    private string _input = "";
+
+    private bool IsMatch => string.Equals(_input.Trim(), _confirmWord, StringComparison.OrdinalIgnoreCase);
+
+    protected override void OnInitialized()
+    {
+        _confirmWord = ConfirmWords[Random.Shared.Next(ConfirmWords.Length)];
+    }
+
+    private void Submit()
+    {
+        if (IsMatch) MudDialog.Close(DialogResult.Ok(true));
+    }
+
+    private void Cancel() => MudDialog.Cancel();
+}

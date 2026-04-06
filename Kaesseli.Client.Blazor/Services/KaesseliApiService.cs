@@ -55,6 +55,24 @@ public class KaesseliApiService(HttpClient httpClient)
         response.EnsureSuccessStatusCode();
     }
 
+    public async Task AddAccountingPeriodAsync(string description, DateOnly fromInclusive, DateOnly toInclusive, CancellationToken ct = default)
+    {
+        var response = await httpClient.PostAsJsonAsync("accountingPeriod", new { fromInclusive, toInclusive, description }, ct);
+        response.EnsureSuccessStatusCode();
+    }
+
+    public async Task UpdateAccountingPeriodAsync(Guid id, string description, DateOnly fromInclusive, DateOnly toInclusive, CancellationToken ct = default)
+    {
+        var response = await httpClient.PutAsJsonAsync($"accountingPeriod/{id}", new { id, description, fromInclusive, toInclusive }, ct);
+        response.EnsureSuccessStatusCode();
+    }
+
+    public async Task DeleteAccountingPeriodAsync(Guid id, CancellationToken ct = default)
+    {
+        var response = await httpClient.DeleteAsync($"accountingPeriod/{id}", ct);
+        response.EnsureSuccessStatusCode();
+    }
+
     public record SplitEntry(Guid OtherAccountId, decimal Amount);
     private record NrOfPossibleAutomationResult(int NrOfPossibleAutomation);
 }

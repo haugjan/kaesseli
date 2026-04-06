@@ -1,0 +1,56 @@
+@using Kaesseli.Client.Blazor.Services
+
+<MudDialog>
+    <DialogContent>
+        <MudForm @ref="_form">
+            <MudTextField @bind-Value="Model.Description" Label="Bezeichnung" Required="true"
+                          RequiredError="Bezeichnung ist erforderlich." Class="mb-4" />
+            <MudDatePicker @bind-Date="_fromDate" Label="Von" Required="true" DateFormat="dd.MM.yyyy"
+                           RequiredError="Startdatum ist erforderlich." Class="mb-4" />
+            <MudDatePicker @bind-Date="_toDate" Label="Bis" Required="true" DateFormat="dd.MM.yyyy"
+                           RequiredError="Enddatum ist erforderlich." />
+        </MudForm>
+    </DialogContent>
+    <DialogActions>
+        <MudButton OnClick="Cancel">Abbrechen</MudButton>
+        <MudButton Color="Color.Primary" Variant="Variant.Filled" OnClick="Submit">Speichern</MudButton>
+    </DialogActions>
+</MudDialog>
+
+@code {
+    [CascadingParameter] private IMudDialogInstance MudDialog { get; set; } = null!;
+
+    [Parameter] public FormModel Model { get; set; } = new();
+
+    private MudForm _form = null!;
+    private DateTime? _fromDate;
+    private DateTime? _toDate;
+
+    protected override void OnParametersSet()
+    {
+        _fromDate = Model.From.HasValue ? Model.From.Value.ToDateTime(TimeOnly.MinValue) : null;
+        _toDate = Model.To.HasValue ? Model.To.Value.ToDateTime(TimeOnly.MinValue) : null;
+    }
+
+    private async Task Submit()
+    {
+        await _form.ValidateAsync();
+        if (!_form.IsValid) return;
+
+        Model.From = _fromDate.HasValue ? DateOnly.FromDateTime(_fromDate.Value) : null;
+        Model.To = _toDate.HasValue ? DateOnly.FromDateTime(_toDate.Value) : null;
+
+        if (Model.From is null || Model.To is null) return;
+
+        MudDialog.Close(DialogResult.Ok(Model));
+    }
+
+    private void Cancel() => MudDialog.Cancel();
+
+    public class FormModel
+    {
+        public string? Description { get; set; }
+        public DateOnly? From { get; set; }
+        public DateOnly? To { get; set; }
+    }
+}

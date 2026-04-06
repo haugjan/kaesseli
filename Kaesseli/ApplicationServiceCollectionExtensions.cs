@@ -20,6 +20,8 @@ public static class ApplicationServiceCollectionExtensions
                 // Accounts
                 .AddTransient<AddAccount.IHandler, AddAccount.Handler>()
                 .AddTransient<AddAccountingPeriod.IHandler, AddAccountingPeriod.Handler>()
+                .AddTransient<UpdateAccountingPeriod.IHandler, UpdateAccountingPeriod.Handler>()
+                .AddTransient<DeleteAccountingPeriod.IHandler, DeleteAccountingPeriod.Handler>()
                 .AddTransient<GetAccount.IHandler, GetAccount.Handler>()
                 .AddTransient<GetAccounts.IHandler, GetAccounts.Handler>()
                 .AddTransient<GetAccountingPeriods.IHandler, GetAccountingPeriods.Handler>()

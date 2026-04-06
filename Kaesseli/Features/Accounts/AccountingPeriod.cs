@@ -5,9 +5,9 @@ public class AccountingPeriod
     private AccountingPeriod() { }
 
     public Guid Id { get; private init; }
-    public string Description { get; private init; } = null!;
-    public DateOnly FromInclusive { get; private init; }
-    public DateOnly ToInclusive { get; private init; }
+    public string Description { get; private set; } = null!;
+    public DateOnly FromInclusive { get; private set; }
+    public DateOnly ToInclusive { get; private set; }
 
     public static AccountingPeriod Create(string description, DateOnly fromInclusive, DateOnly toInclusive)
     {
@@ -21,5 +21,15 @@ public class AccountingPeriod
             FromInclusive = fromInclusive,
             ToInclusive = toInclusive,
         };
+    }
+
+    public void Update(string description, DateOnly fromInclusive, DateOnly toInclusive)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(description);
+        ArgumentOutOfRangeException.ThrowIfGreaterThan(fromInclusive, toInclusive);
+
+        Description = description;
+        FromInclusive = fromInclusive;
+        ToInclusive = toInclusive;
     }
 }

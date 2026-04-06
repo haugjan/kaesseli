@@ -57,6 +57,24 @@ public static class AccountApi
                 }
             );
 
+            app.MapPut(
+                pattern: "/accountingPeriod/{id}",
+                async (UpdateAccountingPeriod.IHandler handler, Guid id, UpdateAccountingPeriod.Query command) =>
+                {
+                    await handler.Handle(command with { Id = id }, default);
+                    return Results.NoContent();
+                }
+            );
+
+            app.MapDelete(
+                pattern: "/accountingPeriod/{id}",
+                async (DeleteAccountingPeriod.IHandler handler, Guid id) =>
+                {
+                    await handler.Handle(new DeleteAccountingPeriod.Query(id), default);
+                    return Results.NoContent();
+                }
+            );
+
             return app;
         }
     }
