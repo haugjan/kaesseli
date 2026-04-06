@@ -1,0 +1,83 @@
+name: Deploy
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: "Environment to deploy to"
+        required: true
+        type: choice
+        options:
+          - dev
+          - prod
+
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+    outputs:
+      image-tag: ${{ github.sha }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Azure Login
+        uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Log in to ACR
+        run: az acr login --name ${{ secrets.ACR_LOGIN_SERVER }}
+
+      - name: Build and push
+        run: |
+          IMAGE=${{ secrets.ACR_LOGIN_SERVER }}/kaesseli:${{ github.sha }}
+          docker build -t $IMAGE -t ${{ secrets.ACR_LOGIN_SERVER }}/kaesseli:latest .
+          docker push $IMAGE
+          docker push ${{ secrets.ACR_LOGIN_SERVER }}/kaesseli:latest
+
+  deploy-dev:
+    needs: build-and-push
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push' || github.event.inputs.environment == 'dev'
+    environment: dev
+    steps:
+      - name: Azure Login
+        uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Deploy to Container App (Dev)
+        uses: azure/container-apps-deploy-action@v2
+        with:
+          containerAppName: kaesseli-dev
+          resourceGroup: RG_Kaesseli
+          imageToDeploy: ${{ secrets.ACR_LOGIN_SERVER }}/kaesseli:${{ github.sha }}
+
+  deploy-prod:
+    needs: [build-and-push, deploy-dev]
+    runs-on: ubuntu-latest
+    if: github.event.inputs.environment == 'prod'
+    environment: prod
+    steps:
+      - name: Azure Login
+        uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Deploy to Container App (Prod)
+        uses: azure/container-apps-deploy-action@v2
+        with:
+          containerAppName: kaesseli-prod
+          resourceGroup: RG_Kaesseli
+          imageToDeploy: ${{ secrets.ACR_LOGIN_SERVER }}/kaesseli:${{ github.sha }}

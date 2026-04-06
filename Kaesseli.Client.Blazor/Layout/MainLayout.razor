@@ -1,9 +1,11 @@
 @inherits LayoutComponentBase
 @using Kaesseli.Client.Blazor.Theme
 @using Kaesseli.Client.Blazor.Services
+@using Microsoft.AspNetCore.Components.WebAssembly.Hosting
 @inject KaesseliApiService Api
 @inject AccountingPeriodState PeriodState
 @inject IJSRuntime JS
+@inject IWebAssemblyHostEnvironment HostEnvironment
 
 <MudThemeProvider Theme="_theme" IsDarkMode="_isDarkMode" />
 <MudPopoverProvider />
@@ -31,7 +33,10 @@
         <MudIconButton Icon="@(_isDarkMode ? Icons.Material.Rounded.LightMode : Icons.Material.Rounded.DarkMode)"
                        Color="Color.Dark"
                        OnClick="@(_ => _isDarkMode = !_isDarkMode)" />
-        <LoginDisplay />
+        @if (HostEnvironment.IsProduction())
+        {
+            <LoginDisplay />
+        }
     </MudAppBar>
 
     <MudDrawer @bind-Open="_drawerOpen" Elevation="0" Variant="DrawerVariant.Responsive" ClipMode="DrawerClipMode.Never">

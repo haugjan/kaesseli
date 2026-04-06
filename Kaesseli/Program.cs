@@ -1,4 +1,5 @@
 using System.Diagnostics;
+using Azure.Identity;
 using Microsoft.Identity.Web;
 using OpenTelemetry.Logs;
 using OpenTelemetry.Metrics;
@@ -9,6 +10,12 @@ using Scalar.AspNetCore;
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Configuration.AddJsonFile("appsettings.user.json", optional: true, reloadOnChange: true);
+
+var keyVaultUri = builder.Configuration["KeyVault:VaultUri"];
+if (!string.IsNullOrEmpty(keyVaultUri))
+{
+    builder.Configuration.AddAzureKeyVault(new Uri(keyVaultUri), new DefaultAzureCredential());
+}
 
 builder.Services.AddOpenApi();
 
@@ -63,11 +70,14 @@ builder.Services.AddCors(options =>
     );
 });
 
-builder.Services.AddMicrosoftIdentityWebApiAuthentication(builder.Configuration, "AzureAdB2C");
-builder.Services.AddAuthorizationBuilder()
-    .SetFallbackPolicy(new Microsoft.AspNetCore.Authorization.AuthorizationPolicyBuilder()
-        .RequireAuthenticatedUser()
-        .Build());
+if (!builder.Environment.IsDevelopment())
+{
+    builder.Services.AddMicrosoftIdentityWebApiAuthentication(builder.Configuration, "AzureAdB2C");
+    builder.Services.AddAuthorizationBuilder()
+        .SetFallbackPolicy(new Microsoft.AspNetCore.Authorization.AuthorizationPolicyBuilder()
+            .RequireAuthenticatedUser()
+            .Build());
+}
 
 builder.Services.AddInfrastructureServices(builder.Configuration);
 builder.Services.AddApplicationServices();
@@ -77,8 +87,11 @@ var app = builder.Build();
 app.UseHttpsRedirection();
 app.UseCors("AllowSpecificOrigin");
 
-app.UseAuthentication();
-app.UseAuthorization();
+if (!app.Environment.IsDevelopment())
+{
+    app.UseAuthentication();
+    app.UseAuthorization();
+}
 
 app.UseDefaultFiles();
 app.UseStaticFiles();

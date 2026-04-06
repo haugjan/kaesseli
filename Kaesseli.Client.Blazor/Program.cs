@@ -13,29 +13,37 @@ builder.RootComponents.Add<HeadOutlet>("head::after");
 
 var apiBaseUrl = builder.Configuration["ApiBaseUrl"]
     ?? throw new InvalidOperationException("ApiBaseUrl not configured in appsettings.json");
-var apiScope = builder.Configuration["ApiScope"]
-    ?? throw new InvalidOperationException("ApiScope not configured in appsettings.json");
 
-builder.Services.AddHttpClient("Kaesseli.API",
-        client => client.BaseAddress = new Uri(apiBaseUrl))
-    .AddHttpMessageHandler(sp => sp.GetRequiredService<AuthorizationMessageHandler>()
-        .ConfigureHandler(
-            authorizedUrls: [apiBaseUrl],
-            scopes: [apiScope]));
+if (builder.HostEnvironment.IsProduction())
+{
+    var apiScope = builder.Configuration["ApiScope"]
+        ?? throw new InvalidOperationException("ApiScope not configured in appsettings.json");
 
-builder.Services.AddScoped(sp =>
-    sp.GetRequiredService<IHttpClientFactory>().CreateClient("Kaesseli.API"));
+    builder.Services.AddHttpClient("Kaesseli.API",
+            client => client.BaseAddress = new Uri(apiBaseUrl))
+        .AddHttpMessageHandler(sp => sp.GetRequiredService<AuthorizationMessageHandler>()
+            .ConfigureHandler(
+                authorizedUrls: [apiBaseUrl],
+                scopes: [apiScope]));
+
+    builder.Services.AddScoped(sp =>
+        sp.GetRequiredService<IHttpClientFactory>().CreateClient("Kaesseli.API"));
+
+    builder.Services.AddMsalAuthentication(options =>
+    {
+        builder.Configuration.Bind("AzureAdB2C", options.ProviderOptions.Authentication);
+        options.ProviderOptions.DefaultAccessTokenScopes.Add(apiScope);
+        options.ProviderOptions.LoginMode = "redirect";
+    });
+}
+else
+{
+    builder.Services.AddScoped(_ => new HttpClient { BaseAddress = new Uri(apiBaseUrl) });
+}
 
 builder.Services.AddScoped<KaesseliApiService>();
 builder.Services.AddSingleton<AccountingPeriodState>();
 builder.Services.AddMudServices();
-
-builder.Services.AddMsalAuthentication(options =>
-{
-    builder.Configuration.Bind("AzureAdB2C", options.ProviderOptions.Authentication);
-    options.ProviderOptions.DefaultAccessTokenScopes.Add(apiScope);
-    options.ProviderOptions.LoginMode = "redirect";
-});
 
 var host = builder.Build();
 
