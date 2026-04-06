@@ -1,6 +1,6 @@
 using System.Diagnostics;
 using Azure.Identity;
-using Microsoft.Identity.Web;
+using Microsoft.AspNetCore.Authentication;
 using OpenTelemetry.Logs;
 using OpenTelemetry.Metrics;
 using OpenTelemetry.Resources;
@@ -72,7 +72,8 @@ builder.Services.AddCors(options =>
 
 if (!builder.Environment.IsDevelopment())
 {
-    builder.Services.AddMicrosoftIdentityWebApiAuthentication(builder.Configuration, "AzureAdB2C");
+    builder.Services.AddAuthentication("Basic")
+        .AddScheme<AuthenticationSchemeOptions, Kaesseli.BasicAuthHandler>("Basic", null);
     builder.Services.AddAuthorizationBuilder()
         .SetFallbackPolicy(new Microsoft.AspNetCore.Authorization.AuthorizationPolicyBuilder()
             .RequireAuthenticatedUser()
@@ -87,14 +88,14 @@ var app = builder.Build();
 app.UseHttpsRedirection();
 app.UseCors("AllowSpecificOrigin");
 
-app.UseDefaultFiles();
-app.UseStaticFiles();
-
 if (!app.Environment.IsDevelopment())
 {
     app.UseAuthentication();
     app.UseAuthorization();
 }
+
+app.UseDefaultFiles();
+app.UseStaticFiles();
 using (var scope = app.Services.CreateScope())
 {
     var context = scope.ServiceProvider.GetRequiredService<Kaesseli.Infrastructure.KaesseliContext>();
