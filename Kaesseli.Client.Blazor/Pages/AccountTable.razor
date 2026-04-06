@@ -110,14 +110,23 @@ else
 
     private static string FormatNullable(decimal? value) => value.HasValue ? value.Value.ToString("N2") : "";
 
-    private static string RowStyle(AccountStatementEntry entry) =>
-        entry.AmountType == AmountType.Budget ? "font-style: italic;" : "";
+    private static string RowStyle(AccountStatementEntry entry) => entry.AmountType switch
+    {
+        AmountType.Budget => "font-style: italic;",
+        AmountType.OpeningBalance => "background-color: rgba(33, 150, 243, 0.08); font-weight: 600;",
+        _ => ""
+    };
 
     private static string AmountStyle(AccountStatementEntry entry)
     {
-        var italic = entry.AmountType == AmountType.Budget ? "font-style: italic; " : "";
+        var baseStyle = entry.AmountType switch
+        {
+            AmountType.Budget => "font-style: italic; ",
+            AmountType.OpeningBalance => "background-color: rgba(33, 150, 243, 0.08); font-weight: 600; ",
+            _ => ""
+        };
         var color = entry.Amount >= 0 ? "color: #21BA45;" : "color: #C10015;";
-        return $"{italic}text-align: right; font-weight: 700; {color}";
+        return $"{baseStyle}text-align: right; font-weight: 700; {color}";
     }
 
     private static string GetMudIcon(string iconName) => iconName switch

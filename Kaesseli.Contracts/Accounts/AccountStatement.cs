@@ -28,5 +28,6 @@ public enum AmountType
 {
     Budget = 1,
     Credit = 2,
-    Debit = 3
+    Debit = 3,
+    OpeningBalance = 4
 }
