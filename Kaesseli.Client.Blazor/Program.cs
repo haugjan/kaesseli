@@ -1,19 +1,16 @@
 using System.Globalization;
 using System.Net.Http.Headers;
 using System.Text;
+using Kaesseli.Client.Blazor;
+using Kaesseli.Client.Blazor.Services;
 using Microsoft.AspNetCore.Components.Web;
 using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
 using Microsoft.JSInterop;
-using Kaesseli.Client.Blazor;
-using Kaesseli.Client.Blazor.Services;
 using MudBlazor.Services;
 
 var builder = WebAssemblyHostBuilder.CreateDefault(args);
 builder.RootComponents.Add<App>("#app");
 builder.RootComponents.Add<HeadOutlet>("head::after");
-
-var apiBaseUrl = builder.Configuration["ApiBaseUrl"]
-    ?? throw new InvalidOperationException("ApiBaseUrl not configured in appsettings.json");
 
 var basicUser = builder.Configuration["BasicAuth:Username"];
 var basicPass = builder.Configuration["BasicAuth:Password"];
@@ -26,7 +23,7 @@ if (!string.IsNullOrEmpty(basicUser) && !string.IsNullOrEmpty(basicPass))
 
 builder.Services.AddScoped(_ =>
 {
-    var client = new HttpClient { BaseAddress = new Uri(apiBaseUrl) };
+    var client = new HttpClient { BaseAddress = new Uri(builder.HostEnvironment.BaseAddress) };
     if (basicAuthHeader is not null)
         client.DefaultRequestHeaders.Authorization = basicAuthHeader;
     return client;
