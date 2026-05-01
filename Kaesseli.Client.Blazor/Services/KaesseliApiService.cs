@@ -279,7 +279,23 @@ public class KaesseliApiService(HttpClient httpClient)
     public async Task DeleteAccountAsync(Guid id, CancellationToken ct = default)
     {
         var response = await httpClient.DeleteAsync($"account/{id}", ct);
+        if (response.StatusCode == System.Net.HttpStatusCode.Conflict)
+            throw new AccountInUseClientException();
         response.EnsureSuccessStatusCode();
+    }
+
+    public async Task<CleanupOrphansResult> CleanupOrphanedAccountReferencesAsync(
+        CancellationToken ct = default
+    )
+    {
+        var response = await httpClient.PostAsync(
+            "admin/cleanupOrphanedAccountReferences",
+            content: null,
+            ct
+        );
+        response.EnsureSuccessStatusCode();
+        return await response.Content.ReadFromJsonAsync<CleanupOrphansResult>(ct)
+            ?? throw new InvalidOperationException("Cleanup endpoint returned no body.");
     }
 
     public async Task<string> ExportAccountPlanAsync(CancellationToken ct = default)

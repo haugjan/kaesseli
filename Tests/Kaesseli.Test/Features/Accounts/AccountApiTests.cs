@@ -183,6 +183,38 @@ public class AccountApiTests : IAsyncLifetime
     }
 
     [Fact]
+    public async Task DeleteAccountEndpoint_ShouldReturnConflict_WhenAccountIsInUse()
+    {
+        // Arrange
+        var accountId = Guid.NewGuid();
+        _deleteAccountMock
+            .Handle(Arg.Any<DeleteAccount.Query>(), Arg.Any<CancellationToken>())
+            .Returns(Task.FromException(new AccountInUseException(accountId)));
+
+        // Act
+        var response = await _client.DeleteAsync(requestUri: $"/account/{accountId}");
+
+        // Assert
+        response.StatusCode.ShouldBe(HttpStatusCode.Conflict);
+    }
+
+    [Fact]
+    public async Task DeleteAccountEndpoint_ShouldReturnNoContent_WhenSuccessful()
+    {
+        // Arrange
+        var accountId = Guid.NewGuid();
+        _deleteAccountMock
+            .Handle(Arg.Any<DeleteAccount.Query>(), Arg.Any<CancellationToken>())
+            .Returns(Task.CompletedTask);
+
+        // Act
+        var response = await _client.DeleteAsync(requestUri: $"/account/{accountId}");
+
+        // Assert
+        response.StatusCode.ShouldBe(HttpStatusCode.NoContent);
+    }
+
+    [Fact]
     public async Task AddAccountingPeriodEndpoint_ShouldReturnCreatedResult()
     {
         // Arrange

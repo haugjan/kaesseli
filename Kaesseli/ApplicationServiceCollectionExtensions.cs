@@ -31,6 +31,10 @@ public static class ApplicationServiceCollectionExtensions
                 .AddTransient<GetFinancialOverview.IHandler, GetFinancialOverview.Handler>()
                 .AddTransient<ExportAccountPlan.IHandler, ExportAccountPlan.Handler>()
                 .AddTransient<ImportAccountPlan.IHandler, ImportAccountPlan.Handler>()
+                .AddTransient<
+                    CleanupOrphanedAccountReferences.IHandler,
+                    CleanupOrphanedAccountReferences.Handler
+                >()
                 // Automation
                 .AddTransient<AddAutomation.IHandler, AddAutomation.Handler>()
                 .AddTransient<ApplyAllAutomations.IHandler, ApplyAllAutomations.Handler>()

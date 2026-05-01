@@ -38,6 +38,9 @@ public interface IAccountRepository
         Guid? excludeAccountId,
         CancellationToken cancellationToken
     );
+    Task<Contracts.Accounts.CleanupOrphansResult> CleanupOrphanedAccountReferences(
+        CancellationToken cancellationToken
+    );
 }
 
 internal class AccountRepository(KaesseliContext context) : IAccountRepository
@@ -143,6 +146,22 @@ internal class AccountRepository(KaesseliContext context) : IAccountRepository
             await context.Accounts.SingleOrDefaultAsync(a => a.Id == accountId, cancellationToken)
             ?? throw new EntityNotFoundException(typeof(Account), accountId);
 
+        // EF Cosmos 10.0.5 generates malformed SQL for AnyAsync with a predicate
+        // (see AccountNumberExists). Use Where(...).ToListAsync(...) and check in memory.
+        var referencingEntries = await context
+            .JournalEntries.Where(e =>
+                EF.Property<Guid>(e, "DebitAccountId") == accountId
+                || EF.Property<Guid>(e, "CreditAccountId") == accountId
+            )
+            .ToListAsync(cancellationToken);
+        if (referencingEntries.Count > 0)
+            throw new AccountInUseException(accountId);
+
+        var budgetEntries = await context
+            .BudgetEntries.Where(e => EF.Property<Guid>(e, "AccountId") == accountId)
+            .ToListAsync(cancellationToken);
+        context.BudgetEntries.RemoveRange(budgetEntries);
+
         context.Accounts.Remove(account);
         await context.SaveChangesAsync(cancellationToken);
     }
@@ -172,6 +191,45 @@ internal class AccountRepository(KaesseliContext context) : IAccountRepository
         var all = await context.Accounts.ToListAsync(cancellationToken);
         return all.Any(a =>
             a.ShortName == shortName && (excludeAccountId is null || a.Id != excludeAccountId)
+        );
+    }
+
+    public async Task<Contracts.Accounts.CleanupOrphansResult> CleanupOrphanedAccountReferences(
+        CancellationToken cancellationToken
+    )
+    {
+        var existingAccountIds = (await context.Accounts.ToListAsync(cancellationToken))
+            .Select(a => a.Id)
+            .ToHashSet();
+
+        var allJournalEntries = await context.JournalEntries.ToListAsync(cancellationToken);
+        var orphanedJournalEntries = allJournalEntries
+            .Where(e =>
+                !existingAccountIds.Contains(
+                    context.Entry(e).Property<Guid>("DebitAccountId").CurrentValue
+                )
+                || !existingAccountIds.Contains(
+                    context.Entry(e).Property<Guid>("CreditAccountId").CurrentValue
+                )
+            )
+            .ToList();
+        context.JournalEntries.RemoveRange(orphanedJournalEntries);
+
+        var allBudgetEntries = await context.BudgetEntries.ToListAsync(cancellationToken);
+        var orphanedBudgetEntries = allBudgetEntries
+            .Where(e =>
+                !existingAccountIds.Contains(
+                    context.Entry(e).Property<Guid>("AccountId").CurrentValue
+                )
+            )
+            .ToList();
+        context.BudgetEntries.RemoveRange(orphanedBudgetEntries);
+
+        await context.SaveChangesAsync(cancellationToken);
+
+        return new Contracts.Accounts.CleanupOrphansResult(
+            JournalEntriesDeleted: orphanedJournalEntries.Count,
+            BudgetEntriesDeleted: orphanedBudgetEntries.Count
         );
     }
 }
