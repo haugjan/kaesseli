@@ -174,7 +174,7 @@ else
                     CurrentAmount = budget?.Amount,
                     CurrentDescription = budget?.Description,
                     NewAmount = budget?.Amount,
-                    NewDescription = budget?.Description ?? "Budget",
+                    NewDescription = budget?.Description ?? a.Name,
                 };
             }).ToList();
 
@@ -203,7 +203,7 @@ else
         if (row.NewAmount is null) return;
         try
         {
-            await Api.SetBudgetAsync(row.NewAmount.Value, row.NewDescription ?? "Budget", row.AccountId, PeriodId);
+            await Api.SetBudgetAsync(row.NewAmount.Value, row.NewDescription ?? row.AccountName, row.AccountId, PeriodId);
             Snackbar.Add($"Budget für {row.AccountName} gespeichert.", Severity.Success);
             await LoadAsync();
         }
