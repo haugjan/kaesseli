@@ -1,0 +1,55 @@
+.account-mobile-list {
+    display: flex;
+    flex-direction: column;
+}
+
+.account-mobile-row {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    padding: 10px 16px;
+    border-top: 1px solid var(--mud-palette-divider);
+    cursor: pointer;
+}
+
+.account-mobile-row:first-child {
+    border-top: none;
+}
+
+.account-mobile-row:hover {
+    background-color: var(--mud-palette-action-default-hover);
+}
+
+.account-mobile-line {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.account-mobile-number {
+    font-variant-numeric: tabular-nums;
+    color: var(--mud-palette-text-secondary);
+    min-width: 44px;
+}
+
+.account-mobile-name {
+    font-weight: 500;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    flex: 1;
+}
+
+.account-mobile-values {
+    justify-content: space-between;
+    padding-left: 50px;
+}
+
+.account-mobile-value {
+    font-variant-numeric: tabular-nums;
+    font-size: 0.875rem;
+}
+
+.account-mobile-budget-month {
+    color: var(--mud-palette-text-secondary);
+}

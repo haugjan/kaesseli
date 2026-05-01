@@ -35,39 +35,65 @@ else
                 </CardHeaderContent>
             </MudCardHeader>
             <MudCardContent Class="pa-0">
-                <MudTable Items="typeAccounts" Dense="true" Hover="true" Elevation="0"
-                          OnRowClick="OnRowClick" T="AccountOverview" Style="background: transparent;">
-                    <HeaderContent>
-                        <MudTh Style="width: 48px;"></MudTh>
-                        <MudTh>Nr.</MudTh>
-                        <MudTh>Name</MudTh>
-                        <MudTh Style="text-align: right;">Kontostand</MudTh>
-                        @if (type.ShowBudget)
-                        {
-                            <MudTh Style="text-align: right;">Budget p.M.</MudTh>
-                            <MudTh Style="text-align: right;">Budget aktuell</MudTh>
-                            <MudTh Style="text-align: right;">Budgetsaldo</MudTh>
-                        }
-                    </HeaderContent>
-                    <RowTemplate>
-                        <MudTd>
-                            <MudAvatar Size="Size.Small" Style="@($"background-color: {context.IconColor}; color: white;")">
-                                <MudIcon Icon="@GetMudIcon(context.Icon)" Size="Size.Small" />
-                            </MudAvatar>
-                        </MudTd>
-                        <MudTd DataLabel="Nr.">@context.Number</MudTd>
-                        <MudTd DataLabel="Name">@context.Name</MudTd>
-                        <MudTd DataLabel="Kontostand" Style="text-align: right;">@FormatNumber(context.AccountBalance)</MudTd>
-                        @if (type.ShowBudget)
-                        {
-                            <MudTd DataLabel="Budget p.M." Style="text-align: right;">@FormatNullable(context.BudgetPerMonth)</MudTd>
-                            <MudTd DataLabel="Budget aktuell" Style="text-align: right;">@FormatNullable(context.CurrentBudget)</MudTd>
-                            <MudTd DataLabel="Budgetsaldo" Style="@BudgetBalanceStyle(context.BudgetBalance)">
-                                @FormatNullable(context.BudgetBalance)
+                <MudHidden Breakpoint="Breakpoint.SmAndDown">
+                    <MudTable Items="typeAccounts" Dense="true" Hover="true" Elevation="0"
+                              OnRowClick="OnRowClick" T="AccountOverview" Style="background: transparent;"
+                              Breakpoint="Breakpoint.None">
+                        <HeaderContent>
+                            <MudTh Style="width: 48px;"></MudTh>
+                            <MudTh>Nr.</MudTh>
+                            <MudTh>Name</MudTh>
+                            <MudTh Style="text-align: right;">Kontostand</MudTh>
+                            @if (type.ShowBudget)
+                            {
+                                <MudTh Style="text-align: right;">Budget p.M.</MudTh>
+                                <MudTh Style="text-align: right;">Budget aktuell</MudTh>
+                                <MudTh Style="text-align: right;">Budgetsaldo</MudTh>
+                            }
+                        </HeaderContent>
+                        <RowTemplate>
+                            <MudTd>
+                                <MudAvatar Size="Size.Small" Style="@($"background-color: {context.IconColor}; color: white;")">
+                                    <MudIcon Icon="@GetMudIcon(context.Icon)" Size="Size.Small" />
+                                </MudAvatar>
                             </MudTd>
+                            <MudTd>@context.Number</MudTd>
+                            <MudTd>@context.Name</MudTd>
+                            <MudTd Style="text-align: right;">@FormatNumber(context.AccountBalance)</MudTd>
+                            @if (type.ShowBudget)
+                            {
+                                <MudTd Style="text-align: right;">@FormatNullable(context.BudgetPerMonth)</MudTd>
+                                <MudTd Style="text-align: right;">@FormatNullable(context.CurrentBudget)</MudTd>
+                                <MudTd Style="@BudgetBalanceStyle(context.BudgetBalance)">@FormatNullable(context.BudgetBalance)</MudTd>
+                            }
+                        </RowTemplate>
+                    </MudTable>
+                </MudHidden>
+                <MudHidden Breakpoint="Breakpoint.MdAndUp">
+                    <div class="account-mobile-list">
+                        @foreach (var account in typeAccounts)
+                        {
+                            var acc = account;
+                            <div class="account-mobile-row" @onclick="@(() => Navigation.NavigateTo($"/accountTable/{acc.Id}"))">
+                                <div class="account-mobile-line">
+                                    <MudAvatar Size="Size.Small" Style="@($"background-color: {acc.IconColor}; color: white;")">
+                                        <MudIcon Icon="@GetMudIcon(acc.Icon)" Size="Size.Small" />
+                                    </MudAvatar>
+                                    <span class="account-mobile-number">@acc.Number</span>
+                                    <span class="account-mobile-name">@acc.Name</span>
+                                </div>
+                                <div class="account-mobile-line account-mobile-values">
+                                    <span class="account-mobile-value">@FormatNumber(acc.AccountBalance)</span>
+                                    @if (type.ShowBudget)
+                                    {
+                                        <span class="account-mobile-value account-mobile-budget-month">@FormatNullable(acc.BudgetPerMonth)</span>
+                                        <span class="account-mobile-value" style="@BudgetBalanceStyle(acc.BudgetBalance)">@FormatNullable(acc.BudgetBalance)</span>
+                                    }
+                                </div>
+                            </div>
                         }
-                    </RowTemplate>
-                </MudTable>
+                    </div>
+                </MudHidden>
             </MudCardContent>
         </MudCard>
     }
