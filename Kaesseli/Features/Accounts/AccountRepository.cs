@@ -147,22 +147,20 @@ internal class AccountRepository(KaesseliContext context) : IAccountRepository
         await context.SaveChangesAsync(cancellationToken);
     }
 
-    // EF Cosmos 10 translates AnyAsync with complex predicates to
-    // 'SELECT VALUE EXISTS(SELECT 1 FROM root ...)', which Cosmos rejects.
-    // Take(1) + ToListAsync compiles to 'SELECT TOP 1 ...', which works.
+    // EF Cosmos 10.0.5 generates malformed 'SELECT VALUE EXISTS(SELECT 1 FROM root c ...)'
+    // for both AnyAsync and Take(1)+ToListAsync with predicates including a Where clause.
+    // Cosmos rejects this with "Identifier 'root' could not be resolved".
+    // Workaround: fetch the full account set (small in this domain) and filter in memory.
     public async Task<bool> AccountNumberExists(
         string number,
         Guid? excludeAccountId,
         CancellationToken cancellationToken
     )
     {
-        var matches = await context
-            .Accounts.Where(a => a.Number == number)
-            .Where(a => excludeAccountId == null || a.Id != excludeAccountId)
-            .Select(a => a.Id)
-            .Take(1)
-            .ToListAsync(cancellationToken);
-        return matches.Count > 0;
+        var all = await context.Accounts.ToListAsync(cancellationToken);
+        return all.Any(a =>
+            a.Number == number && (excludeAccountId is null || a.Id != excludeAccountId)
+        );
     }
 
     public async Task<bool> AccountShortNameExists(
@@ -171,12 +169,9 @@ internal class AccountRepository(KaesseliContext context) : IAccountRepository
         CancellationToken cancellationToken
     )
     {
-        var matches = await context
-            .Accounts.Where(a => a.ShortName == shortName)
-            .Where(a => excludeAccountId == null || a.Id != excludeAccountId)
-            .Select(a => a.Id)
-            .Take(1)
-            .ToListAsync(cancellationToken);
-        return matches.Count > 0;
+        var all = await context.Accounts.ToListAsync(cancellationToken);
+        return all.Any(a =>
+            a.ShortName == shortName && (excludeAccountId is null || a.Id != excludeAccountId)
+        );
     }
 }
