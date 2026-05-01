@@ -1,5 +1,3 @@
-using Kaesseli.Features.Accounts;
-
 namespace Kaesseli.Features.Automation;
 
 public class AutomationEntryPart
@@ -7,17 +5,17 @@ public class AutomationEntryPart
     private AutomationEntryPart() { }
 
     public Guid Id { get; private init; }
-    public Account Account { get; private init; } = null!;
+    public string AccountShortName { get; private init; } = null!;
     public decimal AmountProportion { get; private init; }
 
-    public static AutomationEntryPart Create(Account account, decimal amountProportion)
+    public static AutomationEntryPart Create(string accountShortName, decimal amountProportion)
     {
-        ArgumentNullException.ThrowIfNull(account);
+        ArgumentException.ThrowIfNullOrWhiteSpace(accountShortName);
 
         return new AutomationEntryPart
         {
             Id = Guid.NewGuid(),
-            Account = account,
+            AccountShortName = accountShortName,
             AmountProportion = amountProportion,
         };
     }

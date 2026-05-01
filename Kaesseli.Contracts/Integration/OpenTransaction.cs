@@ -11,13 +11,16 @@ public record OpenTransaction(
     string AccountName,
     string AccountType,
     AccountType AccountTypeId,
-    IEnumerable<SuggestedAccount> SuggestedAccounts);
+    IEnumerable<SuggestedAccount> SuggestedAccounts
+);
 
 public record SuggestedAccount(
     double Relevance,
     Guid AccountId,
+    string AccountShortName,
     string AccountName,
     string AccountType,
     AccountType AccountTypeId,
     string AccountIcon,
-    string AccountIconColor);
+    string AccountIconColor
+);
