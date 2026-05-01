@@ -17,22 +17,22 @@ var apiBaseUrl = builder.Configuration["ApiBaseUrl"]
 
 var basicUser = builder.Configuration["BasicAuth:Username"];
 var basicPass = builder.Configuration["BasicAuth:Password"];
-AuthenticationHeaderValue? basicAuthHeader = null;
-if (!string.IsNullOrEmpty(basicUser) && !string.IsNullOrEmpty(basicPass))
-{
-    var encoded = Convert.ToBase64String(Encoding.UTF8.GetBytes($"{basicUser}:{basicPass}"));
-    basicAuthHeader = new AuthenticationHeaderValue("Basic", encoded);
-}
+    AuthenticationHeaderValue? basicAuthHeader = null;
+    if (!string.IsNullOrEmpty(basicUser) && !string.IsNullOrEmpty(basicPass))
+    {
+        var encoded = Convert.ToBase64String(Encoding.UTF8.GetBytes($"{basicUser}:{basicPass}"));
+        basicAuthHeader = new AuthenticationHeaderValue("Basic", encoded);
+    }
 
-builder.Services.AddScoped(_ =>
-{
-    var client = new HttpClient { BaseAddress = new Uri(apiBaseUrl) };
-    if (basicAuthHeader is not null)
-        client.DefaultRequestHeaders.Authorization = basicAuthHeader;
-    return client;
-});
+    builder.Services.AddScoped(_ =>
+    {
+        var client = new HttpClient { BaseAddress = new Uri(apiBaseUrl) };
+        if (basicAuthHeader is not null)
+            client.DefaultRequestHeaders.Authorization = basicAuthHeader;
+        return client;
+    });
 
-builder.Services.AddScoped<KaesseliApiService>();
+    builder.Services.AddScoped<KaesseliApiService>();
 builder.Services.AddSingleton<AccountingPeriodState>();
 builder.Services.AddMudServices();
 
