@@ -225,6 +225,7 @@
         var parameters = new DialogParameters<DeleteConfirmationDialog>
         {
             { x => x.EntityDescription, $"Konto \"{account.Name}\"" },
+            { x => x.ConfirmText, account.Name },
         };
         var options = new DialogOptions { MaxWidth = MaxWidth.Small, FullWidth = true };
         var dialog = await DialogService.ShowAsync<DeleteConfirmationDialog>("Konto löschen", parameters, options);

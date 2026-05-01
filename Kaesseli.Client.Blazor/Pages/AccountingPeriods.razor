@@ -139,6 +139,7 @@
         var parameters = new DialogParameters<DeleteConfirmationDialog>
         {
             { x => x.EntityDescription, $"Buchungsperiode \"{period.Description}\"" },
+            { x => x.ConfirmText, period.Description },
         };
         var options = new DialogOptions { MaxWidth = MaxWidth.Small, FullWidth = true };
         var dialog = await DialogService.ShowAsync<DeleteConfirmationDialog>("Buchungsperiode löschen", parameters, options);
