@@ -4,9 +4,12 @@
 }
 
 .account-mobile-row {
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
+    display: grid;
+    grid-template-columns: 36px 60px 1fr auto;
+    grid-template-rows: auto auto;
+    column-gap: 10px;
+    row-gap: 2px;
+    align-items: center;
     padding: 10px 16px;
     border-top: 1px solid var(--mud-palette-divider);
     cursor: pointer;
@@ -20,36 +23,47 @@
     background-color: var(--mud-palette-action-default-hover);
 }
 
-.account-mobile-line {
-    display: flex;
-    align-items: center;
-    gap: 10px;
+.account-mobile-icon {
+    grid-column: 1;
+    grid-row: 1;
 }
 
 .account-mobile-number {
+    grid-column: 2;
+    grid-row: 1;
     font-variant-numeric: tabular-nums;
     color: var(--mud-palette-text-secondary);
-    min-width: 44px;
 }
 
 .account-mobile-name {
+    grid-column: 3 / span 2;
+    grid-row: 1;
     font-weight: 500;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
-    flex: 1;
 }
 
-.account-mobile-values {
-    justify-content: space-between;
-    padding-left: 50px;
-}
-
-.account-mobile-value {
+.account-mobile-balance {
+    grid-column: 2;
+    grid-row: 2;
     font-variant-numeric: tabular-nums;
     font-size: 0.875rem;
 }
 
 .account-mobile-budget-month {
+    grid-column: 3;
+    grid-row: 2;
+    font-variant-numeric: tabular-nums;
+    font-size: 0.875rem;
     color: var(--mud-palette-text-secondary);
+    text-align: right;
+}
+
+.account-mobile-budget-balance {
+    grid-column: 4;
+    grid-row: 2;
+    font-variant-numeric: tabular-nums;
+    font-size: 0.875rem;
+    text-align: right;
 }
