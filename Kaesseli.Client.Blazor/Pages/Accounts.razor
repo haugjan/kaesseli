@@ -75,21 +75,19 @@ else
                         {
                             var acc = account;
                             <div class="account-mobile-row" @onclick="@(() => Navigation.NavigateTo($"/accountTable/{acc.Id}"))">
-                                <div class="account-mobile-line">
+                                <div class="account-mobile-icon">
                                     <MudAvatar Size="Size.Small" Style="@($"background-color: {acc.IconColor}; color: white;")">
                                         <MudIcon Icon="@GetMudIcon(acc.Icon)" Size="Size.Small" />
                                     </MudAvatar>
-                                    <span class="account-mobile-number">@acc.Number</span>
-                                    <span class="account-mobile-name">@acc.Name</span>
                                 </div>
-                                <div class="account-mobile-line account-mobile-values">
-                                    <span class="account-mobile-value">@FormatNumber(acc.AccountBalance)</span>
-                                    @if (type.ShowBudget)
-                                    {
-                                        <span class="account-mobile-value account-mobile-budget-month">@FormatNullable(acc.BudgetPerMonth)</span>
-                                        <span class="account-mobile-value" style="@BudgetBalanceStyle(acc.BudgetBalance)">@FormatNullable(acc.BudgetBalance)</span>
-                                    }
-                                </div>
+                                <span class="account-mobile-number">@acc.Number</span>
+                                <span class="account-mobile-name">@acc.Name</span>
+                                <span class="account-mobile-balance">@FormatNumber(acc.AccountBalance)</span>
+                                @if (type.ShowBudget)
+                                {
+                                    <span class="account-mobile-budget-month">@FormatNullable(acc.BudgetPerMonth)</span>
+                                    <span class="account-mobile-budget-balance" style="@BudgetBalanceStyle(acc.BudgetBalance)">@FormatNullable(acc.BudgetBalance)</span>
+                                }
                             </div>
                         }
                     </div>
