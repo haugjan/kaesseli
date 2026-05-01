@@ -29,10 +29,15 @@ public static class ApplicationServiceCollectionExtensions
                 .AddTransient<GetAccountingPeriods.IHandler, GetAccountingPeriods.Handler>()
                 .AddTransient<GetAccountsSummary.IHandler, GetAccountsSummary.Handler>()
                 .AddTransient<GetFinancialOverview.IHandler, GetFinancialOverview.Handler>()
+                .AddTransient<ExportAccountPlan.IHandler, ExportAccountPlan.Handler>()
+                .AddTransient<ImportAccountPlan.IHandler, ImportAccountPlan.Handler>()
                 // Automation
                 .AddTransient<AddAutomation.IHandler, AddAutomation.Handler>()
                 .AddTransient<ApplyAllAutomations.IHandler, ApplyAllAutomations.Handler>()
-                .AddTransient<GetNrOfPossibleAutomation.IHandler, GetNrOfPossibleAutomation.Handler>()
+                .AddTransient<
+                    GetNrOfPossibleAutomation.IHandler,
+                    GetNrOfPossibleAutomation.Handler
+                >()
                 // Budget
                 .AddTransient<SetBudget.IHandler, SetBudget.Handler>()
                 .AddTransient<GetBudgetEntries.IHandler, GetBudgetEntries.Handler>()
@@ -45,7 +50,10 @@ public static class ApplicationServiceCollectionExtensions
                 .AddTransient<ProcessCamtFile.IHandler, ProcessCamtFile.Handler>()
                 .AddTransient<ProcessPostFinanceCsv.IHandler, ProcessPostFinanceCsv.Handler>()
                 // Integration - NextOpenTransaction
-                .AddTransient<OpenTransactionAmountChanged.IHandler, OpenTransactionAmountChanged.Handler>()
+                .AddTransient<
+                    OpenTransactionAmountChanged.IHandler,
+                    OpenTransactionAmountChanged.Handler
+                >()
                 .AddTransient<AssignOpenTransaction.IHandler, AssignOpenTransaction.Handler>()
                 .AddTransient<SplitOpenTransaction.IHandler, SplitOpenTransaction.Handler>()
                 .AddTransient<GetNextOpenTransaction.IHandler, GetNextOpenTransaction.Handler>()

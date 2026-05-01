@@ -30,6 +30,21 @@
         <span class="dismiss">🗙</span>
     </div>
     <script src="_content/MudBlazor/MudBlazor.min.js"></script>
+    <script>
+        window.kaesseli = {
+            downloadText: (filename, contentType, text) => {
+                const blob = new Blob([text], { type: contentType });
+                const url = URL.createObjectURL(blob);
+                const link = document.createElement('a');
+                link.href = url;
+                link.download = filename;
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                URL.revokeObjectURL(url);
+            }
+        };
+    </script>
     <script src="_framework/blazor.webassembly#[.{fingerprint}].js"></script>
 </body>
 

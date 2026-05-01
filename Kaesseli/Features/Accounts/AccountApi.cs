@@ -11,8 +11,11 @@ public static class AccountApi
         {
             app.MapGet(
                 pattern: "/account",
-                async (GetAccounts.IHandler handler, [FromQuery] AccountType? accountType, CancellationToken ct) =>
-                    await handler.Handle(new GetAccounts.Query(accountType), ct)
+                async (
+                    GetAccounts.IHandler handler,
+                    [FromQuery] AccountType? accountType,
+                    CancellationToken ct
+                ) => await handler.Handle(new GetAccounts.Query(accountType), ct)
             );
 
             app.MapGet(
@@ -23,25 +26,39 @@ public static class AccountApi
 
             app.MapGet(
                 pattern: "/accountingPeriod/{accountingPeriodId}/account/{accountId}",
-                async (GetAccount.IHandler handler, Guid accountId, Guid accountingPeriodId, CancellationToken ct) =>
-                    await handler.Handle(new GetAccount.Query(accountId, accountingPeriodId), ct)
+                async (
+                    GetAccount.IHandler handler,
+                    Guid accountId,
+                    Guid accountingPeriodId,
+                    CancellationToken ct
+                ) => await handler.Handle(new GetAccount.Query(accountId, accountingPeriodId), ct)
             );
 
             app.MapGet(
                 pattern: "/accountingPeriod/{accountingPeriodId}/accountSummary",
-                async (GetAccountsSummary.IHandler handler, Guid accountingPeriodId, CancellationToken ct) =>
-                    await handler.Handle(new GetAccountsSummary.Query(accountingPeriodId), ct)
+                async (
+                    GetAccountsSummary.IHandler handler,
+                    Guid accountingPeriodId,
+                    CancellationToken ct
+                ) => await handler.Handle(new GetAccountsSummary.Query(accountingPeriodId), ct)
             );
 
             app.MapGet(
                 pattern: "/accountingPeriod/{accountingPeriodId}/overView",
-                async (GetFinancialOverview.IHandler handler, Guid accountingPeriodId, CancellationToken ct) =>
-                    await handler.Handle(new GetFinancialOverview.Query(accountingPeriodId), ct)
+                async (
+                    GetFinancialOverview.IHandler handler,
+                    Guid accountingPeriodId,
+                    CancellationToken ct
+                ) => await handler.Handle(new GetFinancialOverview.Query(accountingPeriodId), ct)
             );
 
             app.MapPost(
                 pattern: "/account",
-                async (AddAccount.IHandler handler, AddAccount.Query command, CancellationToken ct) =>
+                async (
+                    AddAccount.IHandler handler,
+                    AddAccount.Query command,
+                    CancellationToken ct
+                ) =>
                 {
                     var guid = await handler.Handle(command, ct);
                     return Results.Created(uri: $"/account/{guid}", guid);
@@ -50,7 +67,11 @@ public static class AccountApi
 
             app.MapPost(
                 pattern: "/accountingPeriod",
-                async (AddAccountingPeriod.IHandler handler, AddAccountingPeriod.Query command, CancellationToken ct) =>
+                async (
+                    AddAccountingPeriod.IHandler handler,
+                    AddAccountingPeriod.Query command,
+                    CancellationToken ct
+                ) =>
                 {
                     var guid = await handler.Handle(command, ct);
                     return Results.Created(uri: $"/accountingPeriod/{guid}", guid);
@@ -59,7 +80,11 @@ public static class AccountApi
 
             app.MapPut(
                 pattern: "/accountingPeriod/{id}",
-                async (UpdateAccountingPeriod.IHandler handler, Guid id, UpdateAccountingPeriod.Query command) =>
+                async (
+                    UpdateAccountingPeriod.IHandler handler,
+                    Guid id,
+                    UpdateAccountingPeriod.Query command
+                ) =>
                 {
                     await handler.Handle(command with { Id = id }, default);
                     return Results.NoContent();
@@ -92,6 +117,45 @@ public static class AccountApi
                     return Results.NoContent();
                 }
             );
+
+            app.MapGet(
+                pattern: "/account/plan",
+                async ([FromServices] ExportAccountPlan.IHandler handler, CancellationToken ct) =>
+                {
+                    var yaml = await handler.Handle(ct);
+                    return Results.File(
+                        fileContents: System.Text.Encoding.UTF8.GetBytes(yaml),
+                        contentType: "application/x-yaml",
+                        fileDownloadName: "kontoplan.yaml"
+                    );
+                }
+            );
+
+            app.MapPost(
+                    pattern: "/account/plan",
+                    async (
+                        [FromServices] ImportAccountPlan.IHandler handler,
+                        Stream body,
+                        CancellationToken ct
+                    ) =>
+                    {
+                        using var reader = new StreamReader(body);
+                        var yaml = await reader.ReadToEndAsync(ct);
+                        try
+                        {
+                            var result = await handler.Handle(
+                                new ImportAccountPlan.Query(yaml),
+                                ct
+                            );
+                            return Results.Ok(result);
+                        }
+                        catch (AccountPlanImportException ex)
+                        {
+                            return Results.BadRequest(new { error = ex.Message });
+                        }
+                    }
+                )
+                .Accepts<Stream>("application/x-yaml");
 
             return app;
         }
