@@ -282,6 +282,59 @@ public class KaesseliApiService(HttpClient httpClient)
         response.EnsureSuccessStatusCode();
     }
 
+    public async Task<string> ExportAccountPlanAsync(CancellationToken ct = default)
+    {
+        var response = await httpClient.GetAsync("account/plan", ct);
+        response.EnsureSuccessStatusCode();
+        return await response.Content.ReadAsStringAsync(ct);
+    }
+
+    public async Task<ImportAccountPlanResult> ImportAccountPlanAsync(
+        string yaml,
+        CancellationToken ct = default
+    )
+    {
+        using var content = new StringContent(
+            yaml,
+            System.Text.Encoding.UTF8,
+            "application/x-yaml"
+        );
+        var response = await httpClient.PostAsync("account/plan", content, ct);
+        if (!response.IsSuccessStatusCode)
+        {
+            var errorBody = await response.Content.ReadAsStringAsync(ct);
+            string message;
+            try
+            {
+                var doc = System.Text.Json.JsonDocument.Parse(errorBody);
+                message = doc.RootElement.TryGetProperty("error", out var err)
+                    ? err.GetString() ?? errorBody
+                    : errorBody;
+            }
+            catch
+            {
+                message = errorBody;
+            }
+            return new ImportAccountPlanResult(
+                Success: false,
+                Created: 0,
+                Updated: 0,
+                Error: message
+            );
+        }
+        var result = await response.Content.ReadFromJsonAsync<ImportSummary>(ct);
+        return new ImportAccountPlanResult(
+            Success: true,
+            Created: result?.Created ?? 0,
+            Updated: result?.Updated ?? 0,
+            Error: null
+        );
+    }
+
+    public record ImportAccountPlanResult(bool Success, int Created, int Updated, string? Error);
+
+    private record ImportSummary(int Created, int Updated);
+
     public record SplitEntry(Guid OtherAccountId, decimal Amount);
 
     public record AutomationSplitEntry(string OtherAccountShortName, decimal Amount);
