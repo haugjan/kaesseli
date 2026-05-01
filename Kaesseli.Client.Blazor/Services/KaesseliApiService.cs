@@ -64,7 +64,7 @@ public class KaesseliApiService(HttpClient httpClient)
     public Task AddAutomationAsync(
         string automationText,
         Guid accountingPeriodId,
-        IEnumerable<SplitEntry> entries
+        IEnumerable<AutomationSplitEntry> entries
     ) =>
         httpClient.PostAsJsonAsync(
             "automation",
@@ -283,6 +283,8 @@ public class KaesseliApiService(HttpClient httpClient)
     }
 
     public record SplitEntry(Guid OtherAccountId, decimal Amount);
+
+    public record AutomationSplitEntry(string OtherAccountShortName, decimal Amount);
 
     private record NrOfPossibleAutomationResult(int NrOfPossibleAutomation);
 }

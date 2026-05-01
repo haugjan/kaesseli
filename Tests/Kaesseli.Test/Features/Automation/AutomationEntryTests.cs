@@ -1,6 +1,4 @@
-using Kaesseli.Features.Accounts;
 using Kaesseli.Features.Automation;
-using Kaesseli.Test.Faker;
 using Shouldly;
 using Xunit;
 
@@ -11,8 +9,7 @@ public class AutomationEntryTests
     [Fact]
     public void Create_ValidInput_SetsProperties()
     {
-        var account = new SmartFaker<Account>().Generate();
-        var part = AutomationEntryPart.Create(account, 0.5m);
+        var part = AutomationEntryPart.Create("groceries", 0.5m);
         var entry = AutomationEntry.Create("MIGROS*", [part]);
 
         entry.Id.ShouldNotBe(Guid.Empty);
@@ -41,17 +38,19 @@ public class AutomationEntryPartTests
     [Fact]
     public void Create_ValidInput_SetsProperties()
     {
-        var account = new SmartFaker<Account>().Generate();
-        var part = AutomationEntryPart.Create(account, 0.75m);
+        var part = AutomationEntryPart.Create("groceries", 0.75m);
 
         part.Id.ShouldNotBe(Guid.Empty);
-        part.Account.ShouldBe(account);
+        part.AccountShortName.ShouldBe("groceries");
         part.AmountProportion.ShouldBe(0.75m);
     }
 
-    [Fact]
-    public void Create_NullAccount_Throws()
+    [Theory]
+    [InlineData(null)]
+    [InlineData("")]
+    [InlineData("   ")]
+    public void Create_EmptyShortName_Throws(string? shortName)
     {
-        Should.Throw<ArgumentNullException>(() => AutomationEntryPart.Create(null!, 1m));
+        Should.Throw<ArgumentException>(() => AutomationEntryPart.Create(shortName!, 1m));
     }
 }
