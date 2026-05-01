@@ -1,5 +1,5 @@
-using Kaesseli.Features.Budget;
 using Kaesseli.Features.Accounts;
+using Kaesseli.Features.Budget;
 using Kaesseli.Test.Faker;
 using NSubstitute;
 using Xunit;
@@ -16,7 +16,11 @@ public class AddJournalEntryCommandHandlerTests
         var accountRepo = Substitute.For<IAccountRepository>();
         var command = new SmartFaker<SetBudget.Query>().Generate();
         var cancellationToken = new CancellationToken();
-        var account = Account.Create("Account", AccountType.Expense, new AccountIcon("favorite", "blue"));
+        var account = AccountFactory.Create(
+            "Account",
+            AccountType.Expense,
+            new AccountIcon("favorite", "blue")
+        );
         var accountingPeriod = AccountingPeriod.Create("Test Period", default, default);
 
         mockRepo
@@ -27,9 +31,7 @@ public class AddJournalEntryCommandHandlerTests
                 cancellationToken
             )
             .Returns(callInfo => callInfo.ArgAt<BudgetEntry>(0));
-        accountRepo
-            .GetAccount(Arg.Any<Guid>(), cancellationToken)
-            .Returns(account);
+        accountRepo.GetAccount(Arg.Any<Guid>(), cancellationToken).Returns(account);
         accountRepo
             .GetAccountingPeriod(Arg.Any<Guid>(), cancellationToken)
             .Returns(accountingPeriod);
@@ -40,7 +42,8 @@ public class AddJournalEntryCommandHandlerTests
         var result = await handler.Handle(command, CancellationToken.None);
 
         // Assert
-        await mockRepo.Received()
+        await mockRepo
+            .Received()
             .SetBudget(
                 Arg.Is<BudgetEntry>(entry =>
                     entry.Amount == command.Amount
@@ -60,7 +63,11 @@ public class AddJournalEntryCommandHandlerTests
         var accountRepo = Substitute.For<IAccountRepository>();
         var command = new SmartFaker<SetBudget.Query>().Generate();
         var cancellationToken = new CancellationToken();
-        var account = Account.Create("Account", AccountType.Expense, new AccountIcon("favorite", "blue"));
+        var account = AccountFactory.Create(
+            "Account",
+            AccountType.Expense,
+            new AccountIcon("favorite", "blue")
+        );
         var accountingPeriod = AccountingPeriod.Create("Test Period", default, default);
 
         mockRepo
@@ -71,9 +78,7 @@ public class AddJournalEntryCommandHandlerTests
                 cancellationToken
             )
             .Returns(callInfo => callInfo.ArgAt<BudgetEntry>(0));
-        accountRepo
-            .GetAccount(Arg.Any<Guid>(), cancellationToken)
-            .Returns(account);
+        accountRepo.GetAccount(Arg.Any<Guid>(), cancellationToken).Returns(account);
         accountRepo
             .GetAccountingPeriod(Arg.Any<Guid>(), cancellationToken)
             .Returns(accountingPeriod);
@@ -84,7 +89,8 @@ public class AddJournalEntryCommandHandlerTests
         var result = await handler.Handle(command, CancellationToken.None);
 
         // Assert
-        await mockRepo.Received()
+        await mockRepo
+            .Received()
             .SetBudget(
                 Arg.Is<BudgetEntry>(entry =>
                     entry.Amount == command.Amount

@@ -7,13 +7,26 @@
             <MudTextField @bind-Value="Model.Name" Label="Name" Required="true" RequiredError="Name ist erforderlich."
                           Class="mb-3" />
 
-            <MudSelect @bind-Value="Model.Type" Label="Typ" Required="true" RequiredError="Typ ist erforderlich."
-                       Class="mb-3">
-                <MudSelectItem Value="AccountType.Asset">Aktiv</MudSelectItem>
-                <MudSelectItem Value="AccountType.Liability">Passiv</MudSelectItem>
-                <MudSelectItem Value="AccountType.Revenue">Einkommen</MudSelectItem>
-                <MudSelectItem Value="AccountType.Expense">Ausgaben</MudSelectItem>
+            <MudSelect T="AccountType" Value="Model.Type" ValueChanged="OnTypeChanged" Label="Typ" Required="true"
+                       RequiredError="Typ ist erforderlich." Class="mb-3">
+                <MudSelectItem Value="AccountType.Asset">Aktiv (1xxx)</MudSelectItem>
+                <MudSelectItem Value="AccountType.Liability">Passiv (2xxx)</MudSelectItem>
+                <MudSelectItem Value="AccountType.Revenue">Einkommen (3xxx)</MudSelectItem>
+                <MudSelectItem Value="AccountType.Expense">Ausgaben (4xxx)</MudSelectItem>
             </MudSelect>
+
+            <MudTextField @bind-Value="Model.Number" Label="Kontonummer" Required="true"
+                          RequiredError="Kontonummer ist erforderlich."
+                          Validation="@(new Func<string?, string?>(ValidateNumber))"
+                          HelperText="@($"4-stellig, beginnt mit {ExpectedNumberPrefix}")"
+                          Class="mb-3" />
+
+            <MudTextField Value="Model.ShortName" ValueChanged="@((string v) => Model.ShortName = v?.ToLowerInvariant())"
+                          Label="Kurzbezeichnung" Required="true"
+                          RequiredError="Kurzbezeichnung ist erforderlich."
+                          Validation="@(new Func<string?, string?>(ValidateShortName))"
+                          HelperText="2-20 Zeichen, lowercase, [a-z0-9-]"
+                          Immediate="true" Class="mb-3" />
 
             <MudText Typo="Typo.subtitle2" Class="mb-2">Icon</MudText>
             <div class="d-flex flex-wrap gap-1 pa-2 mb-3" style="max-height: 280px; overflow-y: auto; border: 1px solid var(--mud-palette-divider); border-radius: 8px;">
@@ -136,7 +149,44 @@
     {
         public string? Name { get; set; }
         public AccountType Type { get; set; } = AccountType.Expense;
+        public string? Number { get; set; }
+        public string? ShortName { get; set; }
         public string Icon { get; set; } = "AccountBalance";
         public string IconColor { get; set; } = "#1E88E5";
+    }
+
+    private static readonly System.Text.RegularExpressions.Regex NumberRegex = new(@"^[1-4]\d{3}$");
+    private static readonly System.Text.RegularExpressions.Regex ShortNameRegex = new(@"^[a-z0-9-]{2,20}$");
+
+    private char ExpectedNumberPrefix => Model.Type switch
+    {
+        AccountType.Asset => '1',
+        AccountType.Liability => '2',
+        AccountType.Revenue => '3',
+        AccountType.Expense => '4',
+        _ => '?'
+    };
+
+    private void OnTypeChanged(AccountType type)
+    {
+        Model.Type = type;
+        // best-effort: shift first digit if a number is already entered
+        if (!string.IsNullOrEmpty(Model.Number) && Model.Number.Length == 4 && Model.Number[0] != ExpectedNumberPrefix)
+            Model.Number = ExpectedNumberPrefix + Model.Number[1..];
+    }
+
+    private string? ValidateNumber(string? value)
+    {
+        if (string.IsNullOrEmpty(value)) return null; // Required handles empty
+        if (!NumberRegex.IsMatch(value)) return "4-stellig, erste Ziffer 1-4.";
+        if (value[0] != ExpectedNumberPrefix) return $"Erste Ziffer muss {ExpectedNumberPrefix} sein für diesen Kontotyp.";
+        return null;
+    }
+
+    private string? ValidateShortName(string? value)
+    {
+        if (string.IsNullOrEmpty(value)) return null;
+        if (!ShortNameRegex.IsMatch(value)) return "2-20 Zeichen, nur a-z, 0-9, Bindestrich.";
+        return null;
     }
 }
