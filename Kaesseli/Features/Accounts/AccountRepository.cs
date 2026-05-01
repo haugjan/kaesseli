@@ -147,23 +147,36 @@ internal class AccountRepository(KaesseliContext context) : IAccountRepository
         await context.SaveChangesAsync(cancellationToken);
     }
 
-    public Task<bool> AccountNumberExists(
+    // EF Cosmos 10 translates AnyAsync with complex predicates to
+    // 'SELECT VALUE EXISTS(SELECT 1 FROM root ...)', which Cosmos rejects.
+    // Take(1) + ToListAsync compiles to 'SELECT TOP 1 ...', which works.
+    public async Task<bool> AccountNumberExists(
         string number,
         Guid? excludeAccountId,
         CancellationToken cancellationToken
-    ) =>
-        context.Accounts.AnyAsync(
-            a => a.Number == number && (excludeAccountId == null || a.Id != excludeAccountId),
-            cancellationToken
-        );
+    )
+    {
+        var matches = await context
+            .Accounts.Where(a => a.Number == number)
+            .Where(a => excludeAccountId == null || a.Id != excludeAccountId)
+            .Select(a => a.Id)
+            .Take(1)
+            .ToListAsync(cancellationToken);
+        return matches.Count > 0;
+    }
 
-    public Task<bool> AccountShortNameExists(
+    public async Task<bool> AccountShortNameExists(
         string shortName,
         Guid? excludeAccountId,
         CancellationToken cancellationToken
-    ) =>
-        context.Accounts.AnyAsync(
-            a => a.ShortName == shortName && (excludeAccountId == null || a.Id != excludeAccountId),
-            cancellationToken
-        );
+    )
+    {
+        var matches = await context
+            .Accounts.Where(a => a.ShortName == shortName)
+            .Where(a => excludeAccountId == null || a.Id != excludeAccountId)
+            .Select(a => a.Id)
+            .Take(1)
+            .ToListAsync(cancellationToken);
+        return matches.Count > 0;
+    }
 }
