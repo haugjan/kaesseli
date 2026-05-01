@@ -55,20 +55,36 @@ else
                 }
             </div>
 
-            <MudTable Items="_account.Entries" Dense="true" Hover="true" Elevation="0" Style="background: transparent;">
-                <HeaderContent>
-                    <MudTh>Datum</MudTh>
-                    <MudTh>Beschreibung</MudTh>
-                    <MudTh>Gegenkonto</MudTh>
-                    <MudTh Style="text-align: right;">Betrag</MudTh>
-                </HeaderContent>
-                <RowTemplate>
-                    <MudTd DataLabel="Datum" Style="@RowStyle(context)">@context.ValueDate.ToString("dd.MM.yyyy")</MudTd>
-                    <MudTd DataLabel="Beschreibung" Style="@RowStyle(context)">@context.Description</MudTd>
-                    <MudTd DataLabel="Gegenkonto" Style="@RowStyle(context)">@context.OtherAccount</MudTd>
-                    <MudTd DataLabel="Betrag" Style="@AmountStyle(context)">@FormatNumber(context.Amount)</MudTd>
-                </RowTemplate>
-            </MudTable>
+            <MudHidden Breakpoint="Breakpoint.SmAndDown">
+                <MudTable Items="_account.Entries" Dense="true" Hover="true" Elevation="0"
+                          Style="background: transparent;" Breakpoint="Breakpoint.None">
+                    <HeaderContent>
+                        <MudTh>Datum</MudTh>
+                        <MudTh>Beschreibung</MudTh>
+                        <MudTh>Gegenkonto</MudTh>
+                        <MudTh Style="text-align: right;">Betrag</MudTh>
+                    </HeaderContent>
+                    <RowTemplate>
+                        <MudTd Style="@RowStyle(context)">@context.ValueDate.ToString("dd.MM.yyyy")</MudTd>
+                        <MudTd Style="@RowStyle(context)">@context.Description</MudTd>
+                        <MudTd Style="@RowStyle(context)">@context.OtherAccount</MudTd>
+                        <MudTd Style="@AmountStyle(context)">@FormatNumber(context.Amount)</MudTd>
+                    </RowTemplate>
+                </MudTable>
+            </MudHidden>
+            <MudHidden Breakpoint="Breakpoint.MdAndUp">
+                <div class="entry-mobile-list">
+                    @foreach (var entry in _account.Entries)
+                    {
+                        <div class="entry-mobile-row" style="@RowStyle(entry)">
+                            <span class="entry-mobile-date">@entry.ValueDate.ToString("dd.MM.yyyy")</span>
+                            <span class="entry-mobile-other">@entry.OtherAccount</span>
+                            <span class="entry-mobile-amount" style="@AmountStyle(entry)">@FormatNumber(entry.Amount)</span>
+                            <span class="entry-mobile-description">@entry.Description</span>
+                        </div>
+                    }
+                </div>
+            </MudHidden>
         </MudCardContent>
     </MudCard>
 }
