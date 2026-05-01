@@ -17,7 +17,11 @@ public class BudgetEntryTests
             BudgetEntry.Create(
                 description: "Budget entry",
                 amount: 42.42m,
-                account: Account.Create("Account", accountType, new AccountIcon("favorite", "blue")),
+                account: AccountFactory.Create(
+                    "Account",
+                    accountType,
+                    new AccountIcon("favorite", "blue")
+                ),
                 accountingPeriod: AccountingPeriod.Create("Test Period", default, default)
             );
 
@@ -35,7 +39,11 @@ public class BudgetEntryTests
             BudgetEntry.Create(
                 description: "Budget entry",
                 amount: 42.42m,
-                account: Account.Create("Account", accountType, new AccountIcon("favorite", "blue")),
+                account: AccountFactory.Create(
+                    "Account",
+                    accountType,
+                    new AccountIcon("favorite", "blue")
+                ),
                 accountingPeriod: AccountingPeriod.Create("Test Period", default, default)
             );
 

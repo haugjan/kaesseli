@@ -1,8 +1,7 @@
-using Kaesseli.Infrastructure;
 using Kaesseli.Features.Accounts;
 using Kaesseli.Features.Budget;
+using Kaesseli.Infrastructure;
 using Microsoft.EntityFrameworkCore;
-
 using Shouldly;
 using Xunit;
 
@@ -10,12 +9,11 @@ namespace Kaesseli.Test.Features.Budget;
 
 public class BudgetRepositoryTests
 {
-    private static readonly AccountingPeriod ExpectedAccountPeriod =
-        AccountingPeriod.Create(
-            "Test Period",
-            new DateOnly(year: 2000, month: 1, day: 1),
-            new DateOnly(year: 2000, month: 12, day: 31)
-        );
+    private static readonly AccountingPeriod ExpectedAccountPeriod = AccountingPeriod.Create(
+        "Test Period",
+        new DateOnly(year: 2000, month: 1, day: 1),
+        new DateOnly(year: 2000, month: 12, day: 31)
+    );
 
     private static KaesseliContext CreateContext(DbContextOptions<KaesseliContext> options)
     {
@@ -59,13 +57,21 @@ public class BudgetRepositoryTests
             BudgetEntry.Create(
                 description: "Description 1",
                 amount: 42.42m,
-                account: Account.Create("Account 1", AccountType.Revenue, new AccountIcon("favorite", "blue")),
+                account: AccountFactory.Create(
+                    "Account 1",
+                    AccountType.Revenue,
+                    new AccountIcon("favorite", "blue")
+                ),
                 accountingPeriod: ExpectedAccountPeriod
             ),
             BudgetEntry.Create(
                 description: "Description 2",
                 amount: 24.24m,
-                account: Account.Create("Account 2", AccountType.Expense, new AccountIcon("favorite", "blue")),
+                account: AccountFactory.Create(
+                    "Account 2",
+                    AccountType.Expense,
+                    new AccountIcon("favorite", "blue")
+                ),
                 accountingPeriod: AccountingPeriod.Create(
                     "Test Period 2",
                     new DateOnly(year: 2001, month: 1, day: 1),
@@ -85,7 +91,11 @@ public class BudgetRepositoryTests
         var newEntry = BudgetEntry.Create(
             description: "Description",
             amount: 11.11m,
-            account: Account.Create("Account", AccountType.Expense, new AccountIcon("favorite", "blue")),
+            account: AccountFactory.Create(
+                "Account",
+                AccountType.Expense,
+                new AccountIcon("favorite", "blue")
+            ),
             accountingPeriod: AccountingPeriod.Create("Test Period", default, default)
         );
 

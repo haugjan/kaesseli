@@ -10,8 +10,16 @@ public class JournalEntryTests
     public void CreatingJournalEntry_WithDifferentDebitAndCreditAccount_ShouldSucceed()
     {
         // Arrange
-        var debitAccount = Account.Create("A", AccountType.Expense, new AccountIcon("favorite", "blue"));
-        var creditAccount = Account.Create("B", AccountType.Expense, new AccountIcon("favorite", "blue"));
+        var debitAccount = AccountFactory.Create(
+            "A",
+            AccountType.Expense,
+            new AccountIcon("favorite", "blue")
+        );
+        var creditAccount = AccountFactory.Create(
+            "B",
+            AccountType.Expense,
+            new AccountIcon("favorite", "blue")
+        );
 
         // Act & Assert
         _ = JournalEntry.Create(
@@ -28,7 +36,11 @@ public class JournalEntryTests
     public void CreatingJournalEntry_WithIdenticalDebitAndCreditAccount_ShouldThrowException()
     {
         // Arrange
-        var account = Account.Create("A", AccountType.Expense, new AccountIcon("favorite", "blue"));
+        var account = AccountFactory.Create(
+            "A",
+            AccountType.Expense,
+            new AccountIcon("favorite", "blue")
+        );
 
         // Act & Assert
         Assert.Throws<AccountsMustNotBeSameException>(() =>

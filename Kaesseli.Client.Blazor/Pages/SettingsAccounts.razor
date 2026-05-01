@@ -41,12 +41,14 @@
                       GroupBy="_groupDefinition">
                 <HeaderContent>
                     <MudTh>Icon</MudTh>
+                    <MudTh>Nr.</MudTh>
+                    <MudTh>Kurzbez.</MudTh>
                     <MudTh>Name</MudTh>
                     <MudTh>Typ</MudTh>
                     <MudTh Style="text-align: right;">Aktionen</MudTh>
                 </HeaderContent>
                 <GroupHeaderTemplate>
-                    <MudTh colspan="4" Class="pa-3">
+                    <MudTh colspan="6" Class="pa-3">
                         <MudText Typo="Typo.subtitle1"><b>@context.Key</b></MudText>
                     </MudTh>
                 </GroupHeaderTemplate>
@@ -56,6 +58,8 @@
                             <MudIcon Icon="@AccountDialog.ResolveIcon(context.Icon)" Size="Size.Small" />
                         </MudAvatar>
                     </MudTd>
+                    <MudTd DataLabel="Nr.">@context.Number</MudTd>
+                    <MudTd DataLabel="Kurzbez."><code>@context.ShortName</code></MudTd>
                     <MudTd DataLabel="Name">@context.Name</MudTd>
                     <MudTd DataLabel="Typ">@GetTypeName(context.TypeId)</MudTd>
                     <MudTd DataLabel="Aktionen" Style="text-align: right;">
@@ -105,7 +109,7 @@
         {
             try
             {
-                await Api.AddAccountAsync(model.Name!, model.Type, model.Icon, model.IconColor);
+                await Api.AddAccountAsync(model.Name!, model.Type, model.Number!, model.ShortName!, model.Icon, model.IconColor);
                 Snackbar.Add("Konto erstellt.", Severity.Success);
                 await LoadAsync();
             }
@@ -124,6 +128,8 @@
             {
                 Name = account.Name,
                 Type = account.TypeId,
+                Number = account.Number,
+                ShortName = account.ShortName,
                 Icon = account.Icon,
                 IconColor = account.IconColor,
             }},
@@ -136,7 +142,7 @@
         {
             try
             {
-                await Api.UpdateAccountAsync(account.Id, model.Name!, model.Type, model.Icon, model.IconColor);
+                await Api.UpdateAccountAsync(account.Id, model.Name!, model.Type, model.Number!, model.ShortName!, model.Icon, model.IconColor);
                 Snackbar.Add("Konto aktualisiert.", Severity.Success);
                 await LoadAsync();
             }

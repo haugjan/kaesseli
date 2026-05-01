@@ -1,8 +1,7 @@
-using Kaesseli.Infrastructure;
 using Kaesseli.Features.Accounts;
+using Kaesseli.Infrastructure;
 using Kaesseli.Test.Faker;
 using Microsoft.EntityFrameworkCore;
-
 using Shouldly;
 using Xunit;
 
@@ -24,7 +23,11 @@ public class AccountRepositoryTests
             .UseInMemoryDatabase(databaseName: "AddAccountDb")
             .Options;
 
-        var account = Account.Create("Test Account", AccountType.Asset, new AccountIcon("favorite", "blue"));
+        var account = AccountFactory.Create(
+            "Test Account",
+            AccountType.Asset,
+            new AccountIcon("favorite", "blue")
+        );
 
         await using var context = CreateContext(options);
         var repository = new AccountRepository(context);
@@ -51,10 +54,18 @@ public class AccountRepositoryTests
 
         await using var setupContext = CreateContext(options);
         setupContext.Accounts.Add(
-            entity: Account.Create("Account 1", AccountType.Expense, new AccountIcon("favorite", "blue"))
+            entity: AccountFactory.Create(
+                "Account 1",
+                AccountType.Expense,
+                new AccountIcon("favorite", "blue")
+            )
         );
         setupContext.Accounts.Add(
-            entity: Account.Create("Account 2", AccountType.Expense, new AccountIcon("favorite", "blue"))
+            entity: AccountFactory.Create(
+                "Account 2",
+                AccountType.Expense,
+                new AccountIcon("favorite", "blue")
+            )
         );
         await setupContext.SaveChangesAsync(cancellationToken);
 
@@ -79,9 +90,21 @@ public class AccountRepositoryTests
         await using var setupContext = CreateContext(options);
         var accounts = new List<Account>
         {
-            Account.Create("Account 1", AccountType.Asset, new AccountIcon("favorite", "blue")),
-            Account.Create("Account 2", AccountType.Expense, new AccountIcon("favorite", "blue")),
-            Account.Create("Account 3", AccountType.Asset, new AccountIcon("favorite", "blue")),
+            AccountFactory.Create(
+                "Account 1",
+                AccountType.Asset,
+                new AccountIcon("favorite", "blue")
+            ),
+            AccountFactory.Create(
+                "Account 2",
+                AccountType.Expense,
+                new AccountIcon("favorite", "blue")
+            ),
+            AccountFactory.Create(
+                "Account 3",
+                AccountType.Asset,
+                new AccountIcon("favorite", "blue")
+            ),
         };
         setupContext.Accounts.AddRange(accounts);
         await setupContext.SaveChangesAsync(cancellationToken);
@@ -95,7 +118,10 @@ public class AccountRepositoryTests
 
         // Assert
         currentAccounts.Length.ShouldBe(2);
-        Assert.Equivalent(accounts.Where(account => account.Type == AccountType.Asset), currentAccounts);
+        Assert.Equivalent(
+            accounts.Where(account => account.Type == AccountType.Asset),
+            currentAccounts
+        );
     }
 
     [Fact]
@@ -106,7 +132,11 @@ public class AccountRepositoryTests
             .UseInMemoryDatabase(databaseName: "GetAccountDb")
             .Options;
 
-        var account = Account.Create("Existing Account", AccountType.Liability, new AccountIcon("favorite", "blue"));
+        var account = AccountFactory.Create(
+            "Existing Account",
+            AccountType.Liability,
+            new AccountIcon("favorite", "blue")
+        );
 
         await using var setupContext = CreateContext(options);
         setupContext.Accounts.Add(account);

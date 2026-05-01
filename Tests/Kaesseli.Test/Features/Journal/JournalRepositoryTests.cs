@@ -1,9 +1,8 @@
-using Kaesseli.Infrastructure;
 using Kaesseli.Features.Accounts;
 using Kaesseli.Features.Journal;
+using Kaesseli.Infrastructure;
 using Kaesseli.Test.Faker;
 using Microsoft.EntityFrameworkCore;
-
 using Shouldly;
 using Xunit;
 
@@ -28,10 +27,7 @@ public class JournalRepositoryTests
             .Options;
 
         var firstEntry = new SmartFaker<JournalEntry>()
-            .RuleFor(
-                be => be.AccountingPeriod,
-                value: expectedPeriod
-            )
+            .RuleFor(be => be.AccountingPeriod, value: expectedPeriod)
             .Generate();
         var secondEntry = new SmartFaker<JournalEntry>().Generate();
 
@@ -64,8 +60,16 @@ public class JournalRepositoryTests
             .UseInMemoryDatabase(databaseName: "AddJournalEntryDb")
             .Options;
 
-        var creditAccount = Account.Create("CreditAccount", AccountType.Asset, new AccountIcon("favorite", "blue"));
-        var debitAccount = Account.Create("DebitAccount", AccountType.Asset, new AccountIcon("favorite", "blue"));
+        var creditAccount = AccountFactory.Create(
+            "CreditAccount",
+            AccountType.Asset,
+            new AccountIcon("favorite", "blue")
+        );
+        var debitAccount = AccountFactory.Create(
+            "DebitAccount",
+            AccountType.Asset,
+            new AccountIcon("favorite", "blue")
+        );
         var newEntry = JournalEntry.Create(
             valueDate: DateOnly.FromDateTime(DateTime.Now),
             description: "Description",

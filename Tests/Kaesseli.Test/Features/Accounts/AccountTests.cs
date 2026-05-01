@@ -18,9 +18,21 @@ public class AccountTests
     )
     {
         //Arrange
-        var account = Account.Create("Account", accountType, new AccountIcon("favorite", "blue"));
-        var otherAccount = Account.Create("Other account", AccountType.Revenue, new AccountIcon("favorite", "blue"));
-        var yetAnotherAccount = Account.Create("Other account", AccountType.Expense, new AccountIcon("favorite", "blue"));
+        var account = AccountFactory.Create(
+            "Account",
+            accountType,
+            new AccountIcon("favorite", "blue")
+        );
+        var otherAccount = AccountFactory.Create(
+            "Other account",
+            AccountType.Revenue,
+            new AccountIcon("favorite", "blue")
+        );
+        var yetAnotherAccount = AccountFactory.Create(
+            "Other account",
+            AccountType.Expense,
+            new AccountIcon("favorite", "blue")
+        );
         var accountingPeriod = AccountingPeriod.Create("Test Period", default, default);
         var entries = new List<JournalEntry>
         {

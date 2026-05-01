@@ -1,5 +1,5 @@
-using Kaesseli.Features.Journal;
 using Kaesseli.Features.Accounts;
+using Kaesseli.Features.Journal;
 using Kaesseli.Test.Faker;
 using Microsoft.Extensions.Time.Testing;
 using NSubstitute;
@@ -15,8 +15,16 @@ public class AddJournalEntryCommandHandlerTests
         // Arrange
         var mockJournalRepo = Substitute.For<IJournalRepository>();
         var mockAccountRepo = Substitute.For<IAccountRepository>();
-        var debitAccount = Account.Create("Debit", AccountType.Expense, new AccountIcon("favorite", "blue"));
-        var creditAccount = Account.Create("Credit", AccountType.Revenue, new AccountIcon("favorite", "blue"));
+        var debitAccount = AccountFactory.Create(
+            "Debit",
+            AccountType.Expense,
+            new AccountIcon("favorite", "blue")
+        );
+        var creditAccount = AccountFactory.Create(
+            "Credit",
+            AccountType.Revenue,
+            new AccountIcon("favorite", "blue")
+        );
         var accountingPeriod = AccountingPeriod.Create("Test Period", default, default);
         var command = new SmartFaker<AddJournalEntry.Query>()
             .RuleFor(c => c.DebitAccountId, debitAccount.Id)
@@ -53,7 +61,8 @@ public class AddJournalEntryCommandHandlerTests
         var result = await handler.Handle(command, CancellationToken.None);
 
         // Assert
-        await mockJournalRepo.Received()
+        await mockJournalRepo
+            .Received()
             .AddJournalEntry(
                 Arg.Is<JournalEntry>(entry =>
                     entry.Amount == command.Amount
@@ -72,9 +81,19 @@ public class AddJournalEntryCommandHandlerTests
         var mockJournalRepo = Substitute.For<IJournalRepository>();
         var mockAccountRepo = Substitute.For<IAccountRepository>();
         var currentDay = new DateOnly(year: 1982, month: 11, day: 3);
-        var fakeTimeProvider = new FakeTimeProvider(new DateTimeOffset(currentDay.ToDateTime(TimeOnly.MinValue)));
-        var debitAccount = Account.Create("Debit", AccountType.Expense, new AccountIcon("favorite", "blue"));
-        var creditAccount = Account.Create("Credit", AccountType.Revenue, new AccountIcon("favorite", "blue"));
+        var fakeTimeProvider = new FakeTimeProvider(
+            new DateTimeOffset(currentDay.ToDateTime(TimeOnly.MinValue))
+        );
+        var debitAccount = AccountFactory.Create(
+            "Debit",
+            AccountType.Expense,
+            new AccountIcon("favorite", "blue")
+        );
+        var creditAccount = AccountFactory.Create(
+            "Credit",
+            AccountType.Revenue,
+            new AccountIcon("favorite", "blue")
+        );
         var accountingPeriod = AccountingPeriod.Create("Test Period", default, default);
         var command = new SmartFaker<AddJournalEntry.Query>()
             .RuleFor(c => c.ValueDate, _ => null)
@@ -112,7 +131,8 @@ public class AddJournalEntryCommandHandlerTests
         var result = await handler.Handle(command, CancellationToken.None);
 
         // Assert
-        await mockJournalRepo.Received()
+        await mockJournalRepo
+            .Received()
             .AddJournalEntry(
                 Arg.Is<JournalEntry>(entry =>
                     entry.Amount == command.Amount
