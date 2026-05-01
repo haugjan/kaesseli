@@ -1,9 +1,8 @@
 using System.Globalization;
-using System.Net.Http.Headers;
-using System.Text;
 using Kaesseli.Client.Blazor;
 using Kaesseli.Client.Blazor.Services;
 using Microsoft.AspNetCore.Components.Web;
+using Microsoft.AspNetCore.Components.WebAssembly.Authentication;
 using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
 using Microsoft.JSInterop;
 using MudBlazor.Services;
@@ -12,21 +11,29 @@ var builder = WebAssemblyHostBuilder.CreateDefault(args);
 builder.RootComponents.Add<App>("#app");
 builder.RootComponents.Add<HeadOutlet>("head::after");
 
-var basicUser = builder.Configuration["BasicAuth:Username"];
-var basicPass = builder.Configuration["BasicAuth:Password"];
-AuthenticationHeaderValue? basicAuthHeader = null;
-if (!string.IsNullOrEmpty(basicUser) && !string.IsNullOrEmpty(basicPass))
+var baseAddress = builder.HostEnvironment.BaseAddress.TrimEnd('/');
+builder.Services.AddOidcAuthentication(options =>
 {
-    var encoded = Convert.ToBase64String(Encoding.UTF8.GetBytes($"{basicUser}:{basicPass}"));
-    basicAuthHeader = new AuthenticationHeaderValue("Basic", encoded);
-}
+    builder.Configuration.Bind("Auth:Google", options.ProviderOptions);
+    options.ProviderOptions.Authority = "https://accounts.google.com";
+    options.ProviderOptions.MetadataUrl =
+        $"{baseAddress}/auth/google/.well-known/openid-configuration";
+    options.ProviderOptions.ResponseType = "code";
+    options.ProviderOptions.RedirectUri = $"{baseAddress}/authentication/login-callback";
+    options.ProviderOptions.PostLogoutRedirectUri = $"{baseAddress}/authentication/logout-callback";
+    options.ProviderOptions.DefaultScopes.Clear();
+    options.ProviderOptions.DefaultScopes.Add("openid");
+    options.ProviderOptions.DefaultScopes.Add("email");
+    options.ProviderOptions.DefaultScopes.Add("profile");
+    options.UserOptions.NameClaim = "email";
+});
 
-builder.Services.AddScoped(_ =>
+builder.Services.AddScoped<IdTokenAuthorizationMessageHandler>();
+builder.Services.AddScoped(sp =>
 {
-    var client = new HttpClient { BaseAddress = new Uri(builder.HostEnvironment.BaseAddress) };
-    if (basicAuthHeader is not null)
-        client.DefaultRequestHeaders.Authorization = basicAuthHeader;
-    return client;
+    var handler = sp.GetRequiredService<IdTokenAuthorizationMessageHandler>();
+    handler.InnerHandler = new HttpClientHandler();
+    return new HttpClient(handler) { BaseAddress = new Uri(builder.HostEnvironment.BaseAddress) };
 });
 
 builder.Services.AddScoped<KaesseliApiService>();

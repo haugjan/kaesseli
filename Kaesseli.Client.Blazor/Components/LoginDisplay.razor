@@ -1,0 +1,23 @@
+@inject NavigationManager Navigation
+
+<AuthorizeView>
+    <Authorized>
+        <MudText Typo="Typo.body2" Class="mr-2">@context.User.Identity?.Name</MudText>
+        <MudIconButton Icon="@Icons.Material.Rounded.Logout"
+                       Color="Color.Dark"
+                       OnClick="BeginLogout"
+                       title="Abmelden" />
+    </Authorized>
+    <NotAuthorized>
+        <MudButton Variant="Variant.Text" Color="Color.Inherit"
+                   StartIcon="@Icons.Material.Rounded.Login"
+                   OnClick="BeginLogin">
+            Anmelden
+        </MudButton>
+    </NotAuthorized>
+</AuthorizeView>
+
+@code {
+    private void BeginLogout() => Navigation.NavigateToLogout("authentication/logout");
+    private void BeginLogin() => Navigation.NavigateToLogin("authentication/login");
+}

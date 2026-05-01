@@ -4,6 +4,7 @@
 @inject KaesseliApiService Api
 @inject AccountingPeriodState PeriodState
 @inject IJSRuntime JS
+@inject AuthenticationStateProvider AuthState
 
 <MudThemeProvider Theme="_theme" IsDarkMode="_isDarkMode" />
 <MudPopoverProvider />
@@ -31,6 +32,7 @@
         <MudIconButton Icon="@(_isDarkMode ? Icons.Material.Rounded.LightMode : Icons.Material.Rounded.DarkMode)"
                        Color="Color.Dark"
                        OnClick="@(_ => _isDarkMode = !_isDarkMode)" />
+        <LoginDisplay />
     </MudAppBar>
 
     <MudDrawer @bind-Open="_drawerOpen" Elevation="0" Variant="DrawerVariant.Responsive" ClipMode="DrawerClipMode.Never">
@@ -56,10 +58,20 @@
 
     protected override async Task OnInitializedAsync()
     {
-        var periods = (await Api.GetAccountingPeriodsAsync())?.ToList() ?? [];
-        var savedId = await JS.InvokeAsync<string?>("localStorage.getItem", "selectedPeriod");
-        var parsed = Guid.TryParse(savedId, out var id) ? id : (Guid?)null;
-        PeriodState.Initialize(periods, parsed);
+        var auth = await AuthState.GetAuthenticationStateAsync();
+        if (auth.User.Identity?.IsAuthenticated != true)
+            return;
+
+        try
+        {
+            var periods = (await Api.GetAccountingPeriodsAsync())?.ToList() ?? [];
+            var savedId = await JS.InvokeAsync<string?>("localStorage.getItem", "selectedPeriod");
+            var parsed = Guid.TryParse(savedId, out var id) ? id : (Guid?)null;
+            PeriodState.Initialize(periods, parsed);
+        }
+        catch (HttpRequestException)
+        {
+        }
     }
 
     async Task OnPeriodChanged(Guid id)

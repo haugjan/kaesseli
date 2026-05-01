@@ -30,6 +30,22 @@
         <span class="dismiss">🗙</span>
     </div>
     <script src="_content/MudBlazor/MudBlazor.min.js"></script>
+    <script src="_content/Microsoft.AspNetCore.Components.WebAssembly.Authentication/AuthenticationService.js"></script>
+    <script>
+      window.kaesseliAuth = {
+        getIdToken: function () {
+          for (const key of Object.keys(sessionStorage)) {
+            if (key.startsWith('oidc.user:')) {
+              try {
+                const user = JSON.parse(sessionStorage.getItem(key));
+                if (user && user.id_token) return user.id_token;
+              } catch { /* ignore parse error */ }
+            }
+          }
+          return null;
+        }
+      };
+    </script>
     <script src="_framework/blazor.webassembly#[.{fingerprint}].js"></script>
 </body>
 

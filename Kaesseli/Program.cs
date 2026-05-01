@@ -1,6 +1,6 @@
 using System.Diagnostics;
 using Azure.Identity;
-using Microsoft.AspNetCore.Authentication;
+using Kaesseli;
 using OpenTelemetry.Logs;
 using OpenTelemetry.Metrics;
 using OpenTelemetry.Resources;
@@ -33,17 +33,22 @@ void ConfigureOtlp(OpenTelemetry.Exporter.OtlpExporterOptions o)
     o.Headers = $"x-otlp-api-key={otlpApiKey}";
 }
 
-builder.Services.AddOpenTelemetry()
+builder
+    .Services.AddOpenTelemetry()
     .ConfigureResource(resource => resource.AddService("Kaesseli"))
-    .WithTracing(tracing => tracing
-        .AddAspNetCoreInstrumentation()
-        .AddHttpClientInstrumentation()
-        .AddSource("Microsoft.EntityFrameworkCore")
-        .AddOtlpExporter(ConfigureOtlp))
-    .WithMetrics(metrics => metrics
-        .AddAspNetCoreInstrumentation()
-        .AddHttpClientInstrumentation()
-        .AddOtlpExporter(ConfigureOtlp));
+    .WithTracing(tracing =>
+        tracing
+            .AddAspNetCoreInstrumentation()
+            .AddHttpClientInstrumentation()
+            .AddSource("Microsoft.EntityFrameworkCore")
+            .AddOtlpExporter(ConfigureOtlp)
+    )
+    .WithMetrics(metrics =>
+        metrics
+            .AddAspNetCoreInstrumentation()
+            .AddHttpClientInstrumentation()
+            .AddOtlpExporter(ConfigureOtlp)
+    );
 
 builder.Logging.AddOpenTelemetry(logging =>
 {
@@ -64,14 +69,14 @@ builder.Services.AddCors(options =>
                     "https://localhost:9501",
                     "http://localhost:9000",
                     "http://localhost:7033",
-                    "https://localhost:7033")
+                    "https://localhost:7033"
+                )
                 .AllowAnyHeader()
                 .AllowAnyMethod()
     );
 });
 
-builder.Services.AddAuthentication("Basic")
-    .AddScheme<AuthenticationSchemeOptions, Kaesseli.BasicAuthHandler>("Basic", null);
+builder.Services.AddGoogleAuth(builder.Configuration);
 
 builder.Services.AddInfrastructureServices(builder.Configuration);
 builder.Services.AddApplicationServices();
@@ -81,31 +86,24 @@ var app = builder.Build();
 app.UseHttpsRedirection();
 app.UseCors("AllowSpecificOrigin");
 
-app.UseAuthentication();
-app.Use(async (context, next) =>
-{
-    if (context.User.Identity?.IsAuthenticated != true)
-    {
-        await context.ChallengeAsync("Basic");
-        return;
-    }
-    await next();
-});
-
 app.UseBlazorFrameworkFiles();
 app.UseDefaultFiles();
 app.UseStaticFiles();
+
+app.UseAuthentication();
+app.UseAuthorization();
 using (var scope = app.Services.CreateScope())
 {
-    var context = scope.ServiceProvider.GetRequiredService<Kaesseli.Infrastructure.KaesseliContext>();
+    var context =
+        scope.ServiceProvider.GetRequiredService<Kaesseli.Infrastructure.KaesseliContext>();
     await context.Database.EnsureCreatedAsync();
 }
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
-    app.MapOpenApi();
-    app.MapScalarApiReference();
+    app.MapOpenApi().AllowAnonymous();
+    app.MapScalarApiReference().AllowAnonymous();
 
     _ = Task.Run(async () =>
     {
@@ -114,7 +112,9 @@ if (app.Environment.IsDevelopment())
         {
             using var client = new HttpClient();
             await client.GetAsync("http://localhost:18888");
-            Process.Start(new ProcessStartInfo("http://localhost:18888") { UseShellExecute = true });
+            Process.Start(
+                new ProcessStartInfo("http://localhost:18888") { UseShellExecute = true }
+            );
         }
         catch
         {
@@ -123,8 +123,9 @@ if (app.Environment.IsDevelopment())
     });
 }
 
+app.MapGoogleAuthProxy();
 app.MapKaesseliEndpoints();
 
-app.MapFallbackToFile("/index.html");
+app.MapFallbackToFile("/index.html").AllowAnonymous();
 
 app.Run();
