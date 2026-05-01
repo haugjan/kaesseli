@@ -7,15 +7,37 @@ public interface IAccountRepository
 {
     Task<Account> AddAccount(Account account, CancellationToken cancellationToken);
     Task<IEnumerable<Account>> GetAccounts(CancellationToken cancellationToken);
-    Task<IEnumerable<Account>> GetAccounts(AccountType accountType, CancellationToken cancellationToken);
+    Task<IEnumerable<Account>> GetAccounts(
+        AccountType accountType,
+        CancellationToken cancellationToken
+    );
     Task<Account> GetAccount(Guid accountId, CancellationToken cancellationToken);
-    Task<AccountingPeriod> GetAccountingPeriod(Guid accountingPeriodId, CancellationToken cancellationToken);
-    Task<AccountingPeriod> AddAccountingPeriod(AccountingPeriod accountingPeriod, CancellationToken cancellationToken);
+    Task<AccountingPeriod> GetAccountingPeriod(
+        Guid accountingPeriodId,
+        CancellationToken cancellationToken
+    );
+    Task<AccountingPeriod> AddAccountingPeriod(
+        AccountingPeriod accountingPeriod,
+        CancellationToken cancellationToken
+    );
     Task<IEnumerable<AccountingPeriod>> GetAccountingPeriods(CancellationToken cancellationToken);
-    Task UpdateAccountingPeriod(AccountingPeriod accountingPeriod, CancellationToken cancellationToken);
+    Task UpdateAccountingPeriod(
+        AccountingPeriod accountingPeriod,
+        CancellationToken cancellationToken
+    );
     Task DeleteAccountingPeriod(Guid accountingPeriodId, CancellationToken cancellationToken);
     Task UpdateAccount(Account account, CancellationToken cancellationToken);
     Task DeleteAccount(Guid accountId, CancellationToken cancellationToken);
+    Task<bool> AccountNumberExists(
+        string number,
+        Guid? excludeAccountId,
+        CancellationToken cancellationToken
+    );
+    Task<bool> AccountShortNameExists(
+        string shortName,
+        Guid? excludeAccountId,
+        CancellationToken cancellationToken
+    );
 }
 
 internal class AccountRepository(KaesseliContext context) : IAccountRepository
@@ -28,47 +50,80 @@ internal class AccountRepository(KaesseliContext context) : IAccountRepository
     }
 
     public async Task<IEnumerable<Account>> GetAccounts(CancellationToken cancellationToken) =>
-        await context.Accounts.OrderBy(account=>account.Name).ToListAsync(cancellationToken);
+        await context.Accounts.OrderBy(account => account.Name).ToListAsync(cancellationToken);
 
-    public async Task<IEnumerable<Account>> GetAccounts(AccountType accountType, CancellationToken cancellationToken) =>
-        await context.Accounts.Where(account => account.Type == accountType).ToListAsync(cancellationToken);
+    public async Task<IEnumerable<Account>> GetAccounts(
+        AccountType accountType,
+        CancellationToken cancellationToken
+    ) =>
+        await context
+            .Accounts.Where(account => account.Type == accountType)
+            .ToListAsync(cancellationToken);
 
     public async Task<Account> GetAccount(Guid accountId, CancellationToken cancellationToken) =>
-        await context.Accounts.SingleOrDefaultAsync(account => account.Id == accountId, cancellationToken)
-     ?? throw new EntityNotFoundException(entityType: typeof(Account), accountId);
+        await context.Accounts.SingleOrDefaultAsync(
+            account => account.Id == accountId,
+            cancellationToken
+        ) ?? throw new EntityNotFoundException(entityType: typeof(Account), accountId);
 
-    public async Task<AccountingPeriod> GetAccountingPeriod(Guid accountingPeriodId, CancellationToken cancellationToken) =>
-        await context.AccountingPeriods.FirstOrDefaultAsync(ap => ap.Id == accountingPeriodId, cancellationToken)
-     ?? throw new EntityNotFoundException(entityType: typeof(AccountingPeriod), accountingPeriodId);
+    public async Task<AccountingPeriod> GetAccountingPeriod(
+        Guid accountingPeriodId,
+        CancellationToken cancellationToken
+    ) =>
+        await context.AccountingPeriods.FirstOrDefaultAsync(
+            ap => ap.Id == accountingPeriodId,
+            cancellationToken
+        )
+        ?? throw new EntityNotFoundException(
+            entityType: typeof(AccountingPeriod),
+            accountingPeriodId
+        );
 
-    public async Task<AccountingPeriod> AddAccountingPeriod(AccountingPeriod accountingPeriod, CancellationToken cancellationToken)
+    public async Task<AccountingPeriod> AddAccountingPeriod(
+        AccountingPeriod accountingPeriod,
+        CancellationToken cancellationToken
+    )
     {
         context.AccountingPeriods.Add(accountingPeriod);
         await context.SaveChangesAsync(cancellationToken);
         return accountingPeriod;
     }
 
-    public async Task<IEnumerable<AccountingPeriod>> GetAccountingPeriods(CancellationToken cancellationToken) =>
-        await context.AccountingPeriods.ToListAsync(cancellationToken);
+    public async Task<IEnumerable<AccountingPeriod>> GetAccountingPeriods(
+        CancellationToken cancellationToken
+    ) => await context.AccountingPeriods.ToListAsync(cancellationToken);
 
-    public async Task UpdateAccountingPeriod(AccountingPeriod accountingPeriod, CancellationToken cancellationToken)
+    public async Task UpdateAccountingPeriod(
+        AccountingPeriod accountingPeriod,
+        CancellationToken cancellationToken
+    )
     {
         context.AccountingPeriods.Update(accountingPeriod);
         await context.SaveChangesAsync(cancellationToken);
     }
 
-    public async Task DeleteAccountingPeriod(Guid accountingPeriodId, CancellationToken cancellationToken)
+    public async Task DeleteAccountingPeriod(
+        Guid accountingPeriodId,
+        CancellationToken cancellationToken
+    )
     {
-        var period = await context.AccountingPeriods.FirstOrDefaultAsync(ap => ap.Id == accountingPeriodId, cancellationToken)
-            ?? throw new EntityNotFoundException(typeof(AccountingPeriod), accountingPeriodId);
+        var period =
+            await context.AccountingPeriods.FirstOrDefaultAsync(
+                ap => ap.Id == accountingPeriodId,
+                cancellationToken
+            ) ?? throw new EntityNotFoundException(typeof(AccountingPeriod), accountingPeriodId);
 
-        var journalEntries = await context.JournalEntries
-            .Where(e => EF.Property<Guid>(e, "AccountingPeriodId") == accountingPeriodId)
+        var journalEntries = await context
+            .JournalEntries.Where(e =>
+                EF.Property<Guid>(e, "AccountingPeriodId") == accountingPeriodId
+            )
             .ToListAsync(cancellationToken);
         context.JournalEntries.RemoveRange(journalEntries);
 
-        var budgetEntries = await context.BudgetEntries
-            .Where(e => EF.Property<Guid>(e, "AccountingPeriodId") == accountingPeriodId)
+        var budgetEntries = await context
+            .BudgetEntries.Where(e =>
+                EF.Property<Guid>(e, "AccountingPeriodId") == accountingPeriodId
+            )
             .ToListAsync(cancellationToken);
         context.BudgetEntries.RemoveRange(budgetEntries);
 
@@ -84,10 +139,39 @@ internal class AccountRepository(KaesseliContext context) : IAccountRepository
 
     public async Task DeleteAccount(Guid accountId, CancellationToken cancellationToken)
     {
-        var account = await context.Accounts.SingleOrDefaultAsync(a => a.Id == accountId, cancellationToken)
+        var account =
+            await context.Accounts.SingleOrDefaultAsync(a => a.Id == accountId, cancellationToken)
             ?? throw new EntityNotFoundException(typeof(Account), accountId);
 
         context.Accounts.Remove(account);
         await context.SaveChangesAsync(cancellationToken);
+    }
+
+    // EF Cosmos 10.0.5 generates malformed 'SELECT VALUE EXISTS(SELECT 1 FROM root c ...)'
+    // for both AnyAsync and Take(1)+ToListAsync with predicates including a Where clause.
+    // Cosmos rejects this with "Identifier 'root' could not be resolved".
+    // Workaround: fetch the full account set (small in this domain) and filter in memory.
+    public async Task<bool> AccountNumberExists(
+        string number,
+        Guid? excludeAccountId,
+        CancellationToken cancellationToken
+    )
+    {
+        var all = await context.Accounts.ToListAsync(cancellationToken);
+        return all.Any(a =>
+            a.Number == number && (excludeAccountId is null || a.Id != excludeAccountId)
+        );
+    }
+
+    public async Task<bool> AccountShortNameExists(
+        string shortName,
+        Guid? excludeAccountId,
+        CancellationToken cancellationToken
+    )
+    {
+        var all = await context.Accounts.ToListAsync(cancellationToken);
+        return all.Any(a =>
+            a.ShortName == shortName && (excludeAccountId is null || a.Id != excludeAccountId)
+        );
     }
 }

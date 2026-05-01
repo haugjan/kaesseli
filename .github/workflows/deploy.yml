@@ -65,7 +65,12 @@ jobs:
   deploy-prod:
     needs: [build-and-push, deploy-dev]
     runs-on: ubuntu-latest
-    if: github.event.inputs.environment == 'prod'
+    # Run when explicitly requested for prod, even if deploy-dev was skipped.
+    if: |
+      always() &&
+      needs.build-and-push.result == 'success' &&
+      needs.deploy-dev.result != 'failure' &&
+      github.event.inputs.environment == 'prod'
     environment: prod
     steps:
       - name: Azure Login

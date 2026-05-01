@@ -199,7 +199,7 @@ else
                 await Api.AddAutomationAsync(
                     _automateInput,
                     PeriodState.SelectedPeriodId.Value,
-                    [new KaesseliApiService.SplitEntry(account.AccountId, _transaction.Amount)]);
+                    [new KaesseliApiService.AutomationSplitEntry(account.AccountShortName, _transaction.Amount)]);
             }
 
             await LoadAsync();
@@ -227,10 +227,14 @@ else
 
             if (_isAutomationActive)
             {
+                var automationEntries = _splittingAccounts
+                    .Select(s => new KaesseliApiService.AutomationSplitEntry(s.Account.AccountShortName, s.Amount))
+                    .ToList();
+
                 await Api.AddAutomationAsync(
                     _automateInput,
                     PeriodState.SelectedPeriodId.Value,
-                    entries);
+                    automationEntries);
             }
 
             await LoadAsync();

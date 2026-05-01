@@ -4,16 +4,31 @@
 <MudDialog>
     <DialogContent>
         <MudForm @ref="_form">
-            <MudTextField @bind-Value="Model.Name" Label="Name" Required="true" RequiredError="Name ist erforderlich."
-                          Class="mb-3" />
+            <MudTextField T="string" Value="Model.Name" ValueChanged="OnNameChanged"
+                          Label="Name" Required="true" RequiredError="Name ist erforderlich."
+                          Immediate="true" Class="mb-3" />
 
-            <MudSelect @bind-Value="Model.Type" Label="Typ" Required="true" RequiredError="Typ ist erforderlich."
-                       Class="mb-3">
-                <MudSelectItem Value="AccountType.Asset">Aktiv</MudSelectItem>
-                <MudSelectItem Value="AccountType.Liability">Passiv</MudSelectItem>
-                <MudSelectItem Value="AccountType.Revenue">Einkommen</MudSelectItem>
-                <MudSelectItem Value="AccountType.Expense">Ausgaben</MudSelectItem>
+            <MudSelect T="AccountType" Value="Model.Type" ValueChanged="OnTypeChanged" Label="Typ" Required="true"
+                       RequiredError="Typ ist erforderlich." Class="mb-3">
+                <MudSelectItem Value="AccountType.Asset">Aktiv (1xxx)</MudSelectItem>
+                <MudSelectItem Value="AccountType.Liability">Passiv (2xxx)</MudSelectItem>
+                <MudSelectItem Value="AccountType.Revenue">Einkommen (3xxx)</MudSelectItem>
+                <MudSelectItem Value="AccountType.Expense">Ausgaben (4xxx)</MudSelectItem>
             </MudSelect>
+
+            <MudTextField T="string" Value="_numberSuffix" ValueChanged="OnNumberSuffixChanged"
+                          Label="Kontonummer" Required="true" RequiredError="Kontonummer ist erforderlich."
+                          Validation="@(new Func<string?, string?>(ValidateNumberSuffix))"
+                          Adornment="Adornment.Start" AdornmentText="@ExpectedNumberPrefix.ToString()"
+                          MaxLength="3" HelperText="3 Ziffern, der Präfix folgt aus dem Kontotyp"
+                          Immediate="true" Class="mb-3" />
+
+            <MudTextField T="string" Value="Model.ShortName" ValueChanged="OnShortNameChanged"
+                          Label="Kurzbezeichnung" Required="true"
+                          RequiredError="Kurzbezeichnung ist erforderlich."
+                          Validation="@(new Func<string?, string?>(ValidateShortName))"
+                          HelperText="Wird automatisch aus Name abgeleitet; 2-20 Zeichen, [a-z0-9-]"
+                          Immediate="true" Class="mb-3" />
 
             <MudText Typo="Typo.subtitle2" Class="mb-2">Icon</MudText>
             <div class="d-flex flex-wrap gap-1 pa-2 mb-3" style="max-height: 280px; overflow-y: auto; border: 1px solid var(--mud-palette-divider); border-radius: 8px;">
@@ -49,6 +64,8 @@
 @code {
     private MudForm _form = null!;
     private MudColor _color = new("#1E88E5");
+    private string _numberSuffix = string.Empty;
+    private bool _shortNameUserEdited;
 
     [CascadingParameter] private IMudDialogInstance MudDialog { get; set; } = null!;
 
@@ -115,14 +132,86 @@
     public static string ResolveIcon(string iconName) =>
         IconPalette.TryGetValue(iconName, out var icon) ? icon : Icons.Material.Rounded.Circle;
 
+    private static readonly System.Text.RegularExpressions.Regex SuffixRegex = new(@"^\d{3}$");
+    private static readonly System.Text.RegularExpressions.Regex ShortNameRegex = new(@"^[a-z0-9-]{2,20}$");
+
+    private char ExpectedNumberPrefix => Model.Type switch
+    {
+        AccountType.Asset => '1',
+        AccountType.Liability => '2',
+        AccountType.Revenue => '3',
+        AccountType.Expense => '4',
+        _ => '?'
+    };
+
     protected override void OnParametersSet()
     {
         if (!string.IsNullOrEmpty(Model.IconColor))
             _color = new MudColor(Model.IconColor);
+
+        // edit mode: split existing 4-digit number into suffix
+        _numberSuffix = !string.IsNullOrEmpty(Model.Number) && Model.Number.Length == 4
+            ? Model.Number[1..]
+            : string.Empty;
+
+        // edit mode: ShortName already exists -> never auto-overwrite
+        _shortNameUserEdited = !string.IsNullOrEmpty(Model.ShortName);
+    }
+
+    private void OnNameChanged(string newName)
+    {
+        Model.Name = newName;
+        if (!_shortNameUserEdited)
+            Model.ShortName = DeriveShortName(newName);
+    }
+
+    private void OnShortNameChanged(string newShortName)
+    {
+        Model.ShortName = newShortName?.ToLowerInvariant();
+        _shortNameUserEdited = true;
+    }
+
+    private void OnTypeChanged(AccountType type)
+    {
+        Model.Type = type;
+        Model.Number = $"{ExpectedNumberPrefix}{_numberSuffix}";
+    }
+
+    private void OnNumberSuffixChanged(string newSuffix)
+    {
+        _numberSuffix = newSuffix ?? string.Empty;
+        Model.Number = $"{ExpectedNumberPrefix}{_numberSuffix}";
+    }
+
+    private string? ValidateNumberSuffix(string? value)
+    {
+        if (string.IsNullOrEmpty(value)) return null; // Required handles empty
+        if (!SuffixRegex.IsMatch(value)) return "Genau 3 Ziffern.";
+        return null;
+    }
+
+    private string? ValidateShortName(string? value)
+    {
+        if (string.IsNullOrEmpty(value)) return null;
+        if (!ShortNameRegex.IsMatch(value)) return "2-20 Zeichen, nur a-z, 0-9, Bindestrich.";
+        return null;
+    }
+
+    private static string DeriveShortName(string? name)
+    {
+        if (string.IsNullOrWhiteSpace(name)) return string.Empty;
+        var lowered = name.ToLowerInvariant()
+            .Replace("ä", "ae").Replace("ö", "oe").Replace("ü", "ue").Replace("ß", "ss");
+        var filtered = new string(lowered.Where(c =>
+            (c >= 'a' && c <= 'z') || (c >= '0' && c <= '9') || c == '-').ToArray());
+        return filtered.Length > 20 ? filtered[..20] : filtered;
     }
 
     private async Task Submit()
     {
+        // ensure Model.Number reflects the current prefix+suffix even if Type was last touched
+        Model.Number = $"{ExpectedNumberPrefix}{_numberSuffix}";
+
         await _form.ValidateAsync();
         if (!_form.IsValid) return;
 
@@ -136,6 +225,8 @@
     {
         public string? Name { get; set; }
         public AccountType Type { get; set; } = AccountType.Expense;
+        public string? Number { get; set; }
+        public string? ShortName { get; set; }
         public string Icon { get; set; } = "AccountBalance";
         public string IconColor { get; set; } = "#1E88E5";
     }

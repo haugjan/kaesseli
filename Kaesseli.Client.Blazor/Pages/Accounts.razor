@@ -39,6 +39,7 @@ else
                           OnRowClick="OnRowClick" T="AccountOverview" Style="background: transparent;">
                     <HeaderContent>
                         <MudTh Style="width: 48px;"></MudTh>
+                        <MudTh>Nr.</MudTh>
                         <MudTh>Name</MudTh>
                         <MudTh Style="text-align: right;">Kontostand</MudTh>
                         @if (type.ShowBudget)
@@ -54,6 +55,7 @@ else
                                 <MudIcon Icon="@GetMudIcon(context.Icon)" Size="Size.Small" />
                             </MudAvatar>
                         </MudTd>
+                        <MudTd DataLabel="Nr.">@context.Number</MudTd>
                         <MudTd DataLabel="Name">@context.Name</MudTd>
                         <MudTd DataLabel="Kontostand" Style="text-align: right;">@FormatNumber(context.AccountBalance)</MudTd>
                         @if (type.ShowBudget)

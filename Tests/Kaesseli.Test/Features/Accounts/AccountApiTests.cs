@@ -3,7 +3,6 @@ using System.Text;
 using System.Text.Json;
 using Kaesseli.Contracts.Accounts;
 using Kaesseli.Features.Accounts;
-using Account = Kaesseli.Contracts.Accounts.Account;
 using Kaesseli.Test.Faker;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.TestHost;
@@ -11,6 +10,7 @@ using Microsoft.Extensions.DependencyInjection;
 using NSubstitute;
 using Shouldly;
 using Xunit;
+using Account = Kaesseli.Contracts.Accounts.Account;
 
 namespace Kaesseli.Test.Features.Accounts;
 
@@ -18,16 +18,28 @@ public class AccountApiTests : IAsyncLifetime
 {
     private HttpClient _client = null!;
     private readonly GetAccounts.IHandler _getAccountsMock = Substitute.For<GetAccounts.IHandler>();
-    private readonly GetAccountingPeriods.IHandler _getAccountingPeriodsMock = Substitute.For<GetAccountingPeriods.IHandler>();
+    private readonly GetAccountingPeriods.IHandler _getAccountingPeriodsMock =
+        Substitute.For<GetAccountingPeriods.IHandler>();
     private readonly GetAccount.IHandler _getAccountMock = Substitute.For<GetAccount.IHandler>();
-    private readonly GetAccountsSummary.IHandler _getAccountsSummaryMock = Substitute.For<GetAccountsSummary.IHandler>();
-    private readonly GetFinancialOverview.IHandler _getFinancialOverviewMock = Substitute.For<GetFinancialOverview.IHandler>();
+    private readonly GetAccountsSummary.IHandler _getAccountsSummaryMock =
+        Substitute.For<GetAccountsSummary.IHandler>();
+    private readonly GetFinancialOverview.IHandler _getFinancialOverviewMock =
+        Substitute.For<GetFinancialOverview.IHandler>();
     private readonly AddAccount.IHandler _addAccountMock = Substitute.For<AddAccount.IHandler>();
-    private readonly AddAccountingPeriod.IHandler _addAccountingPeriodMock = Substitute.For<AddAccountingPeriod.IHandler>();
-    private readonly UpdateAccountingPeriod.IHandler _updateAccountingPeriodMock = Substitute.For<UpdateAccountingPeriod.IHandler>();
-    private readonly DeleteAccountingPeriod.IHandler _deleteAccountingPeriodMock = Substitute.For<DeleteAccountingPeriod.IHandler>();
-    private readonly UpdateAccount.IHandler _updateAccountMock = Substitute.For<UpdateAccount.IHandler>();
-    private readonly DeleteAccount.IHandler _deleteAccountMock = Substitute.For<DeleteAccount.IHandler>();
+    private readonly AddAccountingPeriod.IHandler _addAccountingPeriodMock =
+        Substitute.For<AddAccountingPeriod.IHandler>();
+    private readonly UpdateAccountingPeriod.IHandler _updateAccountingPeriodMock =
+        Substitute.For<UpdateAccountingPeriod.IHandler>();
+    private readonly DeleteAccountingPeriod.IHandler _deleteAccountingPeriodMock =
+        Substitute.For<DeleteAccountingPeriod.IHandler>();
+    private readonly UpdateAccount.IHandler _updateAccountMock =
+        Substitute.For<UpdateAccount.IHandler>();
+    private readonly DeleteAccount.IHandler _deleteAccountMock =
+        Substitute.For<DeleteAccount.IHandler>();
+    private readonly ExportAccountPlan.IHandler _exportAccountPlanMock =
+        Substitute.For<ExportAccountPlan.IHandler>();
+    private readonly ImportAccountPlan.IHandler _importAccountPlanMock =
+        Substitute.For<ImportAccountPlan.IHandler>();
 
     public async Task InitializeAsync()
     {
@@ -45,6 +57,8 @@ public class AccountApiTests : IAsyncLifetime
         builder.Services.AddSingleton(_deleteAccountingPeriodMock);
         builder.Services.AddSingleton(_updateAccountMock);
         builder.Services.AddSingleton(_deleteAccountMock);
+        builder.Services.AddSingleton(_exportAccountPlanMock);
+        builder.Services.AddSingleton(_importAccountPlanMock);
 
         var app = builder.Build();
         app.MapAccountEndpoints();
@@ -72,7 +86,8 @@ public class AccountApiTests : IAsyncLifetime
 
         // Assert
         response.StatusCode.ShouldBe(HttpStatusCode.OK);
-        await _getAccountsSummaryMock.Received(1)
+        await _getAccountsSummaryMock
+            .Received(1)
             .Handle(Arg.Any<GetAccountsSummary.Query>(), Arg.Any<CancellationToken>());
     }
 
@@ -84,11 +99,16 @@ public class AccountApiTests : IAsyncLifetime
         var accounts = new SmartFaker<Account>().Generate(count: 3);
         var expectedAccount = accounts[index: 1];
         _getAccountMock
-            .Handle(Arg.Is<GetAccount.Query>(x => x.AccountId == expectedAccount.Id), Arg.Any<CancellationToken>())
+            .Handle(
+                Arg.Is<GetAccount.Query>(x => x.AccountId == expectedAccount.Id),
+                Arg.Any<CancellationToken>()
+            )
             .Returns(
                 new AccountStatement(
                     Id: expectedAccount.Id,
                     Name: expectedAccount.Name,
+                    Number: expectedAccount.Number,
+                    ShortName: expectedAccount.ShortName,
                     Icon: expectedAccount.Icon,
                     IconColor: expectedAccount.IconColor,
                     Type: expectedAccount.TypeId.DisplayName(),
@@ -99,7 +119,8 @@ public class AccountApiTests : IAsyncLifetime
                     BudgetPerYear: null,
                     CurrentBudget: 13,
                     BudgetBalance: 12,
-                    Entries: Array.Empty<AccountStatementEntry>())
+                    Entries: Array.Empty<AccountStatementEntry>()
+                )
             );
 
         // Act
@@ -118,11 +139,11 @@ public class AccountApiTests : IAsyncLifetime
             options
         );
         Assert.Equivalent(expectedAccount, accountResponse);
-        await _getAccountMock.Received(1)
+        await _getAccountMock
+            .Received(1)
             .Handle(
                 Arg.Is<GetAccount.Query>(query =>
-                    query.AccountId == expectedAccount.Id
-                    && query.AccountingPeriodId == periodId
+                    query.AccountId == expectedAccount.Id && query.AccountingPeriodId == periodId
                 ),
                 Arg.Any<CancellationToken>()
             );
@@ -156,7 +177,9 @@ public class AccountApiTests : IAsyncLifetime
             );
         }
 
-        await _addAccountMock.Received(1).Handle(Arg.Any<AddAccount.Query>(), Arg.Any<CancellationToken>());
+        await _addAccountMock
+            .Received(1)
+            .Handle(Arg.Any<AddAccount.Query>(), Arg.Any<CancellationToken>());
     }
 
     [Fact]
@@ -191,15 +214,13 @@ public class AccountApiTests : IAsyncLifetime
         if (_client.BaseAddress != null)
         {
             response.Headers.Location.ShouldBe(
-                new Uri(
-                    uriString: $"/accountingPeriod/{expectedGuid}",
-                    UriKind.Relative
-                )
+                new Uri(uriString: $"/accountingPeriod/{expectedGuid}", UriKind.Relative)
             );
         }
 
         currentGuid.ShouldBe(expectedGuid);
-        await _addAccountingPeriodMock.Received(1)
+        await _addAccountingPeriodMock
+            .Received(1)
             .Handle(Arg.Any<AddAccountingPeriod.Query>(), Arg.Any<CancellationToken>());
     }
 }

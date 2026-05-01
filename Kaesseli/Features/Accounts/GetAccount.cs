@@ -10,7 +10,10 @@ public static class GetAccount
 
     public interface IHandler
     {
-        Task<Contracts.Accounts.AccountStatement> Handle(Query request, CancellationToken cancellationToken);
+        Task<Contracts.Accounts.AccountStatement> Handle(
+            Query request,
+            CancellationToken cancellationToken
+        );
     }
 
     // ReSharper disable once UnusedType.Global
@@ -21,7 +24,10 @@ public static class GetAccount
         TimeProvider timeProvider
     ) : IHandler
     {
-        public async Task<Contracts.Accounts.AccountStatement> Handle(Query request, CancellationToken cancellationToken)
+        public async Task<Contracts.Accounts.AccountStatement> Handle(
+            Query request,
+            CancellationToken cancellationToken
+        )
         {
             var account = await accountRepo.GetAccount(request.AccountId, cancellationToken);
             var period = await accountRepo.GetAccountingPeriod(
@@ -45,19 +51,30 @@ public static class GetAccount
                 )
             ).ToArray();
 
-            var accountBalance = AccountBalanceCalculator.GetAccountBalance(account, journalEntries);
+            var accountBalance = AccountBalanceCalculator.GetAccountBalance(
+                account,
+                journalEntries
+            );
             var budget = AccountBalanceCalculator.GetBudget(account, budgetEntries, period);
             var budgetPerMonth = AccountBalanceCalculator.GetBudgetPerMonth(account, budgetEntries);
             var budgetPerYear = AccountBalanceCalculator.GetBudgetPerYear(account, budgetEntries);
             var currentBudget = AccountBalanceCalculator.GetCurrentBudget(
-                account, budgetEntries, period,
-                DateOnly.FromDateTime(timeProvider.GetLocalNow().DateTime));
+                account,
+                budgetEntries,
+                period,
+                DateOnly.FromDateTime(timeProvider.GetLocalNow().DateTime)
+            );
             var budgetBalance = AccountBalanceCalculator.GetBudgetBalance(
-                account.Type, currentBudget, accountBalance);
+                account.Type,
+                currentBudget,
+                accountBalance
+            );
 
             return new Contracts.Accounts.AccountStatement(
                 Id: account.Id,
                 Name: account.Name,
+                Number: account.Number,
+                ShortName: account.ShortName,
                 Icon: account.Icon.Name,
                 IconColor: account.Icon.Color,
                 Type: account.Type.DisplayName(),
@@ -68,15 +85,19 @@ public static class GetAccount
                 BudgetPerYear: budgetPerYear,
                 CurrentBudget: currentBudget,
                 BudgetBalance: budgetBalance,
-                Entries: GetEntries(account.Id, journalEntries, budgetEntries));
+                Entries: GetEntries(account.Id, journalEntries, budgetEntries)
+            );
         }
 
         private static IEnumerable<Contracts.Accounts.AccountStatementEntry> GetEntries(
             Guid accountId,
             IEnumerable<JournalEntry> journalEntries,
-            IEnumerable<BudgetEntry> budgetEntries)
+            IEnumerable<BudgetEntry> budgetEntries
+        )
         {
-            var journalResults = journalEntries.Select(entry => CreateResultEntry(accountId, entry));
+            var journalResults = journalEntries.Select(entry =>
+                CreateResultEntry(accountId, entry)
+            );
             var budgetResults = budgetEntries.Select(CreateResultEntry);
 
             return journalResults
@@ -87,7 +108,9 @@ public static class GetAccount
                 .ToImmutableList();
         }
 
-        private static Contracts.Accounts.AccountStatementEntry CreateResultEntry(BudgetEntry entry) =>
+        private static Contracts.Accounts.AccountStatementEntry CreateResultEntry(
+            BudgetEntry entry
+        ) =>
             new(
                 Id: entry.Id,
                 ValueDate: entry.AccountingPeriod.FromInclusive,
@@ -95,18 +118,25 @@ public static class GetAccount
                 Amount: entry.Amount,
                 AmountType: Contracts.Accounts.AmountType.Budget,
                 OtherAccount: null,
-                OtherAccountId: null);
+                OtherAccountId: null
+            );
 
-        private static Contracts.Accounts.AccountStatementEntry CreateResultEntry(Guid accountId, JournalEntry entry)
+        private static Contracts.Accounts.AccountStatementEntry CreateResultEntry(
+            Guid accountId,
+            JournalEntry entry
+        )
         {
-            var account = entry.CreditAccount.Id == accountId ? entry.CreditAccount : entry.DebitAccount;
-            var otherAccount = entry.CreditAccount.Id == accountId ? entry.DebitAccount : entry.CreditAccount;
+            var account =
+                entry.CreditAccount.Id == accountId ? entry.CreditAccount : entry.DebitAccount;
+            var otherAccount =
+                entry.CreditAccount.Id == accountId ? entry.DebitAccount : entry.CreditAccount;
             var isDebit = entry.DebitAccount.Id == accountId;
             var amount = AccountBalanceCalculator.GetSignedAmount(account, entry);
 
-            var amountType = entry.IsOpeningBalance
-                ? Contracts.Accounts.AmountType.OpeningBalance
-                : isDebit ? Contracts.Accounts.AmountType.Debit : Contracts.Accounts.AmountType.Credit;
+            var amountType =
+                entry.IsOpeningBalance ? Contracts.Accounts.AmountType.OpeningBalance
+                : isDebit ? Contracts.Accounts.AmountType.Debit
+                : Contracts.Accounts.AmountType.Credit;
 
             return new Contracts.Accounts.AccountStatementEntry(
                 Id: entry.Id,
@@ -115,7 +145,8 @@ public static class GetAccount
                 Amount: amount,
                 AmountType: amountType,
                 OtherAccount: otherAccount.Name,
-                OtherAccountId: otherAccount.Id);
+                OtherAccountId: otherAccount.Id
+            );
         }
     }
 }

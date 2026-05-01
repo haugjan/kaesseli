@@ -1,9 +1,11 @@
 @page "/settings/accounts"
 @using Kaesseli.Client.Blazor.Services
 @using Kaesseli.Client.Blazor.Components
+@using Microsoft.AspNetCore.Components.Forms
 @inject KaesseliApiService Api
 @inject IDialogService DialogService
 @inject ISnackbar Snackbar
+@inject IJSRuntime JS
 
 <PageTitle>Konten verwalten</PageTitle>
 
@@ -20,10 +22,25 @@
             <MudText Typo="Typo.h6">Konten verwalten</MudText>
         </CardHeaderContent>
         <CardHeaderActions>
-            <MudButton Color="Color.Primary" Variant="Variant.Filled" StartIcon="@Icons.Material.Rounded.Add"
-                       OnClick="OnAddClicked">
-                Neues Konto
-            </MudButton>
+            <div class="d-flex gap-2">
+                <MudButton Variant="Variant.Outlined" StartIcon="@Icons.Material.Rounded.Download"
+                           OnClick="OnExportClicked" Disabled="_busy">
+                    Export
+                </MudButton>
+                <MudFileUpload T="IBrowserFile" Accept=".yaml,.yml,application/x-yaml,text/yaml"
+                               FilesChanged="OnImportFile">
+                    <ActivatorContent>
+                        <MudButton HtmlTag="label" Variant="Variant.Outlined"
+                                   StartIcon="@Icons.Material.Rounded.Upload" Disabled="_busy">
+                            Import
+                        </MudButton>
+                    </ActivatorContent>
+                </MudFileUpload>
+                <MudButton Color="Color.Primary" Variant="Variant.Filled" StartIcon="@Icons.Material.Rounded.Add"
+                           OnClick="OnAddClicked">
+                    Neues Konto
+                </MudButton>
+            </div>
         </CardHeaderActions>
     </MudCardHeader>
     <MudCardContent Class="pa-0">
@@ -41,12 +58,14 @@
                       GroupBy="_groupDefinition">
                 <HeaderContent>
                     <MudTh>Icon</MudTh>
+                    <MudTh>Nr.</MudTh>
+                    <MudTh>Kurzbez.</MudTh>
                     <MudTh>Name</MudTh>
                     <MudTh>Typ</MudTh>
                     <MudTh Style="text-align: right;">Aktionen</MudTh>
                 </HeaderContent>
                 <GroupHeaderTemplate>
-                    <MudTh colspan="4" Class="pa-3">
+                    <MudTh colspan="6" Class="pa-3">
                         <MudText Typo="Typo.subtitle1"><b>@context.Key</b></MudText>
                     </MudTh>
                 </GroupHeaderTemplate>
@@ -56,6 +75,8 @@
                             <MudIcon Icon="@AccountDialog.ResolveIcon(context.Icon)" Size="Size.Small" />
                         </MudAvatar>
                     </MudTd>
+                    <MudTd DataLabel="Nr.">@context.Number</MudTd>
+                    <MudTd DataLabel="Kurzbez."><code>@context.ShortName</code></MudTd>
                     <MudTd DataLabel="Name">@context.Name</MudTd>
                     <MudTd DataLabel="Typ">@GetTypeName(context.TypeId)</MudTd>
                     <MudTd DataLabel="Aktionen" Style="text-align: right;">
@@ -72,6 +93,7 @@
 
 @code {
     private List<Account>? _accounts;
+    private bool _busy;
 
     private readonly List<BreadcrumbItem> _breadcrumbs =
     [
@@ -94,6 +116,55 @@
         _accounts = accounts?.OrderBy(a => a.TypeId).ThenBy(a => a.Name).ToList() ?? [];
     }
 
+    private async Task OnExportClicked()
+    {
+        _busy = true;
+        try
+        {
+            var yaml = await Api.ExportAccountPlanAsync();
+            var fileName = $"kontoplan-{DateTime.Now:yyyyMMdd-HHmmss}.yaml";
+            await JS.InvokeVoidAsync("kaesseli.downloadText", fileName, "application/x-yaml", yaml);
+            Snackbar.Add($"Kontoplan exportiert: {fileName}", Severity.Success);
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add($"Export fehlgeschlagen: {ex.Message}", Severity.Error);
+        }
+        finally
+        {
+            _busy = false;
+        }
+    }
+
+    private async Task OnImportFile(IBrowserFile? file)
+    {
+        if (file is null) return;
+        _busy = true;
+        try
+        {
+            using var reader = new StreamReader(file.OpenReadStream(maxAllowedSize: 1024 * 1024));
+            var yaml = await reader.ReadToEndAsync();
+            var result = await Api.ImportAccountPlanAsync(yaml);
+            if (result.Success)
+            {
+                Snackbar.Add($"Import OK: {result.Created} neu, {result.Updated} aktualisiert.", Severity.Success);
+                await LoadAsync();
+            }
+            else
+            {
+                Snackbar.Add($"Import fehlgeschlagen: {result.Error}", Severity.Error);
+            }
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add($"Import-Fehler: {ex.Message}", Severity.Error);
+        }
+        finally
+        {
+            _busy = false;
+        }
+    }
+
     private async Task OnAddClicked()
     {
         var parameters = new DialogParameters<AccountDialog>();
@@ -105,7 +176,7 @@
         {
             try
             {
-                await Api.AddAccountAsync(model.Name!, model.Type, model.Icon, model.IconColor);
+                await Api.AddAccountAsync(model.Name!, model.Type, model.Number!, model.ShortName!, model.Icon, model.IconColor);
                 Snackbar.Add("Konto erstellt.", Severity.Success);
                 await LoadAsync();
             }
@@ -124,6 +195,8 @@
             {
                 Name = account.Name,
                 Type = account.TypeId,
+                Number = account.Number,
+                ShortName = account.ShortName,
                 Icon = account.Icon,
                 IconColor = account.IconColor,
             }},
@@ -136,7 +209,7 @@
         {
             try
             {
-                await Api.UpdateAccountAsync(account.Id, model.Name!, model.Type, model.Icon, model.IconColor);
+                await Api.UpdateAccountAsync(account.Id, model.Name!, model.Type, model.Number!, model.ShortName!, model.Icon, model.IconColor);
                 Snackbar.Add("Konto aktualisiert.", Severity.Success);
                 await LoadAsync();
             }

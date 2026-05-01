@@ -1,7 +1,7 @@
-using Kaesseli.Features.Integration.FileImport;
-using Kaesseli.Features.Integration.NextOpenTransaction;
 using Kaesseli.Features.Accounts;
 using Kaesseli.Features.Integration;
+using Kaesseli.Features.Integration.FileImport;
+using Kaesseli.Features.Integration.NextOpenTransaction;
 using Kaesseli.Test.Faker;
 using NSubstitute;
 using Shouldly;
@@ -12,9 +12,11 @@ namespace Kaesseli.Test.Features.Integration;
 public class ProcessCamtFileCommandHandlerTests
 {
     private readonly ICamtProcessor _camtProcessorMock = Substitute.For<ICamtProcessor>();
-    private readonly ITransactionRepository _transactionRepoMock = Substitute.For<ITransactionRepository>();
+    private readonly ITransactionRepository _transactionRepoMock =
+        Substitute.For<ITransactionRepository>();
     private readonly IAccountRepository _accountRepoMock = Substitute.For<IAccountRepository>();
-    private readonly OpenTransactionAmountChanged.IHandler _eventHandlerMock = Substitute.For<OpenTransactionAmountChanged.IHandler>();
+    private readonly OpenTransactionAmountChanged.IHandler _eventHandlerMock =
+        Substitute.For<OpenTransactionAmountChanged.IHandler>();
     private readonly ProcessCamtFile.Handler _handler;
 
     public ProcessCamtFileCommandHandlerTests() =>
@@ -40,7 +42,11 @@ public class ProcessCamtFileCommandHandlerTests
         _accountRepoMock
             .GetAccount(fakeCommand.AccountId, cancellationToken)
             .Returns(
-                Account.Create("Account", AccountType.Expense, new AccountIcon("favorite", "blue"))
+                AccountFactory.Create(
+                    "Account",
+                    AccountType.Expense,
+                    new AccountIcon("favorite", "blue")
+                )
             );
         _camtProcessorMock
             .ReadCamtFile(fakeCommand.Content, Arg.Any<CancellationToken>())
@@ -57,9 +63,11 @@ public class ProcessCamtFileCommandHandlerTests
         var result = await _handler.Handle(fakeCommand, cancellationToken);
 
         // Assert
-        await _camtProcessorMock.Received(1)
+        await _camtProcessorMock
+            .Received(1)
             .ReadCamtFile(fakeCommand.Content, Arg.Any<CancellationToken>());
-        await _transactionRepoMock.Received(1)
+        await _transactionRepoMock
+            .Received(1)
             .AddTransactionSummary(Arg.Any<TransactionSummary>(), cancellationToken);
         result.ShouldNotBe(Guid.Empty);
     }

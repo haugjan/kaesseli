@@ -32,19 +32,32 @@
     <script src="_content/MudBlazor/MudBlazor.min.js"></script>
     <script src="_content/Microsoft.AspNetCore.Components.WebAssembly.Authentication/AuthenticationService.js"></script>
     <script>
-      window.kaesseliAuth = {
-        getIdToken: function () {
-          for (const key of Object.keys(sessionStorage)) {
-            if (key.startsWith('oidc.user:')) {
-              try {
-                const user = JSON.parse(sessionStorage.getItem(key));
-                if (user && user.id_token) return user.id_token;
-              } catch { /* ignore parse error */ }
+        window.kaesseli = {
+            downloadText: (filename, contentType, text) => {
+                const blob = new Blob([text], { type: contentType });
+                const url = URL.createObjectURL(blob);
+                const link = document.createElement('a');
+                link.href = url;
+                link.download = filename;
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                URL.revokeObjectURL(url);
             }
-          }
-          return null;
-        }
-      };
+        };
+        window.kaesseliAuth = {
+            getIdToken: function () {
+                for (const key of Object.keys(sessionStorage)) {
+                    if (key.startsWith('oidc.user:')) {
+                        try {
+                            const user = JSON.parse(sessionStorage.getItem(key));
+                            if (user && user.id_token) return user.id_token;
+                        } catch { /* ignore parse error */ }
+                    }
+                }
+                return null;
+            }
+        };
     </script>
     <script src="_framework/blazor.webassembly#[.{fingerprint}].js"></script>
 </body>

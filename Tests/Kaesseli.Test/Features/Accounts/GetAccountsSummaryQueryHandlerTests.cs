@@ -27,7 +27,9 @@ public class GetAccountsSummaryQueryHandlerTests
         var accountRepo = Substitute.For<IAccountRepository>();
         var journalRepo = Substitute.For<IJournalRepository>();
         var budgetRepo = Substitute.For<IBudgetRepository>();
-        var fakeTimeProvider = new FakeTimeProvider(new DateTimeOffset(2025, 1, 1, 0, 0, 0, TimeSpan.Zero));
+        var fakeTimeProvider = new FakeTimeProvider(
+            new DateTimeOffset(2025, 1, 1, 0, 0, 0, TimeSpan.Zero)
+        );
         var handler = new GetAccountsSummary.Handler(
             accountRepo,
             journalRepo,
@@ -37,15 +39,21 @@ public class GetAccountsSummaryQueryHandlerTests
         var cancellationToken = new CancellationToken();
         var periodId = Guid.NewGuid();
 
-        var accountToTest = Account.Create("Current Account", accountType, new AccountIcon("favorite", "blue"));
-        var otherAccount = Account.Create("Other Account", AccountType.Expense, new AccountIcon("favorite", "blue"));
+        var accountToTest = AccountFactory.Create(
+            "Current Account",
+            accountType,
+            new AccountIcon("favorite", "blue")
+        );
+        var otherAccount = AccountFactory.Create(
+            "Other Account",
+            AccountType.Expense,
+            new AccountIcon("favorite", "blue")
+        );
 
         var journalEntries = CreateTestJournalEntries(accountToTest, otherAccount);
         var budgetEntries = CreateTestBudgetEntries(accountToTest);
 
-        accountRepo
-            .GetAccounts(cancellationToken)
-            .Returns([otherAccount, accountToTest]);
+        accountRepo.GetAccounts(cancellationToken).Returns([otherAccount, accountToTest]);
         accountRepo
             .GetAccountingPeriod(periodId, cancellationToken)
             .Returns(
@@ -112,8 +120,16 @@ public class GetAccountsSummaryQueryHandlerTests
         var cancellationToken = new CancellationToken();
         var periodId = Guid.NewGuid();
 
-        var otherAccount = Account.Create("Other Account", AccountType.Expense, new AccountIcon("favorite", "blue"));
-        var accountToTest = Account.Create("Current Account", accountType, new AccountIcon("favorite", "blue"));
+        var otherAccount = AccountFactory.Create(
+            "Other Account",
+            AccountType.Expense,
+            new AccountIcon("favorite", "blue")
+        );
+        var accountToTest = AccountFactory.Create(
+            "Current Account",
+            accountType,
+            new AccountIcon("favorite", "blue")
+        );
 
         var journalEntries = CreateTestJournalEntries(accountToTest, otherAccount);
 
@@ -122,9 +138,7 @@ public class GetAccountsSummaryQueryHandlerTests
             .Returns([otherAccount, accountToTest]);
         accountRepo
             .GetAccountingPeriod(periodId, cancellationToken)
-            .Returns(
-                AccountingPeriod.Create(periodId.ToString(), default, default)
-            );
+            .Returns(AccountingPeriod.Create(periodId.ToString(), default, default));
 
         journalRepo
             .GetJournalEntries(
