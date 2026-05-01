@@ -239,6 +239,10 @@
                 Snackbar.Add("Konto gelöscht.", Severity.Success);
                 await LoadAsync();
             }
+            catch (AccountInUseClientException ex)
+            {
+                Snackbar.Add(ex.Message, Severity.Warning);
+            }
             catch
             {
                 Snackbar.Add("Fehler beim Löschen.", Severity.Error);

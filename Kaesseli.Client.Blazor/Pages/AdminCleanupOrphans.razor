@@ -1,0 +1,70 @@
+@page "/admin/cleanup-orphans"
+@using Kaesseli.Client.Blazor.Services
+@inject KaesseliApiService Api
+@inject ISnackbar Snackbar
+
+<PageTitle>Wartung – Verwaiste Daten bereinigen</PageTitle>
+
+<MudCard Elevation="0" Style="border: 1px solid var(--mud-palette-divider); border-radius: 12px; max-width: 640px;">
+    <MudCardHeader>
+        <CardHeaderAvatar>
+            <MudAvatar Style="background-color: #C62828; color: white;" Size="Size.Medium">
+                <MudIcon Icon="@Icons.Material.Rounded.CleaningServices" />
+            </MudAvatar>
+        </CardHeaderAvatar>
+        <CardHeaderContent>
+            <MudText Typo="Typo.h6">Verwaiste Buchungen &amp; Budgets bereinigen</MudText>
+            <MudText Typo="Typo.body2" Class="mud-text-secondary">
+                Entfernt Journal- und Budget-Einträge, deren referenziertes Konto nicht mehr existiert.
+            </MudText>
+        </CardHeaderContent>
+    </MudCardHeader>
+    <MudCardContent>
+        <MudAlert Severity="Severity.Warning" Variant="Variant.Outlined" Class="mb-4">
+            Diese Aktion löscht Daten unwiderruflich. Nur ausführen, wenn die Übersicht 500-Fehler liefert.
+        </MudAlert>
+
+        @if (_result is not null)
+        {
+            <MudPaper Class="pa-4 mb-4" Elevation="0" Style="background: var(--mud-palette-background-grey);">
+                <MudText Typo="Typo.subtitle1"><b>Ergebnis</b></MudText>
+                <MudText>Gelöschte Journal-Einträge: <b>@_result.JournalEntriesDeleted</b></MudText>
+                <MudText>Gelöschte Budget-Einträge: <b>@_result.BudgetEntriesDeleted</b></MudText>
+            </MudPaper>
+        }
+    </MudCardContent>
+    <MudCardActions>
+        <MudButton Color="Color.Error"
+                   Variant="Variant.Filled"
+                   StartIcon="@Icons.Material.Rounded.DeleteSweep"
+                   OnClick="OnRunClicked"
+                   Disabled="_busy">
+            @(_busy ? "Bereinige..." : "Bereinigung starten")
+        </MudButton>
+    </MudCardActions>
+</MudCard>
+
+@code {
+    private bool _busy;
+    private CleanupOrphansResult? _result;
+
+    private async Task OnRunClicked()
+    {
+        _busy = true;
+        try
+        {
+            _result = await Api.CleanupOrphanedAccountReferencesAsync();
+            Snackbar.Add(
+                $"Bereinigt: {_result.JournalEntriesDeleted} Journal- / {_result.BudgetEntriesDeleted} Budget-Einträge.",
+                Severity.Success);
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add($"Bereinigung fehlgeschlagen: {ex.Message}", Severity.Error);
+        }
+        finally
+        {
+            _busy = false;
+        }
+    }
+}

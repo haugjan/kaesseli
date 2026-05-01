@@ -113,8 +113,15 @@ public static class AccountApi
                 pattern: "/account/{id}",
                 async (DeleteAccount.IHandler handler, Guid id) =>
                 {
-                    await handler.Handle(new DeleteAccount.Query(id), default);
-                    return Results.NoContent();
+                    try
+                    {
+                        await handler.Handle(new DeleteAccount.Query(id), default);
+                        return Results.NoContent();
+                    }
+                    catch (AccountInUseException ex)
+                    {
+                        return Results.Conflict(new { error = ex.Message });
+                    }
                 }
             );
 
@@ -129,6 +136,12 @@ public static class AccountApi
                         fileDownloadName: "kontoplan.yaml"
                     );
                 }
+            );
+
+            app.MapPost(
+                pattern: "/admin/cleanupOrphanedAccountReferences",
+                async (CleanupOrphanedAccountReferences.IHandler handler, CancellationToken ct) =>
+                    Results.Ok(await handler.Handle(ct))
             );
 
             app.MapPost(

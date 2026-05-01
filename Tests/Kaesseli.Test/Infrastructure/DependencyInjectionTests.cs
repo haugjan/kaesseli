@@ -19,12 +19,14 @@ public class DependencyInjectionTests
     {
         // Arrange
         var config = new ConfigurationBuilder()
-            .AddInMemoryCollection(new Dictionary<string, string?>
-            {
-                ["CosmosDb:Endpoint"] = "https://localhost:8081",
-                ["CosmosDb:Key"] = "dummykey==",
-                ["CosmosDb:Database"] = "test-db",
-            })
+            .AddInMemoryCollection(
+                new Dictionary<string, string?>
+                {
+                    ["CosmosDb:Endpoint"] = "https://localhost:8081",
+                    ["CosmosDb:Key"] = "dummykey==",
+                    ["CosmosDb:Database"] = "test-db",
+                }
+            )
             .Build();
 
         var serviceCollection = new ServiceCollection();
@@ -59,6 +61,7 @@ public class DependencyInjectionTests
             typeof(GetTotalOpenTransaction.IHandler),
             typeof(GetTransactions.IHandler),
             typeof(GetTransactionSummaries.IHandler),
+            typeof(CleanupOrphanedAccountReferences.IHandler),
         };
 
         foreach (var handlerInterface in handlerInterfaces)
