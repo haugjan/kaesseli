@@ -30,6 +30,7 @@
         <span class="dismiss">🗙</span>
     </div>
     <script src="_content/MudBlazor/MudBlazor.min.js"></script>
+    <script src="_content/Microsoft.AspNetCore.Components.WebAssembly.Authentication/AuthenticationService.js"></script>
     <script>
         window.kaesseli = {
             downloadText: (filename, contentType, text) => {
@@ -42,6 +43,19 @@
                 link.click();
                 document.body.removeChild(link);
                 URL.revokeObjectURL(url);
+            }
+        };
+        window.kaesseliAuth = {
+            getIdToken: function () {
+                for (const key of Object.keys(sessionStorage)) {
+                    if (key.startsWith('oidc.user:')) {
+                        try {
+                            const user = JSON.parse(sessionStorage.getItem(key));
+                            if (user && user.id_token) return user.id_token;
+                        } catch { /* ignore parse error */ }
+                    }
+                }
+                return null;
             }
         };
     </script>

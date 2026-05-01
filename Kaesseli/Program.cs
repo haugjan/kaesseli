@@ -1,6 +1,6 @@
 using System.Diagnostics;
 using Azure.Identity;
-using Microsoft.AspNetCore.Authentication;
+using Kaesseli;
 using OpenTelemetry.Logs;
 using OpenTelemetry.Metrics;
 using OpenTelemetry.Resources;
@@ -81,9 +81,7 @@ builder.Services.AddCors(options =>
     );
 });
 
-builder
-    .Services.AddAuthentication("Basic")
-    .AddScheme<AuthenticationSchemeOptions, Kaesseli.BasicAuthHandler>("Basic", null);
+builder.Services.AddGoogleAuth(builder.Configuration);
 
 builder.Services.AddInfrastructureServices(builder.Configuration);
 builder.Services.AddApplicationServices();
@@ -93,30 +91,14 @@ var app = builder.Build();
 app.UseHttpsRedirection();
 app.UseCors("AllowSpecificOrigin");
 
-app.UseAuthentication();
-app.Use(
-    async (context, next) =>
-    {
-        // Allow health endpoint without auth so external keep-alive pings can reach it.
-        if (context.Request.Path.StartsWithSegments("/healthz"))
-        {
-            await next();
-            return;
-        }
-        if (context.User.Identity?.IsAuthenticated != true)
-        {
-            await context.ChallengeAsync("Basic");
-            return;
-        }
-        await next();
-    }
-);
-
-app.MapHealthChecks("/healthz");
-
 app.UseBlazorFrameworkFiles();
 app.UseDefaultFiles();
 app.UseStaticFiles();
+
+app.UseAuthentication();
+app.UseAuthorization();
+
+app.MapHealthChecks("/healthz").AllowAnonymous();
 
 // Run database initialization in background so it does not block app startup.
 // Cosmos EnsureCreatedAsync makes several round-trips and adds seconds to cold start.
@@ -138,8 +120,8 @@ _ = Task.Run(async () =>
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
-    app.MapOpenApi();
-    app.MapScalarApiReference();
+    app.MapOpenApi().AllowAnonymous();
+    app.MapScalarApiReference().AllowAnonymous();
 
     _ = Task.Run(async () =>
     {
@@ -159,8 +141,9 @@ if (app.Environment.IsDevelopment())
     });
 }
 
+app.MapGoogleAuthProxy();
 app.MapKaesseliEndpoints();
 
-app.MapFallbackToFile("/index.html");
+app.MapFallbackToFile("/index.html").AllowAnonymous();
 
 app.Run();

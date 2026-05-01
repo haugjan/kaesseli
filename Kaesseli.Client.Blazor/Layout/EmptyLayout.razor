@@ -1,0 +1,13 @@
+@inherits LayoutComponentBase
+@using Kaesseli.Client.Blazor.Theme
+
+<MudThemeProvider Theme="_theme" />
+<MudPopoverProvider />
+
+<div class="auth-page">
+    @Body
+</div>
+
+@code {
+    readonly MudTheme _theme = KaesseliTheme.Create();
+}

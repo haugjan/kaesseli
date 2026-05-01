@@ -137,9 +137,8 @@ if (Should-Run 4) {
 
     Write-Host "    Seeding key vault secrets (only if they don't exist yet)..."
     $SecretsToSeed = @{
-        "CosmosDb--Key"        = if ($CosmosKey) { $CosmosKey } else { "REPLACE_WITH_COSMOS_KEY" }
-        "AzureAdB2C--TenantId" = "d8448c66-e344-4009-8169-8083b06994b4"
-        "AzureAdB2C--ClientId" = "c5190367-84f5-4ea7-8fc4-086d0c1abe24"
+        "CosmosDb--Key"          = if ($CosmosKey) { $CosmosKey } else { "REPLACE_WITH_COSMOS_KEY" }
+        "Auth--Google--ClientId" = "REPLACE_WITH_GOOGLE_OAUTH_CLIENT_ID"
     }
 
     foreach ($SecretName in $SecretsToSeed.Keys) {
