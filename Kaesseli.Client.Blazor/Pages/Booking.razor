@@ -1,0 +1,163 @@
+@page "/booking"
+@using Kaesseli.Client.Blazor.Services
+@inject KaesseliApiService Api
+@inject AccountingPeriodState PeriodState
+@inject ISnackbar Snackbar
+@implements IDisposable
+
+<PageTitle>Manuelle Buchung</PageTitle>
+
+<MudBreadcrumbs Items="_breadcrumbs" Class="pa-0 mb-4" />
+
+<MudCard Elevation="0" Class="mb-4" Style="border: 1px solid var(--mud-palette-divider); border-radius: 12px; max-width: 720px;">
+    <MudCardHeader>
+        <CardHeaderAvatar>
+            <MudAvatar Style="background-color: #1976D2; color: white;" Size="Size.Medium">
+                <MudIcon Icon="@Icons.Material.Rounded.EditNote" />
+            </MudAvatar>
+        </CardHeaderAvatar>
+        <CardHeaderContent>
+            <MudText Typo="Typo.h6">Manuelle Buchung</MudText>
+            <MudText Typo="Typo.body2" Class="mud-text-secondary">
+                Periode: @(PeriodState.Periods.FirstOrDefault(p => p.Id == PeriodState.SelectedPeriodId)?.Description ?? "—")
+            </MudText>
+        </CardHeaderContent>
+    </MudCardHeader>
+    <MudCardContent>
+        @if (_accounts is null)
+        {
+            <MudSkeleton SkeletonType="SkeletonType.Rectangle" Height="280px" />
+        }
+        else
+        {
+            <MudGrid Spacing="3">
+                <MudItem xs="12" sm="6">
+                    <MudDatePicker @bind-Date="_date"
+                                   Label="Datum"
+                                   Variant="Variant.Outlined"
+                                   Margin="Margin.Dense"
+                                   DateFormat="dd.MM.yyyy" />
+                </MudItem>
+                <MudItem xs="12" sm="6">
+                    <MudNumericField @bind-Value="_amount"
+                                     Label="Betrag"
+                                     Variant="Variant.Outlined"
+                                     Margin="Margin.Dense"
+                                     Format="N2"
+                                     HideSpinButtons="true" />
+                </MudItem>
+                <MudItem xs="12">
+                    <MudTextField @bind-Value="_description"
+                                  Label="Text"
+                                  Variant="Variant.Outlined"
+                                  Margin="Margin.Dense" />
+                </MudItem>
+                <MudItem xs="12" sm="6">
+                    <MudSelect T="Guid?" @bind-Value="_debitAccountId"
+                               Label="Soll"
+                               Variant="Variant.Outlined"
+                               Margin="Margin.Dense"
+                               AnchorOrigin="Origin.BottomLeft">
+                        @foreach (var account in _accounts)
+                        {
+                            <MudSelectItem T="Guid?" Value="account.Id">@account.Number @account.Name</MudSelectItem>
+                        }
+                    </MudSelect>
+                </MudItem>
+                <MudItem xs="12" sm="6">
+                    <MudSelect T="Guid?" @bind-Value="_creditAccountId"
+                               Label="Haben"
+                               Variant="Variant.Outlined"
+                               Margin="Margin.Dense"
+                               AnchorOrigin="Origin.BottomLeft">
+                        @foreach (var account in _accounts)
+                        {
+                            <MudSelectItem T="Guid?" Value="account.Id">@account.Number @account.Name</MudSelectItem>
+                        }
+                    </MudSelect>
+                </MudItem>
+            </MudGrid>
+        }
+    </MudCardContent>
+    <MudCardActions>
+        <MudSpacer />
+        <MudButton Variant="Variant.Filled"
+                   Color="Color.Primary"
+                   StartIcon="@Icons.Material.Rounded.Save"
+                   Disabled="@(!CanSave || _saving)"
+                   OnClick="SaveAsync">
+            @(_saving ? "Speichert…" : "Speichern")
+        </MudButton>
+    </MudCardActions>
+</MudCard>
+
+@code {
+    private List<Contracts.Accounts.Account>? _accounts;
+    private DateTime? _date = DateTime.Today;
+    private string? _description;
+    private decimal? _amount;
+    private Guid? _debitAccountId;
+    private Guid? _creditAccountId;
+    private bool _saving;
+
+    private static readonly List<BreadcrumbItem> _breadcrumbs =
+    [
+        new("Manuelle Buchung", "/booking", icon: Icons.Material.Rounded.EditNote)
+    ];
+
+    private bool CanSave =>
+        PeriodState.SelectedPeriodId.HasValue
+        && _date.HasValue
+        && _amount is > 0
+        && _debitAccountId.HasValue
+        && _creditAccountId.HasValue
+        && _debitAccountId != _creditAccountId
+        && !string.IsNullOrWhiteSpace(_description);
+
+    protected override async Task OnInitializedAsync()
+    {
+        PeriodState.OnChange += OnPeriodChanged;
+        await LoadAccountsAsync();
+    }
+
+    private async Task LoadAccountsAsync()
+    {
+        var result = await Api.GetAccountsAsync();
+        _accounts = result?.OrderBy(a => a.Number).ToList() ?? [];
+    }
+
+    private void OnPeriodChanged() => InvokeAsync(StateHasChanged);
+
+    private async Task SaveAsync()
+    {
+        if (!CanSave || _saving) return;
+        _saving = true;
+        try
+        {
+            await Api.AddJournalEntryAsync(
+                _amount!.Value,
+                _description!,
+                DateOnly.FromDateTime(_date!.Value),
+                _debitAccountId!.Value,
+                _creditAccountId!.Value,
+                PeriodState.SelectedPeriodId!.Value);
+
+            Snackbar.Add("Buchung gespeichert.", Severity.Success);
+
+            // Form zurücksetzen — Datum und Text bleiben für Folgebuchungen erhalten.
+            _amount = null;
+            _debitAccountId = null;
+            _creditAccountId = null;
+        }
+        catch
+        {
+            Snackbar.Add("Fehler beim Speichern.", Severity.Error);
+        }
+        finally
+        {
+            _saving = false;
+        }
+    }
+
+    public void Dispose() => PeriodState.OnChange -= OnPeriodChanged;
+}
