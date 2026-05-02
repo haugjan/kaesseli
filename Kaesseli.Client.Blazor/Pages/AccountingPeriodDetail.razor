@@ -34,6 +34,7 @@ else
         <MudCardContent Class="pa-0">
             <MudTable Items="_budgetRows" Dense="true" Hover="true" Elevation="0" Style="background: transparent;">
                 <HeaderContent>
+                    <MudTh>Nr.</MudTh>
                     <MudTh>Konto</MudTh>
                     <MudTh>Typ</MudTh>
                     <MudTh Style="text-align: right;">Budget (p.J.)</MudTh>
@@ -43,6 +44,7 @@ else
                     <MudTh></MudTh>
                 </HeaderContent>
                 <RowTemplate>
+                    <MudTd DataLabel="Nr.">@context.AccountNumber</MudTd>
                     <MudTd DataLabel="Konto">@context.AccountName</MudTd>
                     <MudTd DataLabel="Typ">@context.AccountType</MudTd>
                     <MudTd DataLabel="Budget" Style="text-align: right; font-weight: 700;">
@@ -82,6 +84,7 @@ else
         <MudCardContent Class="pa-0">
             <MudTable Items="_openingBalanceRows" Dense="true" Hover="true" Elevation="0" Style="background: transparent;">
                 <HeaderContent>
+                    <MudTh>Nr.</MudTh>
                     <MudTh>Aktivkonto</MudTh>
                     <MudTh Style="text-align: right;">Aktueller Saldo</MudTh>
                     <MudTh>Gegenkonto (Passiv)</MudTh>
@@ -90,6 +93,7 @@ else
                     <MudTh></MudTh>
                 </HeaderContent>
                 <RowTemplate>
+                    <MudTd DataLabel="Nr.">@context.AccountNumber</MudTd>
                     <MudTd DataLabel="Aktivkonto">@context.AccountName</MudTd>
                     <MudTd DataLabel="Saldo" Style="text-align: right; font-weight: 700;">
                         @(context.CurrentAmount.HasValue ? context.CurrentAmount.Value.ToString("N2") : "—")
@@ -169,6 +173,7 @@ else
                 return new BudgetRow
                 {
                     AccountId = a.Id,
+                    AccountNumber = a.Number,
                     AccountName = a.Name,
                     AccountType = FormatAccountType(a.TypeId),
                     CurrentAmount = budget?.Amount,
@@ -189,6 +194,7 @@ else
                 return new OpeningBalanceRow
                 {
                     AccountId = a.Id,
+                    AccountNumber = a.Number,
                     AccountName = a.Name,
                     CurrentAmount = ob?.Amount,
                     NewDescription = "Eröffnungssaldo",
@@ -236,6 +242,7 @@ else
     private class BudgetRow
     {
         public Guid AccountId { get; init; }
+        public string AccountNumber { get; init; } = "";
         public string AccountName { get; init; } = "";
         public string AccountType { get; init; } = "";
         public decimal? CurrentAmount { get; set; }
@@ -248,6 +255,7 @@ else
     private class OpeningBalanceRow
     {
         public Guid AccountId { get; init; }
+        public string AccountNumber { get; init; } = "";
         public string AccountName { get; init; } = "";
         public decimal? CurrentAmount { get; set; }
         public Guid? SelectedLiabilityAccountId { get; set; }
