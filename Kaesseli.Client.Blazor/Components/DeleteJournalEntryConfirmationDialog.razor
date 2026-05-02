@@ -1,0 +1,42 @@
+<MudDialog>
+    <DialogContent>
+        <MudAlert Severity="Severity.Warning" Class="mb-4">
+            Buchung <b>@Description</b> vom @ValueDate.ToString("dd.MM.yyyy") wird unwiderruflich gelöscht.
+        </MudAlert>
+        <MudText Class="mb-2">
+            Zur Bestätigung bitte den Betrag <b>@Amount.ToString("N2")</b> exakt eingeben:
+        </MudText>
+        <MudNumericField T="decimal?" @bind-Value="_input"
+                         Label="Betrag" Format="N2" HideSpinButtons="true"
+                         Immediate="true"
+                         Variant="Variant.Outlined" Margin="Margin.Dense"
+                         Error="@(_input.HasValue && !IsMatch)"
+                         ErrorText="Betrag stimmt nicht überein" />
+    </DialogContent>
+    <DialogActions>
+        <MudButton OnClick="Cancel">Abbrechen</MudButton>
+        <MudButton Color="Color.Error" Variant="Variant.Filled"
+                   Disabled="@(!IsMatch)" OnClick="Submit">
+            Löschen
+        </MudButton>
+    </DialogActions>
+</MudDialog>
+
+@code {
+    [CascadingParameter] private IMudDialogInstance MudDialog { get; set; } = null!;
+
+    [Parameter, EditorRequired] public decimal Amount { get; set; }
+    [Parameter, EditorRequired] public string Description { get; set; } = "";
+    [Parameter, EditorRequired] public DateOnly ValueDate { get; set; }
+
+    private decimal? _input;
+
+    private bool IsMatch => _input.HasValue && _input.Value == Amount;
+
+    private void Submit()
+    {
+        if (IsMatch) MudDialog.Close(DialogResult.Ok(true));
+    }
+
+    private void Cancel() => MudDialog.Cancel();
+}

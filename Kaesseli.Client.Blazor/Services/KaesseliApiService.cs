@@ -222,6 +222,12 @@ public class KaesseliApiService(HttpClient httpClient)
         response.EnsureSuccessStatusCode();
     }
 
+    public async Task DeleteJournalEntryAsync(Guid id, CancellationToken ct = default)
+    {
+        var response = await httpClient.DeleteAsync($"journalEntry/{id}", ct);
+        response.EnsureSuccessStatusCode();
+    }
+
     public async Task AddJournalEntryAsync(
         decimal amount,
         string description,

@@ -48,6 +48,7 @@ public static class ApplicationServiceCollectionExtensions
                 // Journal
                 .AddTransient<AddJournalEntry.IHandler, AddJournalEntry.Handler>()
                 .AddTransient<AddOpeningBalance.IHandler, AddOpeningBalance.Handler>()
+                .AddTransient<DeleteJournalEntry.IHandler, DeleteJournalEntry.Handler>()
                 .AddTransient<GetJournalEntries.IHandler, GetJournalEntries.Handler>()
                 // Integration - FileImport
                 .AddTransient<ProcessFile.IHandler, ProcessFile.Handler>()

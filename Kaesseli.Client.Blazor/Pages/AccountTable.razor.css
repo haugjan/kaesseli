@@ -5,11 +5,17 @@
 
 .entry-mobile-row {
     display: grid;
-    grid-template-columns: auto 1fr auto;
+    grid-template-columns: auto 1fr auto auto;
     column-gap: 10px;
     row-gap: 2px;
     padding: 8px 16px;
     border-top: 1px solid var(--mud-palette-divider);
+    align-items: center;
+}
+
+.entry-mobile-delete {
+    grid-column: 4;
+    grid-row: 1 / span 2;
 }
 
 .entry-mobile-row:first-child {
@@ -48,4 +54,5 @@
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
+    min-width: 0;
 }

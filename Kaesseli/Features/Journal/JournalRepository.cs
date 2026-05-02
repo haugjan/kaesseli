@@ -7,42 +7,70 @@ namespace Kaesseli.Features.Journal;
 
 public interface IJournalRepository
 {
-    Task<JournalEntry> AddJournalEntry(JournalEntry newJournalEntryEntity, CancellationToken cancellationToken);
+    Task<JournalEntry> AddJournalEntry(
+        JournalEntry newJournalEntryEntity,
+        CancellationToken cancellationToken
+    );
+
+    Task DeleteJournalEntry(Guid id, CancellationToken cancellationToken);
 
     Task<IEnumerable<JournalEntry>> GetJournalEntries(
-        Guid accountingPeriodId, Guid? accountId, AccountType? accountType,
-        CancellationToken cancellationToken);
+        Guid accountingPeriodId,
+        Guid? accountId,
+        AccountType? accountType,
+        CancellationToken cancellationToken
+    );
 
     Task AssignOpenTransaction(
         Guid accountingPeriodId,
         Guid transactionId,
         IEnumerable<(Guid OtherAccountId, decimal Amount)> entries,
-        CancellationToken cancellationToken);
+        CancellationToken cancellationToken
+    );
 }
 
 public class JournalRepository(KaesseliContext context) : IJournalRepository
 {
-    public async Task<JournalEntry> AddJournalEntry(JournalEntry newJournalEntryEntity, CancellationToken cancellationToken)
+    public async Task<JournalEntry> AddJournalEntry(
+        JournalEntry newJournalEntryEntity,
+        CancellationToken cancellationToken
+    )
     {
         context.JournalEntries.Add(newJournalEntryEntity);
         await context.SaveChangesAsync(cancellationToken);
         return newJournalEntryEntity;
     }
 
-    public async Task<IEnumerable<JournalEntry>> GetJournalEntries(
-        Guid accountingPeriodId, Guid? accountId, AccountType? accountType,
-        CancellationToken cancellationToken)
+    public async Task DeleteJournalEntry(Guid id, CancellationToken cancellationToken)
     {
-        var entries = await context.JournalEntries
-            .Where(e => EF.Property<Guid>(e, "AccountingPeriodId") == accountingPeriodId)
+        var entry =
+            await context.JournalEntries.FirstOrDefaultAsync(e => e.Id == id, cancellationToken)
+            ?? throw new EntityNotFoundException(typeof(JournalEntry), id);
+        context.JournalEntries.Remove(entry);
+        await context.SaveChangesAsync(cancellationToken);
+    }
+
+    public async Task<IEnumerable<JournalEntry>> GetJournalEntries(
+        Guid accountingPeriodId,
+        Guid? accountId,
+        AccountType? accountType,
+        CancellationToken cancellationToken
+    )
+    {
+        var entries = await context
+            .JournalEntries.Where(e =>
+                EF.Property<Guid>(e, "AccountingPeriodId") == accountingPeriodId
+            )
             .ToListAsync(cancellationToken);
 
         var neededAccountIds = entries
-            .SelectMany(e => new[]
-            {
-                context.Entry(e).Property<Guid>("DebitAccountId").CurrentValue,
-                context.Entry(e).Property<Guid>("CreditAccountId").CurrentValue,
-            })
+            .SelectMany(e =>
+                new[]
+                {
+                    context.Entry(e).Property<Guid>("DebitAccountId").CurrentValue,
+                    context.Entry(e).Property<Guid>("CreditAccountId").CurrentValue,
+                }
+            )
             .ToHashSet();
         var allCached = neededAccountIds.All(id => context.Accounts.Local.Any(a => a.Id == id));
         var accounts = allCached
@@ -50,8 +78,12 @@ public class JournalRepository(KaesseliContext context) : IJournalRepository
             : await context.Accounts.ToListAsync(cancellationToken);
         var accountMap = accounts.ToDictionary(a => a.Id);
 
-        var period = context.AccountingPeriods.Local.FirstOrDefault(p => p.Id == accountingPeriodId)
-            ?? await context.AccountingPeriods.FirstOrDefaultAsync(p => p.Id == accountingPeriodId, cancellationToken);
+        var period =
+            context.AccountingPeriods.Local.FirstOrDefault(p => p.Id == accountingPeriodId)
+            ?? await context.AccountingPeriods.FirstOrDefaultAsync(
+                p => p.Id == accountingPeriodId,
+                cancellationToken
+            );
 
         foreach (var entry in entries)
         {
@@ -64,10 +96,14 @@ public class JournalRepository(KaesseliContext context) : IJournalRepository
         IEnumerable<JournalEntry> result = entries;
 
         if (accountId is not null)
-            result = result.Where(j => j.DebitAccount.Id == accountId || j.CreditAccount.Id == accountId);
+            result = result.Where(j =>
+                j.DebitAccount.Id == accountId || j.CreditAccount.Id == accountId
+            );
 
         if (accountType is not null)
-            result = result.Where(e => e.DebitAccount.Type == accountType || e.CreditAccount.Type == accountType);
+            result = result.Where(e =>
+                e.DebitAccount.Type == accountType || e.CreditAccount.Type == accountType
+            );
 
         return result.ToList();
     }
@@ -76,38 +112,60 @@ public class JournalRepository(KaesseliContext context) : IJournalRepository
         Guid accountingPeriodId,
         Guid transactionId,
         IEnumerable<(Guid OtherAccountId, decimal Amount)> entries,
-        CancellationToken cancellationToken)
+        CancellationToken cancellationToken
+    )
     {
         var entriesArray = entries.ToArray();
 
-        var transaction = await context.Transactions
-            .FirstOrDefaultAsync(t => t.Id == transactionId, cancellationToken)
-            ?? throw new EntityNotFoundException(typeof(Transaction), transactionId);
+        var transaction =
+            await context.Transactions.FirstOrDefaultAsync(
+                t => t.Id == transactionId,
+                cancellationToken
+            ) ?? throw new EntityNotFoundException(typeof(Transaction), transactionId);
 
-        var summaryId = context.Entry(transaction).Property<Guid?>("TransactionSummaryId").CurrentValue;
+        var summaryId = context
+            .Entry(transaction)
+            .Property<Guid?>("TransactionSummaryId")
+            .CurrentValue;
         if (summaryId.HasValue)
         {
-            var summary = await context.TransactionSummaries
-                .FirstOrDefaultAsync(s => s.Id == summaryId.Value, cancellationToken);
+            var summary = await context.TransactionSummaries.FirstOrDefaultAsync(
+                s => s.Id == summaryId.Value,
+                cancellationToken
+            );
             if (summary != null)
             {
-                context.Entry(transaction).Reference(t => t.TransactionSummary!).CurrentValue = summary;
+                context.Entry(transaction).Reference(t => t.TransactionSummary!).CurrentValue =
+                    summary;
                 var accountId = context.Entry(summary).Property<Guid>("AccountId").CurrentValue;
-                var account = await context.Accounts
-                    .FirstOrDefaultAsync(a => a.Id == accountId, cancellationToken);
+                var account = await context.Accounts.FirstOrDefaultAsync(
+                    a => a.Id == accountId,
+                    cancellationToken
+                );
                 if (account != null)
                     context.Entry(summary).Reference(s => s.Account).CurrentValue = account;
             }
         }
 
-        var accountingPeriod = await context.AccountingPeriods
-            .FirstOrDefaultAsync(ap => ap.Id == accountingPeriodId, cancellationToken)
-            ?? throw new EntityNotFoundException(typeof(AccountingPeriod), accountingPeriodId);
+        var accountingPeriod =
+            await context.AccountingPeriods.FirstOrDefaultAsync(
+                ap => ap.Id == accountingPeriodId,
+                cancellationToken
+            ) ?? throw new EntityNotFoundException(typeof(AccountingPeriod), accountingPeriodId);
 
-        WrongAmountException.ThrowIfAmountNotMatch(transaction.Amount, entriesArray.Sum(entry => entry.Amount));
+        WrongAmountException.ThrowIfAmountNotMatch(
+            transaction.Amount,
+            entriesArray.Sum(entry => entry.Amount)
+        );
 
         foreach (var entry in entriesArray)
-            await AssignOpenTransaction(accountingPeriod, transaction, entry.OtherAccountId, entry.Amount, cancellationToken);
+            await AssignOpenTransaction(
+                accountingPeriod,
+                transaction,
+                entry.OtherAccountId,
+                entry.Amount,
+                cancellationToken
+            );
 
         await context.SaveChangesAsync(cancellationToken);
     }
@@ -117,10 +175,14 @@ public class JournalRepository(KaesseliContext context) : IJournalRepository
         Transaction transaction,
         Guid otherAccountId,
         decimal amount,
-        CancellationToken cancellationToken)
+        CancellationToken cancellationToken
+    )
     {
-        var otherAccount = await context.Accounts.FirstOrDefaultAsync(a => a.Id == otherAccountId, cancellationToken)
-                        ?? throw new EntityNotFoundException(typeof(Account), otherAccountId);
+        var otherAccount =
+            await context.Accounts.FirstOrDefaultAsync(
+                a => a.Id == otherAccountId,
+                cancellationToken
+            ) ?? throw new EntityNotFoundException(typeof(Account), otherAccountId);
         var newJournalEntry = JournalEntry.Create(
             transaction.ValueDate,
             transaction.Description,
@@ -128,12 +190,17 @@ public class JournalRepository(KaesseliContext context) : IJournalRepository
             transaction.TransactionSummary!.Account,
             otherAccount,
             accountingPeriod,
-            transaction);
+            transaction
+        );
 
         context.JournalEntries.Add(newJournalEntry);
     }
 
-    private void SetNavigation(JournalEntry entry, string navigationName, Dictionary<Guid, Account> accountMap)
+    private void SetNavigation(
+        JournalEntry entry,
+        string navigationName,
+        Dictionary<Guid, Account> accountMap
+    )
     {
         var fkValue = context.Entry(entry).Property<Guid>(navigationName + "Id").CurrentValue;
         if (accountMap.TryGetValue(fkValue, out var account))

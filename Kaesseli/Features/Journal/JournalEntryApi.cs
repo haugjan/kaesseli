@@ -1,5 +1,5 @@
-using Kaesseli.Features.Journal;
 using Kaesseli.Features.Accounts;
+using Kaesseli.Features.Journal;
 
 // ReSharper disable once CheckNamespace
 namespace Microsoft.AspNetCore.Routing;
@@ -13,7 +13,11 @@ public static class JournalEntryApi
         {
             app.MapPost(
                 pattern: "/journalEntry",
-                async (AddJournalEntry.IHandler handler, AddJournalEntry.Query command, CancellationToken ct) =>
+                async (
+                    AddJournalEntry.IHandler handler,
+                    AddJournalEntry.Query command,
+                    CancellationToken ct
+                ) =>
                 {
                     var guid = await handler.Handle(command, ct);
                     return Results.Created(uri: $"/journalEntry/{guid}", guid);
@@ -32,12 +36,25 @@ public static class JournalEntryApi
             app.MapGet(
                 pattern: "/journalEntry",
                 async (
-                        GetJournalEntries.IHandler handler,
-                        Guid accountingPeriodId,
-                        Guid? accountId,
-                        AccountType? accountType,
-                        CancellationToken ct) =>
-                    await handler.Handle(new GetJournalEntries.Query(accountingPeriodId, accountId, accountType), ct)
+                    GetJournalEntries.IHandler handler,
+                    Guid accountingPeriodId,
+                    Guid? accountId,
+                    AccountType? accountType,
+                    CancellationToken ct
+                ) =>
+                    await handler.Handle(
+                        new GetJournalEntries.Query(accountingPeriodId, accountId, accountType),
+                        ct
+                    )
+            );
+
+            app.MapDelete(
+                pattern: "/journalEntry/{id}",
+                async (DeleteJournalEntry.IHandler handler, Guid id, CancellationToken ct) =>
+                {
+                    await handler.Handle(new DeleteJournalEntry.Query(id), ct);
+                    return Results.NoContent();
+                }
             );
 
             return app;
