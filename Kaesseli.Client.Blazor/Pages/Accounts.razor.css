@@ -61,3 +61,13 @@
 .account-mobile-number-secondary {
     color: var(--mud-palette-text-secondary);
 }
+
+.account-mobile-total {
+    cursor: default;
+    font-weight: 700;
+    background-color: var(--mud-palette-action-default-hover);
+}
+
+.account-mobile-total:hover {
+    background-color: var(--mud-palette-action-default-hover);
+}
