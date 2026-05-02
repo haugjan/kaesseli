@@ -23,6 +23,11 @@ else
         var typeAccounts = _accounts.Where(a => a.Type == type.Name).OrderBy(a => a.Number).ToList();
         if (typeAccounts.Count == 0) continue;
 
+        var totalBalance = typeAccounts.Sum(a => a.AccountBalance);
+        var totalBudgetPerMonth = typeAccounts.Sum(a => a.BudgetPerMonth ?? 0);
+        var totalCurrentBudget = typeAccounts.Sum(a => a.CurrentBudget ?? 0);
+        var totalBudgetBalance = typeAccounts.Sum(a => a.BudgetBalance ?? 0);
+
         <MudCard Elevation="0" Class="mb-4" Style="border: 1px solid var(--mud-palette-divider); border-radius: 12px;">
             <MudCardHeader>
                 <CardHeaderAvatar>
@@ -67,6 +72,18 @@ else
                                 <MudTd Style="@BudgetBalanceStyle(context.BudgetBalance)">@FormatNullable(context.BudgetBalance)</MudTd>
                             }
                         </RowTemplate>
+                        <FooterContent>
+                            <MudTd></MudTd>
+                            <MudTd></MudTd>
+                            <MudTd Style="font-weight: 700;">Total</MudTd>
+                            <MudTd Style="text-align: right; font-weight: 700;">@FormatNumber(totalBalance)</MudTd>
+                            @if (type.ShowBudget)
+                            {
+                                <MudTd Style="text-align: right; font-weight: 700;">@FormatNumber(totalBudgetPerMonth)</MudTd>
+                                <MudTd Style="text-align: right; font-weight: 700;">@FormatNumber(totalCurrentBudget)</MudTd>
+                                <MudTd Style="@BudgetBalanceStyle(totalBudgetBalance)">@FormatNumber(totalBudgetBalance)</MudTd>
+                            }
+                        </FooterContent>
                     </MudTable>
                 </MudHidden>
                 <MudHidden Breakpoint="Breakpoint.MdAndUp">
@@ -94,6 +111,19 @@ else
                                 </div>
                             </div>
                         }
+                        <div class="account-mobile-row account-mobile-total">
+                            <div class="account-mobile-main">
+                                <span class="account-mobile-name">Total</span>
+                            </div>
+                            <div class="account-mobile-numbers">
+                                <span class="account-mobile-number">@FormatNumber(totalBalance)</span>
+                                @if (type.ShowBudget)
+                                {
+                                    <span class="account-mobile-number account-mobile-number-secondary">@FormatNumber(totalBudgetPerMonth)</span>
+                                    <span class="account-mobile-number" style="@BudgetBalanceStyle(totalBudgetBalance)">@FormatNumber(totalBudgetBalance)</span>
+                                }
+                            </div>
+                        </div>
                     </div>
                 </MudHidden>
             </MudCardContent>
