@@ -157,12 +157,12 @@ else
         var budgets = (await budgetTask)?.ToList() ?? [];
         var journalEntries = (await journalTask)?.ToList() ?? [];
 
-        _liabilityAccounts = accounts.Where(a => a.TypeId == AccountType.Liability).OrderBy(a => a.Name).ToList();
+        _liabilityAccounts = accounts.Where(a => a.TypeId == AccountType.Liability).OrderBy(a => a.Number).ToList();
 
         // Budget rows: Revenue + Expense accounts
         _budgetRows = accounts
             .Where(a => a.TypeId is AccountType.Revenue or AccountType.Expense)
-            .OrderBy(a => a.TypeId).ThenBy(a => a.Name)
+            .OrderBy(a => a.TypeId).ThenBy(a => a.Number)
             .Select(a =>
             {
                 var budget = budgets.FirstOrDefault(b => b.AccountId == a.Id);
@@ -182,7 +182,7 @@ else
         var openingBalances = journalEntries.Where(j => j.IsOpeningBalance).ToList();
         _openingBalanceRows = accounts
             .Where(a => a.TypeId == AccountType.Asset)
-            .OrderBy(a => a.Name)
+            .OrderBy(a => a.Number)
             .Select(a =>
             {
                 var ob = openingBalances.FirstOrDefault(j => j.DebitAccountId == a.Id);
