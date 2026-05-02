@@ -20,7 +20,7 @@ else
 {
     @foreach (var type in _accountTypes)
     {
-        var typeAccounts = _accounts.Where(a => a.Type == type.Name).ToList();
+        var typeAccounts = _accounts.Where(a => a.Type == type.Name).OrderBy(a => a.Number).ToList();
         if (typeAccounts.Count == 0) continue;
 
         <MudCard Elevation="0" Class="mb-4" Style="border: 1px solid var(--mud-palette-divider); border-radius: 12px;">
