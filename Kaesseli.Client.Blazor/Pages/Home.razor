@@ -9,9 +9,9 @@
 @if (_overview is null)
 {
     <MudGrid>
-        @for (var i = 0; i < 3; i++)
+        @for (var i = 0; i < 4; i++)
         {
-            <MudItem xs="12" sm="6" lg="4">
+            <MudItem xs="12" sm="6" lg="3">
                 <MudSkeleton SkeletonType="SkeletonType.Rectangle" Height="220px" />
             </MudItem>
         }
@@ -20,25 +20,32 @@
 else
 {
     <MudGrid>
-        <MudItem xs="12" sm="6" lg="4">
+        <MudItem xs="12" sm="6" lg="3">
             <OverviewCard Title="Einkommen"
                           Icon="@Icons.Material.Rounded.TrendingUp"
                           IconColor="#21BA45"
                           Summary="_overview.Revenue"
                           ShowBudget="true" />
         </MudItem>
-        <MudItem xs="12" sm="6" lg="4">
+        <MudItem xs="12" sm="6" lg="3">
             <OverviewCard Title="Ausgaben"
                           Icon="@Icons.Material.Rounded.TrendingDown"
                           IconColor="#C10015"
                           Summary="_overview.Expense"
                           ShowBudget="true" />
         </MudItem>
-        <MudItem xs="12" sm="6" lg="4">
+        <MudItem xs="12" sm="6" lg="3">
             <OverviewCard Title="Vermögen"
                           Icon="@Icons.Material.Rounded.AccountBalance"
                           IconColor="#4254F3"
                           Summary="_overview.Asset"
+                          ShowBudget="false" />
+        </MudItem>
+        <MudItem xs="12" sm="6" lg="3">
+            <OverviewCard Title="Passiven"
+                          Icon="@Icons.Material.Rounded.AccountBalanceWallet"
+                          IconColor="#795548"
+                          Summary="_overview.Liability"
                           ShowBudget="false" />
         </MudItem>
     </MudGrid>
