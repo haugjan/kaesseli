@@ -82,13 +82,7 @@ else
                                 </div>
                                 <div class="account-mobile-main">
                                     <span class="account-mobile-name">@acc.Name</span>
-                                    <span class="account-mobile-info-wrapper" @onclick:stopPropagation="true" @onclick="@(() => {})">
-                                        <MudTooltip Text="@($"Konto-Nr. {acc.Number}")" Arrow="true">
-                                            <MudIcon Icon="@Icons.Material.Outlined.Info"
-                                                     Size="Size.Small"
-                                                     Class="account-mobile-info" />
-                                        </MudTooltip>
-                                    </span>
+                                    <span class="account-mobile-account-number">@acc.Number</span>
                                 </div>
                                 <div class="account-mobile-numbers">
                                     <span class="account-mobile-number">@FormatNumber(acc.AccountBalance)</span>

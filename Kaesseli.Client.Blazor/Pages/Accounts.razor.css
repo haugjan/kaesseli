@@ -28,8 +28,7 @@
 .account-mobile-main {
     grid-column: 2;
     display: flex;
-    align-items: center;
-    gap: 6px;
+    flex-direction: column;
     min-width: 0;
 }
 
@@ -40,13 +39,9 @@
     white-space: nowrap;
 }
 
-.account-mobile-info-wrapper {
-    display: inline-flex;
-    align-items: center;
-    flex-shrink: 0;
-}
-
-.account-mobile-info {
+.account-mobile-account-number {
+    font-variant-numeric: tabular-nums;
+    font-size: 0.75rem;
     color: var(--mud-palette-text-secondary);
 }
 
