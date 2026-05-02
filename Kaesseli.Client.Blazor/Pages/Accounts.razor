@@ -20,7 +20,7 @@ else
 {
     @foreach (var type in _accountTypes)
     {
-        var typeAccounts = _accounts.Where(a => a.Type == type.Name).ToList();
+        var typeAccounts = _accounts.Where(a => a.Type == type.Name).OrderBy(a => a.Number).ToList();
         if (typeAccounts.Count == 0) continue;
 
         <MudCard Elevation="0" Class="mb-4" Style="border: 1px solid var(--mud-palette-divider); border-radius: 12px;">
@@ -80,14 +80,24 @@ else
                                         <MudIcon Icon="@GetMudIcon(acc.Icon)" Size="Size.Small" />
                                     </MudAvatar>
                                 </div>
-                                <span class="account-mobile-number">@acc.Number</span>
-                                <span class="account-mobile-name">@acc.Name</span>
-                                <span class="account-mobile-balance">@FormatNumber(acc.AccountBalance)</span>
-                                @if (type.ShowBudget)
-                                {
-                                    <span class="account-mobile-budget-month">@FormatNullable(acc.BudgetPerMonth)</span>
-                                    <span class="account-mobile-budget-balance" style="@BudgetBalanceStyle(acc.BudgetBalance)">@FormatNullable(acc.BudgetBalance)</span>
-                                }
+                                <div class="account-mobile-main">
+                                    <span class="account-mobile-name">@acc.Name</span>
+                                    <span class="account-mobile-info-wrapper" @onclick:stopPropagation="true" @onclick="@(() => {})">
+                                        <MudTooltip Text="@($"Konto-Nr. {acc.Number}")" Arrow="true">
+                                            <MudIcon Icon="@Icons.Material.Outlined.Info"
+                                                     Size="Size.Small"
+                                                     Class="account-mobile-info" />
+                                        </MudTooltip>
+                                    </span>
+                                </div>
+                                <div class="account-mobile-numbers">
+                                    <span class="account-mobile-number">@FormatNumber(acc.AccountBalance)</span>
+                                    @if (type.ShowBudget)
+                                    {
+                                        <span class="account-mobile-number account-mobile-number-secondary">@FormatNullable(acc.BudgetPerMonth)</span>
+                                        <span class="account-mobile-number" style="@BudgetBalanceStyle(acc.BudgetBalance)">@FormatNullable(acc.BudgetBalance)</span>
+                                    }
+                                </div>
                             </div>
                         }
                     </div>

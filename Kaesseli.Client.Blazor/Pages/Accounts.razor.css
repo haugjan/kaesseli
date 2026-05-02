@@ -5,10 +5,8 @@
 
 .account-mobile-row {
     display: grid;
-    grid-template-columns: 36px 60px 1fr auto;
-    grid-template-rows: auto auto;
+    grid-template-columns: 36px 1fr auto;
     column-gap: 10px;
-    row-gap: 2px;
     align-items: center;
     padding: 10px 16px;
     border-top: 1px solid var(--mud-palette-divider);
@@ -25,45 +23,46 @@
 
 .account-mobile-icon {
     grid-column: 1;
-    grid-row: 1;
 }
 
-.account-mobile-number {
+.account-mobile-main {
     grid-column: 2;
-    grid-row: 1;
-    font-variant-numeric: tabular-nums;
-    color: var(--mud-palette-text-secondary);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    min-width: 0;
 }
 
 .account-mobile-name {
-    grid-column: 3 / span 2;
-    grid-row: 1;
     font-weight: 500;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
 }
 
-.account-mobile-balance {
-    grid-column: 2;
-    grid-row: 2;
-    font-variant-numeric: tabular-nums;
-    font-size: 0.875rem;
+.account-mobile-info-wrapper {
+    display: inline-flex;
+    align-items: center;
+    flex-shrink: 0;
 }
 
-.account-mobile-budget-month {
-    grid-column: 3;
-    grid-row: 2;
-    font-variant-numeric: tabular-nums;
-    font-size: 0.875rem;
+.account-mobile-info {
     color: var(--mud-palette-text-secondary);
-    text-align: right;
 }
 
-.account-mobile-budget-balance {
-    grid-column: 4;
-    grid-row: 2;
+.account-mobile-numbers {
+    grid-column: 3;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.account-mobile-number {
     font-variant-numeric: tabular-nums;
     font-size: 0.875rem;
     text-align: right;
+}
+
+.account-mobile-number-secondary {
+    color: var(--mud-palette-text-secondary);
 }
