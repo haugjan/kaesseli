@@ -1,19 +1,27 @@
 ---
 name: Blazor Migration Analysis
-description: Geplante Migration des Vue/Quasar-Clients (Kaesseli.Client) zu Blazor WebAssembly (clientside)
+description: Migration des Vue/Quasar-Clients (Kaesseli.Client) zu Blazor WebAssembly — im Wesentlichen abgeschlossen, Vue-Client eingefroren
 type: project
 ---
 
-## Ziel
-Den bestehenden Vue 3 + Quasar-Client durch eine Blazor WebAssembly App ersetzen.
+## Status: weitgehend abgeschlossen
 
-**Why:** Einheitliche C#-Sprache über Frontend und Backend, geteilte Modelle, sauberere MSAL-Auth-Integration, kein JS/TS-Toolchain-Overhead.
+Der Blazor-Client (`Kaesseli.Client.Blazor/`) ist die produktive UI; der Vue-Client (`Kaesseli.Client/`) ist eingefroren und wird nicht mehr ins Docker-Image gepublished. Bei neuen Features ausschließlich Blazor anfassen. Diese Datei hält den ursprünglichen Migrationsplan als historischen Kontext fest.
 
-**How to apply:** Bei Implementierungsentscheidungen Blazor-Äquivalente bevorzugen; Shared-Projekt für DTOs vorschlagen.
+**Tatsächliche Auth-Lösung (anders als ursprünglich geplant):** Statt Azure AD/MSAL ist der Endzustand **Google Sign-In via OIDC** mit Email-Allowlist auf dem Backend (siehe `analysis_backend.md::GoogleAuth.cs`). Davor gab es ein Zwischenstadium mit Basic Auth — beides ist Geschichte.
 
 ---
 
-## Aktueller Vue-Client
+## Ziel (ursprünglich)
+Den bestehenden Vue 3 + Quasar-Client durch eine Blazor WebAssembly App ersetzen.
+
+**Why:** Einheitliche C#-Sprache über Frontend und Backend, geteilte Modelle, sauberere Auth-Integration, kein JS/TS-Toolchain-Overhead.
+
+**How to apply:** Bei neuen Features Blazor verwenden; nicht mehr Vue. Shared-DTOs liegen in `Kaesseli.Contracts`.
+
+---
+
+## Vue-Client (Legacy)
 
 - **Stack**: Vue 3, Quasar Framework, TypeScript, Axios
 - **Kein State-Management-Framework** (kein Pinia/Vuex) – component-local mit `ref()`
@@ -22,67 +30,52 @@ Den bestehenden Vue 3 + Quasar-Client durch eine Blazor WebAssembly App ersetzen
 - **API-Base**: `https://localhost:7123/`
 - **Sprache**: Deutsch (UI), TypeScript (Code)
 
-### Komponenten
-| Vue | Route | Funktion |
+### Vue-Komponenten (was migriert wurde)
+| Vue | Blazor-Pendant | Route |
 |---|---|---|
-| KaesseliHome | `/` | Dashboard: Kontosalden, Budgetübersicht |
-| KaesseliAccounts | `/accounts` | Konten nach Typ gruppiert |
-| KaesseliAccountTable | `/accountTable/:id` | Buchungen eines Kontos |
-| KaesseliTransactions | `/transactions` | Kontoauszüge + Transaktionsliste |
-| KaesseliImport | `/import` | CSV/CAMT-Datei-Upload |
-| KaesseliAssign | `/assign` | Transaktionen zuordnen (komplex: Split, Automation, KI-Vorschläge) |
+| KaesseliHome | `Pages/Home.razor` | `/` |
+| KaesseliAccounts | `Pages/Accounts.razor` | `/accounts` |
+| KaesseliAccountTable | `Pages/AccountTable.razor` | `/accountTable/{...}` |
+| KaesseliTransactions | `Pages/Transactions.razor` | `/transactions` |
+| KaesseliImport | `Pages/Import.razor` | `/import` |
+| KaesseliAssign | `Pages/Assign.razor` | `/assign` |
+
+Zusätzlich neu im Blazor-Client (kein Vue-Pendant): `SettingsAccounts`, `AccountingPeriods`, `AccountingPeriodDetail`, `AdminCleanupOrphans`, `Authentication`.
 
 ---
 
-## Blazor-Migrationsplan
+## Tatsächliche Migrations-Mappings
 
-### Projektstruktur
-```
-Kaesseli.Shared/        # NEU: Gemeinsame DTOs (C# Records)
-Kaesseli.Client.Blazor/ # NEU: Blazor WASM (standalone, gegen bestehenden Backend)
-```
-
-### Key Mappings
-| Vue/Quasar | Blazor |
+| Vue/Quasar | Blazor (umgesetzt) |
 |---|---|
 | `ref()`, `onMounted()` | `@code {}`, `OnInitializedAsync()` |
 | Vue Router | `@page "/route"`, `NavigationManager` |
 | Axios | `HttpClient` via DI |
-| Quasar (Material Design) | **MudBlazor** |
-| LocalStorage direkt | `Blazored.LocalStorage` |
-| MSAL-JS | `Microsoft.AspNetCore.Components.WebAssembly.Authentication` |
+| Quasar (Material Design) | **MudBlazor 9.x** |
+| LocalStorage direkt | `IJSRuntime.InvokeAsync("localStorage.*")` (kein Blazored.LocalStorage genutzt) |
+| MSAL-JS | `Microsoft.AspNetCore.Components.WebAssembly.Authentication` (`AddOidcAuthentication`) gegen Google |
+| State-Container | `Services/AccountingPeriodState.cs` (Singleton, `event Action OnChange`) |
 
-### State Management
-Empfehlung: **Service-basiert** (kein Fluxor), da der Vue-Client auch kein Store hatte:
-```csharp
-public class AccountingPeriodState  // Singleton via DI
-{
-    public string? SelectedPeriodId { get; private set; }
-    public event Action? OnChange;
-    public void SetPeriod(string id) { SelectedPeriodId = id; OnChange?.Invoke(); }
-}
-```
-
-### Besonderheiten KaesseliAssign (komplexeste Komponente)
+### KaesseliAssign (komplexeste Komponente)
 - Ctrl+Click für Split: `MouseEventArgs.CtrlKey`
 - Live-Filter: `@oninput` + LINQ
 - Debounced Automation-Counter: `Task.Delay` + `CancellationToken`
 - Split-Betragsverteilung: C# `decimal` (keine JS-Floating-Point-Probleme)
 
-### Auth
+### Auth (Endzustand)
+Google OIDC im Client (`Program.cs`):
 ```csharp
-builder.Services.AddMsalAuthentication(options =>
-    builder.Configuration.Bind("AzureAd", options.ProviderOptions.Authentication));
+builder.Services.AddOidcAuthentication(options =>
+{
+    builder.Configuration.Bind("Auth:Google", options.ProviderOptions);
+    options.ProviderOptions.Authority = "https://accounts.google.com";
+    options.ProviderOptions.MetadataUrl = $"{baseAddress}/auth/google/.well-known/openid-configuration";
+    // ResponseType "code", Scopes openid/email/profile, NameClaim "email"
+});
 ```
-Azure-Config aus `authConfig.js` → `appsettings.json`
+Backend-Validierung über `JwtBearer` + Email-Allowlist; ClientSecret bleibt serverseitig, der Public Client tauscht den Code über den Backend-Token-Proxy.
 
 ---
 
-## API-Endpunkte (Backend bleibt unverändert)
-- `GET /accountingPeriod` / `/{id}/overView` / `/{id}/accountSummary` / `/{id}/account/{accountId}`
-- `GET /transactionSummary`, `GET /transaction?transactionSummaryId={id}`
-- `GET /transaction/nextOpen`, `GET /transaction/totalOpen`
-- `GET /account?accountType={id}`
-- `GET /automation/nrMatchInput?input={text}`
-- `POST /file/upload` (multipart), `POST /automation`
-- `PATCH /transaction/journalEntry`, `PATCH /transaction/journalEntry/split`
+## API-Endpunkte
+Siehe `analysis_backend.md::Endpoint-Übersicht`. Backend wurde während der Migration um YAML-Kontoplan-Export/Import (`/account/plan`), Wartungs-Endpoint (`/admin/cleanupOrphanedAccountReferences`), Health-Check (`/healthz`) und die OIDC-Proxies (`/auth/google/...`) erweitert.
