@@ -222,6 +222,32 @@ public class KaesseliApiService(HttpClient httpClient)
         response.EnsureSuccessStatusCode();
     }
 
+    public async Task AddJournalEntryAsync(
+        decimal amount,
+        string description,
+        DateOnly valueDate,
+        Guid debitAccountId,
+        Guid creditAccountId,
+        Guid accountingPeriodId,
+        CancellationToken ct = default
+    )
+    {
+        var response = await httpClient.PostAsJsonAsync(
+            "journalEntry",
+            new
+            {
+                amount,
+                description,
+                valueDate,
+                debitAccountId,
+                creditAccountId,
+                accountingPeriodId,
+            },
+            ct
+        );
+        response.EnsureSuccessStatusCode();
+    }
+
     public async Task AddAccountAsync(
         string name,
         AccountType type,
