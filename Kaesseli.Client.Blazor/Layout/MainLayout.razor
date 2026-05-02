@@ -5,6 +5,7 @@
 @inject AccountingPeriodState PeriodState
 @inject IJSRuntime JS
 @inject AuthenticationStateProvider AuthState
+@inject NavigationManager Navigation
 
 <MudThemeProvider Theme="_theme" IsDarkMode="_isDarkMode" />
 <MudPopoverProvider />
@@ -12,9 +13,13 @@
 <MudSnackbarProvider />
 
 <MudLayout>
-    <MudAppBar Elevation="0" Style="border-bottom: 1px solid var(--mud-palette-divider);">
+    <MudAppBar Elevation="0" Style="@AppBarStyle">
         <MudIconButton Icon="@Icons.Material.Rounded.Menu" Color="Color.Dark" Edge="Edge.Start"
                        OnClick="@(_ => _drawerOpen = !_drawerOpen)" />
+        @if (IsDev)
+        {
+            <span class="dev-badge">DEV</span>
+        }
         <MudSpacer />
         @if (PeriodState.Periods.Any())
         {
@@ -55,6 +60,12 @@
     readonly MudTheme _theme = KaesseliTheme.Create();
     bool _isDarkMode;
     bool _drawerOpen = true;
+
+    private bool IsDev => new Uri(Navigation.BaseUri).Host.Contains("-dev", StringComparison.OrdinalIgnoreCase);
+
+    private string AppBarStyle => IsDev
+        ? "border-bottom: 1px solid var(--mud-palette-divider); background-color: #FFF3CD;"
+        : "border-bottom: 1px solid var(--mud-palette-divider);";
 
     protected override async Task OnInitializedAsync()
     {
