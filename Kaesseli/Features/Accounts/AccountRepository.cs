@@ -53,7 +53,7 @@ internal class AccountRepository(KaesseliContext context) : IAccountRepository
     }
 
     public async Task<IEnumerable<Account>> GetAccounts(CancellationToken cancellationToken) =>
-        await context.Accounts.OrderBy(account => account.Name).ToListAsync(cancellationToken);
+        await context.Accounts.OrderBy(account => account.Number).ToListAsync(cancellationToken);
 
     public async Task<IEnumerable<Account>> GetAccounts(
         AccountType accountType,
@@ -61,6 +61,7 @@ internal class AccountRepository(KaesseliContext context) : IAccountRepository
     ) =>
         await context
             .Accounts.Where(account => account.Type == accountType)
+            .OrderBy(account => account.Number)
             .ToListAsync(cancellationToken);
 
     public async Task<Account> GetAccount(Guid accountId, CancellationToken cancellationToken) =>

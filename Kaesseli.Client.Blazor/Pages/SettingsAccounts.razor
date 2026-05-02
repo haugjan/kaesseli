@@ -113,7 +113,7 @@
     private async Task LoadAsync()
     {
         var accounts = await Api.GetAccountsAsync();
-        _accounts = accounts?.OrderBy(a => a.TypeId).ThenBy(a => a.Name).ToList() ?? [];
+        _accounts = accounts?.OrderBy(a => a.TypeId).ThenBy(a => a.Number).ToList() ?? [];
     }
 
     private async Task OnExportClicked()
