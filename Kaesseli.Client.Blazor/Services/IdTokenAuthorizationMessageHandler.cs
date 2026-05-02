@@ -1,9 +1,13 @@
+using System.Net;
 using System.Net.Http.Headers;
+using Microsoft.AspNetCore.Components;
+using Microsoft.AspNetCore.Components.WebAssembly.Authentication;
 using Microsoft.JSInterop;
 
 namespace Kaesseli.Client.Blazor.Services;
 
-public sealed class IdTokenAuthorizationMessageHandler(IJSRuntime js) : DelegatingHandler
+public sealed class IdTokenAuthorizationMessageHandler(IJSRuntime js, NavigationManager navigation)
+    : DelegatingHandler
 {
     protected override async Task<HttpResponseMessage> SendAsync(
         HttpRequestMessage request,
@@ -22,6 +26,17 @@ public sealed class IdTokenAuthorizationMessageHandler(IJSRuntime js) : Delegati
         }
         catch (JSException) { }
 
-        return await base.SendAsync(request, cancellationToken);
+        var response = await base.SendAsync(request, cancellationToken);
+
+        if (response.StatusCode == HttpStatusCode.Unauthorized && !IsOnAuthenticationPage())
+            navigation.NavigateToLogin("authentication/login");
+
+        return response;
+    }
+
+    private bool IsOnAuthenticationPage()
+    {
+        var path = navigation.ToBaseRelativePath(navigation.Uri);
+        return path.StartsWith("authentication/", StringComparison.OrdinalIgnoreCase);
     }
 }
