@@ -78,8 +78,15 @@
 
     private async Task LoadAsync()
     {
-        var periods = await Api.GetAccountingPeriodsAsync();
-        _periods = periods?.OrderByDescending(p => p.FromInclusive).ToList() ?? [];
+        try
+        {
+            var periods = await Api.GetAccountingPeriodsAsync();
+            _periods = periods?.OrderByDescending(p => p.FromInclusive).ToList() ?? [];
+        }
+        catch (HttpRequestException)
+        {
+            _periods = [];
+        }
     }
 
     private async Task OnAddClicked()
