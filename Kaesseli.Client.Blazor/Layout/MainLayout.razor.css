@@ -6,3 +6,16 @@
     height: 56px;
     box-sizing: border-box;
 }
+
+.dev-badge {
+    display: inline-flex;
+    align-items: center;
+    background-color: #1F1300;
+    color: #FFC107;
+    font-weight: 700;
+    font-size: 0.75rem;
+    letter-spacing: 0.15em;
+    padding: 4px 10px;
+    border-radius: 4px;
+    margin-right: 10px;
+}
