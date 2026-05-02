@@ -171,23 +171,19 @@
 
     private async Task OnAddClicked()
     {
-        var parameters = new DialogParameters<AccountDialog>();
+        var parameters = new DialogParameters<AccountDialog>
+        {
+            { x => x.OnSubmitAsync, new Func<AccountDialog.FormModel, Task>(model =>
+                Api.AddAccountAsync(model.Name!, model.Type, model.Number!, model.ShortName!, model.Icon, model.IconColor)) },
+        };
         var options = new DialogOptions { MaxWidth = MaxWidth.Small, FullWidth = true };
         var dialog = await DialogService.ShowAsync<AccountDialog>("Neues Konto", parameters, options);
         var result = await dialog.Result;
 
-        if (result is { Canceled: false, Data: AccountDialog.FormModel model })
+        if (result is { Canceled: false })
         {
-            try
-            {
-                await Api.AddAccountAsync(model.Name!, model.Type, model.Number!, model.ShortName!, model.Icon, model.IconColor);
-                Snackbar.Add("Konto erstellt.", Severity.Success);
-                await LoadAsync();
-            }
-            catch
-            {
-                Snackbar.Add("Fehler beim Erstellen.", Severity.Error);
-            }
+            Snackbar.Add("Konto erstellt.", Severity.Success);
+            await LoadAsync();
         }
     }
 
@@ -204,23 +200,17 @@
                 Icon = account.Icon,
                 IconColor = account.IconColor,
             }},
+            { x => x.OnSubmitAsync, new Func<AccountDialog.FormModel, Task>(model =>
+                Api.UpdateAccountAsync(account.Id, model.Name!, model.Type, model.Number!, model.ShortName!, model.Icon, model.IconColor)) },
         };
         var options = new DialogOptions { MaxWidth = MaxWidth.Small, FullWidth = true };
         var dialog = await DialogService.ShowAsync<AccountDialog>("Konto bearbeiten", parameters, options);
         var result = await dialog.Result;
 
-        if (result is { Canceled: false, Data: AccountDialog.FormModel model })
+        if (result is { Canceled: false })
         {
-            try
-            {
-                await Api.UpdateAccountAsync(account.Id, model.Name!, model.Type, model.Number!, model.ShortName!, model.Icon, model.IconColor);
-                Snackbar.Add("Konto aktualisiert.", Severity.Success);
-                await LoadAsync();
-            }
-            catch
-            {
-                Snackbar.Add("Fehler beim Aktualisieren.", Severity.Error);
-            }
+            Snackbar.Add("Konto aktualisiert.", Severity.Success);
+            await LoadAsync();
         }
     }
 

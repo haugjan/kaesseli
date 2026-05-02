@@ -245,6 +245,7 @@ public class KaesseliApiService(HttpClient httpClient)
             },
             ct
         );
+        await ThrowOnDuplicateAccountFieldAsync(response, ct);
         response.EnsureSuccessStatusCode();
     }
 
@@ -273,7 +274,36 @@ public class KaesseliApiService(HttpClient httpClient)
             },
             ct
         );
+        await ThrowOnDuplicateAccountFieldAsync(response, ct);
         response.EnsureSuccessStatusCode();
+    }
+
+    private static async Task ThrowOnDuplicateAccountFieldAsync(
+        HttpResponseMessage response,
+        CancellationToken ct
+    )
+    {
+        if (response.StatusCode != System.Net.HttpStatusCode.Conflict)
+            return;
+        var body = await response.Content.ReadAsStringAsync(ct);
+        try
+        {
+            using var doc = System.Text.Json.JsonDocument.Parse(body);
+            if (
+                doc.RootElement.TryGetProperty("field", out var field)
+                && doc.RootElement.TryGetProperty("message", out var message)
+            )
+            {
+                throw new DuplicateAccountFieldException(
+                    field.GetString() ?? string.Empty,
+                    message.GetString() ?? string.Empty
+                );
+            }
+        }
+        catch (System.Text.Json.JsonException)
+        {
+            // 409 ohne strukturiertes Body fällt durch zu EnsureSuccessStatusCode.
+        }
     }
 
     public async Task DeleteAccountAsync(Guid id, CancellationToken ct = default)

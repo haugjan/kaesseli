@@ -60,8 +60,19 @@ public static class AccountApi
                     CancellationToken ct
                 ) =>
                 {
-                    var guid = await handler.Handle(command, ct);
-                    return Results.Created(uri: $"/account/{guid}", guid);
+                    try
+                    {
+                        var guid = await handler.Handle(command, ct);
+                        return Results.Created(uri: $"/account/{guid}", guid);
+                    }
+                    catch (DuplicateAccountNumberException ex)
+                    {
+                        return Results.Conflict(new { field = "number", message = ex.Message });
+                    }
+                    catch (DuplicateAccountShortNameException ex)
+                    {
+                        return Results.Conflict(new { field = "shortName", message = ex.Message });
+                    }
                 }
             );
 
@@ -104,8 +115,19 @@ public static class AccountApi
                 pattern: "/account/{id}",
                 async (UpdateAccount.IHandler handler, Guid id, UpdateAccount.Query command) =>
                 {
-                    await handler.Handle(command with { Id = id }, default);
-                    return Results.NoContent();
+                    try
+                    {
+                        await handler.Handle(command with { Id = id }, default);
+                        return Results.NoContent();
+                    }
+                    catch (DuplicateAccountNumberException ex)
+                    {
+                        return Results.Conflict(new { field = "number", message = ex.Message });
+                    }
+                    catch (DuplicateAccountShortNameException ex)
+                    {
+                        return Results.Conflict(new { field = "shortName", message = ex.Message });
+                    }
                 }
             );
 
