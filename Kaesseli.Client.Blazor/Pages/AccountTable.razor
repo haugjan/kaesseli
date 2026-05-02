@@ -1,7 +1,10 @@
 @page "/accountTable/{AccountId:guid}"
+@using Kaesseli.Client.Blazor.Components
 @using Kaesseli.Client.Blazor.Services
 @inject KaesseliApiService Api
 @inject AccountingPeriodState PeriodState
+@inject IDialogService DialogService
+@inject ISnackbar Snackbar
 @implements IDisposable
 
 <PageTitle>@(_account?.Name ?? "Konto")</PageTitle>
@@ -63,12 +66,22 @@ else
                         <MudTh>Beschreibung</MudTh>
                         <MudTh>Gegenkonto</MudTh>
                         <MudTh Style="text-align: right;">Betrag</MudTh>
+                        <MudTh Style="width: 48px;"></MudTh>
                     </HeaderContent>
                     <RowTemplate>
                         <MudTd Style="@RowStyle(context)">@context.ValueDate.ToString("dd.MM.yyyy")</MudTd>
                         <MudTd Style="@RowStyle(context)">@context.Description</MudTd>
                         <MudTd Style="@RowStyle(context)">@context.OtherAccount</MudTd>
                         <MudTd Style="@AmountStyle(context)">@FormatNumber(context.Amount)</MudTd>
+                        <MudTd Style="text-align: right;">
+                            @if (IsDeletable(context))
+                            {
+                                <MudIconButton Icon="@Icons.Material.Rounded.Delete"
+                                               Size="Size.Small"
+                                               Color="Color.Default"
+                                               OnClick="@(() => ConfirmDeleteAsync(context))" />
+                            }
+                        </MudTd>
                     </RowTemplate>
                 </MudTable>
             </MudHidden>
@@ -76,11 +89,20 @@ else
                 <div class="entry-mobile-list">
                     @foreach (var entry in _account.Entries)
                     {
-                        <div class="entry-mobile-row" style="@RowStyle(entry)">
-                            <span class="entry-mobile-date">@entry.ValueDate.ToString("dd.MM.yyyy")</span>
-                            <span class="entry-mobile-other">@entry.OtherAccount</span>
-                            <span class="entry-mobile-amount" style="@AmountStyle(entry)">@FormatNumber(entry.Amount)</span>
-                            <span class="entry-mobile-description">@entry.Description</span>
+                        var e = entry;
+                        <div class="entry-mobile-row" style="@RowStyle(e)">
+                            <span class="entry-mobile-date">@e.ValueDate.ToString("dd.MM.yyyy")</span>
+                            <span class="entry-mobile-other">@e.OtherAccount</span>
+                            <span class="entry-mobile-amount" style="@AmountStyle(e)">@FormatNumber(e.Amount)</span>
+                            <span class="entry-mobile-description">@e.Description</span>
+                            @if (IsDeletable(e))
+                            {
+                                <MudIconButton Icon="@Icons.Material.Rounded.Delete"
+                                               Size="Size.Small"
+                                               Color="Color.Default"
+                                               Class="entry-mobile-delete"
+                                               OnClick="@(() => ConfirmDeleteAsync(e))" />
+                            }
                         </div>
                     }
                 </div>
@@ -120,6 +142,34 @@ else
     {
         if (PeriodState.SelectedPeriodId is null) return;
         _account = await Api.GetAccountStatementAsync(PeriodState.SelectedPeriodId.Value, AccountId);
+    }
+
+    private static bool IsDeletable(AccountStatementEntry entry) =>
+        entry.AmountType is AmountType.Credit or AmountType.Debit;
+
+    private async Task ConfirmDeleteAsync(AccountStatementEntry entry)
+    {
+        var parameters = new DialogParameters
+        {
+            { nameof(DeleteJournalEntryConfirmationDialog.Amount), entry.Amount },
+            { nameof(DeleteJournalEntryConfirmationDialog.Description), entry.Description },
+            { nameof(DeleteJournalEntryConfirmationDialog.ValueDate), entry.ValueDate },
+        };
+
+        var dialog = await DialogService.ShowAsync<DeleteJournalEntryConfirmationDialog>("Buchung löschen", parameters);
+        var result = await dialog.Result;
+        if (result is null || result.Canceled) return;
+
+        try
+        {
+            await Api.DeleteJournalEntryAsync(entry.Id);
+            Snackbar.Add("Buchung gelöscht.", Severity.Success);
+            await LoadAsync();
+        }
+        catch
+        {
+            Snackbar.Add("Fehler beim Löschen.", Severity.Error);
+        }
     }
 
     private static string FormatNumber(decimal value) => value.ToString("N2");
