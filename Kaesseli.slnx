@@ -16,7 +16,6 @@
     <Project Path="Tests/Kaesseli.Test/Kaesseli.Test.csproj" />
   </Folder>
   <Project Path="Kaesseli.Client.Blazor/Kaesseli.Client.Blazor.csproj" />
-  <Project Path="Kaesseli.Client/Kaesseli.Client.esproj" />
   <Project Path="Kaesseli.Contracts/Kaesseli.Contracts.csproj" />
   <Project Path="Kaesseli/Kaesseli.csproj" />
 </Solution>
