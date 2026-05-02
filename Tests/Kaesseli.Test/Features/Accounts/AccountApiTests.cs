@@ -183,6 +183,93 @@ public class AccountApiTests : IAsyncLifetime
     }
 
     [Fact]
+    public async Task AddAccountEndpoint_ShouldReturnConflict_WhenNumberDuplicate()
+    {
+        _addAccountMock
+            .Handle(Arg.Any<AddAccount.Query>(), Arg.Any<CancellationToken>())
+            .Returns(Task.FromException<Guid>(new DuplicateAccountNumberException("1000")));
+
+        var content = new StringContent(
+            JsonSerializer.Serialize(new SmartFaker<AddAccount.Query>().Generate()),
+            Encoding.UTF8,
+            "application/json"
+        );
+
+        var response = await _client.PostAsync("/account", content);
+
+        response.StatusCode.ShouldBe(HttpStatusCode.Conflict);
+        var body = await response.Content.ReadAsStringAsync();
+        using var doc = JsonDocument.Parse(body);
+        doc.RootElement.GetProperty("field").GetString().ShouldBe("number");
+        doc.RootElement.GetProperty("message").GetString().ShouldNotBeNullOrEmpty();
+    }
+
+    [Fact]
+    public async Task AddAccountEndpoint_ShouldReturnConflict_WhenShortNameDuplicate()
+    {
+        _addAccountMock
+            .Handle(Arg.Any<AddAccount.Query>(), Arg.Any<CancellationToken>())
+            .Returns(Task.FromException<Guid>(new DuplicateAccountShortNameException("bank")));
+
+        var content = new StringContent(
+            JsonSerializer.Serialize(new SmartFaker<AddAccount.Query>().Generate()),
+            Encoding.UTF8,
+            "application/json"
+        );
+
+        var response = await _client.PostAsync("/account", content);
+
+        response.StatusCode.ShouldBe(HttpStatusCode.Conflict);
+        var body = await response.Content.ReadAsStringAsync();
+        using var doc = JsonDocument.Parse(body);
+        doc.RootElement.GetProperty("field").GetString().ShouldBe("shortName");
+    }
+
+    [Fact]
+    public async Task UpdateAccountEndpoint_ShouldReturnConflict_WhenNumberDuplicate()
+    {
+        var accountId = Guid.NewGuid();
+        _updateAccountMock
+            .Handle(Arg.Any<UpdateAccount.Query>(), Arg.Any<CancellationToken>())
+            .Returns(Task.FromException(new DuplicateAccountNumberException("1000")));
+
+        var content = new StringContent(
+            JsonSerializer.Serialize(new SmartFaker<UpdateAccount.Query>().Generate()),
+            Encoding.UTF8,
+            "application/json"
+        );
+
+        var response = await _client.PutAsync($"/account/{accountId}", content);
+
+        response.StatusCode.ShouldBe(HttpStatusCode.Conflict);
+        var body = await response.Content.ReadAsStringAsync();
+        using var doc = JsonDocument.Parse(body);
+        doc.RootElement.GetProperty("field").GetString().ShouldBe("number");
+    }
+
+    [Fact]
+    public async Task UpdateAccountEndpoint_ShouldReturnConflict_WhenShortNameDuplicate()
+    {
+        var accountId = Guid.NewGuid();
+        _updateAccountMock
+            .Handle(Arg.Any<UpdateAccount.Query>(), Arg.Any<CancellationToken>())
+            .Returns(Task.FromException(new DuplicateAccountShortNameException("bank")));
+
+        var content = new StringContent(
+            JsonSerializer.Serialize(new SmartFaker<UpdateAccount.Query>().Generate()),
+            Encoding.UTF8,
+            "application/json"
+        );
+
+        var response = await _client.PutAsync($"/account/{accountId}", content);
+
+        response.StatusCode.ShouldBe(HttpStatusCode.Conflict);
+        var body = await response.Content.ReadAsStringAsync();
+        using var doc = JsonDocument.Parse(body);
+        doc.RootElement.GetProperty("field").GetString().ShouldBe("shortName");
+    }
+
+    [Fact]
     public async Task DeleteAccountEndpoint_ShouldReturnConflict_WhenAccountIsInUse()
     {
         // Arrange

@@ -1,3 +1,4 @@
+@using Kaesseli.Client.Blazor.Services
 @using Kaesseli.Contracts.Accounts
 @using MudBlazor.Utilities
 
@@ -56,8 +57,8 @@
         </MudForm>
     </DialogContent>
     <DialogActions>
-        <MudButton OnClick="Cancel">Abbrechen</MudButton>
-        <MudButton Color="Color.Primary" Variant="Variant.Filled" OnClick="Submit">Speichern</MudButton>
+        <MudButton OnClick="Cancel" Disabled="_submitting">Abbrechen</MudButton>
+        <MudButton Color="Color.Primary" Variant="Variant.Filled" OnClick="Submit" Disabled="_submitting">Speichern</MudButton>
     </DialogActions>
 </MudDialog>
 
@@ -66,10 +67,15 @@
     private MudColor _color = new("#1E88E5");
     private string _numberSuffix = string.Empty;
     private bool _shortNameUserEdited;
+    private string? _numberServerError;
+    private string? _shortNameServerError;
+    private bool _submitting;
 
     [CascadingParameter] private IMudDialogInstance MudDialog { get; set; } = null!;
 
     [Parameter] public FormModel Model { get; set; } = new();
+
+    [Parameter] public Func<FormModel, Task>? OnSubmitAsync { get; set; }
 
     public static readonly Dictionary<string, string> IconPalette = new()
     {
@@ -169,22 +175,26 @@
     {
         Model.ShortName = newShortName?.ToLowerInvariant();
         _shortNameUserEdited = true;
+        _shortNameServerError = null;
     }
 
     private void OnTypeChanged(AccountType type)
     {
         Model.Type = type;
         Model.Number = $"{ExpectedNumberPrefix}{_numberSuffix}";
+        _numberServerError = null;
     }
 
     private void OnNumberSuffixChanged(string newSuffix)
     {
         _numberSuffix = newSuffix ?? string.Empty;
         Model.Number = $"{ExpectedNumberPrefix}{_numberSuffix}";
+        _numberServerError = null;
     }
 
     private string? ValidateNumberSuffix(string? value)
     {
+        if (_numberServerError is not null) return _numberServerError;
         if (string.IsNullOrEmpty(value)) return null; // Required handles empty
         if (!SuffixRegex.IsMatch(value)) return "Genau 3 Ziffern.";
         return null;
@@ -192,6 +202,7 @@
 
     private string? ValidateShortName(string? value)
     {
+        if (_shortNameServerError is not null) return _shortNameServerError;
         if (string.IsNullOrEmpty(value)) return null;
         if (!ShortNameRegex.IsMatch(value)) return "2-20 Zeichen, nur a-z, 0-9, Bindestrich.";
         return null;
@@ -216,6 +227,32 @@
         if (!_form.IsValid) return;
 
         Model.IconColor = _color.ToString(MudColorOutputFormats.Hex);
+
+        if (OnSubmitAsync is null)
+        {
+            MudDialog.Close(DialogResult.Ok(Model));
+            return;
+        }
+
+        _submitting = true;
+        try
+        {
+            await OnSubmitAsync(Model);
+        }
+        catch (DuplicateAccountFieldException ex)
+        {
+            if (ex.Field == "number")
+                _numberServerError = "Diese Kontonummer ist bereits vergeben.";
+            else if (ex.Field == "shortName")
+                _shortNameServerError = "Diese Kurzbezeichnung ist bereits vergeben.";
+            await _form.ValidateAsync();
+            return;
+        }
+        finally
+        {
+            _submitting = false;
+        }
+
         MudDialog.Close(DialogResult.Ok(Model));
     }
 
