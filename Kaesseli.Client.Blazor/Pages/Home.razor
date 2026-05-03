@@ -25,28 +25,32 @@ else
                           Icon="@Icons.Material.Rounded.TrendingUp"
                           IconColor="#21BA45"
                           Summary="_overview.Revenue"
-                          ShowBudget="true" />
+                          ShowBudget="true"
+                          Href="/accounts?type=Revenue" />
         </MudItem>
         <MudItem xs="12" sm="6" lg="3">
             <OverviewCard Title="Ausgaben"
                           Icon="@Icons.Material.Rounded.TrendingDown"
                           IconColor="#C10015"
                           Summary="_overview.Expense"
-                          ShowBudget="true" />
+                          ShowBudget="true"
+                          Href="/accounts?type=Expense" />
         </MudItem>
         <MudItem xs="12" sm="6" lg="3">
             <OverviewCard Title="Vermögen"
                           Icon="@Icons.Material.Rounded.AccountBalance"
                           IconColor="#4254F3"
                           Summary="_overview.Asset"
-                          ShowBudget="false" />
+                          ShowBudget="false"
+                          Href="/accounts?type=Asset" />
         </MudItem>
         <MudItem xs="12" sm="6" lg="3">
             <OverviewCard Title="Passiven"
                           Icon="@Icons.Material.Rounded.AccountBalanceWallet"
                           IconColor="#795548"
                           Summary="_overview.Liability"
-                          ShowBudget="false" />
+                          ShowBudget="false"
+                          Href="/accounts?type=Liability" />
         </MudItem>
     </MudGrid>
 }
