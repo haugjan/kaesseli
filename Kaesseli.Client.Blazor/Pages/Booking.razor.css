@@ -1,0 +1,8 @@
+.booking-effect {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    margin-top: 4px;
+    font-size: 0.8rem;
+    color: var(--mud-palette-text-secondary);
+}

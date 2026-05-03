@@ -63,6 +63,16 @@
                             <MudSelectItem T="Guid?" Value="account.Id">@account.Number @account.Name</MudSelectItem>
                         }
                     </MudSelect>
+                    @{ var debit = GetEffect(_debitAccountId, isDebit: true); }
+                    @if (debit is not null)
+                    {
+                        <div class="booking-effect">
+                            <MudIcon Icon="@(debit.Increases ? Icons.Material.Rounded.ArrowUpward : Icons.Material.Rounded.ArrowDownward)"
+                                     Color="@(debit.Increases ? Color.Success : Color.Error)"
+                                     Size="Size.Small" />
+                            <span>Saldo @(debit.Increases ? "wird erhöht" : "wird verringert") (@debit.TypeLabel)</span>
+                        </div>
+                    }
                 </MudItem>
                 <MudItem xs="12" sm="6">
                     <MudSelect T="Guid?" @bind-Value="_creditAccountId"
@@ -75,6 +85,16 @@
                             <MudSelectItem T="Guid?" Value="account.Id">@account.Number @account.Name</MudSelectItem>
                         }
                     </MudSelect>
+                    @{ var credit = GetEffect(_creditAccountId, isDebit: false); }
+                    @if (credit is not null)
+                    {
+                        <div class="booking-effect">
+                            <MudIcon Icon="@(credit.Increases ? Icons.Material.Rounded.ArrowUpward : Icons.Material.Rounded.ArrowDownward)"
+                                     Color="@(credit.Increases ? Color.Success : Color.Error)"
+                                     Size="Size.Small" />
+                            <span>Saldo @(credit.Increases ? "wird erhöht" : "wird verringert") (@credit.TypeLabel)</span>
+                        </div>
+                    }
                 </MudItem>
             </MudGrid>
         }
@@ -113,6 +133,29 @@
         && _creditAccountId.HasValue
         && _debitAccountId != _creditAccountId
         && !string.IsNullOrWhiteSpace(_description);
+
+    private BookingEffect? GetEffect(Guid? accountId, bool isDebit)
+    {
+        if (accountId is null) return null;
+        var account = _accounts?.FirstOrDefault(a => a.Id == accountId);
+        if (account is null) return null;
+
+        // Aktiv- und Aufwandskonten erhöhen sich im Soll, Passiv- und Ertragskonten im Haben.
+        var increasesOnDebit = account.TypeId is AccountType.Asset or AccountType.Expense;
+        var increases = isDebit ? increasesOnDebit : !increasesOnDebit;
+        return new BookingEffect(increases, FormatType(account.TypeId));
+    }
+
+    private static string FormatType(AccountType type) => type switch
+    {
+        AccountType.Asset => "Aktiv",
+        AccountType.Liability => "Passiv",
+        AccountType.Revenue => "Einkommen",
+        AccountType.Expense => "Ausgabe",
+        _ => type.ToString()
+    };
+
+    private sealed record BookingEffect(bool Increases, string TypeLabel);
 
     protected override async Task OnInitializedAsync()
     {
