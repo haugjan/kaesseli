@@ -38,6 +38,7 @@ builder.Services.AddScoped(sp =>
 
 builder.Services.AddScoped<KaesseliApiService>();
 builder.Services.AddSingleton<AccountingPeriodState>();
+builder.Services.AddSingleton<PwaUpdateService>();
 builder.Services.AddMudServices();
 
 var host = builder.Build();

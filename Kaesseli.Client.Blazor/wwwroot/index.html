@@ -71,9 +71,62 @@
     </script>
     <script src="_framework/blazor.webassembly#[.{fingerprint}].js"></script>
     <script>
-        if ('serviceWorker' in navigator) {
-            navigator.serviceWorker.register('service-worker.js');
-        }
+        window.kaesseliPwa = (function () {
+            let dotNetRef = null;
+            let waitingWorker = null;
+            let reloading = false;
+
+            function notifyDotNet() {
+                if (dotNetRef) {
+                    dotNetRef.invokeMethodAsync('OnUpdateAvailable');
+                }
+            }
+
+            function trackInstalling(worker) {
+                worker.addEventListener('statechange', () => {
+                    if (worker.state === 'installed' && navigator.serviceWorker.controller) {
+                        waitingWorker = worker;
+                        notifyDotNet();
+                    }
+                });
+            }
+
+            if ('serviceWorker' in navigator) {
+                navigator.serviceWorker.register('service-worker.js').then(reg => {
+                    if (reg.waiting && navigator.serviceWorker.controller) {
+                        waitingWorker = reg.waiting;
+                        notifyDotNet();
+                    }
+                    if (reg.installing) trackInstalling(reg.installing);
+                    reg.addEventListener('updatefound', () => {
+                        if (reg.installing) trackInstalling(reg.installing);
+                    });
+                    document.addEventListener('visibilitychange', () => {
+                        if (document.visibilityState === 'visible') {
+                            reg.update().catch(() => { });
+                        }
+                    });
+                }).catch(() => { });
+
+                navigator.serviceWorker.addEventListener('controllerchange', () => {
+                    if (reloading) return;
+                    reloading = true;
+                    location.reload();
+                });
+            }
+
+            return {
+                init: function (ref) {
+                    dotNetRef = ref;
+                    if (waitingWorker) notifyDotNet();
+                },
+                applyUpdate: function () {
+                    if (waitingWorker) {
+                        waitingWorker.postMessage({ type: 'SKIP_WAITING' });
+                    }
+                }
+            };
+        })();
     </script>
 </body>
 

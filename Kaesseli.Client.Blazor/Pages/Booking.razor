@@ -53,22 +53,26 @@
                                   Margin="Margin.Dense" />
                 </MudItem>
                 <MudItem xs="12" sm="6">
-                    <MudSelect T="Guid?" @bind-Value="_debitAccountId"
-                               Label="Soll"
-                               Variant="Variant.Outlined"
-                               Margin="Margin.Dense"
-                               AnchorOrigin="Origin.BottomLeft"
-                               ToStringFunc="@(id => FormatSelected(id, isDebit: true))">
-                        @foreach (var account in _accounts)
-                        {
-                            var increases = IsIncreasing(account.TypeId, isDebit: true);
-                            <MudSelectItem T="Guid?" Value="account.Id">
-                                <span style="@(increases ? "color: #21BA45; font-weight: 700; margin-right: 6px;" : "color: #C10015; font-weight: 700; margin-right: 6px;")">@(increases ? "↑" : "↓")</span>
-                                @account.Number @account.Name
-                            </MudSelectItem>
-                        }
-                    </MudSelect>
-                    @{ var debit = GetEffect(_debitAccountId, isDebit: true); }
+                    <MudAutocomplete T="Contracts.Accounts.Account"
+                                     @bind-Value="_debitAccount"
+                                     Label="Soll"
+                                     Variant="Variant.Outlined"
+                                     Margin="Margin.Dense"
+                                     SearchFunc="SearchAccounts"
+                                     ToStringFunc="@(a => FormatSelected(a, isDebit: true))"
+                                     OpenOnFocus="true"
+                                     ResetValueOnEmptyText="true"
+                                     Clearable="true"
+                                     CoerceText="true"
+                                     MaxItems="500"
+                                     AnchorOrigin="Origin.BottomLeft">
+                        <ItemTemplate Context="account">
+                            @{ var inc = IsIncreasing(account.TypeId, isDebit: true); }
+                            <span style="@($"color: {(inc ? "#21BA45" : "#C10015")}; font-weight: 700; margin-right: 6px;")">@(inc ? "↑" : "↓")</span>
+                            @account.Number @account.Name
+                        </ItemTemplate>
+                    </MudAutocomplete>
+                    @{ var debit = GetEffect(_debitAccount, isDebit: true); }
                     @if (debit is not null)
                     {
                         <div class="booking-effect">
@@ -77,22 +81,26 @@
                     }
                 </MudItem>
                 <MudItem xs="12" sm="6">
-                    <MudSelect T="Guid?" @bind-Value="_creditAccountId"
-                               Label="Haben"
-                               Variant="Variant.Outlined"
-                               Margin="Margin.Dense"
-                               AnchorOrigin="Origin.BottomLeft"
-                               ToStringFunc="@(id => FormatSelected(id, isDebit: false))">
-                        @foreach (var account in _accounts)
-                        {
-                            var increases = IsIncreasing(account.TypeId, isDebit: false);
-                            <MudSelectItem T="Guid?" Value="account.Id">
-                                <span style="@(increases ? "color: #21BA45; font-weight: 700; margin-right: 6px;" : "color: #C10015; font-weight: 700; margin-right: 6px;")">@(increases ? "↑" : "↓")</span>
-                                @account.Number @account.Name
-                            </MudSelectItem>
-                        }
-                    </MudSelect>
-                    @{ var credit = GetEffect(_creditAccountId, isDebit: false); }
+                    <MudAutocomplete T="Contracts.Accounts.Account"
+                                     @bind-Value="_creditAccount"
+                                     Label="Haben"
+                                     Variant="Variant.Outlined"
+                                     Margin="Margin.Dense"
+                                     SearchFunc="SearchAccounts"
+                                     ToStringFunc="@(a => FormatSelected(a, isDebit: false))"
+                                     OpenOnFocus="true"
+                                     ResetValueOnEmptyText="true"
+                                     Clearable="true"
+                                     CoerceText="true"
+                                     MaxItems="500"
+                                     AnchorOrigin="Origin.BottomLeft">
+                        <ItemTemplate Context="account">
+                            @{ var inc = IsIncreasing(account.TypeId, isDebit: false); }
+                            <span style="@($"color: {(inc ? "#21BA45" : "#C10015")}; font-weight: 700; margin-right: 6px;")">@(inc ? "↑" : "↓")</span>
+                            @account.Number @account.Name
+                        </ItemTemplate>
+                    </MudAutocomplete>
+                    @{ var credit = GetEffect(_creditAccount, isDebit: false); }
                     @if (credit is not null)
                     {
                         <div class="booking-effect">
@@ -120,8 +128,8 @@
     private DateTime? _date = DateTime.Today;
     private string? _description;
     private decimal? _amount;
-    private Guid? _debitAccountId;
-    private Guid? _creditAccountId;
+    private Contracts.Accounts.Account? _debitAccount;
+    private Contracts.Accounts.Account? _creditAccount;
     private bool _saving;
 
     private static readonly List<BreadcrumbItem> _breadcrumbs =
@@ -133,15 +141,13 @@
         PeriodState.SelectedPeriodId.HasValue
         && _date.HasValue
         && _amount is > 0
-        && _debitAccountId.HasValue
-        && _creditAccountId.HasValue
-        && _debitAccountId != _creditAccountId
+        && _debitAccount is not null
+        && _creditAccount is not null
+        && _debitAccount.Id != _creditAccount.Id
         && !string.IsNullOrWhiteSpace(_description);
 
-    private BookingEffect? GetEffect(Guid? accountId, bool isDebit)
+    private BookingEffect? GetEffect(Contracts.Accounts.Account? account, bool isDebit)
     {
-        if (accountId is null) return null;
-        var account = _accounts?.FirstOrDefault(a => a.Id == accountId);
         if (account is null) return null;
         return new BookingEffect(IsIncreasing(account.TypeId, isDebit), FormatType(account.TypeId));
     }
@@ -153,10 +159,8 @@
         return isDebit ? increasesOnDebit : !increasesOnDebit;
     }
 
-    private string FormatSelected(Guid? accountId, bool isDebit)
+    private static string FormatSelected(Contracts.Accounts.Account? account, bool isDebit)
     {
-        if (accountId is null) return string.Empty;
-        var account = _accounts?.FirstOrDefault(a => a.Id == accountId);
         if (account is null) return string.Empty;
         var arrow = IsIncreasing(account.TypeId, isDebit) ? "↑" : "↓";
         return $"{arrow}  {account.Number} {account.Name}";
@@ -170,6 +174,45 @@
         AccountType.Expense => "Ausgabe",
         _ => type.ToString()
     };
+
+    private Task<IEnumerable<Contracts.Accounts.Account>> SearchAccounts(string? value, CancellationToken _)
+    {
+        IEnumerable<Contracts.Accounts.Account> source = _accounts ?? [];
+        if (string.IsNullOrWhiteSpace(value))
+        {
+            return Task.FromResult(source);
+        }
+
+        // Wenn der aktuelle Text dem aktuell gewählten Konto (mit Pfeil-Präfix) entspricht,
+        // beim erneuten Öffnen die volle Liste zeigen statt nur den einen Treffer.
+        if (source.Any(a =>
+                string.Equals(FormatSelected(a, isDebit: true), value, StringComparison.OrdinalIgnoreCase)
+                || string.Equals(FormatSelected(a, isDebit: false), value, StringComparison.OrdinalIgnoreCase)))
+        {
+            return Task.FromResult(source);
+        }
+
+        var query = value.Trim();
+        return Task.FromResult(source.Where(a => MatchesWordStart(a, query)));
+    }
+
+    private static bool MatchesWordStart(Contracts.Accounts.Account account, string query)
+    {
+        if (account.Number.StartsWith(query, StringComparison.OrdinalIgnoreCase)
+            || account.ShortName.StartsWith(query, StringComparison.OrdinalIgnoreCase))
+        {
+            return true;
+        }
+
+        foreach (var word in account.Name.Split(' ', StringSplitOptions.RemoveEmptyEntries))
+        {
+            if (word.StartsWith(query, StringComparison.OrdinalIgnoreCase))
+            {
+                return true;
+            }
+        }
+        return false;
+    }
 
     private sealed record BookingEffect(bool Increases, string TypeLabel);
 
@@ -197,16 +240,16 @@
                 _amount!.Value,
                 _description!,
                 DateOnly.FromDateTime(_date!.Value),
-                _debitAccountId!.Value,
-                _creditAccountId!.Value,
+                _debitAccount!.Id,
+                _creditAccount!.Id,
                 PeriodState.SelectedPeriodId!.Value);
 
             Snackbar.Add("Buchung gespeichert.", Severity.Success);
 
             // Form zurücksetzen — Datum und Text bleiben für Folgebuchungen erhalten.
             _amount = null;
-            _debitAccountId = null;
-            _creditAccountId = null;
+            _debitAccount = null;
+            _creditAccount = null;
         }
         catch
         {
