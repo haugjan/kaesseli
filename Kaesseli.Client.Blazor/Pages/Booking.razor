@@ -57,19 +57,21 @@
                                Label="Soll"
                                Variant="Variant.Outlined"
                                Margin="Margin.Dense"
-                               AnchorOrigin="Origin.BottomLeft">
+                               AnchorOrigin="Origin.BottomLeft"
+                               ToStringFunc="@(id => FormatSelected(id, isDebit: true))">
                         @foreach (var account in _accounts)
                         {
-                            <MudSelectItem T="Guid?" Value="account.Id">@account.Number @account.Name</MudSelectItem>
+                            var increases = IsIncreasing(account.TypeId, isDebit: true);
+                            <MudSelectItem T="Guid?" Value="account.Id">
+                                <span style="@(increases ? "color: #21BA45; font-weight: 700; margin-right: 6px;" : "color: #C10015; font-weight: 700; margin-right: 6px;")">@(increases ? "↑" : "↓")</span>
+                                @account.Number @account.Name
+                            </MudSelectItem>
                         }
                     </MudSelect>
                     @{ var debit = GetEffect(_debitAccountId, isDebit: true); }
                     @if (debit is not null)
                     {
                         <div class="booking-effect">
-                            <MudIcon Icon="@(debit.Increases ? Icons.Material.Rounded.ArrowUpward : Icons.Material.Rounded.ArrowDownward)"
-                                     Color="@(debit.Increases ? Color.Success : Color.Error)"
-                                     Size="Size.Small" />
                             <span>Saldo @(debit.Increases ? "wird erhöht" : "wird verringert") (@debit.TypeLabel)</span>
                         </div>
                     }
@@ -79,19 +81,21 @@
                                Label="Haben"
                                Variant="Variant.Outlined"
                                Margin="Margin.Dense"
-                               AnchorOrigin="Origin.BottomLeft">
+                               AnchorOrigin="Origin.BottomLeft"
+                               ToStringFunc="@(id => FormatSelected(id, isDebit: false))">
                         @foreach (var account in _accounts)
                         {
-                            <MudSelectItem T="Guid?" Value="account.Id">@account.Number @account.Name</MudSelectItem>
+                            var increases = IsIncreasing(account.TypeId, isDebit: false);
+                            <MudSelectItem T="Guid?" Value="account.Id">
+                                <span style="@(increases ? "color: #21BA45; font-weight: 700; margin-right: 6px;" : "color: #C10015; font-weight: 700; margin-right: 6px;")">@(increases ? "↑" : "↓")</span>
+                                @account.Number @account.Name
+                            </MudSelectItem>
                         }
                     </MudSelect>
                     @{ var credit = GetEffect(_creditAccountId, isDebit: false); }
                     @if (credit is not null)
                     {
                         <div class="booking-effect">
-                            <MudIcon Icon="@(credit.Increases ? Icons.Material.Rounded.ArrowUpward : Icons.Material.Rounded.ArrowDownward)"
-                                     Color="@(credit.Increases ? Color.Success : Color.Error)"
-                                     Size="Size.Small" />
                             <span>Saldo @(credit.Increases ? "wird erhöht" : "wird verringert") (@credit.TypeLabel)</span>
                         </div>
                     }
@@ -139,11 +143,23 @@
         if (accountId is null) return null;
         var account = _accounts?.FirstOrDefault(a => a.Id == accountId);
         if (account is null) return null;
+        return new BookingEffect(IsIncreasing(account.TypeId, isDebit), FormatType(account.TypeId));
+    }
 
-        // Aktiv- und Aufwandskonten erhöhen sich im Soll, Passiv- und Ertragskonten im Haben.
-        var increasesOnDebit = account.TypeId is AccountType.Asset or AccountType.Expense;
-        var increases = isDebit ? increasesOnDebit : !increasesOnDebit;
-        return new BookingEffect(increases, FormatType(account.TypeId));
+    // Aktiv- und Aufwandskonten erhöhen sich im Soll, Passiv- und Ertragskonten im Haben.
+    private static bool IsIncreasing(AccountType type, bool isDebit)
+    {
+        var increasesOnDebit = type is AccountType.Asset or AccountType.Expense;
+        return isDebit ? increasesOnDebit : !increasesOnDebit;
+    }
+
+    private string FormatSelected(Guid? accountId, bool isDebit)
+    {
+        if (accountId is null) return string.Empty;
+        var account = _accounts?.FirstOrDefault(a => a.Id == accountId);
+        if (account is null) return string.Empty;
+        var arrow = IsIncreasing(account.TypeId, isDebit) ? "↑" : "↓";
+        return $"{arrow}  {account.Number} {account.Name}";
     }
 
     private static string FormatType(AccountType type) => type switch
