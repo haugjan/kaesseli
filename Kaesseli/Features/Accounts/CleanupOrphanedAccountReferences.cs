@@ -10,8 +10,15 @@ public static class CleanupOrphanedAccountReferences
     // ReSharper disable once UnusedType.Global
     public class Handler(IAccountRepository repo) : IHandler
     {
-        public Task<Contracts.Accounts.CleanupOrphansResult> Handle(
+        public async Task<Contracts.Accounts.CleanupOrphansResult> Handle(
             CancellationToken cancellationToken
-        ) => repo.CleanupOrphanedAccountReferences(cancellationToken);
+        )
+        {
+            var counts = await repo.CleanupOrphanedAccountReferences(cancellationToken);
+            return new Contracts.Accounts.CleanupOrphansResult(
+                JournalEntriesDeleted: counts.JournalEntriesDeleted,
+                BudgetEntriesDeleted: counts.BudgetEntriesDeleted
+            );
+        }
     }
 }

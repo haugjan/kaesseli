@@ -39,9 +39,14 @@ Konsolen-App (kein Webhost), die:
 - Google OAuth Client (Web Application) muss `<origin>/authentication/login-callback` als Redirect-URI freigegeben haben.
 
 ## Branching / Aktueller Stand
-- `main` ist der Default-Branch.
-- Aktiver Working-Tree (Snapshot 2026-05-02): Branch `feature/dev-environment-banner`.
+- `main` ist der Default-Branch. Snapshot dieses Dokuments aktualisiert 2026-05-03.
 - Wichtige jüngere Commits:
+  - `3ea3e44 Prompt user to apply PWA update via snackbar` — Update-Hinweis bei neuer Service-Worker-Version
+  - `c66f0ab Move direction arrow into the booking account dropdown` — Soll/Haben-Pfeil im Booking-Select
+  - `c7256ba Show direction hint for selected accounts on manual booking page` — Booking-Page erkennt Kontotyp und zeigt Richtungshinweis
+  - `d463179 Show per-type totals on accounts overview` — Accounts-Übersicht zeigt Summen pro `AccountType`
+  - `1573b04 Allow deleting a journal entry with amount confirmation` — `DELETE /journalEntry/{id}` + Frontend-Bestätigung über Betrag
+  - `e0d9322 Show liabilities card on overview page` — neue Vermögens-/Schulden-Karte
   - `81c983a Visually mark the dev environment in the AppBar` — gelbes DEV-Badge wenn Host `-dev` enthält
   - `47374ad Prevent account deletion when journal entries exist` — `AccountInUseException` → 409
   - `eec00d6 Make app installable as a PWA` — manifest, icons, service-worker

@@ -11,12 +11,13 @@
 <MudCard Elevation="0" Style="border: 1px solid var(--mud-palette-divider); border-radius: 12px; max-width: 600px;">
     <MudCardContent>
         <MudFileUpload T="IBrowserFile" @bind-Files="_file" Accept=".camt,.xml,.csv,.zip">
-            <ActivatorContent>
+            <CustomContent Context="fileUpload">
                 <MudButton Variant="Variant.Filled" Color="Color.Primary"
+                           OnClick="@fileUpload.OpenFilePickerAsync"
                            StartIcon="@Icons.Material.Rounded.CloudUpload">
                     Datei auswählen
                 </MudButton>
-            </ActivatorContent>
+            </CustomContent>
         </MudFileUpload>
 
         @if (_file is not null)

@@ -15,8 +15,8 @@ public class ProcessCamtFileCommandHandlerTests
     private readonly ITransactionRepository _transactionRepoMock =
         Substitute.For<ITransactionRepository>();
     private readonly IAccountRepository _accountRepoMock = Substitute.For<IAccountRepository>();
-    private readonly OpenTransactionAmountChanged.IHandler _eventHandlerMock =
-        Substitute.For<OpenTransactionAmountChanged.IHandler>();
+    private readonly UpdateOpenTransactionTotal.IHandler _updateOpenTotalMock =
+        Substitute.For<UpdateOpenTransactionTotal.IHandler>();
     private readonly ProcessCamtFile.Handler _handler;
 
     public ProcessCamtFileCommandHandlerTests() =>
@@ -24,7 +24,7 @@ public class ProcessCamtFileCommandHandlerTests
             _camtProcessorMock,
             _transactionRepoMock,
             _accountRepoMock,
-            _eventHandlerMock
+            _updateOpenTotalMock
         );
 
     [Fact]

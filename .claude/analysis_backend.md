@@ -60,6 +60,7 @@ Convention: jede `*Api.cs` ist ein `extension(IEndpointRouteBuilder app)` mit `M
 | POST | `/journalEntry` | `AddJournalEntry` |
 | POST | `/journalEntry/openingBalance` | `AddOpeningBalance` |
 | GET | `/journalEntry?accountingPeriodId=&accountId=&accountType=` | `GetJournalEntries` |
+| DELETE | `/journalEntry/{id}` | `DeleteJournalEntry` (Frontend verlangt Betrags-Bestätigung) |
 | GET | `/transactionSummary` | `GetTransactionSummaries` |
 | GET | `/transaction?transactionSummaryId=` | `GetTransactions` |
 | GET | `/transaction/nextOpen?skip=` | `GetNextOpenTransaction` |
@@ -121,7 +122,7 @@ Klassen mit `private` Ctor + statischer `Create(...)`-Factory + `Update(...)`. B
 - `Features/Automation/` — Pattern-basierte Automatisierung von Transaktionszuordnung (`AutomationEntry`, `AutomationEntryPart`, `ApplyAllAutomations`)
 - `Features/Budget/` — Budget setzen/abfragen (nur Revenue/Expense erlaubt — `BudgetNotAllowedException`)
 - `Features/Integration/FileImport/` — `ICamtProcessor` (XML-Schemas in `Camt053Schema.cs`), `IPostFinanceCsvProcessor` (CsvHelper). `ProcessFile.Handler` dispatched anhand `FileType` an `ProcessCamtFile` oder `ProcessPostFinanceCsv`.
-- `Features/Integration/NextOpenTransaction/` — Workflow für offene Transaktionen (Get, Assign, Split, Total, `OpenTransactionAmountChanged`-Event)
+- `Features/Integration/NextOpenTransaction/` — Workflow für offene Transaktionen (Get, Assign, Split, Total, `UpdateOpenTransactionTotal`-Side-Effect)
 - `Features/Integration/TransactionQuery/` — Lese-Queries
 - `Features/Journal/` — Journaleinträge & Eröffnungsbilanz, Validierungen (`AccountsMustNotBeSameException`, `WrongAmountException`)
 - `Infrastructure/` — DbContext, Endpoint-Mapping, Service-Registrierung, `EntityNotFoundException`, kleine Extensions

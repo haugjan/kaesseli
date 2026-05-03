@@ -1,6 +1,6 @@
-using Kaesseli.Features.Integration.NextOpenTransaction;
 using Kaesseli.Features.Accounts;
 using Kaesseli.Features.Integration;
+using Kaesseli.Features.Integration.NextOpenTransaction;
 
 namespace Kaesseli.Features.Integration.FileImport;
 
@@ -18,27 +18,37 @@ public static class ProcessCamtFile
         ICamtProcessor camtProcessor,
         ITransactionRepository transactionRepository,
         IAccountRepository accountRepo,
-        OpenTransactionAmountChanged.IHandler eventHandler) : IHandler
+        UpdateOpenTransactionTotal.IHandler updateOpenTotal
+    ) : IHandler
     {
         public async Task<Guid> Handle(Query request, CancellationToken cancellationToken)
         {
-            var financialDocument = await camtProcessor.ReadCamtFile(request.Content, cancellationToken);
+            var financialDocument = await camtProcessor.ReadCamtFile(
+                request.Content,
+                cancellationToken
+            );
             var account = await accountRepo.GetAccount(request.AccountId, cancellationToken);
-            var existingReferences = await transactionRepository.GetExistingTransactionReferences(cancellationToken);
+            var existingReferences = await transactionRepository.GetExistingTransactionReferences(
+                cancellationToken
+            );
 
-            var newTransactions = financialDocument.Entries
-                .Where(entry => !existingReferences.Contains(entry.Reference))
-                .Select(entry => Transaction.Create(
-                    rawText: entry.RawText,
-                    amount: entry.Amount,
-                    valueDate: entry.ValueDate,
-                    description: entry.Description,
-                    reference: entry.Reference,
-                    bookDate: entry.BookDate,
-                    transactionCode: entry.TransactionCode,
-                    transactionCodeDetail: entry.TransactionCodeDetail,
-                    debtor: entry.Debtor,
-                    creditor: entry.Creditor)).ToList();
+            var newTransactions = financialDocument
+                .Entries.Where(entry => !existingReferences.Contains(entry.Reference))
+                .Select(entry =>
+                    Transaction.Create(
+                        rawText: entry.RawText,
+                        amount: entry.Amount,
+                        valueDate: entry.ValueDate,
+                        description: entry.Description,
+                        reference: entry.Reference,
+                        bookDate: entry.BookDate,
+                        transactionCode: entry.TransactionCode,
+                        transactionCodeDetail: entry.TransactionCodeDetail,
+                        debtor: entry.Debtor,
+                        creditor: entry.Creditor
+                    )
+                )
+                .ToList();
 
             if (newTransactions.Count == 0)
                 return Guid.Empty;
@@ -50,11 +60,16 @@ public static class ProcessCamtFile
                 financialDocument.ValueDateFrom,
                 financialDocument.ValueDateTo,
                 financialDocument.Reference,
-                newTransactions);
-            await transactionRepository.AddTransactionSummary(transactionSummary, cancellationToken);
-            await eventHandler.Handle(
-                notification: new OpenTransactionAmountChanged.Event(newTransactions.Count),
-                cancellationToken);
+                newTransactions
+            );
+            await transactionRepository.AddTransactionSummary(
+                transactionSummary,
+                cancellationToken
+            );
+            await updateOpenTotal.Handle(
+                new UpdateOpenTransactionTotal.Query(newTransactions.Count),
+                cancellationToken
+            );
             return transactionSummary.Id;
         }
     }

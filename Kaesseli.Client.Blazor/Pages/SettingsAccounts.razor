@@ -29,12 +29,13 @@
                 </MudButton>
                 <MudFileUpload T="IBrowserFile" Accept=".yaml,.yml,application/x-yaml,text/yaml"
                                FilesChanged="OnImportFile">
-                    <ActivatorContent>
-                        <MudButton HtmlTag="label" Variant="Variant.Outlined"
+                    <CustomContent Context="fileUpload">
+                        <MudButton Variant="Variant.Outlined"
+                                   OnClick="@fileUpload.OpenFilePickerAsync"
                                    StartIcon="@Icons.Material.Rounded.Upload" Disabled="_busy">
                             Import
                         </MudButton>
-                    </ActivatorContent>
+                    </CustomContent>
                 </MudFileUpload>
                 <MudButton Color="Color.Primary" Variant="Variant.Filled" StartIcon="@Icons.Material.Rounded.Add"
                            OnClick="OnAddClicked">

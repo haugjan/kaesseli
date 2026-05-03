@@ -54,7 +54,7 @@ public class DependencyInjectionTests
             typeof(ProcessFile.IHandler),
             typeof(ProcessCamtFile.IHandler),
             typeof(ProcessPostFinanceCsv.IHandler),
-            typeof(OpenTransactionAmountChanged.IHandler),
+            typeof(UpdateOpenTransactionTotal.IHandler),
             typeof(AssignOpenTransaction.IHandler),
             typeof(SplitOpenTransaction.IHandler),
             typeof(GetNextOpenTransaction.IHandler),

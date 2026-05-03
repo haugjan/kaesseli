@@ -15,8 +15,8 @@ public class ProcessCamtFileDuplicateTests
     private readonly ITransactionRepository _transactionRepoMock =
         Substitute.For<ITransactionRepository>();
     private readonly IAccountRepository _accountRepoMock = Substitute.For<IAccountRepository>();
-    private readonly OpenTransactionAmountChanged.IHandler _eventHandlerMock =
-        Substitute.For<OpenTransactionAmountChanged.IHandler>();
+    private readonly UpdateOpenTransactionTotal.IHandler _updateOpenTotalMock =
+        Substitute.For<UpdateOpenTransactionTotal.IHandler>();
     private readonly ProcessCamtFile.Handler _handler;
 
     public ProcessCamtFileDuplicateTests() =>
@@ -24,7 +24,7 @@ public class ProcessCamtFileDuplicateTests
             _camtProcessorMock,
             _transactionRepoMock,
             _accountRepoMock,
-            _eventHandlerMock
+            _updateOpenTotalMock
         );
 
     [Fact]
@@ -54,9 +54,9 @@ public class ProcessCamtFileDuplicateTests
         await _transactionRepoMock
             .DidNotReceive()
             .AddTransactionSummary(Arg.Any<TransactionSummary>(), Arg.Any<CancellationToken>());
-        await _eventHandlerMock
+        await _updateOpenTotalMock
             .DidNotReceive()
-            .Handle(Arg.Any<OpenTransactionAmountChanged.Event>(), Arg.Any<CancellationToken>());
+            .Handle(Arg.Any<UpdateOpenTransactionTotal.Query>(), Arg.Any<CancellationToken>());
     }
 
     [Fact]
@@ -92,10 +92,10 @@ public class ProcessCamtFileDuplicateTests
                 Arg.Is<TransactionSummary>(ts => ts.Transactions.Count() == 2),
                 Arg.Any<CancellationToken>()
             );
-        await _eventHandlerMock
+        await _updateOpenTotalMock
             .Received(1)
             .Handle(
-                Arg.Is<OpenTransactionAmountChanged.Event>(e => e.Amount == 2),
+                Arg.Is<UpdateOpenTransactionTotal.Query>(q => q.Delta == 2),
                 Arg.Any<CancellationToken>()
             );
     }

@@ -8,14 +8,15 @@ namespace Kaesseli.Test.Features.Integration;
 public class SplitOpenTransactionTests
 {
     private readonly IJournalRepository _journalRepoMock = Substitute.For<IJournalRepository>();
-    private readonly OpenTransactionAmountChanged.IHandler _eventHandlerMock = Substitute.For<OpenTransactionAmountChanged.IHandler>();
+    private readonly UpdateOpenTransactionTotal.IHandler _updateOpenTotalMock =
+        Substitute.For<UpdateOpenTransactionTotal.IHandler>();
     private readonly SplitOpenTransaction.Handler _handler;
 
     public SplitOpenTransactionTests() =>
-        _handler = new SplitOpenTransaction.Handler(_journalRepoMock, _eventHandlerMock);
+        _handler = new SplitOpenTransaction.Handler(_journalRepoMock, _updateOpenTotalMock);
 
     [Fact]
-    public async Task Handle_SplitsTransactionAndFiresEvent()
+    public async Task Handle_SplitsTransactionAndUpdatesOpenTotal()
     {
         var entries = new[]
         {
@@ -26,13 +27,19 @@ public class SplitOpenTransactionTests
 
         await _handler.Handle(query, CancellationToken.None);
 
-        await _journalRepoMock.Received(1).AssignOpenTransaction(
-            query.AccountingPeriodId,
-            query.TransactionId,
-            Arg.Is<IEnumerable<(Guid, decimal)>>(e => e.Count() == 2),
-            Arg.Any<CancellationToken>());
-        await _eventHandlerMock.Received(1).Handle(
-            Arg.Is<OpenTransactionAmountChanged.Event>(e => e.Amount == -1),
-            Arg.Any<CancellationToken>());
+        await _journalRepoMock
+            .Received(1)
+            .AssignOpenTransaction(
+                query.AccountingPeriodId,
+                query.TransactionId,
+                Arg.Is<IEnumerable<(Guid, decimal)>>(e => e.Count() == 2),
+                Arg.Any<CancellationToken>()
+            );
+        await _updateOpenTotalMock
+            .Received(1)
+            .Handle(
+                Arg.Is<UpdateOpenTransactionTotal.Query>(q => q.Delta == -1),
+                Arg.Any<CancellationToken>()
+            );
     }
 }

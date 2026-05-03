@@ -38,10 +38,10 @@ public interface IAccountRepository
         Guid? excludeAccountId,
         CancellationToken cancellationToken
     );
-    Task<Contracts.Accounts.CleanupOrphansResult> CleanupOrphanedAccountReferences(
-        CancellationToken cancellationToken
-    );
+    Task<OrphanCleanupCounts> CleanupOrphanedAccountReferences(CancellationToken cancellationToken);
 }
+
+public record OrphanCleanupCounts(int JournalEntriesDeleted, int BudgetEntriesDeleted);
 
 internal class AccountRepository(KaesseliContext context) : IAccountRepository
 {
@@ -195,7 +195,7 @@ internal class AccountRepository(KaesseliContext context) : IAccountRepository
         );
     }
 
-    public async Task<Contracts.Accounts.CleanupOrphansResult> CleanupOrphanedAccountReferences(
+    public async Task<OrphanCleanupCounts> CleanupOrphanedAccountReferences(
         CancellationToken cancellationToken
     )
     {
@@ -228,7 +228,7 @@ internal class AccountRepository(KaesseliContext context) : IAccountRepository
 
         await context.SaveChangesAsync(cancellationToken);
 
-        return new Contracts.Accounts.CleanupOrphansResult(
+        return new OrphanCleanupCounts(
             JournalEntriesDeleted: orphanedJournalEntries.Count,
             BudgetEntriesDeleted: orphanedBudgetEntries.Count
         );
