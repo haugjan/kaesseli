@@ -53,7 +53,7 @@ Eine zentrale Klasse, die alle Backend-Endpoints kapselt (`HttpClient`-basiert).
 - `Layout/MainLayout.razor` — `MudLayout` mit `MudAppBar` (Period-Selector, DarkMode-Toggle, `<LoginDisplay />`), `MudDrawer` (NavMenu), `MudMainContent`.
   - Lädt Perioden + Saved-Id (LocalStorage `selectedPeriod`) erst nach `AuthenticationStateProvider.GetAuthenticationStateAsync()` → ruft `PeriodState.Initialize`.
   - **DEV-Banner**: gelber `dev-badge` + gelber AppBar-Hintergrund, wenn `Navigation.BaseUri` den Host-Substring `-dev` enthält (Commit `81c983a Visually mark the dev environment in the AppBar`).
-- `Layout/NavMenu.razor` — Routen: `/` (Home), `/accounts`, `/assign`, `/import`, `/transactions`, `/settings/periods`, `/settings/accounts`. UI komplett deutsch ("Konten", "Zuweisen", "Kontoauszüge", "Einstellungen"). `AdminCleanupOrphans` ist nicht im Menü — direkt über `/admin/cleanup-orphans` aufrufen.
+- `Layout/NavMenu.razor` — Routen: `/` (Home), `/accounts`, `/assign`, `/booking` (Manuelle Buchung), `/import`, `/transactions`, dazu ein `MudNavGroup` "Einstellungen" mit `/settings/periods` und `/settings/accounts`. UI komplett deutsch ("Konten", "Zuweisen", "Manuelle Buchung", "Kontoauszüge", "Einstellungen"). `AdminCleanupOrphans` ist nicht im Menü — direkt über `/admin/cleanup-orphans` aufrufen.
 - `Theme/` — Custom MudTheme (`KaesseliTheme.Create()`).
 
 ## Pages (`Pages/*.razor`)
@@ -64,6 +64,7 @@ Eine zentrale Klasse, die alle Backend-Endpoints kapselt (`HttpClient`-basiert).
 | `/accountTable/{...}` | AccountTable.razor | Buchungen eines einzelnen Kontos (Mobile: Compact-Liste) |
 | `/accountingPeriod/{...}` | AccountingPeriodDetail.razor | Detailansicht einer Periode |
 | `/assign` | Assign.razor | Komplexe Zuordnung offener Transaktionen (Split, Automation, Filter) |
+| `/booking` | Booking.razor | Manuelle Buchung (Soll/Haben-Auswahl, Direction-Hint je nach Kontotyp) |
 | `/import` | Import.razor | Datei-Upload (CSV/CAMT/ZIP) |
 | `/transactions` | Transactions.razor | Kontoauszüge / Transaktions-Liste |
 | `/settings/accounts` | SettingsAccounts.razor | Konten verwalten + YAML-Export/Import des Kontoplans |

@@ -2,7 +2,7 @@
 
 Persönliches Doppelte-Buchhaltungs-Tool (Schweiz, Deutsch). ASP.NET Core Web-API + Blazor WASM, .NET 10, Cosmos DB, **Google Sign-In via OIDC** (JWT-Bearer mit Email-Allowlist). Als PWA installierbar.
 
-> **Wichtig:** Detail-Notizen liegen unter `.claude/analysis_*.md` (Stand 2026-05-02). Bei Konflikt mit dem aktuellen Code immer den Code als Quelle der Wahrheit nehmen.
+> **Wichtig:** Detail-Notizen liegen unter `.claude/analysis_*.md` (Stand 2026-05-03). Bei Konflikt mit dem aktuellen Code immer den Code als Quelle der Wahrheit nehmen.
 
 ## Erst lesen — passend zur Aufgabe
 

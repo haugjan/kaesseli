@@ -1,6 +1,6 @@
 # Kaesseli – Solution Overview
 
-> Stand: 2026-05-02. Stichprobenartiger Snapshot — Code immer gegen `main`/aktuellen Branch verifizieren.
+> Stand: 2026-05-03. Stichprobenartiger Snapshot — Code immer gegen `main`/aktuellen Branch verifizieren.
 
 ## Zweck
 Persönliches Doppelte-Buchhaltungs-Tool (Schweiz, Deutsch). Konten, Buchungsperioden, Journaleinträge, Budgets, Bankdatei-Import (PostFinance CSV / CAMT.053), automatische Zuordnung von Transaktionen zu Konten, YAML-Export/Import des Kontoplans. Als PWA installierbar.
