@@ -56,8 +56,8 @@ public static class ApplicationServiceCollectionExtensions
                 .AddTransient<ProcessPostFinanceCsv.IHandler, ProcessPostFinanceCsv.Handler>()
                 // Integration - NextOpenTransaction
                 .AddTransient<
-                    OpenTransactionAmountChanged.IHandler,
-                    OpenTransactionAmountChanged.Handler
+                    UpdateOpenTransactionTotal.IHandler,
+                    UpdateOpenTransactionTotal.Handler
                 >()
                 .AddTransient<AssignOpenTransaction.IHandler, AssignOpenTransaction.Handler>()
                 .AddTransient<SplitOpenTransaction.IHandler, SplitOpenTransaction.Handler>()
