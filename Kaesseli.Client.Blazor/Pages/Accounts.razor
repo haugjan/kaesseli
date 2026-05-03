@@ -3,6 +3,7 @@
 @inject KaesseliApiService Api
 @inject AccountingPeriodState PeriodState
 @inject NavigationManager Navigation
+@inject IJSRuntime JS
 @implements IDisposable
 
 <PageTitle>Kontoübersicht</PageTitle>
@@ -28,7 +29,7 @@ else
         var totalCurrentBudget = typeAccounts.Sum(a => a.CurrentBudget ?? 0);
         var totalBudgetBalance = typeAccounts.Sum(a => a.BudgetBalance ?? 0);
 
-        <MudCard Elevation="0" Class="mb-4" Style="border: 1px solid var(--mud-palette-divider); border-radius: 12px;">
+        <MudCard id="@AnchorId(type.TypeId)" Elevation="0" Class="mb-4" Style="border: 1px solid var(--mud-palette-divider); border-radius: 12px;">
             <MudCardHeader>
                 <CardHeaderAvatar>
                     <MudAvatar Style="@($"background-color: {type.Color}; color: white;")" Size="Size.Medium">
@@ -133,6 +134,7 @@ else
 
 @code {
     private List<AccountOverview>? _accounts;
+    private bool _scrolledToType;
 
     private static readonly List<BreadcrumbItem> _breadcrumbs =
     [
@@ -141,16 +143,26 @@ else
 
     private static readonly AccountTypeInfo[] _accountTypes =
     [
-        new("Einkommen", Icons.Material.Rounded.AttachMoney, "#21BA45", true),
-        new("Ausgaben", Icons.Material.Rounded.MoneyOff, "#C10015", true),
-        new("Aktiv", Icons.Material.Rounded.AccountBalance, "#1976D2", false),
-        new("Passiv", Icons.Material.Rounded.AccountBalanceWallet, "#795548", false),
+        new("Einkommen", AccountType.Revenue, Icons.Material.Rounded.AttachMoney, "#21BA45", true),
+        new("Ausgaben", AccountType.Expense, Icons.Material.Rounded.MoneyOff, "#C10015", true),
+        new("Aktiv", AccountType.Asset, Icons.Material.Rounded.AccountBalance, "#1976D2", false),
+        new("Passiv", AccountType.Liability, Icons.Material.Rounded.AccountBalanceWallet, "#795548", false),
     ];
+
+    [SupplyParameterFromQuery] public string? Type { get; set; }
 
     protected override async Task OnInitializedAsync()
     {
         PeriodState.OnChange += OnPeriodChanged;
         await LoadAsync();
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (_scrolledToType || _accounts is null || string.IsNullOrEmpty(Type)) return;
+        if (!Enum.TryParse<AccountType>(Type, ignoreCase: true, out var type)) return;
+        _scrolledToType = true;
+        await JS.InvokeVoidAsync("kaesseli.scrollToElement", AnchorId(type));
     }
 
     private void OnPeriodChanged()
@@ -193,5 +205,7 @@ else
 
     public void Dispose() => PeriodState.OnChange -= OnPeriodChanged;
 
-    private record AccountTypeInfo(string Name, string Icon, string Color, bool ShowBudget);
+    private static string AnchorId(AccountType type) => $"account-type-{type}";
+
+    private record AccountTypeInfo(string Name, AccountType TypeId, string Icon, string Color, bool ShowBudget);
 }

@@ -1,5 +1,8 @@
+@inject NavigationManager Navigation
 
-<MudCard Elevation="0" Style="border: 1px solid var(--mud-palette-divider); border-radius: 12px;">
+<MudCard Elevation="0"
+         Style="@($"border: 1px solid var(--mud-palette-divider); border-radius: 12px;{(Href is null ? "" : " cursor: pointer;")}")"
+         @onclick="OnCardClick">
     <MudCardHeader>
         <CardHeaderAvatar>
             <MudAvatar Style="@($"background-color: {IconColor}20; color: {IconColor};")" Size="Size.Medium">
@@ -69,6 +72,12 @@
     [Parameter, EditorRequired] public string IconColor { get; set; } = "";
     [Parameter, EditorRequired] public AccountTypeSummary Summary { get; set; } = null!;
     [Parameter] public bool ShowBudget { get; set; }
+    [Parameter] public string? Href { get; set; }
+
+    void OnCardClick()
+    {
+        if (Href is not null) Navigation.NavigateTo(Href);
+    }
 
     static string FormatNumber(decimal value) =>
         value.ToString("N2", System.Globalization.CultureInfo.CurrentCulture);
