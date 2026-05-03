@@ -6,6 +6,8 @@
 @inject IJSRuntime JS
 @inject AuthenticationStateProvider AuthState
 @inject NavigationManager Navigation
+@inject PwaUpdateService PwaUpdate
+@inject ISnackbar Snackbar
 
 <MudThemeProvider Theme="_theme" IsDarkMode="_isDarkMode" />
 <MudPopoverProvider />
@@ -89,5 +91,25 @@
     {
         PeriodState.SelectPeriod(id);
         await JS.InvokeVoidAsync("localStorage.setItem", "selectedPeriod", id.ToString());
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (!firstRender) return;
+        PwaUpdate.UpdateAvailable += ShowUpdateSnackbar;
+        await PwaUpdate.InitializeAsync();
+    }
+
+    private Task ShowUpdateSnackbar()
+    {
+        Snackbar.Add("Neue Version verfügbar", Severity.Info, config =>
+        {
+            config.RequireInteraction = true;
+            config.ShowCloseIcon = true;
+            config.Action = "Aktualisieren";
+            config.ActionColor = Color.Primary;
+            config.OnClick = async _ => await PwaUpdate.ApplyUpdateAsync();
+        });
+        return Task.CompletedTask;
     }
 }
