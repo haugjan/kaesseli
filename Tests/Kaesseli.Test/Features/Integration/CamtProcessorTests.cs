@@ -66,7 +66,7 @@ public class CamtProcessorTests
         [
             new()
             {
-                Description = "Sample transaction details",
+                Description = "Fictional Company",
                 Amount = -29.95m,
                 ValueDate = new DateOnly(year: 2024, month: 01, day: 25),
                 BookDate = new DateOnly(year: 2024, month: 01, day: 24),
@@ -87,7 +87,7 @@ public class CamtProcessorTests
             },
             new()
             {
-                Description = "Credit transaction details",
+                Description = "Another Fictional Company",
                 Amount = 13656.85m,
                 ValueDate = new DateOnly(year: 2024, month: 01, day: 27),
                 BookDate = new DateOnly(year: 2024, month: 01, day: 26),

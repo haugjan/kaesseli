@@ -51,7 +51,7 @@ internal class CamtProcessor : ICamtProcessor
         new()
         {
             RawText = entry.NtryDtls.ToYaml(),
-            Description = entry.AddtlNtryInf,
+            Description = BuildSingleDescription(entry),
             Reference = entry.AcctSvcrRef,
             TransactionCodeDetail = entry.BkTxCd.ToYaml(),
             TransactionCode = entry.BkTxCd.Domn.Cd,
@@ -61,6 +61,46 @@ internal class CamtProcessor : ICamtProcessor
             Debtor = GetSingleDebtor(entry),
             Creditor = GetSingleCreditor(entry)
         };
+
+    private static string BuildSingleDescription(ReportEntry4 entry)
+    {
+        // Card transactions: AddtlNtryInf wraps the merchant name in boilerplate
+        // ("Einkauf ZKB Visa Debit Card Nr. xxxx 8393, JUMBO …"). The merchant
+        // alone is in CardTx/POI/Id/Id and is far more useful for matching.
+        var poi = entry.CardTx?.POI?.Id?.Id;
+        if (!string.IsNullOrWhiteSpace(poi))
+            return poi.Trim();
+
+        // Non-batch transfer with a TxDtls: prefer creditor/debtor + remittance
+        // info — they describe the actual payment instead of the bank's wrapper.
+        var txDtls = entry.NtryDtls?
+                          .SelectMany(d => d.TxDtls ?? [])
+                          .ToArray() ?? [];
+        if (txDtls.Length == 1)
+        {
+            var combined = CombinePartyAndRemittance(txDtls[0]);
+            if (!string.IsNullOrWhiteSpace(combined))
+                return combined;
+        }
+
+        return entry.AddtlNtryInf ?? string.Empty;
+    }
+
+    private static string? CombinePartyAndRemittance(EntryTransaction4 tx)
+    {
+        var party = tx.RltdPties?.Cdtr?.Nm ?? tx.RltdPties?.Dbtr?.Nm;
+        var remit = tx.RmtInf?.Ustrd is { Length: > 0 } lines
+                        ? string.Join(" / ", lines)
+                        : null;
+
+        if (!string.IsNullOrWhiteSpace(party) && !string.IsNullOrWhiteSpace(remit))
+            return $"{party} – {remit}";
+        if (!string.IsNullOrWhiteSpace(party))
+            return party;
+        if (!string.IsNullOrWhiteSpace(remit))
+            return remit;
+        return null;
+    }
 
     private static FinancialDocumentEntry CreateBatchPart(ReportEntry4 parent, EntryTransaction4 part, int index) =>
         new()
@@ -78,21 +118,8 @@ internal class CamtProcessor : ICamtProcessor
             Creditor = part.RltdPties?.Cdtr?.Nm
         };
 
-    private static string BuildBatchDescription(ReportEntry4 parent, EntryTransaction4 part)
-    {
-        var party = part.RltdPties?.Cdtr?.Nm ?? part.RltdPties?.Dbtr?.Nm;
-        var remit = part.RmtInf?.Ustrd is { Length: > 0 } lines
-                        ? string.Join(" / ", lines)
-                        : null;
-
-        if (!string.IsNullOrWhiteSpace(party) && !string.IsNullOrWhiteSpace(remit))
-            return $"{party} – {remit}";
-        if (!string.IsNullOrWhiteSpace(party))
-            return party;
-        if (!string.IsNullOrWhiteSpace(remit))
-            return remit;
-        return parent.AddtlNtryInf;
-    }
+    private static string BuildBatchDescription(ReportEntry4 parent, EntryTransaction4 part) =>
+        CombinePartyAndRemittance(part) ?? parent.AddtlNtryInf;
 
     private static decimal SignedAmount(decimal amount, CreditDebitCode indicator) =>
         indicator == CreditDebitCode.CRDT ? amount : -amount;
