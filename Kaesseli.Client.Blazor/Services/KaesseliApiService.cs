@@ -20,6 +20,12 @@ public class KaesseliApiService(HttpClient httpClient)
             $"accountingPeriod/{periodId}/account/{accountId}"
         );
 
+    public Task<AccountBalanceCheck?> GetAccountBalanceCheckAsync(Guid periodId, Guid accountId, CancellationToken ct = default) =>
+        httpClient.GetFromJsonAsync<AccountBalanceCheck>(
+            $"accountingPeriod/{periodId}/account/{accountId}/balanceCheck",
+            ct
+        );
+
     public Task<IEnumerable<TransactionSummary>?> GetTransactionSummariesAsync() =>
         httpClient.GetFromJsonAsync<IEnumerable<TransactionSummary>>("transactionSummary");
 

@@ -35,6 +35,16 @@ public static class AccountApi
             );
 
             app.MapGet(
+                pattern: "/accountingPeriod/{accountingPeriodId}/account/{accountId}/balanceCheck",
+                async (
+                    CheckAccountBalance.IHandler handler,
+                    Guid accountId,
+                    Guid accountingPeriodId,
+                    CancellationToken ct
+                ) => await handler.Handle(new CheckAccountBalance.Query(accountId, accountingPeriodId), ct)
+            );
+
+            app.MapGet(
                 pattern: "/accountingPeriod/{accountingPeriodId}/accountSummary",
                 async (
                     GetAccountsSummary.IHandler handler,
