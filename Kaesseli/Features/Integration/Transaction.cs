@@ -17,8 +17,11 @@ public class Transaction
     public string TransactionCodeDetail { get; private init; } = null!;
     public string? Debtor { get; private init; }
     public string? Creditor { get; private init; }
+    public bool IsIgnored { get; private set; }
     public TransactionSummary? TransactionSummary { get; private init; }
     public IEnumerable<JournalEntry>? JournalEntries { get; private init; }
+
+    public void SetIgnored(bool isIgnored) => IsIgnored = isIgnored;
 
     public static Transaction Create(
         string rawText,

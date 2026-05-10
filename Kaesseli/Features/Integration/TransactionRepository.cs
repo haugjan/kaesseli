@@ -13,6 +13,8 @@ public interface ITransactionRepository
     Task<Transaction> GetTransaction(Guid requestTransactionId, CancellationToken cancellationToken);
     Task ChangeTotalOpenTransaction(int notificationAmount, CancellationToken cancellationToken);
     Task<HashSet<string>> GetExistingTransactionReferences(CancellationToken cancellationToken);
+    Task<Transaction> SetTransactionIgnored(Guid transactionId, bool isIgnored, CancellationToken cancellationToken);
+    Task<bool> HasJournalEntries(Guid transactionId, CancellationToken cancellationToken);
 }
 
 internal class TransactionRepository : ITransactionRepository
@@ -71,6 +73,7 @@ internal class TransactionRepository : ITransactionRepository
 
         var openTransaction = allTransactions
             .Where(t => !transactionIdsWithJournal.Contains(t.Id))
+            .Where(t => !t.IsIgnored)
             .OrderBy(t => t.ValueDate)
             .Skip(skip)
             .FirstOrDefault();
@@ -106,7 +109,7 @@ internal class TransactionRepository : ITransactionRepository
             .Select(id => id!.Value)
             .ToHashSet();
 
-        var totalOpen = allTransactions.Count(t => !transactionIdsWithJournal.Contains(t.Id));
+        var totalOpen = allTransactions.Count(t => !transactionIdsWithJournal.Contains(t.Id) && !t.IsIgnored);
 
         statistic = TransactionStatistic.Create(totalOpen);
         _context.TransactionStatistics.Add(statistic);
@@ -134,6 +137,21 @@ internal class TransactionRepository : ITransactionRepository
             .Where(t => t.Reference is not null)
             .Select(t => t.Reference)
             .ToHashSet();
+    }
+
+    public async Task<Transaction> SetTransactionIgnored(Guid transactionId, bool isIgnored, CancellationToken cancellationToken)
+    {
+        var transaction = await _context.Transactions.FirstOrDefaultAsync(t => t.Id == transactionId, cancellationToken)
+            ?? throw new EntityNotFoundException(entityType: typeof(Transaction), transactionId);
+        transaction.SetIgnored(isIgnored);
+        await _context.SaveChangesAsync(cancellationToken);
+        return transaction;
+    }
+
+    public async Task<bool> HasJournalEntries(Guid transactionId, CancellationToken cancellationToken)
+    {
+        var journalEntries = await _context.JournalEntries.ToListAsync(cancellationToken);
+        return journalEntries.Any(je => _context.Entry(je).Property<Guid?>("TransactionId").CurrentValue == transactionId);
     }
 
     private TransactionStatistic AddStatisticEntryIfNull(TransactionStatistic? statistic)

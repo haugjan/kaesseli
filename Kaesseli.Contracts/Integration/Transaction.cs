@@ -11,4 +11,5 @@ public record Transaction(
     string TransactionCode,
     string TransactionCodeDetail,
     string? Debtor,
-    string? Creditor);
+    string? Creditor,
+    bool IsIgnored);

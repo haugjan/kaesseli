@@ -122,6 +122,7 @@ public class TransactionRepositoryTests
         var repository = new TransactionRepository(context);
         var transaction = new SmartFaker<Transaction>()
             .RuleFor(t => t.JournalEntries, value: Array.Empty<JournalEntry>())
+            .RuleFor(t => t.IsIgnored, value: false)
             .Generate();
         context.Transactions.Add(transaction);
         await context.SaveChangesAsync();
@@ -131,5 +132,70 @@ public class TransactionRepositoryTests
 
         // Assert
         Assert.NotNull(result);
+    }
+
+    [Fact]
+    public async Task GetNextOpenTransaction_SkipsIgnoredTransactions()
+    {
+        var options = new DbContextOptionsBuilder<KaesseliContext>()
+            .UseInMemoryDatabase(databaseName: "GetNextOpenTransaction_SkipsIgnoredDb")
+            .Options;
+        var context = CreateContext(options);
+        var repository = new TransactionRepository(context);
+        var ignored = new SmartFaker<Transaction>()
+            .RuleFor(t => t.JournalEntries, value: Array.Empty<JournalEntry>())
+            .RuleFor(t => t.IsIgnored, value: true)
+            .Generate();
+        context.Transactions.Add(ignored);
+        await context.SaveChangesAsync();
+
+        var result = await repository.GetNextOpenTransaction(skip: 0, cancellationToken: default);
+
+        result.ShouldBeNull();
+    }
+
+    [Fact]
+    public async Task GetTotalOpenTransaction_DoesNotCountIgnoredTransactions()
+    {
+        var options = new DbContextOptionsBuilder<KaesseliContext>()
+            .UseInMemoryDatabase(databaseName: "GetTotalOpenTransaction_IgnoresDb")
+            .Options;
+        var context = CreateContext(options);
+        var repository = new TransactionRepository(context);
+        var open = new SmartFaker<Transaction>()
+            .RuleFor(t => t.JournalEntries, value: Array.Empty<JournalEntry>())
+            .RuleFor(t => t.IsIgnored, value: false)
+            .Generate();
+        var ignored = new SmartFaker<Transaction>()
+            .RuleFor(t => t.JournalEntries, value: Array.Empty<JournalEntry>())
+            .RuleFor(t => t.IsIgnored, value: true)
+            .Generate();
+        context.Transactions.AddRange(open, ignored);
+        await context.SaveChangesAsync();
+
+        var total = await repository.GetTotalOpenTransaction(CancellationToken.None);
+
+        total.ShouldBe(1);
+    }
+
+    [Fact]
+    public async Task SetTransactionIgnored_PersistsState()
+    {
+        var options = new DbContextOptionsBuilder<KaesseliContext>()
+            .UseInMemoryDatabase(databaseName: "SetTransactionIgnoredDb")
+            .Options;
+        var context = CreateContext(options);
+        var repository = new TransactionRepository(context);
+        var transaction = new SmartFaker<Transaction>()
+            .RuleFor(t => t.IsIgnored, value: false)
+            .Generate();
+        context.Transactions.Add(transaction);
+        await context.SaveChangesAsync();
+
+        await repository.SetTransactionIgnored(transaction.Id, isIgnored: true, CancellationToken.None);
+
+        await using var assertContext = CreateContext(options);
+        var stored = await assertContext.Transactions.FirstAsync(t => t.Id == transaction.Id);
+        stored.IsIgnored.ShouldBeTrue();
     }
 }

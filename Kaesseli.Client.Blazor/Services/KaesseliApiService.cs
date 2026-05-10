@@ -46,6 +46,16 @@ public class KaesseliApiService(HttpClient httpClient)
             }
         );
 
+    public Task SetTransactionIgnoredAsync(Guid transactionId, bool isIgnored) =>
+        httpClient.PatchAsJsonAsync(
+            "transaction/ignore",
+            new
+            {
+                transactionId,
+                isIgnored,
+            }
+        );
+
     public Task SplitTransactionAsync(
         Guid accountingPeriodId,
         Guid transactionId,

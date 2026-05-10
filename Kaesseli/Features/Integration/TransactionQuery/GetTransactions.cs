@@ -29,7 +29,8 @@ public static class GetTransactions
                 TransactionCode: t.TransactionCode,
                 TransactionCodeDetail: t.TransactionCodeDetail,
                 Debtor: t.Debtor,
-                Creditor: t.Creditor)).ToImmutableList();
+                Creditor: t.Creditor,
+                IsIgnored: t.IsIgnored)).ToImmutableList();
         }
     }
 }
