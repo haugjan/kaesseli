@@ -8,7 +8,7 @@ using Microsoft.Extensions.DependencyInjection;
 using NSubstitute;
 using Shouldly;
 using Xunit;
-using JobStatusContract = JobStatusContract;
+using JobStatusContract = Kaesseli.Contracts.AccountSuggestion.AccountSuggestionJobStatus;
 
 namespace Kaesseli.Test.Features.AccountSuggestion;
 
