@@ -29,6 +29,7 @@ public static class ApplicationServiceCollectionExtensions
                 .AddTransient<GetAccountingPeriods.IHandler, GetAccountingPeriods.Handler>()
                 .AddTransient<GetAccountsSummary.IHandler, GetAccountsSummary.Handler>()
                 .AddTransient<GetFinancialOverview.IHandler, GetFinancialOverview.Handler>()
+                .AddTransient<CheckAccountBalance.IHandler, CheckAccountBalance.Handler>()
                 .AddTransient<ExportAccountPlan.IHandler, ExportAccountPlan.Handler>()
                 .AddTransient<ImportAccountPlan.IHandler, ImportAccountPlan.Handler>()
                 .AddTransient<

@@ -41,8 +41,48 @@
                 }
             }
         </MudSelect>
+
+        @if (_balanceCheck is not null)
+        {
+            <MudAlert Severity="@BalanceSeverity" Class="mt-3" Dense="true" ShowCloseIcon="true"
+                      CloseIconClicked="@(() => _balanceCheck = null)">
+                @if (_balanceCheck.LatestStatementDate is null)
+                {
+                    <text>Für dieses Konto wurde noch kein CAMT-Statement importiert.</text>
+                }
+                else
+                {
+                    <div>
+                        <b>Letztes CAMT (@_balanceCheck.LatestStatementDate.Value.ToString("dd.MM.yyyy")):</b>
+                        @_balanceCheck.LatestStatementBalance!.Value.ToString("N2") CHF
+                    </div>
+                    <div>
+                        <b>Aktueller Kontostand (Periode):</b>
+                        @_balanceCheck.CurrentBalance.ToString("N2") CHF
+                    </div>
+                    <div>
+                        <b>Differenz:</b> @_balanceCheck.Difference!.Value.ToString("N2") CHF
+                        @if (_balanceCheck.Difference == 0m)
+                        {
+                            <span> – stimmt überein.</span>
+                        }
+                        else
+                        {
+                            <span> – noch offene Transaktionen oder fehlende Buchungen.</span>
+                        }
+                    </div>
+                }
+            </MudAlert>
+        }
     </MudCardContent>
     <MudCardActions>
+        <MudButton Color="Color.Default" Variant="Variant.Outlined"
+                   Disabled="@(_selectedAccountId is null || PeriodState.SelectedPeriodId is null || _checking)"
+                   OnClick="OnCheckBalance"
+                   StartIcon="@(_checking ? Icons.Material.Rounded.HourglassEmpty : Icons.Material.Rounded.AccountBalance)">
+            @(_checking ? "Prüfe…" : "Kontostand prüfen")
+        </MudButton>
+        <MudSpacer />
         <MudButton Color="Color.Primary" Variant="Variant.Filled"
                    Disabled="@(_file is null || _selectedAccountId is null || _uploading)"
                    OnClick="OnUpload"
@@ -57,11 +97,22 @@
     private Guid? _selectedAccountId;
     private List<Contracts.Accounts.Account>? _accounts;
     private bool _uploading;
+    private bool _checking;
+    private AccountBalanceCheck? _balanceCheck;
 
     private static readonly List<BreadcrumbItem> _breadcrumbs =
     [
         new("Import", "/import", icon: Icons.Material.Rounded.FileUpload)
     ];
+
+    private Severity BalanceSeverity =>
+        _balanceCheck switch
+        {
+            null => Severity.Info,
+            { LatestStatementDate: null } => Severity.Info,
+            { Difference: 0m } => Severity.Success,
+            _ => Severity.Warning,
+        };
 
     protected override async Task OnInitializedAsync()
     {
@@ -101,6 +152,28 @@
         finally
         {
             _uploading = false;
+        }
+    }
+
+    private async Task OnCheckBalance()
+    {
+        if (_selectedAccountId is null || PeriodState.SelectedPeriodId is null) return;
+
+        _checking = true;
+        _balanceCheck = null;
+        try
+        {
+            _balanceCheck = await Api.GetAccountBalanceCheckAsync(
+                PeriodState.SelectedPeriodId.Value,
+                _selectedAccountId.Value);
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add($"Fehler beim Prüfen: {ex.Message}", Severity.Error);
+        }
+        finally
+        {
+            _checking = false;
         }
     }
 
