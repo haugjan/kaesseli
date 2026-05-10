@@ -1,6 +1,7 @@
 @page "/transactions"
 @using Kaesseli.Client.Blazor.Services
 @inject KaesseliApiService Api
+@inject ISnackbar Snackbar
 
 <PageTitle>Kontoauszüge</PageTitle>
 
@@ -30,16 +31,26 @@ else
 {
     <MudCard Elevation="0" Style="border: 1px solid var(--mud-palette-divider); border-radius: 12px;">
         <MudCardContent Class="pa-0">
-            <MudTable Items="_transactions" Dense="true" Hover="true" Elevation="0" Style="background: transparent;">
+            <MudTable Items="_transactions" Dense="true" Hover="true" Elevation="0" Style="background: transparent;"
+                      RowStyleFunc="@RowStyle">
                 <HeaderContent>
                     <MudTh>Datum</MudTh>
                     <MudTh>Beschreibung</MudTh>
                     <MudTh Style="text-align: right;">Betrag</MudTh>
+                    <MudTh Style="text-align: center; width: 1%;">Ignoriert</MudTh>
                 </HeaderContent>
                 <RowTemplate>
                     <MudTd DataLabel="Datum">@context.ValueDate.ToString("dd.MM.yyyy")</MudTd>
-                    <MudTd DataLabel="Beschreibung">@context.Description</MudTd>
+                    <MudTd DataLabel="Beschreibung" Style="@DescriptionStyle(context.IsIgnored)">@context.Description</MudTd>
                     <MudTd DataLabel="Betrag" Style="@AmountStyle(context.Amount)">@context.Amount.ToString("N2")</MudTd>
+                    <MudTd DataLabel="Ignoriert" Style="text-align: center;">
+                        <MudTooltip Text="@(context.IsIgnored ? "Wieder aktivieren" : "Ignorieren")">
+                            <MudIconButton Icon="@(context.IsIgnored ? Icons.Material.Rounded.VisibilityOff : Icons.Material.Rounded.Visibility)"
+                                           Color="@(context.IsIgnored ? Color.Default : Color.Primary)"
+                                           Size="Size.Small"
+                                           OnClick="@(() => OnToggleIgnoredAsync(context))" />
+                        </MudTooltip>
+                    </MudTd>
                 </RowTemplate>
             </MudTable>
         </MudCardContent>
@@ -64,8 +75,28 @@ else
 
         if (id is null) return;
 
-        var result = await Api.GetTransactionsAsync(id.Value);
+        await ReloadTransactionsAsync(id.Value);
+    }
+
+    private async Task ReloadTransactionsAsync(Guid summaryId)
+    {
+        var result = await Api.GetTransactionsAsync(summaryId);
         _transactions = result?.ToList() ?? [];
+    }
+
+    private async Task OnToggleIgnoredAsync(Transaction transaction)
+    {
+        if (_selectedId is null) return;
+
+        try
+        {
+            await Api.SetTransactionIgnoredAsync(transaction.Id, !transaction.IsIgnored);
+            await ReloadTransactionsAsync(_selectedId.Value);
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add($"Fehler: {ex.Message}", Severity.Error);
+        }
     }
 
     private static string AmountStyle(decimal amount)
@@ -73,4 +104,10 @@ else
         var color = amount >= 0 ? "color: #21BA45;" : "color: #C10015;";
         return $"text-align: right; font-weight: 700; {color}";
     }
+
+    private static string DescriptionStyle(bool isIgnored) =>
+        isIgnored ? "text-decoration: line-through;" : string.Empty;
+
+    private static string RowStyle(Transaction transaction, int _) =>
+        transaction.IsIgnored ? "opacity: 0.55;" : string.Empty;
 }

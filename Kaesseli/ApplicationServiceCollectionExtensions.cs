@@ -61,6 +61,7 @@ public static class ApplicationServiceCollectionExtensions
                 >()
                 .AddTransient<AssignOpenTransaction.IHandler, AssignOpenTransaction.Handler>()
                 .AddTransient<SplitOpenTransaction.IHandler, SplitOpenTransaction.Handler>()
+                .AddTransient<SetIgnoreTransaction.IHandler, SetIgnoreTransaction.Handler>()
                 .AddTransient<GetNextOpenTransaction.IHandler, GetNextOpenTransaction.Handler>()
                 .AddTransient<GetTotalOpenTransaction.IHandler, GetTotalOpenTransaction.Handler>()
                 // Integration - TransactionQuery

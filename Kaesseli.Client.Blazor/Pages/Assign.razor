@@ -13,9 +13,17 @@
 {
     <MudCard Elevation="0" Class="mb-4" Style="border: 1px solid var(--mud-palette-divider); border-radius: 12px;">
         <MudCardContent>
-            <MudText Typo="Typo.h6">
-                @_transaction.ValueDate.ToString("dddd, dd. MMMM yyyy")
-            </MudText>
+            <div class="d-flex align-center">
+                <MudText Typo="Typo.h6">
+                    @_transaction.ValueDate.ToString("dddd, dd. MMMM yyyy")
+                </MudText>
+                <MudSpacer />
+                <MudTooltip Text="Ignorieren / überspringen">
+                    <MudIconButton Icon="@Icons.Material.Rounded.VisibilityOff"
+                                   Color="Color.Default"
+                                   OnClick="OnIgnoreClick" />
+                </MudTooltip>
+            </div>
             <MudChip T="string"
                      Style="@(_transaction.Amount >= 0 ? "background-color: #21BA45; color: white;" : "background-color: #C10015; color: white;")"
                      Icon="@(_transaction.Amount >= 0 ? Icons.Material.Rounded.AttachMoney : Icons.Material.Rounded.MoneyOff)">
@@ -257,6 +265,22 @@ else
     {
         if (string.IsNullOrWhiteSpace(text)) return;
         _nrOfPossibleAutomations = await Api.GetNrOfPossibleAutomationsAsync(text);
+    }
+
+    private async Task OnIgnoreClick()
+    {
+        if (_transaction is null) return;
+
+        try
+        {
+            await Api.SetTransactionIgnoredAsync(_transaction.Id, isIgnored: true);
+            Snackbar.Add("Transaktion ignoriert.", Severity.Info);
+            await LoadAsync();
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add($"Fehler: {ex.Message}", Severity.Error);
+        }
     }
 
     private async Task OnFilterKeyDown(KeyboardEventArgs e)

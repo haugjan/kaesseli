@@ -57,6 +57,7 @@ public class DependencyInjectionTests
             typeof(UpdateOpenTransactionTotal.IHandler),
             typeof(AssignOpenTransaction.IHandler),
             typeof(SplitOpenTransaction.IHandler),
+            typeof(SetIgnoreTransaction.IHandler),
             typeof(GetNextOpenTransaction.IHandler),
             typeof(GetTotalOpenTransaction.IHandler),
             typeof(GetTransactions.IHandler),

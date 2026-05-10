@@ -49,6 +49,12 @@ public static class IntegrationApi
                     await handler.Handle(cmd, ct)
             );
 
+            app.MapPatch(
+                pattern: "/transaction/ignore",
+                async (SetIgnoreTransaction.IHandler handler, [FromBody] SetIgnoreTransaction.Query cmd, CancellationToken ct) =>
+                    await handler.Handle(cmd, ct)
+            );
+
             app.MapPost(
                     pattern: "/file/upload",
                     async (
