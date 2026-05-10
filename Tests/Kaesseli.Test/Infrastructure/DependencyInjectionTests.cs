@@ -2,6 +2,7 @@ using Kaesseli.Features.AccountSuggestion;
 using Kaesseli.Features.Accounts;
 using Kaesseli.Features.Automation;
 using Kaesseli.Features.Budget;
+using Kaesseli.Features.Integration;
 using Kaesseli.Features.Integration.FileImport;
 using Kaesseli.Features.Integration.NextOpenTransaction;
 using Kaesseli.Features.Integration.TransactionQuery;
@@ -65,6 +66,7 @@ public class DependencyInjectionTests
             typeof(GetTransactionSummaries.IHandler),
             typeof(CleanupOrphanedAccountReferences.IHandler),
             typeof(GenerateAccountSuggestions.IRunner),
+            typeof(CleanupBatchParentTransactions.IHandler),
         };
 
         foreach (var handlerInterface in handlerInterfaces)

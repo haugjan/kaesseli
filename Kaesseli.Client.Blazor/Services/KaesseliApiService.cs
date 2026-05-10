@@ -405,6 +405,21 @@ public class KaesseliApiService(HttpClient httpClient)
             ?? throw new InvalidOperationException("Cleanup endpoint returned no body.");
     }
 
+    public async Task<CleanupBatchParentsResult> CleanupBatchParentTransactionsAsync(
+        bool execute,
+        CancellationToken ct = default
+    )
+    {
+        var response = await httpClient.PostAsync(
+            $"admin/cleanupBatchParentTransactions?execute={execute.ToString().ToLowerInvariant()}",
+            content: null,
+            ct
+        );
+        response.EnsureSuccessStatusCode();
+        return await response.Content.ReadFromJsonAsync<CleanupBatchParentsResult>(ct)
+            ?? throw new InvalidOperationException("Cleanup endpoint returned no body.");
+    }
+
     public async Task<string> ExportAccountPlanAsync(CancellationToken ct = default)
     {
         var response = await httpClient.GetAsync("account/plan", ct);

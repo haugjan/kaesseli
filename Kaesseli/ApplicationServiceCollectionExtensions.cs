@@ -2,6 +2,7 @@ using Kaesseli.Features.AccountSuggestion;
 using Kaesseli.Features.Accounts;
 using Kaesseli.Features.Automation;
 using Kaesseli.Features.Budget;
+using Kaesseli.Features.Integration;
 using Kaesseli.Features.Integration.FileImport;
 using Kaesseli.Features.Integration.NextOpenTransaction;
 using Kaesseli.Features.Integration.TransactionQuery;
@@ -66,6 +67,10 @@ public static class ApplicationServiceCollectionExtensions
                 .AddTransient<SetIgnoreTransaction.IHandler, SetIgnoreTransaction.Handler>()
                 .AddTransient<GetNextOpenTransaction.IHandler, GetNextOpenTransaction.Handler>()
                 .AddTransient<GetTotalOpenTransaction.IHandler, GetTotalOpenTransaction.Handler>()
+                .AddTransient<
+                    CleanupBatchParentTransactions.IHandler,
+                    CleanupBatchParentTransactions.Handler
+                >()
                 // Integration - TransactionQuery
                 .AddTransient<GetTransactions.IHandler, GetTransactions.Handler>()
                 .AddTransient<GetTransactionSummaries.IHandler, GetTransactionSummaries.Handler>()
