@@ -34,6 +34,7 @@ public class ProcessCamtFileDuplicateTests
         var entries = new SmartFaker<FinancialDocumentEntry>().Generate(count: 3);
         var document = new SmartFaker<FinancialDocument>()
             .RuleFor(d => d.Entries, _ => entries)
+            .RuleFor(d => d.HasBalanceInfo, _ => false)
             .Generate();
 
         _camtProcessorMock
@@ -66,6 +67,7 @@ public class ProcessCamtFileDuplicateTests
         var entries = new SmartFaker<FinancialDocumentEntry>().Generate(count: 3);
         var document = new SmartFaker<FinancialDocument>()
             .RuleFor(d => d.Entries, _ => entries)
+            .RuleFor(d => d.HasBalanceInfo, _ => false)
             .Generate();
 
         _camtProcessorMock

@@ -1,4 +1,4 @@
-﻿namespace Kaesseli.Features.Integration.FileImport;
+namespace Kaesseli.Features.Integration.FileImport;
 
 public class FinancialDocument
 {
@@ -8,4 +8,10 @@ public class FinancialDocument
     public required DateOnly ValueDateFrom { get; init; }
     public required DateOnly ValueDateTo { get; init; }
     public required string Reference { get; init; }
+    public bool HasBalanceInfo { get; init; }
+
+    public decimal EntriesTotal => Entries.Sum(entry => entry.Amount);
+    public decimal ExpectedDelta => BalanceAfter - BalanceBefore;
+    public decimal BalanceDifference => EntriesTotal - ExpectedDelta;
+    public bool IsBalanceConsistent => !HasBalanceInfo || BalanceDifference == 0m;
 }

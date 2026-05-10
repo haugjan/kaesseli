@@ -4,7 +4,12 @@ namespace Kaesseli.Features.Integration.FileImport;
 
 public static class ProcessFile
 {
-    public record Query(FileType FileType, Stream Content, Guid AccountId, Guid AccountingPeriodId);
+    public record Query(
+        FileType FileType,
+        Stream Content,
+        Guid AccountId,
+        Guid AccountingPeriodId,
+        bool IgnoreBalanceMismatch = false);
 
     public interface IHandler
     {
@@ -21,7 +26,10 @@ public static class ProcessFile
             var result = request.FileType switch
             {
                 FileType.Camt => await camtHandler.Handle(
-                                     request: new ProcessCamtFile.Query(Content: request.Content, AccountId: request.AccountId),
+                                     new ProcessCamtFile.Query(
+                                         Content: request.Content,
+                                         AccountId: request.AccountId,
+                                         IgnoreBalanceMismatch: request.IgnoreBalanceMismatch),
                                      cancellationToken),
                 FileType.PostFinanceCsv => await postFinanceCsvHandler.Handle(
                                                request: new ProcessPostFinanceCsv.Query(Content: request.Content, AccountId: request.AccountId),

@@ -1,4 +1,4 @@
-﻿using System.Xml.Serialization;
+using System.Xml.Serialization;
 
 namespace Kaesseli.Features.Integration.FileImport;
 
@@ -15,44 +15,94 @@ internal class CamtProcessor : ICamtProcessor
 
         var firstStatement = document.BkToCstmrStmt.Stmt.Single();
 
-        var financialDocument = new FinancialDocument
+        var openingBalance = firstStatement.Bal.Single(b => b.Tp.CdOrPrtry.Item is BalanceType12Code.OPBD);
+        var closingBalance = firstStatement.Bal.Single(b => b.Tp.CdOrPrtry.Item is BalanceType12Code.CLBD);
+
+        return new FinancialDocument
         {
             Entries = CreateCamtEntries(firstStatement),
-            BalanceBefore = firstStatement.Bal.Single(balance => balance.Tp.CdOrPrtry.Item is BalanceType12Code.OPBD).Amt.Value,
-            BalanceAfter = firstStatement.Bal.Single(balance => balance.Tp.CdOrPrtry.Item is BalanceType12Code.CLBD).Amt.Value,
+            BalanceBefore = SignedAmount(openingBalance.Amt.Value, openingBalance.CdtDbtInd),
+            BalanceAfter = SignedAmount(closingBalance.Amt.Value, closingBalance.CdtDbtInd),
             ValueDateFrom = DateOnly.FromDateTime(firstStatement.FrToDt.FrDtTm),
             ValueDateTo = DateOnly.FromDateTime(firstStatement.FrToDt.ToDtTm),
-            Reference = document.BkToCstmrStmt.GrpHdr.MsgId
+            Reference = document.BkToCstmrStmt.GrpHdr.MsgId,
+            HasBalanceInfo = true
         };
-
-        return financialDocument;
     }
 
-    private static IEnumerable<FinancialDocumentEntry> CreateCamtEntries(AccountStatement4 accountStatement) =>
-        accountStatement.Ntry
-                        .Select(
-                            entry => new FinancialDocumentEntry
-                            {
-                                RawText = entry.NtryDtls.ToYaml(),
-                                Description = entry.AddtlNtryInf,
-                                Reference = entry.AcctSvcrRef,
-                                TransactionCodeDetail = entry.BkTxCd.ToYaml(),
-                                TransactionCode = entry.BkTxCd.Domn.Cd,
-                                Amount = entry.CdtDbtInd == CreditDebitCode.CRDT
-                                             ? entry.Amt.Value
-                                             : -entry.Amt.Value,
-                                ValueDate = DateOnly.FromDateTime(entry.ValDt.Item),
-                                BookDate = DateOnly.FromDateTime(entry.BookgDt.Item),
-                                Debtor = GetDebtor(entry),
-                                Creditor = GetCreditor(entry)
-                            });
+    private static IEnumerable<FinancialDocumentEntry> CreateCamtEntries(AccountStatement4 accountStatement)
+    {
+        foreach (var entry in accountStatement.Ntry)
+        {
+            var subEntries = entry.NtryDtls?.SelectMany(d => d.TxDtls ?? []).ToArray() ?? [];
+            if (subEntries.Length > 1)
+            {
+                for (var i = 0; i < subEntries.Length; i++)
+                    yield return CreateBatchPart(entry, subEntries[i], i);
+            }
+            else
+            {
+                yield return CreateSingleEntry(entry);
+            }
+        }
+    }
 
-    private static string? GetDebtor(ReportEntry4 entry) =>
+    private static FinancialDocumentEntry CreateSingleEntry(ReportEntry4 entry) =>
+        new()
+        {
+            RawText = entry.NtryDtls.ToYaml(),
+            Description = entry.AddtlNtryInf,
+            Reference = entry.AcctSvcrRef,
+            TransactionCodeDetail = entry.BkTxCd.ToYaml(),
+            TransactionCode = entry.BkTxCd.Domn.Cd,
+            Amount = SignedAmount(entry.Amt.Value, entry.CdtDbtInd),
+            ValueDate = DateOnly.FromDateTime(entry.ValDt.Item),
+            BookDate = DateOnly.FromDateTime(entry.BookgDt.Item),
+            Debtor = GetSingleDebtor(entry),
+            Creditor = GetSingleCreditor(entry)
+        };
+
+    private static FinancialDocumentEntry CreateBatchPart(ReportEntry4 parent, EntryTransaction4 part, int index) =>
+        new()
+        {
+            RawText = part.ToYaml(),
+            Description = BuildBatchDescription(parent, part),
+            Reference = part.Refs?.AcctSvcrRef
+                        ?? $"{parent.AcctSvcrRef}-{index + 1}",
+            TransactionCodeDetail = (part.BkTxCd ?? parent.BkTxCd).ToYaml(),
+            TransactionCode = (part.BkTxCd ?? parent.BkTxCd).Domn.Cd,
+            Amount = SignedAmount(part.Amt.Value, part.CdtDbtInd),
+            ValueDate = DateOnly.FromDateTime(parent.ValDt.Item),
+            BookDate = DateOnly.FromDateTime(parent.BookgDt.Item),
+            Debtor = part.RltdPties?.Dbtr?.Nm,
+            Creditor = part.RltdPties?.Cdtr?.Nm
+        };
+
+    private static string BuildBatchDescription(ReportEntry4 parent, EntryTransaction4 part)
+    {
+        var party = part.RltdPties?.Cdtr?.Nm ?? part.RltdPties?.Dbtr?.Nm;
+        var remit = part.RmtInf?.Ustrd is { Length: > 0 } lines
+                        ? string.Join(" / ", lines)
+                        : null;
+
+        if (!string.IsNullOrWhiteSpace(party) && !string.IsNullOrWhiteSpace(remit))
+            return $"{party} – {remit}";
+        if (!string.IsNullOrWhiteSpace(party))
+            return party;
+        if (!string.IsNullOrWhiteSpace(remit))
+            return remit;
+        return parent.AddtlNtryInf;
+    }
+
+    private static decimal SignedAmount(decimal amount, CreditDebitCode indicator) =>
+        indicator == CreditDebitCode.CRDT ? amount : -amount;
+
+    private static string? GetSingleDebtor(ReportEntry4 entry) =>
         entry.NtryDtls?
              .FirstOrDefault()?.TxDtls
              .FirstOrDefault()?
              .RltdPties?.Dbtr?.Nm;
-    private static string? GetCreditor(ReportEntry4 entry) =>
+    private static string? GetSingleCreditor(ReportEntry4 entry) =>
         entry.NtryDtls?
              .FirstOrDefault()?.TxDtls
              .FirstOrDefault()?

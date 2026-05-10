@@ -1,0 +1,58 @@
+@using Kaesseli.Contracts.Integration
+
+<MudDialog>
+    <DialogContent>
+        <MudAlert Severity="Severity.Warning" Class="mb-4">
+            Bei @Mismatches.Count Datei(en) stimmt der Kontostand nicht mit der Summe der Buchungen überein.
+        </MudAlert>
+
+        <MudSimpleTable Dense="true" Bordered="true" Hover="true" Striped="true">
+            <thead>
+                <tr>
+                    <th>Datei</th>
+                    <th>Periode</th>
+                    <th style="text-align: right;">Erwartet</th>
+                    <th style="text-align: right;">Tatsächlich</th>
+                    <th style="text-align: right;">Differenz</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var m in Mismatches)
+                {
+                    <tr>
+                        <td>@m.FileName</td>
+                        <td>@m.ValueDateFrom.ToString("dd.MM.yyyy") – @m.ValueDateTo.ToString("dd.MM.yyyy")</td>
+                        <td style="text-align: right;">@m.ExpectedDelta.ToString("N2")</td>
+                        <td style="text-align: right;">@m.ActualDelta.ToString("N2")</td>
+                        <td style="@DiffStyle(m.Difference)">@m.Difference.ToString("N2")</td>
+                    </tr>
+                }
+            </tbody>
+        </MudSimpleTable>
+
+        <MudText Typo="Typo.body2" Class="mud-text-secondary mt-3">
+            Trotzdem importieren? Die Buchungen werden wie erkannt übernommen, der Kontostand kann danach abweichen.
+        </MudText>
+    </DialogContent>
+    <DialogActions>
+        <MudButton OnClick="Cancel">Abbrechen</MudButton>
+        <MudButton Color="Color.Warning" Variant="Variant.Filled" OnClick="Submit">
+            Trotzdem importieren
+        </MudButton>
+    </DialogActions>
+</MudDialog>
+
+@code {
+    [CascadingParameter] private IMudDialogInstance MudDialog { get; set; } = null!;
+
+    [Parameter, EditorRequired] public IReadOnlyList<BalanceMismatch> Mismatches { get; set; } = [];
+
+    private static string DiffStyle(decimal diff)
+    {
+        var color = diff == 0 ? "" : (diff > 0 ? "color: #21BA45;" : "color: #C10015;");
+        return $"text-align: right; font-weight: 700; {color}";
+    }
+
+    private void Submit() => MudDialog.Close(DialogResult.Ok(true));
+    private void Cancel() => MudDialog.Cancel();
+}

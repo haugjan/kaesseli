@@ -1,7 +1,9 @@
 @page "/import"
+@using Kaesseli.Client.Blazor.Components
 @using Kaesseli.Client.Blazor.Services
 @inject KaesseliApiService Api
 @inject AccountingPeriodState PeriodState
+@inject IDialogService DialogService
 @inject ISnackbar Snackbar
 
 <PageTitle>Import</PageTitle>
@@ -74,10 +76,23 @@
         _uploading = true;
         try
         {
-            await using var stream = _file.OpenReadStream(maxAllowedSize: 10 * 1024 * 1024);
-            await Api.UploadFileAsync(stream, _file.Name, _selectedAccountId.Value, PeriodState.SelectedPeriodId.Value);
-            Snackbar.Add("Datei erfolgreich hochgeladen!", Severity.Success);
-            _file = null;
+            var result = await UploadAsync(ignoreBalanceMismatch: false);
+            if (result.Success)
+            {
+                Snackbar.Add("Datei erfolgreich hochgeladen!", Severity.Success);
+                _file = null;
+                return;
+            }
+
+            var confirmed = await ConfirmMismatchAsync(result.Mismatches);
+            if (!confirmed) return;
+
+            var forced = await UploadAsync(ignoreBalanceMismatch: true);
+            if (forced.Success)
+            {
+                Snackbar.Add("Datei trotz Abweichung importiert.", Severity.Warning);
+                _file = null;
+            }
         }
         catch (Exception ex)
         {
@@ -87,5 +102,28 @@
         {
             _uploading = false;
         }
+    }
+
+    private async Task<KaesseliApiService.UploadFileResult> UploadAsync(bool ignoreBalanceMismatch)
+    {
+        await using var stream = _file!.OpenReadStream(maxAllowedSize: 10 * 1024 * 1024);
+        return await Api.UploadFileAsync(
+            stream,
+            _file.Name,
+            _selectedAccountId!.Value,
+            PeriodState.SelectedPeriodId!.Value,
+            ignoreBalanceMismatch);
+    }
+
+    private async Task<bool> ConfirmMismatchAsync(IReadOnlyList<Contracts.Integration.BalanceMismatch> mismatches)
+    {
+        var parameters = new DialogParameters
+        {
+            { nameof(BalanceMismatchDialog.Mismatches), mismatches }
+        };
+
+        var dialog = await DialogService.ShowAsync<BalanceMismatchDialog>("Kontostand stimmt nicht", parameters);
+        var result = await dialog.Result;
+        return result is { Canceled: false, Data: true };
     }
 }

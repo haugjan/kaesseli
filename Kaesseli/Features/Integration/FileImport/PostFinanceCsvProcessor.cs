@@ -46,7 +46,8 @@ internal class PostFinanceCsvProcessor : IPostFinanceCsvProcessor
             BalanceAfter = 0,
             ValueDateFrom = entries.Min(entry => entry.ValueDate),
             ValueDateTo = entries.Max(entry => entry.ValueDate),
-            Reference = entries.ToYaml().ToHash()
+            Reference = entries.ToYaml().ToHash(),
+            HasBalanceInfo = false
         };
         return Task.FromResult(result);
     }

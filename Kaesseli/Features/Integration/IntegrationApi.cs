@@ -59,18 +59,21 @@ public static class IntegrationApi
                     pattern: "/file/upload",
                     async (
                         ProcessFile.IHandler handler,
+                        ICamtProcessor camtProcessor,
                         IFormFile file,
                         [FromForm] Guid accountId,
                         [FromForm] Guid accountingPeriodId,
+                        [FromQuery] bool? ignoreBalanceMismatch,
                         CancellationToken ct
                     ) =>
                     {
+                        var force = ignoreBalanceMismatch.GetValueOrDefault();
                         var extension = System.IO.Path.GetExtension(file.FileName);
                         if (extension == ".zip")
-                            return await UploadZippedFiles(file, accountId, accountingPeriodId, handler, ct);
+                            return await UploadZippedFiles(file, accountId, accountingPeriodId, force, handler, camtProcessor, ct);
 
                         await using var fileStream = file.OpenReadStream();
-                        return await UploadFile(fileStream, extension, accountId, accountingPeriodId, handler, ct);
+                        return await UploadSingleFile(fileStream, file.FileName, extension, accountId, accountingPeriodId, force, handler, ct);
                     }
                 )
                 .Accepts<IFormFile>(contentType: "multipart/form-data")
@@ -79,35 +82,96 @@ public static class IntegrationApi
         }
     }
 
-    private static async Task<Guid> UploadZippedFiles(
-        IFormFile file, Guid accountId, Guid accountingPeriodId,
-        ProcessFile.IHandler handler, CancellationToken ct)
+    private static async Task<IResult> UploadZippedFiles(
+        IFormFile file,
+        Guid accountId,
+        Guid accountingPeriodId,
+        bool force,
+        ProcessFile.IHandler handler,
+        ICamtProcessor camtProcessor,
+        CancellationToken ct)
     {
         await using var memoryStream = file.OpenReadStream();
         using var archive = new ZipArchive(memoryStream);
+
+        var preparedFiles = new List<(string Name, byte[] Bytes, FileType Type)>();
         foreach (var entry in archive.Entries)
         {
-            await using var entryStream = entry.Open();
             var extension = System.IO.Path.GetExtension(entry.FullName);
-            await UploadFile(entryStream, extension, accountId, accountingPeriodId, handler, ct);
+            var fileType = ResolveFileType(extension);
+            await using var entryStream = entry.Open();
+            using var memory = new MemoryStream();
+            await entryStream.CopyToAsync(memory, ct);
+            preparedFiles.Add((entry.FullName, memory.ToArray(), fileType));
         }
-        return Guid.Empty;
-    }
 
-    private static async Task<Guid> UploadFile(
-        Stream stream, string extension, Guid accountId, Guid accountingPeriodId,
-        ProcessFile.IHandler handler, CancellationToken ct)
-    {
-        var fileType = extension switch
+        if (!force)
         {
-            ".csv" => FileType.PostFinanceCsv,
-            ".camt" or ".xml" => FileType.Camt,
-            _ => throw new ArgumentOutOfRangeException(),
-        };
-        var command = new ProcessFile.Query(
-            FileType: fileType, Content: stream,
-            AccountId: accountId, AccountingPeriodId: accountingPeriodId);
+            var mismatches = new List<Contracts.Integration.BalanceMismatch>();
+            foreach (var (name, bytes, type) in preparedFiles)
+            {
+                if (type != FileType.Camt) continue;
+                using var parseStream = new MemoryStream(bytes);
+                var doc = await camtProcessor.ReadCamtFile(parseStream, ct);
+                if (!doc.IsBalanceConsistent)
+                    mismatches.Add(BuildMismatch(name, doc));
+            }
 
-        return await handler.Handle(command, ct);
+            if (mismatches.Count > 0)
+                return Results.Json(
+                    new Contracts.Integration.BalanceMismatchResponse(mismatches),
+                    statusCode: 422);
+        }
+
+        Guid lastId = Guid.Empty;
+        foreach (var (_, bytes, type) in preparedFiles)
+        {
+            using var importStream = new MemoryStream(bytes);
+            lastId = await handler.Handle(
+                new ProcessFile.Query(type, importStream, accountId, accountingPeriodId, IgnoreBalanceMismatch: true),
+                ct);
+        }
+        return Results.Ok(lastId);
     }
+
+    private static async Task<IResult> UploadSingleFile(
+        Stream stream,
+        string fileName,
+        string extension,
+        Guid accountId,
+        Guid accountingPeriodId,
+        bool force,
+        ProcessFile.IHandler handler,
+        CancellationToken ct)
+    {
+        var fileType = ResolveFileType(extension);
+        var command = new ProcessFile.Query(fileType, stream, accountId, accountingPeriodId, force);
+
+        try
+        {
+            return Results.Ok(await handler.Handle(command, ct));
+        }
+        catch (BalanceMismatchException ex)
+        {
+            return Results.Json(
+                new Contracts.Integration.BalanceMismatchResponse([BuildMismatch(fileName, ex.Document)]),
+                statusCode: 422);
+        }
+    }
+
+    private static FileType ResolveFileType(string extension) => extension switch
+    {
+        ".csv" => FileType.PostFinanceCsv,
+        ".camt" or ".xml" => FileType.Camt,
+        _ => throw new ArgumentOutOfRangeException(nameof(extension), extension, $"Unsupported file extension '{extension}'"),
+    };
+
+    private static Contracts.Integration.BalanceMismatch BuildMismatch(string fileName, FinancialDocument document) =>
+        new(
+            FileName: fileName,
+            ExpectedDelta: document.ExpectedDelta,
+            ActualDelta: document.EntriesTotal,
+            Difference: document.BalanceDifference,
+            ValueDateFrom: document.ValueDateFrom,
+            ValueDateTo: document.ValueDateTo);
 }

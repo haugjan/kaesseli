@@ -1,5 +1,4 @@
 using Kaesseli.Features.Accounts;
-using Kaesseli.Features.Integration;
 using Kaesseli.Features.Integration.NextOpenTransaction;
 
 namespace Kaesseli.Features.Integration.FileImport;
@@ -7,7 +6,7 @@ namespace Kaesseli.Features.Integration.FileImport;
 public static class ProcessCamtFile
 {
     // ReSharper disable once ClassNeverInstantiated.Global
-    public record Query(Stream Content, Guid AccountId);
+    public record Query(Stream Content, Guid AccountId, bool IgnoreBalanceMismatch = false);
 
     public interface IHandler
     {
@@ -27,6 +26,10 @@ public static class ProcessCamtFile
                 request.Content,
                 cancellationToken
             );
+
+            if (!request.IgnoreBalanceMismatch && !financialDocument.IsBalanceConsistent)
+                throw new BalanceMismatchException(financialDocument);
+
             var account = await accountRepo.GetAccount(request.AccountId, cancellationToken);
             var existingReferences = await transactionRepository.GetExistingTransactionReferences(
                 cancellationToken
