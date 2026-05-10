@@ -101,11 +101,13 @@ public class KaesseliApiService(HttpClient httpClient)
             accountType.HasValue ? $"account?accountType={(int)accountType}" : "account"
         );
 
-    public async Task UploadFileAsync(
+    public async Task<UploadFileResult> UploadFileAsync(
         Stream fileStream,
         string fileName,
         Guid accountId,
-        Guid accountingPeriodId
+        Guid accountingPeriodId,
+        bool ignoreBalanceMismatch = false,
+        CancellationToken ct = default
     )
     {
         using var content = new MultipartFormDataContent();
@@ -113,9 +115,19 @@ public class KaesseliApiService(HttpClient httpClient)
         content.Add(streamContent, "file", fileName);
         content.Add(new StringContent(accountId.ToString()), "accountId");
         content.Add(new StringContent(accountingPeriodId.ToString()), "accountingPeriodId");
-        var response = await httpClient.PostAsync("file/upload", content);
+
+        var url = $"file/upload?ignoreBalanceMismatch={(ignoreBalanceMismatch ? "true" : "false")}";
+        var response = await httpClient.PostAsync(url, content, ct);
+        if ((int)response.StatusCode == 422)
+        {
+            var body = await response.Content.ReadFromJsonAsync<Contracts.Integration.BalanceMismatchResponse>(cancellationToken: ct);
+            return new UploadFileResult(Success: false, Mismatches: body?.Mismatches ?? []);
+        }
         response.EnsureSuccessStatusCode();
+        return new UploadFileResult(Success: true, Mismatches: []);
     }
+
+    public record UploadFileResult(bool Success, IReadOnlyList<Contracts.Integration.BalanceMismatch> Mismatches);
 
     public async Task AddAccountingPeriodAsync(
         string description,
