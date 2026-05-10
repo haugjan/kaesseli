@@ -9,6 +9,30 @@
 
 <MudBreadcrumbs Items="_breadcrumbs" Class="pa-0 mb-4" />
 
+<div class="d-flex align-center gap-3 mb-4">
+    <MudButton StartIcon="@Icons.Material.Rounded.AutoAwesome"
+               Color="Color.Secondary"
+               Variant="Variant.Outlined"
+               Disabled="@(_jobStatus?.IsRunning == true)"
+               OnClick="OnGenerateSuggestionsClick">
+        @(_jobStatus?.IsRunning == true ? "KI-Vorschläge laufen…" : "KI-Vorschläge generieren")
+    </MudButton>
+    @if (_jobStatus is not null && (_jobStatus.IsRunning || _jobStatus.Processed > 0 || _jobStatus.Failed > 0))
+    {
+        <MudText Typo="Typo.body2">
+            @_jobStatus.Processed / @_jobStatus.Total verarbeitet
+            @if (_jobStatus.Failed > 0)
+            {
+                <span> · @_jobStatus.Failed Fehler</span>
+            }
+        </MudText>
+        @if (_jobStatus.IsRunning)
+        {
+            <MudProgressCircular Indeterminate="true" Size="Size.Small" />
+        }
+    }
+</div>
+
 @if (_transaction is not null)
 {
     <MudCard Elevation="0" Class="mb-4" Style="border: 1px solid var(--mud-palette-divider); border-radius: 12px;">
@@ -79,6 +103,29 @@
         </MudCard>
     }
 
+    @if (TopAiSuggestions.Count > 0)
+    {
+        <MudText Typo="Typo.subtitle2" Class="mb-2">
+            <MudIcon Icon="@Icons.Material.Rounded.AutoAwesome" Size="Size.Small" />
+            KI-Vorschläge
+        </MudText>
+        <div class="d-flex flex-wrap gap-2 mb-3">
+            @foreach (var item in TopAiSuggestions)
+            {
+                var acc = item.Account;
+                var conf = item.Confidence;
+                <div @onclick="@(async e => await OnAccountClick(acc, e))" @onclick:stopPropagation style="cursor: pointer;">
+                    <MudChip T="string"
+                             Style="@($"background-color: {acc.AccountIconColor}; color: white; border: 2px solid var(--mud-palette-primary);")"
+                             Icon="@GetMudIcon(acc.AccountIcon)">
+                        @acc.AccountName · @($"{conf * 100:N0}%")
+                    </MudChip>
+                </div>
+            }
+        </div>
+        <MudDivider Class="mb-3" />
+    }
+
     <div class="d-flex flex-wrap gap-2">
         @foreach (var account in FilteredAccounts)
         {
@@ -105,6 +152,25 @@ else
     private int _nrOfPossibleAutomations;
     private bool _isAutomationActive;
     private MudTextField<string>? _filterInput;
+    private AccountSuggestionJobStatus? _jobStatus;
+    private CancellationTokenSource? _pollCts;
+
+    private List<TopSuggestion> TopAiSuggestions
+    {
+        get
+        {
+            if (_transaction is null || _transaction.AiSuggestions is null) return [];
+            var splittingIds = _splittingAccounts.Select(s => s.Account.AccountId).ToHashSet();
+            var byId = _transaction.SuggestedAccounts.ToDictionary(a => a.AccountId);
+            return _transaction.AiSuggestions
+                .Where(s => byId.ContainsKey(s.AccountId))
+                .Where(s => s.AccountId != _transaction.AccountId)
+                .Where(s => !splittingIds.Contains(s.AccountId))
+                .OrderBy(s => s.Rank)
+                .Select(s => new TopSuggestion(byId[s.AccountId], s.Confidence))
+                .ToList();
+        }
+    }
 
     private static readonly List<BreadcrumbItem> _breadcrumbs =
     [
@@ -132,6 +198,8 @@ else
     {
         PeriodState.OnChange += OnPeriodChanged;
         await LoadAsync();
+        await RefreshJobStatusAsync();
+        if (_jobStatus?.IsRunning == true) StartPolling();
     }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
@@ -293,7 +361,69 @@ else
         }
     }
 
-    public void Dispose() => PeriodState.OnChange -= OnPeriodChanged;
+    private async Task OnGenerateSuggestionsClick()
+    {
+        try
+        {
+            _jobStatus = await Api.StartAccountSuggestionJobAsync();
+            if (_jobStatus is { Started: false, IsRunning: true })
+                Snackbar.Add("Es läuft bereits ein KI-Job.", Severity.Info);
+            StartPolling();
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add($"KI-Job konnte nicht gestartet werden: {ex.Message}", Severity.Error);
+        }
+    }
+
+    private async Task RefreshJobStatusAsync()
+    {
+        try
+        {
+            _jobStatus = await Api.GetAccountSuggestionJobStatusAsync();
+        }
+        catch
+        {
+            // Status-Polling-Fehler dürfen die UI nicht stoppen.
+        }
+    }
+
+    private void StartPolling()
+    {
+        _pollCts?.Cancel();
+        _pollCts = new CancellationTokenSource();
+        var ct = _pollCts.Token;
+        _ = Task.Run(async () =>
+        {
+            while (!ct.IsCancellationRequested)
+            {
+                await Task.Delay(2000, ct);
+                await InvokeAsync(async () =>
+                {
+                    var previousProcessed = _jobStatus?.Processed ?? 0;
+                    await RefreshJobStatusAsync();
+                    StateHasChanged();
+                    if (_jobStatus is { IsRunning: false })
+                    {
+                        _pollCts?.Cancel();
+                        // Reload current transaction so a fresh suggestion shows up.
+                        if (_jobStatus.Processed > previousProcessed)
+                            await LoadAsync();
+                        StateHasChanged();
+                    }
+                });
+            }
+        }, ct);
+    }
+
+    public void Dispose()
+    {
+        PeriodState.OnChange -= OnPeriodChanged;
+        _pollCts?.Cancel();
+        _pollCts?.Dispose();
+    }
+
+    private record TopSuggestion(SuggestedAccount Account, double Confidence);
 
     private static string GetMudIcon(string iconName) => iconName switch
     {

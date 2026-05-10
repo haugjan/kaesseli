@@ -11,7 +11,14 @@ public record OpenTransaction(
     string AccountName,
     string AccountType,
     AccountType AccountTypeId,
-    IEnumerable<SuggestedAccount> SuggestedAccounts
+    IEnumerable<SuggestedAccount> SuggestedAccounts,
+    IReadOnlyList<AiAccountSuggestion>? AiSuggestions = null
+);
+
+public record AiAccountSuggestion(
+    Guid AccountId,
+    int Rank,
+    double Confidence
 );
 
 public record SuggestedAccount(
