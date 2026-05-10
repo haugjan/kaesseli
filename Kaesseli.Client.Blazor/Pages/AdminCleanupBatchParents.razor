@@ -1,0 +1,110 @@
+@page "/admin/cleanup-batch-parents"
+@using Kaesseli.Client.Blazor.Services
+@inject KaesseliApiService Api
+@inject ISnackbar Snackbar
+
+<PageTitle>Wartung – Sammel-Buchungen bereinigen</PageTitle>
+
+<MudCard Elevation="0" Style="border: 1px solid var(--mud-palette-divider); border-radius: 12px; max-width: 880px;">
+    <MudCardHeader>
+        <CardHeaderAvatar>
+            <MudAvatar Style="background-color: #C62828; color: white;" Size="Size.Medium">
+                <MudIcon Icon="@Icons.Material.Rounded.CallSplit" />
+            </MudAvatar>
+        </CardHeaderAvatar>
+        <CardHeaderContent>
+            <MudText Typo="Typo.h6">Veraltete CAMT-Sammel-Transaktionen bereinigen</MudText>
+            <MudText Typo="Typo.body2" Class="mud-text-secondary">
+                Findet Transaktionen, die vor #45 als gelumpter Sammel-Eintrag importiert wurden und mittlerweile durch
+                granulare Sub-Transaktionen ersetzt sind. Vorschau ist immer der Default — gelöscht wird erst nach
+                explizitem Klick auf „Endgültig löschen".
+            </MudText>
+        </CardHeaderContent>
+    </MudCardHeader>
+    <MudCardContent>
+        <MudAlert Severity="Severity.Warning" Variant="Variant.Outlined" Class="mb-4">
+            Ausgeführt löscht sowohl die alten Parent-Transaktionen als auch <b>alle</b> Journaleinträge, die du daraus manuell aufgeteilt hast. Erst die Vorschau prüfen!
+        </MudAlert>
+
+        @if (_result is not null)
+        {
+            <MudPaper Class="pa-4 mb-4" Elevation="0" Style="background: var(--mud-palette-background-grey);">
+                <MudText Typo="Typo.subtitle1">
+                    <b>@(_result.DryRun ? "Vorschau" : "Ausgeführt")</b>
+                    — @_result.ParentsFound Parent-Transaktion(en),
+                    @_result.JournalEntriesAffected zugehörige Journaleinträge
+                </MudText>
+
+                @if (_result.Parents.Count == 0)
+                {
+                    <MudText Class="mt-2">Nichts zu bereinigen. Deine Daten sind sauber.</MudText>
+                }
+                else
+                {
+                    <MudTable Items="_result.Parents" Class="mt-3" Dense="true" Hover="true">
+                        <HeaderContent>
+                            <MudTh>Datum</MudTh>
+                            <MudTh>Reference</MudTh>
+                            <MudTh>Beschreibung</MudTh>
+                            <MudTh Style="text-align:right">Betrag</MudTh>
+                            <MudTh Style="text-align:right">Subs</MudTh>
+                            <MudTh Style="text-align:right">JE</MudTh>
+                        </HeaderContent>
+                        <RowTemplate>
+                            <MudTd>@context.ValueDate.ToString("dd.MM.yyyy")</MudTd>
+                            <MudTd Style="font-family: monospace;">@context.Reference</MudTd>
+                            <MudTd>@context.Description</MudTd>
+                            <MudTd Style="text-align:right">@context.Amount.ToString("N2")</MudTd>
+                            <MudTd Style="text-align:right">@context.ChildCount</MudTd>
+                            <MudTd Style="text-align:right">@context.JournalEntryCount</MudTd>
+                        </RowTemplate>
+                    </MudTable>
+                }
+            </MudPaper>
+        }
+    </MudCardContent>
+    <MudCardActions>
+        <MudButton Color="Color.Primary"
+                   Variant="Variant.Outlined"
+                   StartIcon="@Icons.Material.Rounded.Visibility"
+                   OnClick="@(() => Run(execute: false))"
+                   Disabled="_busy">
+            @(_busy ? "Lade..." : "Vorschau")
+        </MudButton>
+        <MudSpacer />
+        <MudButton Color="Color.Error"
+                   Variant="Variant.Filled"
+                   StartIcon="@Icons.Material.Rounded.DeleteSweep"
+                   OnClick="@(() => Run(execute: true))"
+                   Disabled="_busy || _result is null || _result.Parents.Count == 0 || !_result.DryRun">
+            Endgültig löschen
+        </MudButton>
+    </MudCardActions>
+</MudCard>
+
+@code {
+    private bool _busy;
+    private CleanupBatchParentsResult? _result;
+
+    private async Task Run(bool execute)
+    {
+        _busy = true;
+        try
+        {
+            _result = await Api.CleanupBatchParentTransactionsAsync(execute);
+            Snackbar.Add(
+                execute
+                    ? $"Gelöscht: {_result.ParentsFound} Parent / {_result.JournalEntriesAffected} Journaleinträge."
+                    : $"Vorschau: {_result.ParentsFound} Parent / {_result.JournalEntriesAffected} Journaleinträge.",
+                execute ? Severity.Success : Severity.Info);
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add($"Fehlgeschlagen: {ex.Message}", Severity.Error);
+        }
+        finally
+        {
+            _busy = false;
+        }
+    }
+}
