@@ -1,0 +1,220 @@
+@page "/journal"
+@using Kaesseli.Client.Blazor.Components
+@using Kaesseli.Client.Blazor.Services
+@inject KaesseliApiService Api
+@inject AccountingPeriodState PeriodState
+@inject IDialogService DialogService
+@inject ISnackbar Snackbar
+@implements IDisposable
+
+<PageTitle>Buchungen</PageTitle>
+
+<MudBreadcrumbs Items="_breadcrumbs" Class="pa-0 mb-4" />
+
+@if (_entries is null || _accounts is null)
+{
+    <MudSkeleton SkeletonType="SkeletonType.Rectangle" Height="400px" />
+}
+else
+{
+    <MudCard Elevation="0" Style="border: 1px solid var(--mud-palette-divider); border-radius: 12px;">
+        <MudCardHeader>
+            <CardHeaderAvatar>
+                <MudAvatar Style="background-color: #1976D2; color: white;" Size="Size.Medium">
+                    <MudIcon Icon="@Icons.Material.Rounded.MenuBook" />
+                </MudAvatar>
+            </CardHeaderAvatar>
+            <CardHeaderContent>
+                <MudText Typo="Typo.h6">Alle Buchungen</MudText>
+                <MudText Typo="Typo.body2" Class="mud-text-secondary">
+                    Periode: @(PeriodState.Periods.FirstOrDefault(p => p.Id == PeriodState.SelectedPeriodId)?.Description ?? "—")
+                    · @_entries.Count Einträge
+                </MudText>
+            </CardHeaderContent>
+        </MudCardHeader>
+        <MudCardContent Class="pt-0">
+            <MudTextField @bind-Value="_search" Placeholder="Suchen…" Immediate="true"
+                          Variant="Variant.Outlined" Margin="Margin.Dense" Clearable="true"
+                          Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Rounded.Search"
+                          Class="mb-3" Style="max-width: 360px;" />
+
+            <MudHidden Breakpoint="Breakpoint.SmAndDown">
+                <MudTable Items="FilteredEntries" Dense="true" Hover="true" Elevation="0"
+                          Style="background: transparent;" Breakpoint="Breakpoint.None"
+                          FixedHeader="true"
+                          @bind-RowsPerPage="_rowsPerPage">
+                    <HeaderContent>
+                        <MudTh>Datum</MudTh>
+                        <MudTh>Beschreibung</MudTh>
+                        <MudTh>Soll</MudTh>
+                        <MudTh>Haben</MudTh>
+                        <MudTh Style="text-align: right;">Betrag</MudTh>
+                        <MudTh Style="width: 48px;"></MudTh>
+                    </HeaderContent>
+                    <RowTemplate>
+                        <MudTd Style="@RowStyle(context)">@context.ValueDate.ToString("dd.MM.yyyy")</MudTd>
+                        <MudTd Style="@RowStyle(context)">@context.Description</MudTd>
+                        <MudTd Style="@RowStyle(context)">@AccountLabel(context.DebitAccountId)</MudTd>
+                        <MudTd Style="@RowStyle(context)">@AccountLabel(context.CreditAccountId)</MudTd>
+                        <MudTd Style="@AmountStyle(context)">@context.Amount.ToString("N2")</MudTd>
+                        <MudTd Style="text-align: right;">
+                            @if (!context.IsOpeningBalance)
+                            {
+                                <MudIconButton Icon="@Icons.Material.Rounded.Delete"
+                                               Size="Size.Small"
+                                               Color="Color.Default"
+                                               OnClick="@(() => ConfirmDeleteAsync(context))" />
+                            }
+                        </MudTd>
+                    </RowTemplate>
+                    <PagerContent>
+                        <MudTablePager PageSizeOptions="_pageSizeOptions" />
+                    </PagerContent>
+                </MudTable>
+            </MudHidden>
+
+            <MudHidden Breakpoint="Breakpoint.MdAndUp">
+                <MudTable Items="FilteredEntries" Dense="true" Hover="true" Elevation="0"
+                          Style="background: transparent;" Breakpoint="Breakpoint.None"
+                          @bind-RowsPerPage="_rowsPerPage">
+                    <HeaderContent>
+                        <MudTh>Datum</MudTh>
+                        <MudTh>Konten</MudTh>
+                        <MudTh Style="text-align: right;">Betrag</MudTh>
+                        <MudTh Style="width: 48px;"></MudTh>
+                    </HeaderContent>
+                    <RowTemplate>
+                        <MudTd Style="@RowStyle(context)">@context.ValueDate.ToString("dd.MM.yyyy")</MudTd>
+                        <MudTd Style="@RowStyle(context)">
+                            <div style="display: flex; flex-direction: column; line-height: 1.2;">
+                                <span><b>S:</b> @AccountLabel(context.DebitAccountId)</span>
+                                <span><b>H:</b> @AccountLabel(context.CreditAccountId)</span>
+                                <span class="mud-text-secondary" style="font-size: 0.85em;">@context.Description</span>
+                            </div>
+                        </MudTd>
+                        <MudTd Style="@AmountStyle(context)">@context.Amount.ToString("N2")</MudTd>
+                        <MudTd Style="text-align: right;">
+                            @if (!context.IsOpeningBalance)
+                            {
+                                <MudIconButton Icon="@Icons.Material.Rounded.Delete"
+                                               Size="Size.Small"
+                                               Color="Color.Default"
+                                               OnClick="@(() => ConfirmDeleteAsync(context))" />
+                            }
+                        </MudTd>
+                    </RowTemplate>
+                    <PagerContent>
+                        <MudTablePager PageSizeOptions="_pageSizeOptions" />
+                    </PagerContent>
+                </MudTable>
+            </MudHidden>
+        </MudCardContent>
+    </MudCard>
+}
+
+@code {
+    private List<Contracts.Journal.JournalEntry>? _entries;
+    private Dictionary<Guid, Contracts.Accounts.Account>? _accounts;
+    private string? _search;
+    private int _rowsPerPage = 25;
+    private readonly int[] _pageSizeOptions = [10, 25, 50, 100, 250];
+
+    private static readonly List<BreadcrumbItem> _breadcrumbs =
+    [
+        new("Buchungen", "/journal", icon: Icons.Material.Rounded.MenuBook)
+    ];
+
+    private IEnumerable<Contracts.Journal.JournalEntry> FilteredEntries
+    {
+        get
+        {
+            if (_entries is null) return [];
+            if (string.IsNullOrWhiteSpace(_search)) return _entries;
+            var query = _search.Trim();
+            return _entries.Where(e =>
+                e.Description.Contains(query, StringComparison.OrdinalIgnoreCase)
+                || AccountLabel(e.DebitAccountId).Contains(query, StringComparison.OrdinalIgnoreCase)
+                || AccountLabel(e.CreditAccountId).Contains(query, StringComparison.OrdinalIgnoreCase));
+        }
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        PeriodState.OnChange += OnPeriodChanged;
+        await LoadAsync();
+    }
+
+    private void OnPeriodChanged()
+    {
+        _ = InvokeAsync(async () =>
+        {
+            _entries = null;
+            await LoadAsync();
+            StateHasChanged();
+        });
+    }
+
+    private async Task LoadAsync()
+    {
+        if (PeriodState.SelectedPeriodId is null) return;
+
+        var entriesTask = Api.GetJournalEntriesAsync(PeriodState.SelectedPeriodId.Value);
+        var accountsTask = _accounts is null ? Api.GetAccountsAsync() : Task.FromResult<IEnumerable<Contracts.Accounts.Account>?>(_accounts.Values);
+
+        var entries = await entriesTask;
+        var accounts = await accountsTask;
+
+        _accounts = accounts?.ToDictionary(a => a.Id) ?? [];
+        _entries = entries?
+            .OrderByDescending(e => e.ValueDate)
+            .ThenByDescending(e => e.IsOpeningBalance)
+            .ToList() ?? [];
+    }
+
+    private string AccountLabel(Guid? accountId)
+    {
+        if (!accountId.HasValue || _accounts is null) return "—";
+        return _accounts.TryGetValue(accountId.Value, out var account)
+            ? $"{account.Number} {account.Name}"
+            : "—";
+    }
+
+    private async Task ConfirmDeleteAsync(Contracts.Journal.JournalEntry entry)
+    {
+        var parameters = new DialogParameters
+        {
+            { nameof(DeleteJournalEntryConfirmationDialog.Amount), entry.Amount },
+            { nameof(DeleteJournalEntryConfirmationDialog.Description), entry.Description },
+            { nameof(DeleteJournalEntryConfirmationDialog.ValueDate), entry.ValueDate },
+        };
+
+        var dialog = await DialogService.ShowAsync<DeleteJournalEntryConfirmationDialog>("Buchung löschen", parameters);
+        var result = await dialog.Result;
+        if (result is null || result.Canceled) return;
+
+        try
+        {
+            await Api.DeleteJournalEntryAsync(entry.Id);
+            Snackbar.Add("Buchung gelöscht.", Severity.Success);
+            await LoadAsync();
+        }
+        catch
+        {
+            Snackbar.Add("Fehler beim Löschen.", Severity.Error);
+        }
+    }
+
+    private static string RowStyle(Contracts.Journal.JournalEntry entry) =>
+        entry.IsOpeningBalance ? "background-color: rgba(33, 150, 243, 0.08); font-weight: 600;" : "";
+
+    private static string AmountStyle(Contracts.Journal.JournalEntry entry)
+    {
+        var baseStyle = entry.IsOpeningBalance
+            ? "background-color: rgba(33, 150, 243, 0.08); font-weight: 600; "
+            : "";
+        var color = entry.Amount >= 0 ? "color: #21BA45;" : "color: #C10015;";
+        return $"{baseStyle}text-align: right; font-weight: 700; {color}";
+    }
+
+    public void Dispose() => PeriodState.OnChange -= OnPeriodChanged;
+}
