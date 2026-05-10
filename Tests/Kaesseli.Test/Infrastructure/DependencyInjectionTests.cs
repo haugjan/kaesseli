@@ -1,3 +1,4 @@
+using Kaesseli.Features.AccountSuggestion;
 using Kaesseli.Features.Accounts;
 using Kaesseli.Features.Automation;
 using Kaesseli.Features.Budget;
@@ -63,6 +64,7 @@ public class DependencyInjectionTests
             typeof(GetTransactions.IHandler),
             typeof(GetTransactionSummaries.IHandler),
             typeof(CleanupOrphanedAccountReferences.IHandler),
+            typeof(GenerateAccountSuggestions.IRunner),
         };
 
         foreach (var handlerInterface in handlerInterfaces)

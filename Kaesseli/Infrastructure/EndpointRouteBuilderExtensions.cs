@@ -17,6 +17,7 @@ public static class EndpointRouteBuilderExtensions
                .MapJournalEndpoints()
                .MapAccountEndpoints()
                .MapIntegrationEndpoints()
-               .MapAutomationEndpoints();
+               .MapAutomationEndpoints()
+               .MapAccountSuggestionEndpoints();
     }
 }

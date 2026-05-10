@@ -1,3 +1,5 @@
+using Kaesseli.Features.AccountSuggestion;
+using Kaesseli.Features.AccountSuggestion.Gemini;
 using Kaesseli.Features.Accounts;
 using Kaesseli.Features.Automation;
 using Kaesseli.Features.Budget;
@@ -22,6 +24,7 @@ public static class InfrastructureServiceCollectionExtensions
         ) =>
             services
                 .AddRepositories()
+                .AddGemini(configuration)
                 .AddScoped<ICamtProcessor, CamtProcessor>()
                 .AddScoped<IPostFinanceCsvProcessor, PostFinanceCsvProcessor>()
                 .AddDbContext<KaesseliContext>(options =>
@@ -72,6 +75,7 @@ public static class InfrastructureServiceCollectionExtensions
             .AddScoped<IJournalRepository, JournalRepository>()
             .AddScoped<IAccountRepository, AccountRepository>()
             .AddScoped<IAutomationRepository, AutomationRepository>()
-            .AddScoped<ITransactionRepository, TransactionRepository>();
+            .AddScoped<ITransactionRepository, TransactionRepository>()
+            .AddScoped<IAccountSuggestionRepository, AccountSuggestionRepository>();
 
 }

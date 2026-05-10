@@ -1,3 +1,4 @@
+using Kaesseli.Features.AccountSuggestion;
 using Kaesseli.Features.Accounts;
 using Kaesseli.Features.Integration;
 
@@ -18,7 +19,8 @@ public static class GetNextOpenTransaction
     // ReSharper disable once UnusedType.Global
     public class Handler(
         ITransactionRepository transactionRepository,
-        IAccountRepository accountRepository
+        IAccountRepository accountRepository,
+        IAccountSuggestionRepository accountSuggestionRepository
     ) : IHandler
     {
         public async Task<Contracts.Integration.OpenTransaction?> Handle(
@@ -34,6 +36,19 @@ public static class GetNextOpenTransaction
                 return null;
 
             var accounts = await accountRepository.GetAccounts(cancellationToken);
+            var suggestion = await accountSuggestionRepository.GetByTransactionId(
+                transaction.Id,
+                cancellationToken
+            );
+
+            var aiSuggestions = suggestion?.Items
+                .OrderBy(i => i.Rank)
+                .Select(i => new Contracts.Integration.AiAccountSuggestion(
+                    AccountId: i.AccountId,
+                    Rank: i.Rank,
+                    Confidence: i.Confidence
+                ))
+                .ToList();
 
             return new Contracts.Integration.OpenTransaction(
                 Id: transaction.Id,
@@ -55,7 +70,8 @@ public static class GetNextOpenTransaction
                 ),
                 AccountName: transaction.TransactionSummary!.Account.Name,
                 AccountType: transaction.TransactionSummary!.Account.Type.DisplayName(),
-                AccountTypeId: transaction.TransactionSummary!.Account.Type
+                AccountTypeId: transaction.TransactionSummary!.Account.Type,
+                AiSuggestions: aiSuggestions
             );
         }
     }

@@ -37,6 +37,23 @@ public class KaesseliApiService(HttpClient httpClient)
     public Task<OpenTransaction?> GetNextOpenTransactionAsync(int skip = 0) =>
         httpClient.GetFromJsonAsync<OpenTransaction>($"transaction/nextOpen?skip={skip}");
 
+    public async Task<Contracts.AccountSuggestion.AccountSuggestionJobStatus?> StartAccountSuggestionJobAsync(
+        CancellationToken ct = default
+    )
+    {
+        var response = await httpClient.PostAsync("accountSuggestion/generate", content: null, ct);
+        response.EnsureSuccessStatusCode();
+        return await response.Content.ReadFromJsonAsync<Contracts.AccountSuggestion.AccountSuggestionJobStatus>(ct);
+    }
+
+    public Task<Contracts.AccountSuggestion.AccountSuggestionJobStatus?> GetAccountSuggestionJobStatusAsync(
+        CancellationToken ct = default
+    ) =>
+        httpClient.GetFromJsonAsync<Contracts.AccountSuggestion.AccountSuggestionJobStatus>(
+            "accountSuggestion/status",
+            ct
+        );
+
     public Task AssignTransactionAsync(
         Guid accountingPeriodId,
         Guid transactionId,
