@@ -1,5 +1,6 @@
 using System.IO;
 using System.IO.Compression;
+using Kaesseli.Features.Integration;
 using Kaesseli.Features.Integration.FileImport;
 using Kaesseli.Features.Integration.NextOpenTransaction;
 using Kaesseli.Features.Integration.TransactionQuery;
@@ -53,6 +54,12 @@ public static class IntegrationApi
                 pattern: "/transaction/ignore",
                 async (SetIgnoreTransaction.IHandler handler, [FromBody] SetIgnoreTransaction.Query cmd, CancellationToken ct) =>
                     await handler.Handle(cmd, ct)
+            );
+
+            app.MapPost(
+                pattern: "/admin/cleanupBatchParentTransactions",
+                async (CleanupBatchParentTransactions.IHandler handler, [FromQuery] bool? execute, CancellationToken ct) =>
+                    Results.Ok(await handler.Handle(new CleanupBatchParentTransactions.Query(execute.GetValueOrDefault()), ct))
             );
 
             app.MapPost(

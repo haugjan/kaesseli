@@ -15,7 +15,12 @@ public interface ITransactionRepository
     Task<HashSet<string>> GetExistingTransactionReferences(CancellationToken cancellationToken);
     Task<Transaction> SetTransactionIgnored(Guid transactionId, bool isIgnored, CancellationToken cancellationToken);
     Task<bool> HasJournalEntries(Guid transactionId, CancellationToken cancellationToken);
+    Task<BatchParentCleanupOutcome> CleanupBatchParentTransactions(bool dryRun, CancellationToken cancellationToken);
 }
+
+public record BatchParentCleanupOutcome(bool DryRun, IReadOnlyList<BatchParentDeletion> Parents);
+
+public record BatchParentDeletion(Transaction Parent, int ChildCount, int JournalEntryCount);
 
 internal class TransactionRepository : ITransactionRepository
 {
@@ -152,6 +157,69 @@ internal class TransactionRepository : ITransactionRepository
     {
         var journalEntries = await _context.JournalEntries.ToListAsync(cancellationToken);
         return journalEntries.Any(je => _context.Entry(je).Property<Guid?>("TransactionId").CurrentValue == transactionId);
+    }
+
+    public async Task<BatchParentCleanupOutcome> CleanupBatchParentTransactions(
+        bool dryRun,
+        CancellationToken cancellationToken)
+    {
+        var allTransactions = await _context.Transactions.ToListAsync(cancellationToken);
+        var allJournalEntries = await _context.JournalEntries.ToListAsync(cancellationToken);
+
+        var childCountByParentRef = new Dictionary<string, int>();
+        foreach (var tx in allTransactions)
+        {
+            var parentRef = TryGetSyntheticParentReference(tx.Reference);
+            if (parentRef is null) continue;
+            childCountByParentRef[parentRef] = childCountByParentRef.GetValueOrDefault(parentRef) + 1;
+        }
+
+        var parents = allTransactions
+            .Where(t => t.Reference is not null && childCountByParentRef.ContainsKey(t.Reference))
+            .ToList();
+        var parentIds = parents.Select(p => p.Id).ToHashSet();
+
+        var entriesToDeleteByParentId = allJournalEntries
+            .Where(je =>
+            {
+                var txId = _context.Entry(je).Property<Guid?>("TransactionId").CurrentValue;
+                return txId.HasValue && parentIds.Contains(txId.Value);
+            })
+            .GroupBy(je => _context.Entry(je).Property<Guid?>("TransactionId").CurrentValue!.Value)
+            .ToDictionary(g => g.Key, g => g.ToList());
+
+        var deletions = parents
+            .Select(p => new BatchParentDeletion(
+                Parent: p,
+                ChildCount: childCountByParentRef[p.Reference],
+                JournalEntryCount: entriesToDeleteByParentId.TryGetValue(p.Id, out var jes) ? jes.Count : 0))
+            .ToList();
+
+        if (!dryRun && parents.Count > 0)
+        {
+            var allEntriesToDelete = entriesToDeleteByParentId.Values.SelectMany(list => list).ToList();
+            _context.JournalEntries.RemoveRange(allEntriesToDelete);
+            _context.Transactions.RemoveRange(parents);
+
+            // Old SplitOpenTransaction calls decremented the cached open counter for each
+            // deleted parent. Drop the cache so GetTotalOpenTransaction recomputes from scratch.
+            var stats = await _context.TransactionStatistics.ToListAsync(cancellationToken);
+            _context.TransactionStatistics.RemoveRange(stats);
+
+            await _context.SaveChangesAsync(cancellationToken);
+        }
+
+        return new BatchParentCleanupOutcome(DryRun: dryRun, Parents: deletions);
+    }
+
+    private static string? TryGetSyntheticParentReference(string? reference)
+    {
+        if (string.IsNullOrEmpty(reference)) return null;
+        var lastDash = reference.LastIndexOf('-');
+        if (lastDash <= 0) return null;
+        var suffix = reference[(lastDash + 1)..];
+        if (suffix.Length == 0 || !suffix.All(char.IsDigit)) return null;
+        return reference[..lastDash];
     }
 
     private TransactionStatistic AddStatisticEntryIfNull(TransactionStatistic? statistic)
