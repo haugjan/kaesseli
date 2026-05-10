@@ -2,7 +2,7 @@ using Kaesseli.Features.AccountSuggestion;
 using Shouldly;
 using Xunit;
 
-namespace Kaesseli.Test.Features.AccountSuggestion;
+namespace Kaesseli.Test.Features.AccountSuggestions;
 
 public class AccountSuggestionTests
 {

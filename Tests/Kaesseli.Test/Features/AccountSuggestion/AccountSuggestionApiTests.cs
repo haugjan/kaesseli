@@ -10,7 +10,7 @@ using Shouldly;
 using Xunit;
 using JobStatusContract = Kaesseli.Contracts.AccountSuggestion.AccountSuggestionJobStatus;
 
-namespace Kaesseli.Test.Features.AccountSuggestion;
+namespace Kaesseli.Test.Features.AccountSuggestions;
 
 public class AccountSuggestionApiTests : IAsyncLifetime
 {
