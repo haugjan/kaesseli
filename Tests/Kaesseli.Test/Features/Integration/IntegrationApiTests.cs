@@ -25,6 +25,7 @@ public class IntegrationApiTests : IAsyncLifetime
     private readonly GetTotalOpenTransaction.IHandler _getTotalOpenTransactionMock = Substitute.For<GetTotalOpenTransaction.IHandler>();
     private readonly AssignOpenTransaction.IHandler _assignOpenTransactionMock = Substitute.For<AssignOpenTransaction.IHandler>();
     private readonly SplitOpenTransaction.IHandler _splitOpenTransactionMock = Substitute.For<SplitOpenTransaction.IHandler>();
+    private readonly SetIgnoreTransaction.IHandler _setIgnoreTransactionMock = Substitute.For<SetIgnoreTransaction.IHandler>();
 
     public async Task InitializeAsync()
     {
@@ -38,6 +39,7 @@ public class IntegrationApiTests : IAsyncLifetime
         builder.Services.AddSingleton(_getTotalOpenTransactionMock);
         builder.Services.AddSingleton(_assignOpenTransactionMock);
         builder.Services.AddSingleton(_splitOpenTransactionMock);
+        builder.Services.AddSingleton(_setIgnoreTransactionMock);
         builder.Services.AddAntiforgery();
 
         var app = builder.Build();
