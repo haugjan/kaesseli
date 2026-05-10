@@ -79,6 +79,10 @@ public static class GenerateAccountSuggestions
 
             var examples = await BuildHistoricalExamples(context, accounts, cancellationToken);
 
+            const int maxConsecutiveFailures = 5;
+            var retryDelay = TimeSpan.FromSeconds(2);
+            var consecutiveFailures = 0;
+
             foreach (var transaction in openTransactions)
             {
                 if (cancellationToken.IsCancellationRequested) break;
@@ -110,11 +114,32 @@ public static class GenerateAccountSuggestions
                     );
                     await suggestionRepo.Add(suggestion, cancellationToken);
                     status.IncrementProcessed();
+                    consecutiveFailures = 0;
                 }
                 catch (Exception ex)
                 {
                     logger.LogWarning(ex, "Suggestion failed for transaction {Id}", transaction.Id);
                     status.IncrementFailed(ex.Message);
+                    consecutiveFailures++;
+
+                    if (consecutiveFailures >= maxConsecutiveFailures)
+                    {
+                        logger.LogError(
+                            "Aborting account suggestion job {RunId} after {Count} consecutive failures",
+                            runId,
+                            consecutiveFailures
+                        );
+                        break;
+                    }
+
+                    try
+                    {
+                        await Task.Delay(retryDelay, cancellationToken);
+                    }
+                    catch (OperationCanceledException)
+                    {
+                        break;
+                    }
                 }
             }
 
