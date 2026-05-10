@@ -1,3 +1,4 @@
+using Kaesseli.Features.AccountSuggestion;
 using Kaesseli.Features.Accounts;
 using Kaesseli.Features.Budget;
 using Kaesseli.Features.Integration;
@@ -35,6 +36,7 @@ public class KaesseliContext : DbContext
     public virtual DbSet<AccountingPeriod> AccountingPeriods { get; init; } = null!;
     public virtual DbSet<TransactionStatistic> TransactionStatistics { get; init; } = null!;
     public virtual DbSet<AutomationEntry> Automations { get; init; } = null!;
+    public virtual DbSet<AccountSuggestion> AccountSuggestions { get; init; } = null!;
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -93,6 +95,12 @@ public class KaesseliContext : DbContext
         modelBuilder.Entity<TransactionStatistic>(entity =>
         {
             entity.HasPartitionKey(ts => ts.Id);
+        });
+
+        modelBuilder.Entity<AccountSuggestion>(entity =>
+        {
+            entity.HasPartitionKey(s => s.Id);
+            entity.OwnsMany(s => s.Items);
         });
 
         foreach (var entityType in modelBuilder.Model.GetEntityTypes().Where(e => !e.IsOwned()))

@@ -1,3 +1,4 @@
+using Kaesseli.Features.AccountSuggestion;
 using Kaesseli.Features.Accounts;
 using Kaesseli.Features.Automation;
 using Kaesseli.Features.Budget;
@@ -72,6 +73,9 @@ public static class ApplicationServiceCollectionExtensions
                 >()
                 // Integration - TransactionQuery
                 .AddTransient<GetTransactions.IHandler, GetTransactions.Handler>()
-                .AddTransient<GetTransactionSummaries.IHandler, GetTransactionSummaries.Handler>();
+                .AddTransient<GetTransactionSummaries.IHandler, GetTransactionSummaries.Handler>()
+                // AccountSuggestion (background job — status is shared across requests)
+                .AddSingleton<AccountSuggestionJobStatus>()
+                .AddSingleton<GenerateAccountSuggestions.IRunner, GenerateAccountSuggestions.Runner>();
     }
 }
