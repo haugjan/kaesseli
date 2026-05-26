@@ -59,6 +59,7 @@ public static class GenerateAccountSuggestions
             var suggestionRepo = sp.GetRequiredService<IAccountSuggestionRepository>();
             var accountRepo = sp.GetRequiredService<IAccountRepository>();
             var gemini = sp.GetRequiredService<IGeminiClient>();
+            var geminiOptions = sp.GetRequiredService<GeminiOptions>();
 
             var openTransactions = await GetOpenTransactionsWithoutSuggestion(context, suggestionRepo, cancellationToken);
             status.SetTotal(openTransactions.Count);
@@ -82,50 +83,43 @@ public static class GenerateAccountSuggestions
             const int maxConsecutiveFailures = 5;
             var retryDelay = TimeSpan.FromSeconds(2);
             var consecutiveFailures = 0;
+            var batchSize = Math.Max(1, geminiOptions.BatchSize);
 
-            foreach (var transaction in openTransactions)
+            foreach (var batch in openTransactions.Chunk(batchSize))
             {
                 if (cancellationToken.IsCancellationRequested) break;
 
+                var transactionByRef = new Dictionary<string, Transaction>(StringComparer.Ordinal);
+                var inputs = new List<GeminiTransactionInput>(batch.Length);
+                for (var i = 0; i < batch.Length; i++)
+                {
+                    var reference = $"t{i + 1}";
+                    transactionByRef[reference] = batch[i];
+                    inputs.Add(new GeminiTransactionInput(reference, batch[i].Description, batch[i].Amount));
+                }
+
+                IReadOnlyList<GeminiBatchSuggestion> batchResults;
                 try
                 {
-                    var rawSuggestions = await gemini.SuggestAccountsAsync(
-                        transaction.Description,
-                        transaction.Amount,
+                    batchResults = await gemini.SuggestAccountsAsync(
+                        inputs,
                         accountPlan,
                         examples,
                         cancellationToken
                     );
-
-                    var items = rawSuggestions
-                        .Where(s => accountByShortName.ContainsKey(s.AccountShortName))
-                        .Select((s, idx) => AccountSuggestionItem.Create(
-                            accountByShortName[s.AccountShortName].Id,
-                            Math.Clamp(s.Confidence, 0, 1),
-                            rank: idx + 1
-                        ))
-                        .ToList();
-
-                    var suggestion = AccountSuggestion.Create(
-                        transaction.Id,
-                        timeProvider.GetUtcNow(),
-                        items,
-                        error: items.Count == 0 ? "Keine gültigen Vorschläge erhalten." : null
-                    );
-                    await suggestionRepo.Add(suggestion, cancellationToken);
-                    status.IncrementProcessed();
                     consecutiveFailures = 0;
                 }
                 catch (Exception ex)
                 {
-                    logger.LogWarning(ex, "Suggestion failed for transaction {Id}", transaction.Id);
-                    status.IncrementFailed(ex.Message);
+                    logger.LogWarning(ex, "Suggestion batch failed for {Count} transactions", batch.Length);
+                    for (var i = 0; i < batch.Length; i++)
+                        status.IncrementFailed(ex.Message);
                     consecutiveFailures++;
 
                     if (consecutiveFailures >= maxConsecutiveFailures)
                     {
                         logger.LogError(
-                            "Aborting account suggestion job {RunId} after {Count} consecutive failures",
+                            "Aborting account suggestion job {RunId} after {Count} consecutive batch failures",
                             runId,
                             consecutiveFailures
                         );
@@ -139,6 +133,46 @@ public static class GenerateAccountSuggestions
                     catch (OperationCanceledException)
                     {
                         break;
+                    }
+                    continue;
+                }
+
+                var resultByRef = batchResults
+                    .Where(r => !string.IsNullOrEmpty(r.Reference))
+                    .GroupBy(r => r.Reference, StringComparer.Ordinal)
+                    .ToDictionary(g => g.Key, g => g.First(), StringComparer.Ordinal);
+
+                foreach (var (reference, transaction) in transactionByRef)
+                {
+                    if (cancellationToken.IsCancellationRequested) break;
+
+                    try
+                    {
+                        resultByRef.TryGetValue(reference, out var batchResult);
+                        var rawSuggestions = batchResult?.Suggestions ?? [];
+
+                        var items = rawSuggestions
+                            .Where(s => accountByShortName.ContainsKey(s.AccountShortName))
+                            .Select((s, idx) => AccountSuggestionItem.Create(
+                                accountByShortName[s.AccountShortName].Id,
+                                Math.Clamp(s.Confidence, 0, 1),
+                                rank: idx + 1
+                            ))
+                            .ToList();
+
+                        var suggestion = AccountSuggestion.Create(
+                            transaction.Id,
+                            timeProvider.GetUtcNow(),
+                            items,
+                            error: items.Count == 0 ? "Keine gültigen Vorschläge erhalten." : null
+                        );
+                        await suggestionRepo.Add(suggestion, cancellationToken);
+                        status.IncrementProcessed();
+                    }
+                    catch (Exception ex)
+                    {
+                        logger.LogWarning(ex, "Persisting suggestion failed for transaction {Id}", transaction.Id);
+                        status.IncrementFailed(ex.Message);
                     }
                 }
             }
