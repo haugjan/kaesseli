@@ -26,6 +26,35 @@ public static class AutomationApi
                 }
             );
 
+            app.MapGet(
+                pattern: "/automation",
+                async (GetAutomations.IHandler handler, CancellationToken ct) =>
+                    await handler.Handle(ct)
+            );
+
+            app.MapPut(
+                pattern: "/automation/{id}",
+                async (
+                    UpdateAutomation.IHandler handler,
+                    Guid id,
+                    UpdateAutomation.Query command,
+                    CancellationToken ct
+                ) =>
+                {
+                    await handler.Handle(command with { Id = id }, ct);
+                    return Results.NoContent();
+                }
+            );
+
+            app.MapDelete(
+                pattern: "/automation/{id}",
+                async (DeleteAutomation.IHandler handler, Guid id, CancellationToken ct) =>
+                {
+                    await handler.Handle(new DeleteAutomation.Query(id), ct);
+                    return Results.NoContent();
+                }
+            );
+
             return app;
         }
     }

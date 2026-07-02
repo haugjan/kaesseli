@@ -41,6 +41,9 @@ public static class ApplicationServiceCollectionExtensions
                 // Automation
                 .AddTransient<AddAutomation.IHandler, AddAutomation.Handler>()
                 .AddTransient<ApplyAllAutomations.IHandler, ApplyAllAutomations.Handler>()
+                .AddTransient<GetAutomations.IHandler, GetAutomations.Handler>()
+                .AddTransient<UpdateAutomation.IHandler, UpdateAutomation.Handler>()
+                .AddTransient<DeleteAutomation.IHandler, DeleteAutomation.Handler>()
                 .AddTransient<
                     GetNrOfPossibleAutomation.IHandler,
                     GetNrOfPossibleAutomation.Handler
