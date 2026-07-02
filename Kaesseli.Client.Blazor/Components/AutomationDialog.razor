@@ -1,0 +1,106 @@
+@using Kaesseli.Contracts.Accounts
+
+<MudDialog>
+    <DialogContent>
+        <MudForm @ref="_form">
+            <MudTextField T="string" @bind-Value="Model.AutomationText"
+                          Label="Automatisierungs-Text" Required="true"
+                          RequiredError="Text ist erforderlich."
+                          HelperText="Trifft auf Buchungstexte zu. * und ? sind Platzhalter."
+                          Immediate="true" Class="mb-4" />
+
+            <MudText Typo="Typo.subtitle2" Class="mb-2">Aufteilung</MudText>
+
+            @foreach (var part in Model.Parts)
+            {
+                <div class="d-flex align-center gap-2 mb-2">
+                    <MudSelect T="string" @bind-Value="part.AccountShortName" Label="Konto"
+                               Required="true" RequiredError="Konto ist erforderlich."
+                               Dense="true" Margin="Margin.Dense" Class="flex-grow-1">
+                        @foreach (var account in Accounts)
+                        {
+                            <MudSelectItem T="string" Value="account.ShortName">
+                                @account.Name (@account.ShortName)
+                            </MudSelectItem>
+                        }
+                    </MudSelect>
+                    <MudNumericField T="decimal" @bind-Value="part.Percentage" Label="Anteil (%)"
+                                     Format="N2" Min="0" Margin="Margin.Dense" Style="max-width: 130px;" />
+                    <MudIconButton Icon="@Icons.Material.Rounded.Delete" Color="Color.Error"
+                                   Size="Size.Small" Disabled="@(Model.Parts.Count <= 1)"
+                                   OnClick="() => RemovePart(part)" />
+                </div>
+            }
+
+            <MudButton StartIcon="@Icons.Material.Rounded.Add" Size="Size.Small"
+                       OnClick="AddPart" Class="mt-1">
+                Konto hinzufügen
+            </MudButton>
+        </MudForm>
+    </DialogContent>
+    <DialogActions>
+        <MudButton OnClick="Cancel" Disabled="_submitting">Abbrechen</MudButton>
+        <MudButton Color="Color.Primary" Variant="Variant.Filled" OnClick="Submit" Disabled="_submitting">
+            Speichern
+        </MudButton>
+    </DialogActions>
+</MudDialog>
+
+@code {
+    private MudForm _form = null!;
+    private bool _submitting;
+
+    [CascadingParameter] private IMudDialogInstance MudDialog { get; set; } = null!;
+
+    [Parameter, EditorRequired] public FormModel Model { get; set; } = new();
+
+    [Parameter, EditorRequired] public IReadOnlyList<Account> Accounts { get; set; } = [];
+
+    [Parameter] public Func<FormModel, Task>? OnSubmitAsync { get; set; }
+
+    private void AddPart() => Model.Parts.Add(new PartRow());
+
+    private void RemovePart(PartRow part)
+    {
+        if (Model.Parts.Count > 1)
+            Model.Parts.Remove(part);
+    }
+
+    private async Task Submit()
+    {
+        await _form.ValidateAsync();
+        if (!_form.IsValid) return;
+
+        if (OnSubmitAsync is null)
+        {
+            MudDialog.Close(DialogResult.Ok(Model));
+            return;
+        }
+
+        _submitting = true;
+        try
+        {
+            await OnSubmitAsync(Model);
+        }
+        finally
+        {
+            _submitting = false;
+        }
+
+        MudDialog.Close(DialogResult.Ok(Model));
+    }
+
+    private void Cancel() => MudDialog.Cancel();
+
+    public class FormModel
+    {
+        public string AutomationText { get; set; } = "";
+        public List<PartRow> Parts { get; set; } = [];
+    }
+
+    public class PartRow
+    {
+        public string AccountShortName { get; set; } = "";
+        public decimal Percentage { get; set; }
+    }
+}

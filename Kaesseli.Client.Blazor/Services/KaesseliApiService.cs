@@ -109,6 +109,40 @@ public class KaesseliApiService(HttpClient httpClient)
             }
         );
 
+    public Task<IEnumerable<Contracts.Automation.AutomationEntry>?> GetAutomationsAsync(
+        CancellationToken ct = default
+    ) =>
+        httpClient.GetFromJsonAsync<IEnumerable<Contracts.Automation.AutomationEntry>>(
+            "automation",
+            ct
+        );
+
+    public async Task UpdateAutomationAsync(
+        Guid id,
+        string automationText,
+        IEnumerable<AutomationSplitProportion> parts,
+        CancellationToken ct = default
+    )
+    {
+        var response = await httpClient.PutAsJsonAsync(
+            $"automation/{id}",
+            new
+            {
+                id,
+                automationText,
+                parts,
+            },
+            ct
+        );
+        response.EnsureSuccessStatusCode();
+    }
+
+    public async Task DeleteAutomationAsync(Guid id, CancellationToken ct = default)
+    {
+        var response = await httpClient.DeleteAsync($"automation/{id}", ct);
+        response.EnsureSuccessStatusCode();
+    }
+
     public async Task<int> GetNrOfPossibleAutomationsAsync(string input)
     {
         var result = await httpClient.GetFromJsonAsync<NrOfPossibleAutomationResult>(
@@ -476,6 +510,8 @@ public class KaesseliApiService(HttpClient httpClient)
     public record SplitEntry(Guid OtherAccountId, decimal Amount);
 
     public record AutomationSplitEntry(string OtherAccountShortName, decimal Amount);
+
+    public record AutomationSplitProportion(string AccountShortName, decimal AmountProportion);
 
     private record NrOfPossibleAutomationResult(int NrOfPossibleAutomation);
 }

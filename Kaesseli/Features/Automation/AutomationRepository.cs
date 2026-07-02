@@ -16,6 +16,13 @@ public interface IAutomationRepository
         CancellationToken cancellationToken
     );
     Task<IEnumerable<AutomationEntry>> GetAutomations(CancellationToken cancellationToken);
+    Task UpdateAutomation(
+        Guid id,
+        string automationText,
+        IEnumerable<AutomationEntryPart> parts,
+        CancellationToken cancellationToken
+    );
+    Task DeleteAutomation(Guid id, CancellationToken cancellationToken);
 }
 
 internal class AutomationRepository(KaesseliContext context) : IAutomationRepository
@@ -58,6 +65,46 @@ internal class AutomationRepository(KaesseliContext context) : IAutomationReposi
         }
 
         return automations;
+    }
+
+    public async Task UpdateAutomation(
+        Guid id,
+        string automationText,
+        IEnumerable<AutomationEntryPart> parts,
+        CancellationToken cancellationToken
+    )
+    {
+        var automation =
+            await context.Automations.FirstOrDefaultAsync(a => a.Id == id, cancellationToken)
+            ?? throw new EntityNotFoundException(typeof(AutomationEntry), id);
+
+        await RemovePartsOf(id, cancellationToken);
+
+        automation.Update(automationText, parts.ToList());
+        await context.SaveChangesAsync(cancellationToken);
+    }
+
+    public async Task DeleteAutomation(Guid id, CancellationToken cancellationToken)
+    {
+        var automation =
+            await context.Automations.FirstOrDefaultAsync(a => a.Id == id, cancellationToken)
+            ?? throw new EntityNotFoundException(typeof(AutomationEntry), id);
+
+        await RemovePartsOf(id, cancellationToken);
+
+        context.Automations.Remove(automation);
+        await context.SaveChangesAsync(cancellationToken);
+    }
+
+    private async Task RemovePartsOf(Guid automationId, CancellationToken cancellationToken)
+    {
+        var allParts = await context.Set<AutomationEntryPart>().ToListAsync(cancellationToken);
+        var existingParts = allParts
+            .Where(p =>
+                context.Entry(p).Property<Guid>("AutomationEntryId").CurrentValue == automationId
+            )
+            .ToList();
+        context.Set<AutomationEntryPart>().RemoveRange(existingParts);
     }
 
     private async Task<List<Transaction>> GetOpenTransactionsMatching(

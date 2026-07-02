@@ -1,0 +1,156 @@
+@page "/settings/automations"
+@using Kaesseli.Client.Blazor.Services
+@using Kaesseli.Client.Blazor.Components
+@inject KaesseliApiService Api
+@inject IDialogService DialogService
+@inject ISnackbar Snackbar
+
+<PageTitle>Automatisierungen verwalten</PageTitle>
+
+<MudBreadcrumbs Items="_breadcrumbs" Class="pa-0 mb-4" />
+
+<MudCard Elevation="0" Style="border: 1px solid var(--mud-palette-divider); border-radius: 12px;">
+    <MudCardHeader>
+        <CardHeaderAvatar>
+            <MudAvatar Style="background-color: #8E24AA; color: white;" Size="Size.Medium">
+                <MudIcon Icon="@Icons.Material.Rounded.AutoMode" />
+            </MudAvatar>
+        </CardHeaderAvatar>
+        <CardHeaderContent>
+            <MudText Typo="Typo.h6">Automatisierungen verwalten</MudText>
+        </CardHeaderContent>
+    </MudCardHeader>
+    <MudCardContent Class="pa-0">
+        @if (_automations is null)
+        {
+            <MudSkeleton SkeletonType="SkeletonType.Rectangle" Height="200px" />
+        }
+        else if (_automations.Count == 0)
+        {
+            <MudAlert Severity="Severity.Info" Class="ma-4">Keine Automatisierungen vorhanden.</MudAlert>
+        }
+        else
+        {
+            <MudTable Items="_automations" Dense="true" Hover="true" Elevation="0" Style="background: transparent;">
+                <HeaderContent>
+                    <MudTh>Text</MudTh>
+                    <MudTh>Aufteilung</MudTh>
+                    <MudTh Style="text-align: right;">Aktionen</MudTh>
+                </HeaderContent>
+                <RowTemplate>
+                    <MudTd DataLabel="Text"><code>@context.AutomationText</code></MudTd>
+                    <MudTd DataLabel="Aufteilung">
+                        <div class="d-flex flex-wrap gap-1">
+                            @foreach (var part in context.Parts)
+                            {
+                                <MudChip T="string" Size="Size.Small" Color="Color.Default">
+                                    @DescribePart(part)
+                                </MudChip>
+                            }
+                        </div>
+                    </MudTd>
+                    <MudTd DataLabel="Aktionen" Style="text-align: right;">
+                        <MudIconButton Icon="@Icons.Material.Rounded.Edit" Size="Size.Small"
+                                       OnClick="() => OnEditClicked(context)" />
+                        <MudIconButton Icon="@Icons.Material.Rounded.Delete" Size="Size.Small" Color="Color.Error"
+                                       OnClick="() => OnDeleteClicked(context)" />
+                    </MudTd>
+                </RowTemplate>
+            </MudTable>
+        }
+    </MudCardContent>
+</MudCard>
+
+@code {
+    private List<AutomationEntry>? _automations;
+    private IReadOnlyList<Account> _accounts = [];
+
+    private readonly List<BreadcrumbItem> _breadcrumbs =
+    [
+        new("Home", "/", icon: Icons.Material.Rounded.Home),
+        new("Einstellungen", null, disabled: true, icon: Icons.Material.Rounded.Settings),
+        new("Automatisierungen", null, disabled: true),
+    ];
+
+    protected override async Task OnInitializedAsync() => await LoadAsync();
+
+    private async Task LoadAsync()
+    {
+        var accounts = await Api.GetAccountsAsync();
+        _accounts = accounts?.ToList() ?? [];
+
+        var automations = await Api.GetAutomationsAsync();
+        _automations = automations?
+            .OrderBy(a => a.AutomationText, StringComparer.OrdinalIgnoreCase)
+            .ToList() ?? [];
+    }
+
+    private string DescribePart(AutomationEntryPart part)
+    {
+        var name = _accounts.FirstOrDefault(a => a.ShortName == part.AccountShortName)?.Name
+                   ?? part.AccountShortName;
+        return $"{name} · {part.AmountProportion * 100:N0}%";
+    }
+
+    private async Task OnEditClicked(AutomationEntry automation)
+    {
+        var model = new AutomationDialog.FormModel
+        {
+            AutomationText = automation.AutomationText,
+            Parts = automation.Parts
+                .Select(p => new AutomationDialog.PartRow
+                {
+                    AccountShortName = p.AccountShortName,
+                    Percentage = p.AmountProportion * 100,
+                })
+                .ToList(),
+        };
+
+        var parameters = new DialogParameters<AutomationDialog>
+        {
+            { x => x.Model, model },
+            { x => x.Accounts, _accounts },
+            { x => x.OnSubmitAsync, new Func<AutomationDialog.FormModel, Task>(m =>
+                Api.UpdateAutomationAsync(
+                    automation.Id,
+                    m.AutomationText,
+                    m.Parts.Select(p => new KaesseliApiService.AutomationSplitProportion(
+                        p.AccountShortName, p.Percentage)))) },
+        };
+        var options = new DialogOptions { MaxWidth = MaxWidth.Small, FullWidth = true };
+        var dialog = await DialogService.ShowAsync<AutomationDialog>("Automatisierung bearbeiten", parameters, options);
+        var result = await dialog.Result;
+
+        if (result is { Canceled: false })
+        {
+            Snackbar.Add("Automatisierung aktualisiert.", Severity.Success);
+            await LoadAsync();
+        }
+    }
+
+    private async Task OnDeleteClicked(AutomationEntry automation)
+    {
+        var parameters = new DialogParameters<DeleteConfirmationDialog>
+        {
+            { x => x.EntityDescription, $"Automatisierung \"{automation.AutomationText}\"" },
+            { x => x.ConfirmText, automation.AutomationText },
+        };
+        var options = new DialogOptions { MaxWidth = MaxWidth.Small, FullWidth = true };
+        var dialog = await DialogService.ShowAsync<DeleteConfirmationDialog>("Automatisierung löschen", parameters, options);
+        var result = await dialog.Result;
+
+        if (result is { Canceled: false })
+        {
+            try
+            {
+                await Api.DeleteAutomationAsync(automation.Id);
+                Snackbar.Add("Automatisierung gelöscht.", Severity.Success);
+                await LoadAsync();
+            }
+            catch
+            {
+                Snackbar.Add("Fehler beim Löschen.", Severity.Error);
+            }
+        }
+    }
+}
