@@ -130,27 +130,24 @@
 
     private async Task OnDeleteClicked(AutomationEntry automation)
     {
-        var parameters = new DialogParameters<DeleteConfirmationDialog>
-        {
-            { x => x.EntityDescription, $"Automatisierung \"{automation.AutomationText}\"" },
-            { x => x.ConfirmText, automation.AutomationText },
-        };
-        var options = new DialogOptions { MaxWidth = MaxWidth.Small, FullWidth = true };
-        var dialog = await DialogService.ShowAsync<DeleteConfirmationDialog>("Automatisierung löschen", parameters, options);
-        var result = await dialog.Result;
+        var confirmed = await DialogService.ShowMessageBoxAsync(
+            title: "Automatisierung löschen",
+            message: $"Automatisierung \"{automation.AutomationText}\" wirklich löschen?",
+            yesText: "Löschen",
+            cancelText: "Abbrechen");
 
-        if (result is { Canceled: false })
+        if (confirmed != true)
+            return;
+
+        try
         {
-            try
-            {
-                await Api.DeleteAutomationAsync(automation.Id);
-                Snackbar.Add("Automatisierung gelöscht.", Severity.Success);
-                await LoadAsync();
-            }
-            catch
-            {
-                Snackbar.Add("Fehler beim Löschen.", Severity.Error);
-            }
+            await Api.DeleteAutomationAsync(automation.Id);
+            Snackbar.Add("Automatisierung gelöscht.", Severity.Success);
+            await LoadAsync();
+        }
+        catch
+        {
+            Snackbar.Add("Fehler beim Löschen.", Severity.Error);
         }
     }
 }
