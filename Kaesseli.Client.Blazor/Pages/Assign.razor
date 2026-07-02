@@ -223,6 +223,9 @@ else
         _automateInput = _transaction?.Description ?? "";
         _filterText = "";
         _splittingAccounts.Clear();
+        // Automatisierung bewusst pro Transaktion neu aktivieren lassen, damit nicht
+        // versehentlich für den Folgebetrag ebenfalls eine Automatisierung entsteht.
+        _isAutomationActive = false;
     }
 
     private async Task OnAccountClick(SuggestedAccount account, MouseEventArgs e)
